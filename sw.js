@@ -1,6 +1,6 @@
 /* Cache-first: po pierwszym wejściu aplikacja działa bez zasięgu.
    Zmiana CACHE unieważnia stary komplet plików. */
-const CACHE = 'plan12-v2';
+const CACHE = 'plan12-v3';
 const ASSETS = [
   './', './index.html', './app.js?v=2', './plan.json?v=2',
   './manifest.webmanifest', './icon-192.png', './icon-512.png',
@@ -20,6 +20,16 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+
+  // Wejście z linkiem ?t=9 ma inny adres niż to, co jest w cache — bez tego
+  // aplikacja otwarta z zakładki nie wstałaby bez zasięgu.
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match('./index.html') || caches.match('./'))
+    );
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(hit => {
       // Świeża wersja w tle, ale odpowiadamy natychmiast z cache.
