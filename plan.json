@@ -1,0 +1,854 @@
+{
+ "title": "Plan 12 tygodni",
+ "schedule": "pon A · wt cardio · śr B · czw wolne · pt C · sob cardio · nd wolne",
+ "bar": 20,
+ "plates": [
+  25,
+  20,
+  15,
+  10,
+  5,
+  2.5,
+  1.25
+ ],
+ "e1rm": {
+  "front": 80,
+  "dl": 105,
+  "bench": 150
+ },
+ "weeks": {
+  "lower": [
+   {
+    "week": 1,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.55,
+    "dlAdj": 0,
+    "rpe": 6,
+    "barHeight": "tuż pod kolanem (~50 cm)"
+   },
+   {
+    "week": 2,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.575,
+    "dlAdj": 0,
+    "rpe": 6,
+    "barHeight": "tuż pod kolanem (~50 cm)"
+   },
+   {
+    "week": 3,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.6,
+    "dlAdj": 0,
+    "rpe": 6,
+    "barHeight": "tuż pod kolanem (~50 cm)"
+   },
+   {
+    "week": 4,
+    "block": "1",
+    "scheme": "4 × 8",
+    "pct": 0.6,
+    "dlAdj": 0,
+    "rpe": 6,
+    "barHeight": "tuż pod kolanem (~50 cm)"
+   },
+   {
+    "week": 5,
+    "block": "2",
+    "scheme": "4 × 8",
+    "pct": 0.625,
+    "dlAdj": -0.05,
+    "rpe": 6.5,
+    "barHeight": "połowa piszczeli (~35 cm)"
+   },
+   {
+    "week": 6,
+    "block": "2",
+    "scheme": "4 × 8",
+    "pct": 0.65,
+    "dlAdj": 0,
+    "rpe": 6.5,
+    "barHeight": "połowa piszczeli (~35 cm)"
+   },
+   {
+    "week": 7,
+    "block": "deload",
+    "scheme": "2 × 6",
+    "pct": 0.55,
+    "dlAdj": 0,
+    "rpe": 5,
+    "barHeight": "jak w bloku 2"
+   },
+   {
+    "week": 8,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.675,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "połowa piszczeli (~35 cm)"
+   },
+   {
+    "week": 9,
+    "block": "3",
+    "scheme": "4 × 6",
+    "pct": 0.7,
+    "dlAdj": -0.05,
+    "rpe": 7,
+    "barHeight": "tuż nad podłogą (~5 cm)"
+   },
+   {
+    "week": 10,
+    "block": "3",
+    "scheme": "4 × 6",
+    "pct": 0.7,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "tuż nad podłogą (~5 cm)"
+   },
+   {
+    "week": 11,
+    "block": "3",
+    "scheme": "4 × 6",
+    "pct": 0.725,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "tuż nad podłogą (~5 cm)"
+   },
+   {
+    "week": 12,
+    "block": "3",
+    "scheme": "3 × 6 + kontrola",
+    "pct": 0.725,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "tuż nad podłogą (~5 cm)"
+   }
+  ],
+  "upper": [
+   {
+    "week": 1,
+    "block": "1",
+    "scheme": "4 × 8",
+    "pct": 0.65,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 2,
+    "block": "1",
+    "scheme": "4 × 8",
+    "pct": 0.675,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 3,
+    "block": "1",
+    "scheme": "4 × 8",
+    "pct": 0.7,
+    "rpe": 7.5,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 4,
+    "block": "1",
+    "scheme": "4 × 8",
+    "pct": 0.725,
+    "rpe": 8,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 5,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.75,
+    "rpe": 8,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 6,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.775,
+    "rpe": 8,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 7,
+    "block": "deload",
+    "scheme": "2 × 6",
+    "pct": 0.625,
+    "rpe": 5,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 8,
+    "block": "3",
+    "scheme": "5 × 4",
+    "pct": 0.825,
+    "rpe": 8,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 9,
+    "block": "3",
+    "scheme": "5 × 4",
+    "pct": 0.85,
+    "rpe": 8.5,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 10,
+    "block": "3",
+    "scheme": "4 × 4",
+    "pct": 0.875,
+    "rpe": 9,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 11,
+    "block": "4",
+    "scheme": "4 × 3",
+    "pct": 0.9,
+    "rpe": 9,
+    "benchText": null,
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   },
+   {
+    "week": 12,
+    "block": "4",
+    "scheme": "test 1RM",
+    "pct": null,
+    "rpe": 10,
+    "benchText": "dojście: 5-3-2-1-1, potem próby",
+    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+   }
+  ]
+ },
+ "days": {
+  "A": {
+   "key": "A",
+   "title": "GÓRA",
+   "day": "Poniedziałek",
+   "minutes": 62,
+   "items": [
+    {
+     "n": 1,
+     "name": "Mobilizacja odcinka piersiowego",
+     "superset": null,
+     "scheme": "2 × 8",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Górna część pleców na krawędzi ławki albo na wałku, ręce za głową, wyprost do tyłu. Wałek przesuwasz co 2 powtórzenia. ~4 min.",
+     "noCut": false
+    },
+    {
+     "n": 2,
+     "name": "Wyciskanie leżąc",
+     "superset": null,
+     "scheme": {
+      "ref": "upper.scheme"
+     },
+     "load": {
+      "ref": "bench.kg"
+     },
+     "rpe": {
+      "ref": "upper.rpe"
+     },
+     "note": "Bój główny. Przerwy 3 min (od bloku 3: 4 min). Umiarkowany mostek, stopy szerzej i płasko. ~22 min.",
+     "noCut": true
+    },
+    {
+     "n": 3,
+     "name": "Podciąganie",
+     "superset": null,
+     "scheme": {
+      "ref": "upper.scheme"
+     },
+     "load": {
+      "ref": "upper.pullup"
+     },
+     "rpe": {
+      "ref": "upper.rpe"
+     },
+     "note": "Bój główny. Przerwy 2 min. Poniżej 8 powtórzeń: negatywy 4×5 po 4 s albo asysta gumą. ~12 min.",
+     "noCut": true
+    },
+    {
+     "n": 4,
+     "name": "Podciąganie podchwytem, wąsko",
+     "superset": null,
+     "scheme": "3 × 10",
+     "load": "masa ciała → pas",
+     "rpe": "8",
+     "note": "Druga ekspozycja na ciągnięcie, innym kątem niż bój główny. Podchwyt dokłada biceps, wąski chwyt zmienia tor. Poniżej 8 powtórzeń: asysta gumą. Przerwa 90 s. ~9 min.",
+     "noCut": false
+    },
+    {
+     "n": 5,
+     "name": "Przyciąganie gumy do brzucha, siedząc",
+     "superset": null,
+     "scheme": "3 × 15",
+     "load": "coraz grubsza guma",
+     "rpe": "7",
+     "note": "Guma zaczepiona na wysokości klatki, siad na podłodze lub ławce. Łokcie przy tułowiu, ŁOPATKI ŚCIĄGNIĘTE na końcu ruchu, powrót 3 s. Poziome ciągnięcie bez obciążania prostowników grzbietu. ~7 min.",
+     "noCut": false
+    },
+    {
+     "n": 6,
+     "name": "Spacer farmera jednorącz (suitcase carry)",
+     "superset": null,
+     "scheme": "3 × 30 m / stronę",
+     "load": "podwójna progresja",
+     "rpe": "8",
+     "note": "Hantel W JEDNEJ RĘCE. Miednica POZIOMO, żebra w dół, NIE odchylaj się w przeciwną stronę. Barki ściągnięte, chód normalny. Zaczynaj od słabszej strony. Przerwa 90 s. ~9 min.",
+     "noCut": false
+    },
+    {
+     "n": 7,
+     "name": "Face pull z gumą",
+     "superset": null,
+     "scheme": "3 × 20",
+     "load": "stała guma",
+     "rpe": "6",
+     "note": "Guma na wysokości twarzy, łokcie wysoko, ciągniesz do czoła z rotacją zewnętrzną. Przeciwwaga dla objętości pchania. ~5 min.",
+     "noCut": false
+    }
+   ]
+  },
+  "B": {
+   "key": "B",
+   "title": "DÓŁ · kontrola i stabilizacja",
+   "day": "Środa",
+   "minutes": 67,
+   "items": [
+    {
+     "n": 1,
+     "name": "Knee-to-wall — mobilizacja zgięcia grzbietowego stopy",
+     "superset": null,
+     "scheme": "2 × 10 / nogę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Stopa przed ścianą, kolano jedzie do ściany po linii drugiego palca, PIĘTA NIE ODRYWA SIĘ. Rób po rowerze, nie na zimno; tempo 2 s w dół. Raz w tygodniu zmierz odległość palców od ściany. ~4 min.",
+     "noCut": false
+    },
+    {
+     "n": 2,
+     "name": "Przysiad hiszpański (izometria)",
+     "superset": null,
+     "scheme": "5 × 45 s",
+     "load": "guma / hantel",
+     "rpe": "6",
+     "note": "Przerwa 60 s. Piszczele pionowo, tułów pionowo. Trudniej = głębiej albo hantel przy klatce.",
+     "noCut": true
+    },
+    {
+     "n": 3,
+     "name": "Przysiad bułgarski z hantlami",
+     "superset": null,
+     "scheme": "4 × 10 / nogę",
+     "load": "podwójna progresja",
+     "rpe": "7",
+     "note": "Wykrok 60–90 cm, przednia stopa 15–20 cm w bok od linii tylnej. W dole piszczel PIONOWA, tułów PIONOWO. Tylna stopa podbiciem na skrzyni 30–35 cm, nie na wysokiej ławce. Przerwa 90 s. ~13 min.",
+     "noCut": true
+    },
+    {
+     "n": 4,
+     "name": "Hip thrust jednonóż",
+     "superset": null,
+     "scheme": "3 × 12 / nogę",
+     "load": "masa ciała → hantel na biodrze",
+     "rpe": "7",
+     "note": "Barki na ławce, jedna stopa na podłodze, druga noga uniesiona. 2 s pauzy w górze, biodra na równi. ~8 min.",
+     "noCut": false
+    },
+    {
+     "n": 5,
+     "name": "Odwodzenie w staniu z gumą",
+     "superset": null,
+     "scheme": "3 × 15 / nogę",
+     "load": "coraz grubsza guma",
+     "rpe": "6",
+     "note": "Guma wokół kostek, przy stojaku dla równowagi. Biodro NEUTRALNE — noga nie schodzi przed ani za linię ciała, nie krzyżuje. ~6 min.",
+     "noCut": false
+    },
+    {
+     "n": 6,
+     "name": "Wspięcia na palce jednonóż",
+     "superset": "A1",
+     "scheme": "3 × 15 / nogę",
+     "load": "masa ciała → hantel",
+     "rpe": "7",
+     "note": "SUPERSERIA z A2 — bez przerwy między nimi, 90 s po parze. Przednia część stopy na talerzu, pełny zakres, 1 s w górze, 3 s w dół. Nie trzymaj się, jeśli dasz radę. ~9 min na obie.",
+     "noCut": false
+    },
+    {
+     "n": 7,
+     "name": "Zgięcie grzbietowe na maszynie (piszczelowy przedni)",
+     "superset": "A2",
+     "scheme": "3 × 20",
+     "load": "coraz cięższy stos",
+     "rpe": "7",
+     "note": "SUPERSERIA z A1. Pełny zakres, powrót WOLNO (3 s). Trenuje przednią stronę podudzia — przeciwwaga dla wspięć.",
+     "noCut": false
+    },
+    {
+     "n": 8,
+     "name": "Ewersja stopy z gumą (siedząc)",
+     "superset": "B1",
+     "scheme": "3 × 20 / nogę",
+     "load": "coraz grubsza guma",
+     "rpe": "6",
+     "note": "SUPERSERIA z B2 — 60 s po parze. Guma wokół śródstopia, drugi koniec zaczepiony po WEWNĘTRZNEJ stronie. Odchylasz stopę na zewnątrz, wracasz WOLNO (3 s). ~7 min na obie.",
+     "noCut": false
+    },
+    {
+     "n": 9,
+     "name": "Stanie na jednej nodze — oczy zamknięte",
+     "superset": "B2",
+     "scheme": "3 × 30 s / nogę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "SUPERSERIA z B1. Boso, przy ścianie na wypadek utraty równowagi. Postęp: poduszka lub złożony ręcznik pod stopą. Trening równowagi i czucia ułożenia stopy.",
+     "noCut": false
+    },
+    {
+     "n": 10,
+     "name": "Deska bokiem",
+     "superset": null,
+     "scheme": "3 × 40 s / stronę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Biodra wysoko, ciało w jednej linii, łokieć pod barkiem. Wytrzymałość bocznego łańcucha tułowia. ~6 min.",
+     "noCut": false
+    },
+    {
+     "n": 11,
+     "name": "Wykręcanie sztangi z kolan (barbell rollout)",
+     "superset": null,
+     "scheme": "3 × 8",
+     "load": "masa ciała → talerze 5 kg",
+     "rpe": "7",
+     "note": "Klęk, dłonie na gryfie, wykręcasz tak daleko, jak UTRZYMASZ lędźwie bez wygięcia. Wracasz brzuchem, nie rękami. Zasięg zwiększasz dopiero, gdy plecy zostają neutralne przez całą serię. ~5 min.",
+     "noCut": false
+    }
+   ]
+  },
+  "C": {
+   "key": "C",
+   "title": "DÓŁ · boje",
+   "day": "Piątek",
+   "minutes": 60,
+   "items": [
+    {
+     "n": 1,
+     "name": "Front squat",
+     "superset": null,
+     "scheme": {
+      "ref": "lower.scheme"
+     },
+     "load": {
+      "ref": "front.kg"
+     },
+     "rpe": {
+      "ref": "lower.rpe"
+     },
+     "note": "Bój główny. Przerwy 3 min. Głębokość: tak nisko, jak plecy neutralne i kolano milczy. ~20 min.",
+     "noCut": true
+    },
+    {
+     "n": 2,
+     "name": "Martwy ciąg z podwyższenia",
+     "superset": null,
+     "scheme": {
+      "ref": "lower.scheme"
+     },
+     "load": {
+      "ref": "dl.kg"
+     },
+     "rpe": {
+      "ref": "lower.rpe"
+     },
+     "note": "Bój główny. Przerwy 3 min, krótsza rozgrzewka — jesteś już rozgrzany. Wysokość gryfu w arkuszu Ciężary. ~18 min.",
+     "noCut": true
+    },
+    {
+     "n": 3,
+     "name": "RDL z hantlami",
+     "superset": null,
+     "scheme": "3 × 10",
+     "load": "tempo 3-0-1",
+     "rpe": "7",
+     "note": "Przerwa 90 s. ~7 min.",
+     "noCut": false
+    },
+    {
+     "n": 4,
+     "name": "Reverse hyper na ławce",
+     "superset": null,
+     "scheme": "3 × 15",
+     "load": "masa ciała → hantel między stopami",
+     "rpe": "7",
+     "note": "Brzuchem na ławce, biodra na krawędzi, nogi wiszą, dłonie trzymają ławkę OD SPODU. Unosisz nogi do linii ciała, 1 s pauzy, WOLNO w dół (3 s). Zatrzymujesz się na linii — nie wyginasz lędźwi ponad nią. Nic nie trzeba blokować. ~8 min.",
+     "noCut": false
+    },
+    {
+     "n": 5,
+     "name": "Przysiad hiszpański (izometria)",
+     "superset": null,
+     "scheme": "4 × 45 s",
+     "load": "guma / hantel",
+     "rpe": "6",
+     "note": "Przerwa 60 s. Piszczele pionowo, tułów pionowo. Trudniej = głębiej albo hantel przy klatce.",
+     "noCut": true
+    }
+   ]
+  }
+ },
+ "warmup": {
+  "ramp": {
+   "steps": [
+    "Gryf 2 × 8",
+    "50% × 5",
+    "70% × 3",
+    "85% × 2",
+    "Ciężar roboczy"
+   ],
+   "lifts": [
+    {
+     "lift": "bench",
+     "name": "Wyciskanie leżąc"
+    },
+    {
+     "lift": "front",
+     "name": "Front squat"
+    },
+    {
+     "lift": "dl",
+     "name": "Martwy ciąg z podwyższenia"
+    }
+   ]
+  },
+  "notes": [
+   "Przerwy między seriami dojściowymi: 60 s. Mają rozgrzewać, nie męczyć — żadna nie jest ciężka.",
+   "Od bloku 3 (tydzień 8) dołóż jeszcze jedno pojedyncze powtórzenie na ~93% ciężaru roboczego.",
+   "W dniu C przed ciągiem wystarczą DWIE serie (50% × 5, 75% × 3) — jesteś już rozgrzany po przysiadzie."
+  ],
+  "days": {
+   "A": {
+    "label": "DZIEŃ A — góra  ·  ~6 min",
+    "steps": [
+     {
+      "what": "Rower spokojnie",
+      "dose": "4 min",
+      "note": "Podniesienie temperatury. Bez zadyszki."
+     },
+     {
+      "what": "Przewlekanie gumy nad głową (dislocates)",
+      "dose": "2 × 10",
+      "note": "Szeroki chwyt, ręce proste, wolno. Zwężaj chwyt z tygodnia na tydzień."
+     },
+     {
+      "what": "Band pull-apart",
+      "dose": "2 × 15",
+      "note": "Ręce na wysokości barków, łopatki ściągnięte."
+     },
+     {
+      "what": "Rotacja zewnętrzna z gumą",
+      "dose": "1 × 15 / rękę",
+      "note": "Łokieć przy tułowiu, przedramię na zewnątrz. Budzi stożek rotatorów przed wyciskaniem."
+     },
+     {
+      "what": "Mobilizacja odcinka piersiowego",
+      "dose": "2 × 8",
+      "note": "To już ćwiczenie nr 1 z arkusza Dzień A — nie robisz go drugi raz."
+     },
+     {
+      "what": "Serie dojściowe do wyciskania",
+      "dose": "wg tabeli",
+      "note": "Patrz tabela wyżej."
+     },
+     {
+      "what": "Przed podciąganiem",
+      "dose": "zwis 2 × 20 s + 1 × 5 lekko",
+      "note": "Zwis rozluźnia bark i przygotowuje chwyt."
+     }
+    ]
+   },
+   "B": {
+    "label": "DZIEŃ B — kontrola i stabilizacja  ·  ~5 min",
+    "steps": [
+     {
+      "what": "Rower spokojnie",
+      "dose": "5 min",
+      "note": "Dzień bez sztangi, więc rozgrzewka może być krótsza i łagodniejsza."
+     },
+     {
+      "what": "Przysiady z masą ciała",
+      "dose": "2 × 10",
+      "note": "Do połowy zakresu, spokojnie."
+     },
+     {
+      "what": "Mostek biodrowy",
+      "dose": "1 × 15",
+      "note": "Budzi pośladki przed hip thrustami i odwodzeniem."
+     },
+     {
+      "what": "Knee-to-wall",
+      "dose": "2 × 10 / nogę",
+      "note": "To już ćwiczenie nr 1 z arkusza Dzień B — pełni podwójną rolę."
+     },
+     {
+      "what": "BEZ krążeń bioder i szukania końcowych zakresów",
+      "dose": "",
+      "note": ""
+     }
+    ]
+   },
+   "C": {
+    "label": "DZIEŃ C — dół  ·  ~6 min",
+    "steps": [
+     {
+      "what": "Rower spokojnie",
+      "dose": "4 min",
+      "note": "Najcięższy dzień — nie skracaj tego."
+     },
+     {
+      "what": "Przysiady z masą ciała",
+      "dose": "2 × 10",
+      "note": "Pełne tempo, kontrolowane."
+     },
+     {
+      "what": "Mostek biodrowy",
+      "dose": "1 × 15",
+      "note": ""
+     },
+     {
+      "what": "Goblet squat z lekkim hantlem",
+      "dose": "1 × 8",
+      "note": "Ustawia wzorzec przysiadu przed sztangą. Lekko, 3 s w dół."
+     },
+     {
+      "what": "Serie dojściowe do front squata",
+      "dose": "wg tabeli",
+      "note": "Patrz tabela wyżej."
+     },
+     {
+      "what": "Serie dojściowe do ciągu",
+      "dose": "50% × 5, 75% × 3",
+      "note": "Krótsza wersja — już jesteś rozgrzany."
+     }
+    ]
+   }
+  },
+  "skip": [
+   "Statycznego rozciągania przed treningiem — obniża wytwarzaną siłę na kilkadziesiąt minut. Rozciągaj po treningu albo w wolny dzień, nie przed.",
+   "Rolowania jako obowiązkowego punktu — daje chwilową ulgę, ale nie zmienia niczego trwale. Jeśli lubisz, rób, tylko nie zamiast reszty.",
+   "Krążeń bioder i pracy w końcowych zakresach."
+  ]
+ },
+ "cardio": [
+  {
+   "week": 1,
+   "tue": "Strefa 2 — 35 min",
+   "sat": "Strefa 2 — 40 min",
+   "note": "Pierwsze 4 tygodnie tylko spokojna objętość."
+  },
+  {
+   "week": 2,
+   "tue": "Strefa 2 — 40 min",
+   "sat": "Strefa 2 — 45 min",
+   "note": ""
+  },
+  {
+   "week": 3,
+   "tue": "Strefa 2 — 40 min",
+   "sat": "Strefa 2 — 50 min",
+   "note": ""
+  },
+  {
+   "week": 4,
+   "tue": "Strefa 2 — 45 min",
+   "sat": "Strefa 2 — 50 min",
+   "note": ""
+  },
+  {
+   "week": 5,
+   "tue": "Strefa 2 — 45 min",
+   "sat": "10 min rozgrz. + 4 × 3 min mocno / 3 min lekko + 5 min schłodzenia",
+   "note": "Interwały wchodzą dopiero teraz — po miesiącu bazy."
+  },
+  {
+   "week": 6,
+   "tue": "Strefa 2 — 50 min",
+   "sat": "10 min + 4 × 4 min / 3 min + 5 min",
+   "note": ""
+  },
+  {
+   "week": 7,
+   "tue": "Strefa 2 — 40 min",
+   "sat": "Strefa 2 — 40 min",
+   "note": "Deload — interwały pomiń."
+  },
+  {
+   "week": 8,
+   "tue": "Strefa 2 — 50 min",
+   "sat": "10 min + 4 × 4 min / 3 min + 5 min",
+   "note": ""
+  },
+  {
+   "week": 9,
+   "tue": "Strefa 2 — 55 min",
+   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
+   "note": ""
+  },
+  {
+   "week": 10,
+   "tue": "Strefa 2 — 55 min",
+   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
+   "note": ""
+  },
+  {
+   "week": 11,
+   "tue": "Strefa 2 — 60 min",
+   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
+   "note": ""
+  },
+  {
+   "week": 12,
+   "tue": "Strefa 2 — 60 min",
+   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
+   "note": "Docelowy tydzień. Dalej utrzymujesz, nie zwiększasz."
+  }
+ ],
+ "cardioInfo": {
+  "Czym jest strefa 2": [
+   "Tempo, w którym mówisz PEŁNYMI ZDANIAMI bez zadyszki, ale rozmowa już lekko przeszkadza.",
+   "Jeśli musisz łapać oddech w środku zdania — jedziesz za mocno. Jeśli możesz śpiewać — za lekko.",
+   "Tu buduje się wydolność podstawowa. Nudne tempo jest właściwym tempem."
+  ],
+  "Interwały — jak je robić": [
+   "4 min MOCNO = RPE 8–9: pod koniec każdego powtórzenia wypowiadasz najwyżej kilka słów.",
+   "3 min LEKKO = kręcisz na luzie, nie zatrzymujesz się.",
+   "Na rowerze: WYŻSZA KADENCJA, NIŻSZY OPÓR. Ta sama praca dla serca, znacznie mniejsza dla kolana."
+  ],
+  "Rower czy pływanie": [
+   "Strefa 2 — dowolnie, na przemian. Pływanie dodatkowo odciąża kręgosłup i rozrusza obręcz barkową.",
+   "Interwały — raczej rower: łatwiej kontrolujesz intensywność i opór, więc łatwiej oszczędzasz kolano."
+  ],
+  "Zasada nadrzędna": [
+   "Jeśli w danym tygodniu musisz coś odpuścić, odpuszczasz interwały, nie strefę 2.",
+   "I odpuszczasz cardio dopiero po tym, jak zrobiłeś trzy treningi siłowe — nie przed."
+  ]
+ },
+ "rules": [
+  {
+   "heading": "Układ tygodnia",
+   "lines": [
+    "Poniedziałek — Dzień A: GÓRA (wyciskanie i podciąganie jako boje główne)",
+    "Wtorek — cardio wg arkusza CARDIO",
+    "Środa — Dzień B: DÓŁ, kontrola i stabilizacja (bez sztangi, bez obciążenia osiowego)",
+    "Czwartek — wolne",
+    "Piątek — Dzień C: DÓŁ (front squat + ciąg)",
+    "Sobota — cardio wg arkusza CARDIO · Niedziela — wolne",
+    "Ciężki dzień dolny wypada w piątek, więc ma pełny weekend na regenerację, a środa trafia dokładnie w środek między nim a kolejnym."
+   ]
+  },
+  {
+   "heading": "Czas trwania",
+   "lines": [
+    "Dzień A ~62 min, dzień B ~67 min, dzień C ~60 min. Plus 5–6 min rozgrzewki z osobnego arkusza.",
+    "PRZERWY: bój główny 3 min (wyciskanie od bloku 3: 4 min), pozostałe 90 s, izometrie 60 s.",
+    "ROZGRZEWKA: pełny rozpis w osobnym arkuszu ROZGRZEWKA, z przeliczonymi ciężarami serii dojściowych.",
+    "SUPERSERIE w dniu B (pary A1/A2 i B1/B2): robisz bez przerwy w środku, odpoczywasz po parze. To ~8 min oszczędności.",
+    "Jeśli brakuje czasu, tniesz w kolejności: rollout → deska bokiem → jedna seria z każdej superserii.",
+    "Boju głównego, przysiadu hiszpańskiego i przysiadu bułgarskiego nie tniesz nigdy."
+   ]
+  },
+  {
+   "heading": "Dwa reżimy w jednym planie",
+   "lines": [
+    "DÓŁ (front squat, martwy ciąg) — sufit 72,5% E1RM, sufit RPE 7, bez testu maksa.",
+    "GÓRA (wyciskanie, podciąganie) — normalna progresja siłowa do 90% i test 1RM w tygodniu 12.",
+    "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar z tabeli wychodzi ciężej niż sufit, zdejmujesz z gryfu."
+   ]
+  },
+  {
+   "heading": "Rekalibracja ciężarów",
+   "lines": [
+    "DÓŁ — po tygodniu 3 i po tygodniu 7: jeśli KAŻDA sesja zmieściła się w suficie RPE, podnieś E1RM front squata i ciągu o 10%. Choć raz nie — bez zmian.",
+    "GÓRA — E1RM policzone z aktualnej serii, więc nie wymaga korekty. Zmieniasz tylko wtedy, gdy tydzień 1 wyraźnie mija się z sufitem RPE.",
+    "Nigdy więcej niż 10% naraz. Zbyt lekki start kosztuje trzy tygodnie, zbyt ciężki kosztuje cykl.",
+    "Przycisk +10% jest przy każdym E1RM na dole ekranu głównego."
+   ]
+  },
+  {
+   "heading": "Reguła zaokrągleń",
+   "lines": [
+    "Zawsze w dół do 2,5 kg. Przy hantlach — do najbliższego dostępnego skoku, w dół."
+   ]
+  },
+  {
+   "heading": "Progresja ćwiczeń dodatkowych",
+   "lines": [
+    "Zakres np. 3×8–12. Zaczynasz od 8. Gdy zrobisz 12 we wszystkich seriach →",
+    "dokładasz najmniejszy możliwy ciężar i wracasz do 8. Sufit RPE wg kolumny w arkuszu dnia."
+   ]
+  },
+  {
+   "heading": "Zasada złego dnia",
+   "lines": [
+    "Rozgrzewkowe serie idą wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.",
+    "Nie odwołujesz treningu i nie przepychasz na siłę.",
+    "Plecy sztywne rano: zamień dzień C na dzień B. Kolejność da się przestawić w obrębie tygodnia."
+   ]
+  },
+  {
+   "heading": "Tydzień 7 — deload (nie jest opcjonalny)",
+   "lines": [
+    "Dół: 2 × 6 przy 55% E1RM, RPE 5. Góra: 2 × 6 przy 62,5%, RPE 5.",
+    "Ćwiczenia dodatkowe: 2 serie zamiast 3, ten sam ciężar.",
+    "Dzień B w tygodniu deloadu: zostaw izometrię, resztę po 2 serie, superserie pomiń (~30 min)."
+   ]
+  },
+  {
+   "heading": "Tydzień 12, góra — test 1RM",
+   "lines": [
+    "Dojście: 5 powt. @ 60%, 3 @ 75%, 2 @ 85%, 1 @ 92%, potem 2–3 próby, 4–5 min przerwy między nimi.",
+    "Asekuracja albo stojaki z ogranicznikami ustawionymi na wysokość klatki — obowiązkowo, bez wyjątków.",
+    "Jeśli druga próba idzie wolno i technika się psuje — kończysz. Trzecia próba jest opcjonalna, nie obowiązkowa."
+   ]
+  },
+  {
+   "heading": "Tydzień 12, dół — test kontrolny",
+   "lines": [
+    "Weź ciężar z tygodnia 3 i zrób jedną serię na maksymalną liczbę powtórzeń, ale zatrzymaj się",
+    "przy 15 albo przy RPE 8 — co nastąpi pierwsze. Porównaj z tygodniem 3.",
+    "Więcej powtórzeń przy tym samym ciężarze = cykl zadziałał, a dowiadujesz się tego bez podejścia do granicy.",
+    "Dopiero po tym decydujesz, czy schodzić ciągiem na podłogę i wracać do przysiadu ze sztangą z tyłu."
+   ]
+  },
+  {
+   "heading": "Kiedy powtórzyć tydzień",
+   "lines": [
+    "Tydzień podbijasz tylko wtedy, gdy KAŻDA sesja zmieściła się w suficie RPE.",
+    "Jeśli nie — nie zmieniasz numeru i powtarzasz ten sam tydzień z tym samym ciężarem.",
+    "Dwa razy z rzędu — cofasz się o 10% i zawężasz zakres ruchu.",
+    "To nie jest opóźnienie planu. To jest plan."
+   ]
+  }
+ ]
+}

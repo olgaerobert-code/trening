@@ -1,0 +1,9 @@
+# Skoroszyt źródłowy NIE trafia do repozytorium — zawiera treści,
+# których nie publikujemy. Zostaje lokalnie, na Pulpicie.
+*.xlsx
+*.xls
+prywatne/
+
+node_modules/
+.DS_Store
+Thumbs.db
