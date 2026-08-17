@@ -16,7 +16,8 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   przyciskiem ustawiasz go jako E1RM; cały plan przelicza się natychmiast
 - **Wykres progresji** — trzy boje przez 12 tygodni, jedna oś (wszystko w kg),
   krzyżyk i dymek pod palcem, tabele z dokładnymi wartościami pod spodem
-- **Timer przerwy** — pierścień odliczający z wibracją, 60 / 90 / 120 / 180 s
+- **Timer przerwy** — pierścień odliczający, 60 / 90 / 120 / 180 s, sygnał dźwiękowy
+  (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
 - **Cardio** i **Zasady** prowadzenia cyklu
 
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
@@ -66,12 +67,24 @@ opisy stanu zdrowia i historii — nie.
 
 Skoroszyt `.xlsx` jest w `.gitignore` i nie trafia do repozytorium.
 
+## Dźwięk
+
+Sygnał jest syntezowany przez Web Audio — zero plików do pobrania, więc offline działa
+tak samo. Piknięcia są **planowane w zegarze Web Audio w chwili startu**, nie odpalane
+z `setInterval`: przeglądarki na telefonie dławią liczniki, gdy karta jest w tle albo
+ekran zgaszony, a harmonogram Web Audio idzie dalej. Dzięki temu dźwięk trafia w sekundę
+nawet wtedy, gdy odliczanie na ekranie zwolni. Przerwanie przerwy anuluje zaplanowane tony.
+
+Ograniczenie, na które strona nie ma wpływu: na iPhonie przełącznik ciszy wycisza także
+dźwięk ze stron. Wtedy zostaje wibracja.
+
 ## Co się zapisuje
 
-Tylko dwie rzeczy, w `localStorage` pod kluczem `trening.v1`:
+Tylko trzy rzeczy, w `localStorage` pod kluczem `trening.v1`:
 
 - numer tygodnia (1–12)
 - trzy wartości E1RM
+- czy sygnał dźwiękowy jest włączony
 
 Odklikane serie żyją w pamięci karty i znikają po jej zamknięciu. Link `?t=9`
 otwiera aplikację od razu na konkretnym tygodniu.

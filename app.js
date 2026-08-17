@@ -1,8 +1,8 @@
 /* Plan 12 tygodni — cała logika skoroszytu, bez skoroszytu.
-   Stan trwały: numer tygodnia i trzy E1RM. Nic więcej się nie zapisuje. */
+   Stan trwały: numer tygodnia, trzy E1RM i przełącznik dźwięku. Nic więcej. */
 
 const LS = 'trening.v1';
-const state = { week: 1, e1rm: null, plan: null, view: location.hash || '#/' };
+const state = { week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true };
 const setsDone = new Map();          // tylko w pamięci karty — znika po zamknięciu
 const calc = { lift: 'bench', kg: 100, reps: 5, rpe: 8 };
 
@@ -28,11 +28,12 @@ function loadState() {
     const raw = JSON.parse(localStorage.getItem(LS) || '{}');
     if (raw.week >= 1 && raw.week <= 12) state.week = raw.week;
     if (raw.e1rm) state.e1rm = raw.e1rm;
+    if (typeof raw.sound === 'boolean') state.sound = raw.sound;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const save = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm }));
+const save = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound }));
 
 /* ---------- przeliczenia (odpowiednik formuł z arkusza Ciężary) ---------- */
 const lowerRow = w => state.plan.weeks.lower[w - 1];
@@ -768,6 +769,50 @@ function rulesView() {
   return frag;
 }
 
+/* ---------- dźwięk ---------- */
+// Sygnał jest syntezowany w przeglądarce — zero plików do pobrania, więc offline
+// działa tak samo jak online.
+//
+// Kluczowa decyzja: wszystkie piknięcia planujemy w zegarze Web Audio w chwili
+// startu, zamiast odpalać je z setInterval. Przeglądarki na telefonie dławią
+// liczniki w tle (karta schowana, ekran zgaszony), a harmonogram Web Audio idzie
+// dalej — dzięki temu dźwięk trafia w sekundę nawet wtedy, gdy odliczanie
+// na ekranie zwolni.
+let ac = null, voices = [];
+
+function audioCtx() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  if (!ac) ac = new AC();
+  if (ac.state === 'suspended') ac.resume();   // iOS budzi się tylko z gestu
+  return ac;
+}
+function beep(at, freq, dur, gain) {
+  const c = ac;
+  const osc = c.createOscillator(), env = c.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, at);
+  env.gain.setValueAtTime(0.0001, at);
+  env.gain.exponentialRampToValueAtTime(gain, at + 0.012);
+  env.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  osc.connect(env).connect(c.destination);
+  osc.start(at);
+  osc.stop(at + dur + 0.03);
+  voices.push(osc);
+}
+function scheduleBeeps(seconds) {
+  if (!state.sound || !audioCtx()) return;
+  const t0 = ac.currentTime + 0.06;
+  for (const k of [3, 2, 1]) if (seconds > k) beep(t0 + seconds - k, 760, 0.08, 0.12);
+  beep(t0 + seconds, 660, 0.14, 0.2);          // koniec przerwy: trzy tony w górę
+  beep(t0 + seconds + 0.17, 880, 0.14, 0.2);
+  beep(t0 + seconds + 0.34, 1320, 0.3, 0.22);
+}
+function cancelBeeps() {
+  voices.forEach(o => { try { o.stop(); } catch { /* już się skończył */ } });
+  voices = [];
+}
+
 /* ---------- timer przerwy ---------- */
 let tLeft = 0, tTotal = 0, tId = null, tFired = false;
 const R = 24, CIRC = 2 * Math.PI * R;
@@ -791,16 +836,37 @@ function renderTimer() {
     b.onclick = () => (tId && tTotal === s) ? stopTimer() : startTimer(s);
     inner.append(b);
   });
+
+  const snd = el('button', 'tbtn snd' + (state.sound ? '' : ' off'));
+  snd.setAttribute('aria-label', state.sound ? 'Wycisz sygnał' : 'Włącz sygnał');
+  snd.title = snd.getAttribute('aria-label');
+  snd.innerHTML = state.sound
+    ? '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>';
+  snd.onclick = () => {
+    state.sound = !state.sound;
+    save();
+    if (state.sound) { audioCtx(); if (tId) scheduleBeeps(tLeft); }   // odblokuj dźwięk gestem
+    else cancelBeeps();
+    renderTimer();
+  };
+  inner.append(snd);
   box.append(inner);
 }
-function stopTimer() { clearInterval(tId); tId = null; tLeft = 0; tTotal = 0; tFired = false; renderTimer(); }
+function stopTimer() {
+  clearInterval(tId); tId = null; tLeft = 0; tTotal = 0; tFired = false;
+  cancelBeeps(); renderTimer();
+}
 function startTimer(s) {
   clearInterval(tId);
+  cancelBeeps();
   tLeft = s; tTotal = s; tFired = false;
+  scheduleBeeps(s);
   tId = setInterval(() => {
     tLeft--;
     if (tLeft <= 0) {
       clearInterval(tId); tId = null; tLeft = 0; tFired = true;
+      voices = [];
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
     }
     renderTimer();
@@ -847,7 +913,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=6')
+fetch('plan.json?v=7')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
