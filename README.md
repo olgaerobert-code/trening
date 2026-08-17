@@ -6,6 +6,24 @@ sufity RPE, serie dojściowe w rozgrzewce i blok cardio.
 
 Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
+## Co jest w środku
+
+- **Dni A / B / C** — ćwiczenia z ciężarem na wybrany tydzień, superserie sparowane
+  wizualnie, opisy wykonania, odklikiwanie serii i pasek postępu sesji
+- **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
+  (kolory wg standardu IPF)
+- **Kalkulator 1RM** — przeliczasz dowolną serię na przewidywany maks i jednym
+  przyciskiem ustawiasz go jako E1RM; cały plan przelicza się natychmiast
+- **Wykres progresji** — trzy boje przez 12 tygodni, jedna oś (wszystko w kg),
+  krzyżyk i dymek pod palcem, tabele z dokładnymi wartościami pod spodem
+- **Timer przerwy** — pierścień odliczający z wibracją, 60 / 90 / 120 / 180 s
+- **Cardio** i **Zasady** prowadzenia cyklu
+
+Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
+Przeszły komplet kontroli na powierzchni karty: pasmo jasności, próg chromy,
+rozróżnialność przy zaburzeniach widzenia barw (najgorsza para ΔE 9,4 przy progu 8),
+próg dla widzenia normalnego (20,9 przy progu 15) i kontrast ≥ 3:1.
+
 ## Uruchomienie lokalnie
 
 Aplikacja czyta `plan.json` przez `fetch`, więc otwarcie pliku `index.html` bezpośrednio
@@ -70,7 +88,11 @@ Repozytorium → Settings → Pages → Source: `main`, katalog `/ (root)`.
 Adres: `https://<login>.github.io/<repo>/`. Na telefonie: menu przeglądarki →
 „Dodaj do ekranu głównego".
 
-Po każdej zmianie plików podbij `CACHE` w `sw.js`, inaczej service worker poda starą wersję.
+Po każdej zmianie plików podbij **oba** znaczniki wersji, inaczej przeglądarka
+albo service worker poda starą wersję:
+
+- `?v=N` przy `app.js` w `index.html`, przy `plan.json` w `app.js` i w liście `ASSETS` w `sw.js`
+- `CACHE` w `sw.js`
 
 ## Struktura
 
