@@ -303,7 +303,7 @@ function dayView(key) {
   // Postęp sesji liczony z odklikanych serii.
   let total = 0, done = 0;
   d.items.forEach(it => {
-    const pl = plannedOf(it, w);
+    const pl = plannedOf(it, w, key);
     total += pl.sets;
     done += logGet(w, key, it.n).filter(Boolean).length;
   });
@@ -390,8 +390,16 @@ function exerciseCard(it, key, w) {
   box.append(metrics);
   if (platesRow) box.append(platesRow);
 
-  const pl = plannedOf(it, w);
+  const pl = plannedOf(it, w, key);
   if (pl.sets) box.append(setRows(it, key, w, pl));
+
+  const prop = accProgress(it, key, w);
+  if (prop != null) {
+    const chip = el('button', 'progchip');
+    chip.textContent = `Dwa tygodnie z kompletem — podnieś do ${fmt(prop)} kg`;
+    chip.onclick = () => { state.acc[accKey(it)] = prop; saveAcc(); render(); };
+    box.append(chip);
+  }
 
   if (it.note) {
     const note = el('div', 'exnote', it.note);
@@ -798,18 +806,45 @@ const logKey = (w, day, n) => `${w}|${day}|${n}`;
 // Ile serii, ile powtorzen (albo sekund/metrow) i jaki ciezar przewiduje plan.
 // "4 × 8" → {sets:4, target:8}   "3 × 30 s / nogę" → {sets:3, target:30, unit:'s'}
 // "test 1RM" → {sets:0}
-function plannedOf(it, w) {
+function plannedOf(it, w, day) {
   const scheme = String(resolve(it.scheme, w) || '');
   const m = scheme.match(/^\s*(\d+)\s*[×x]\s*(\d+)\s*(s|min|m)?/);
   const load = resolve(it.load, w);
   const acc = state.acc[accKey(it)];
+  // Przy ćwiczeniu dodatkowym ciężaru nie ma w planie — bierzemy własne ustawienie,
+  // a jak go nie ma, to ostatni zapisany, żeby nie przepisywać go co tydzień.
+  const wlasny = acc != null ? acc : (day ? lastKgOf(it, w, day) : null);
   return {
     sets: m ? Math.min(+m[1], 12) : 0,
     target: m ? +m[2] : null,
     unit: m && m[3] ? m[3] : null,
-    kg: isKg(load) ? load : (acc != null ? acc : null),
+    kg: isKg(load) ? load : wlasny,
     planKg: isKg(load) ? load : null,     // czy ciezar pochodzi z planu, czy jest wlasny
   };
+}
+
+function lastKgOf(it, w, day) {
+  for (let i = w - 1; i >= 1; i--) {
+    const row = logGet(i, day, it.n).find(r => r && r.kg != null);
+    if (row) return row.kg;
+  }
+  return null;
+}
+
+// Podwójna progresja: dwa ostatnie tygodnie treningowe z kompletem powtórzeń
+// → propozycja najmniejszego skoku. Bez liczbowego ciężaru nie ma czego dodać.
+function accProgress(it, day, w) {
+  const pl = plannedOf(it, w, day);
+  if (pl.planKg != null || pl.kg == null || !pl.sets) return null;
+  const [wo, wn] = windowWeeks(w);
+  if (!wo || !wn) return null;
+  const ocena = [wo, wn].map(x => {
+    const rows = logGet(x, day, it.n);
+    const wtedy = rows.find(r => r && r.pr != null);
+    return judgeSession({ sets: pl.sets, reps: wtedy ? wtedy.pr : pl.target, kg: wtedy ? wtedy.pk : null }, rows);
+  });
+  const prop = accSuggestion(ocena[0], ocena[1], pl.kg);
+  return prop != null && prop > pl.kg ? prop : null;
 }
 const accKey = it => 'x' + it.name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 24);
 
@@ -968,7 +1003,7 @@ function judgeWeek(liftKey, w) {
   const { day, name } = MAIN[liftKey];
   const it = state.plan.days[day].items.find(x => x.name === name);
   if (!it) return 'brak';
-  const pl = plannedOf(it, w);
+  const pl = plannedOf(it, w, day);
   const rows = logGet(w, day, it.n);
   // Ciężar planowany zmienia się wstecz przy każdej korekcie E1RM, więc oceniamy
   // wobec tego, co plan przewidywał W CHWILI ZAPISU. Bez tego korekta w górę
@@ -1274,7 +1309,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=11')
+fetch('plan.json?v=12')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

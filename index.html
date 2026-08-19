@@ -242,6 +242,11 @@ details.acc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
   text-transform:uppercase;color:var(--ink-3)}
 .setrow.done .ministep{border-color:color-mix(in srgb,var(--good) 35%,var(--line))}
 
+.progchip{display:block;width:100%;margin-top:11px;padding:10px 12px;border-radius:11px;
+  background:color-mix(in srgb,var(--good) 16%,var(--s2));border:1px solid color-mix(in srgb,var(--good) 40%,var(--line));
+  color:#8ee0bb;font-size:12.5px;font-weight:600;text-align:center}
+.progchip:active{transform:scale(.985)}
+
 /* ══ karta korekty ══ */
 .note.adj{border-left-color:var(--good)}
 .adjrow{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13.5px;color:var(--ink)}
@@ -380,7 +385,7 @@ tr.now td:last-child{border-radius:0 7px 7px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=11"></script>
-<script src="app.js?v=11"></script>
+<script src="progresja.js?v=12"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
