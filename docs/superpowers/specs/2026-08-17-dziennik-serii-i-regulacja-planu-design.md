@@ -214,7 +214,7 @@ zamkniętej tabeli i kodzie planu. Klucz `service_role` / `secret` nie pojawia s
 ### Zostało do zrobienia po stronie konta
 
 **Uruchomienie SQL-a** (tabela `sety` + funkcje `log_pull` i `log_push`) w edytorze SQL
-w Supabase — to konto Roberta, więc wykonuje to on. Skrypt jest częścią wdrożenia i
+w Supabase — to prywatne konto, więc uruchamia się to ręcznie. Skrypt jest częścią wdrożenia i
 trafi do `tools/supabase.sql`.
 
 Do czasu uruchomienia SQL-a aplikacja działa w wersji lokalnej — dziennik i regulacja
