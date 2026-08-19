@@ -942,9 +942,12 @@ function pushStan() {
   clearTimeout(stanTimer);
   stanTimer = setTimeout(async () => {
     if (!navigator.onLine) return;
-    const ts = new Date().toISOString();
-    try { await rpc('stan_push', { p_key: state.key, p_dane: stanLokalny(), p_ts: ts }); stanTs = ts; }
-    catch { /* brak tabeli albo sieci — stan zostaje lokalny */ }
+    try {
+      // Serwer zwraca znacznik, ktory naprawde stoi w bazie — bierzemy go u siebie.
+      // Bez tego urzadzenie zapamietaloby czas, ktorego nigdy nie zapisano,
+      // i przestaloby przyjmowac zmiany z drugiego urzadzenia.
+      stanTs = await rpc('stan_push', { p_key: state.key, p_dane: stanLokalny() });
+    } catch { /* brak tabeli albo sieci — stan zostaje lokalny */ }
   }, 700);
 }
 
@@ -1378,7 +1381,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=14')
+fetch('plan.json?v=15')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

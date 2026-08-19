@@ -110,14 +110,17 @@ as $$
     and s.plan_key = p_key;
 $$;
 
-create or replace function public.stan_push(p_key text, p_dane jsonb, p_ts timestamptz)
-returns boolean
+-- Zwraca znacznik czasu, ktory FAKTYCZNIE stoi w bazie po zapisie. Rozstrzyga
+-- zegar serwera, nie urzadzenia: zegary telefonu i laptopa potrafia sie rozjechac
+-- o minuty, a wtedy starszy zapis wygrywalby z nowszym.
+create or replace function public.stan_push(p_key text, p_dane jsonb)
+returns timestamptz
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-  zapisano boolean;
+  wynik timestamptz;
 begin
   if char_length(p_key) < 12 then
     raise exception 'nieprawidlowy kod planu';
@@ -127,17 +130,16 @@ begin
   end if;
 
   insert into public.stan (plan_key, dane, ts)
-  values (p_key, p_dane, coalesce(p_ts, now()))
+  values (p_key, p_dane, now())
   on conflict (plan_key) do update
-    set dane = excluded.dane, ts = excluded.ts
-    where excluded.ts > public.stan.ts;
+    set dane = excluded.dane, ts = excluded.ts;
 
-  get diagnostics zapisano = row_count;
-  return zapisano;
+  select s.ts into wynik from public.stan s where s.plan_key = p_key;
+  return wynik;
 end;
 $$;
 
 revoke all on function public.stan_pull(text)                        from public;
-revoke all on function public.stan_push(text, jsonb, timestamptz)    from public;
+revoke all on function public.stan_push(text, jsonb)                 from public;
 grant execute on function public.stan_pull(text)                     to anon, authenticated;
-grant execute on function public.stan_push(text, jsonb, timestamptz) to anon, authenticated;
+grant execute on function public.stan_push(text, jsonb)              to anon, authenticated;
