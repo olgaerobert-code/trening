@@ -2,8 +2,16 @@
    Stan trwały: numer tygodnia, trzy E1RM i przełącznik dźwięku. Nic więcej. */
 
 const LS = 'trening.v1';
-const state = { week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true };
-const setsDone = new Map();          // tylko w pamięci karty — znika po zamknięciu
+const state = {
+  week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
+  log: {}, adjust: {}, acc: {}, queue: [], key: null, sync: 'off',
+};
+
+/* ---------- Supabase ---------- */
+// Klucz publikowalny jest jawny z założenia. Bezpieczeństwo nie opiera się na nim,
+// tylko na zamkniętej tabeli i kodzie planu — patrz tools/supabase.sql.
+const SB_URL = 'https://jvbdodnoxzowviqwhzfr.supabase.co';
+const SB_KEY = 'sb_publishable_RYMFMP8_vAaRy6vfgUFhjQ_qqhkOdr8';
 const calc = { lift: 'bench', kg: 100, reps: 5, rpe: 8 };
 
 const LIFTS = [
@@ -20,7 +28,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const floor25 = x => Math.floor(x / 2.5) * 2.5;
-const round25 = x => Math.round(x / 2.5) * 2.5;
+// round25 pochodzi z progresja.js — jeden wspólny zasięg globalny, jedna definicja.
 const fmt = n => (n == null ? '—' : String(Math.round(n * 100) / 100).replace('.', ','));
 
 function loadState() {
@@ -34,6 +42,32 @@ function loadState() {
   if (t >= 1 && t <= 12) state.week = t;
 }
 const save = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound }));
+
+/* ---------- magazyn dziennika ---------- */
+const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening.acc.v1';
+const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1';
+const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
+const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
+const saveAdjust = () => localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust));
+const saveAcc = () => localStorage.setItem(LS_ACC, JSON.stringify(state.acc));
+const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
+
+function loadStores() {
+  state.log = readJSON(LS_LOG, {});
+  state.adjust = readJSON(LS_ADJ, {});
+  state.acc = readJSON(LS_ACC, {});
+  state.queue = readJSON(LS_Q, []);
+  state.key = localStorage.getItem(LS_KEY) || newPlanKey();
+  localStorage.setItem(LS_KEY, state.key);
+}
+
+// Kod planu: 12 znaków bez liter mylących się z cyframi, w grupach po cztery.
+function newPlanKey() {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const b = crypto.getRandomValues(new Uint8Array(12));
+  const s = [...b].map(x => abc[x % abc.length]).join('');
+  return s.slice(0, 4) + '-' + s.slice(4, 8) + '-' + s.slice(8, 12);
+}
 
 /* ---------- przeliczenia (odpowiednik formuł z arkusza Ciężary) ---------- */
 const lowerRow = w => state.plan.weeks.lower[w - 1];
@@ -125,7 +159,7 @@ function weekBar() {
 
 function setWeek(w) {
   if (w < 1 || w > 12) return;
-  state.week = w; save(); render();
+  state.week = w; save(); maybeAdjust(); render();
   window.scrollTo({ top: 0 });
 }
 
@@ -134,6 +168,9 @@ function homeView() {
   const p = state.plan, w = state.week, frag = document.createDocumentFragment();
   const body = el('div', 'stagger');
   const deload = String(lowerRow(w).block).toLowerCase() === 'deload';
+
+  const adj = adjustCard();
+  if (adj) body.append(adj);
 
   if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.'));
   if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.'));
@@ -180,6 +217,7 @@ function homeView() {
   tiles.append(tile({ k: '1RM', ghost: true, title: 'Kalkulator 1RM', sub: 'Przelicz serię na maks i ustaw E1RM', href: '#/1rm' }));
   tiles.append(tile({ k: '≡', ghost: true, title: 'Ciężary i progresja', sub: 'Wykres i tabela na 12 tygodni', href: '#/tabela' }));
   tiles.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
+  tiles.append(tile({ k: '⚙', ghost: true, title: 'Dziennik i urządzenia', sub: syncLabel(), href: '#/ustawienia' }));
   body.append(tiles);
 
   const box = el('div', 'card');
@@ -265,9 +303,9 @@ function dayView(key) {
   // Postęp sesji liczony z odklikanych serii.
   let total = 0, done = 0;
   d.items.forEach(it => {
-    const n = setCount(resolve(it.scheme, w));
-    total += n;
-    done += Math.min(setsDone.get(key + '|' + it.n) || 0, n);
+    const pl = plannedOf(it, w);
+    total += pl.sets;
+    done += logGet(w, key, it.n).filter(Boolean).length;
   });
   if (total) {
     const sp = el('div', 'sprog');
@@ -352,24 +390,8 @@ function exerciseCard(it, key, w) {
   box.append(metrics);
   if (platesRow) box.append(platesRow);
 
-  const n = setCount(scheme);
-  if (n) {
-    const dots = el('div', 'dots');
-    const id = key + '|' + it.n;
-    for (let s = 0; s < n; s++) {
-      const dot = el('button', 'dot');
-      dot.setAttribute('aria-label', `Seria ${s + 1} z ${n}`);
-      if ((setsDone.get(id) || 0) > s) dot.classList.add('done');
-      dot.append(el('span'));
-      dot.onclick = () => {
-        const cur = setsDone.get(id) || 0;
-        setsDone.set(id, cur === s + 1 ? s : s + 1);
-        render();
-      };
-      dots.append(dot);
-    }
-    box.append(dots);
-  }
+  const pl = plannedOf(it, w);
+  if (pl.sets) box.append(setRows(it, key, w, pl));
 
   if (it.note) {
     const note = el('div', 'exnote', it.note);
@@ -769,6 +791,242 @@ function rulesView() {
   return frag;
 }
 
+/* ---------- dziennik serii ---------- */
+// Klucz wpisu: "tydzien|dzien|numer cwiczenia". Wartosc: tablica serii {r, kg, ts}.
+const logKey = (w, day, n) => `${w}|${day}|${n}`;
+
+// Ile serii, ile powtorzen (albo sekund/metrow) i jaki ciezar przewiduje plan.
+// "4 × 8" → {sets:4, target:8}   "3 × 30 s / nogę" → {sets:3, target:30, unit:'s'}
+// "test 1RM" → {sets:0}
+function plannedOf(it, w) {
+  const scheme = String(resolve(it.scheme, w) || '');
+  const m = scheme.match(/^\s*(\d+)\s*[×x]\s*(\d+)\s*(s|min|m)?/);
+  const load = resolve(it.load, w);
+  const acc = state.acc[accKey(it)];
+  return {
+    sets: m ? Math.min(+m[1], 12) : 0,
+    target: m ? +m[2] : null,
+    unit: m && m[3] ? m[3] : null,
+    kg: isKg(load) ? load : (acc != null ? acc : null),
+    planKg: isKg(load) ? load : null,     // czy ciezar pochodzi z planu, czy jest wlasny
+  };
+}
+const accKey = it => 'x' + it.name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 24);
+
+function logGet(w, day, n) { return state.log[logKey(w, day, n)] || []; }
+function logSet(w, day, n, idx, val) {
+  const k = logKey(w, day, n);
+  const rows = (state.log[k] || []).slice();
+  while (rows.length <= idx) rows.push(null);
+  rows[idx] = val;
+  while (rows.length && rows[rows.length - 1] == null) rows.pop();
+  const ts = new Date().toISOString();
+  if (rows[idx]) rows[idx] = { ...rows[idx], ts };
+  if (rows.length) state.log[k] = rows; else delete state.log[k];
+  saveLog();
+  queuePush({ week: w, day, ex: n, set_no: idx + 1, reps: val ? val.r : null, kg: val ? val.kg : null, ts });
+}
+
+/* ---------- synchronizacja ---------- */
+async function rpc(fn, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(fn + ' ' + r.status);
+  return r.json();
+}
+
+// Kolejka trzyma NAJNOWSZY stan każdej serii, nie historię — powtórne tapnięcie
+// w tę samą serię nadpisuje wpis zamiast puchnąć kolejkę.
+function queuePush(row) {
+  state.queue = state.queue.filter(x =>
+    !(x.week === row.week && x.day === row.day && x.ex === row.ex && x.set_no === row.set_no));
+  state.queue.push(row);
+  saveQueue();
+  flushQueue();
+}
+
+let flushing = false;
+async function flushQueue() {
+  if (flushing || !state.queue.length) return;
+  if (!navigator.onLine) { setSync('off'); return; }
+  flushing = true;
+  const batch = state.queue.slice(0, 200);
+  try {
+    await rpc('log_push', { p_key: state.key, p_rows: batch });
+    state.queue = state.queue.slice(batch.length);
+    saveQueue();
+    setSync(state.queue.length ? 'wait' : 'ok');
+  } catch {
+    setSync('off');
+  }
+  flushing = false;
+  if (state.queue.length && state.sync !== 'off') flushQueue();
+}
+
+async function pullAll() {
+  if (!navigator.onLine) return setSync('off');
+  try {
+    const rows = await rpc('log_pull', { p_key: state.key });
+    let changed = false;
+    for (const r of rows) {
+      const k = logKey(r.week, r.day, r.ex), i = r.set_no - 1;
+      const arr = (state.log[k] || []).slice();
+      while (arr.length <= i) arr.push(null);
+      const mine = arr[i];
+      if (!mine || !mine.ts || new Date(r.ts) > new Date(mine.ts)) {      // wygrywa nowszy
+        arr[i] = r.reps == null ? null : { r: r.reps, kg: r.kg == null ? null : +r.kg, ts: r.ts };
+        changed = true;
+      }
+      while (arr.length && arr[arr.length - 1] == null) arr.pop();
+      if (arr.length) state.log[k] = arr; else delete state.log[k];
+    }
+    setSync(state.queue.length ? 'wait' : 'ok');
+    if (changed) { saveLog(); render(); }
+  } catch {
+    setSync('off');
+  }
+}
+
+function setSync(s) {
+  state.sync = s;
+  const n = document.getElementById('syncst');
+  if (n) { n.textContent = syncLabel(); n.className = 'syncst ' + s; }
+}
+const syncLabel = () => state.sync === 'ok' ? 'zsynchronizowano'
+  : state.sync === 'wait' ? `czeka ${state.queue.length} wpisów`
+  : state.queue.length ? `offline · ${state.queue.length} wpisów czeka` : 'offline';
+
+window.addEventListener('online', () => { flushQueue(); pullAll(); });
+window.addEventListener('offline', () => setSync('off'));
+
+// Wiersze serii: kolko „zrobione” plus dwa male steppery na odchylki od planu.
+function setRows(it, day, w, pl) {
+  const box = el('div', 'sets');
+  const rows = logGet(w, day, it.n);
+  for (let i = 0; i < pl.sets; i++) {
+    const cur = rows[i] || null;
+    const r = el('div', 'setrow' + (cur ? ' done' : ''));
+
+    const tick = el('button', 'tick');
+    tick.setAttribute('aria-label', `Seria ${i + 1} z ${pl.sets}`);
+    tick.textContent = String(i + 1);
+    tick.onclick = () => {
+      logSet(w, day, it.n, i, cur ? null : { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+      render();
+    };
+    r.append(tick);
+
+    const val = cur || { r: pl.target, kg: pl.kg };
+    r.append(miniStep(pl.unit === 's' ? 'sek' : pl.unit === 'm' ? 'm' : 'powt.', val.r, 1, nv => {
+      logSet(w, day, it.n, i, { r: Math.max(0, Math.min(50, nv)), kg: val.kg, pr: pl.target, pk: pl.planKg });
+      render();
+    }));
+    if (val.kg != null) {
+      r.append(miniStep('kg', val.kg, 2.5, nv => {
+        logSet(w, day, it.n, i, { r: val.r, kg: Math.max(0, Math.min(500, nv)), pr: pl.target, pk: pl.planKg });
+        render();
+      }));
+    }
+    box.append(r);
+  }
+  return box;
+}
+
+function miniStep(label, value, delta, onChange) {
+  const s = el('div', 'ministep');
+  const minus = el('button', null, '−');
+  const plus = el('button', null, '+');
+  minus.onclick = () => onChange(value - delta);
+  plus.onclick = () => onChange(value + delta);
+  const v = el('div', 'mv');
+  v.append(el('b', null, fmt(value)));
+  v.append(el('i', null, label));
+  s.append(minus, v, plus);
+  return s;
+}
+
+/* ---------- korekta z dwóch tygodni ---------- */
+// Boj glowny dnia: z ktorego cwiczenia liczymy korekte dla ktorego E1RM.
+const MAIN = { bench: { day: 'A', name: 'Wyciskanie leżąc' }, front: { day: 'C', name: 'Front squat' }, dl: { day: 'C', name: 'Martwy ciąg z podwyższenia' } };
+
+const isDeload = w => w >= 1 && w <= 12 && String(lowerRow(w).block).toLowerCase() === 'deload';
+
+// Dwa ostatnie tygodnie TRENINGOWE przed w. Deload jest z założenia lekki, więc
+// nie da się go ocenić — gdyby wpadał do okna, korekta po deloadzie nigdy by nie weszła.
+function windowWeeks(w) {
+  const out = [];
+  for (let i = w - 1; i >= 1 && out.length < 2; i--) if (!isDeload(i)) out.push(i);
+  return out.reverse();                       // [starszy, nowszy]
+}
+
+function judgeWeek(liftKey, w) {
+  if (w < 1 || w > 12) return 'brak';
+  if (isDeload(w)) return 'brak';
+  const { day, name } = MAIN[liftKey];
+  const it = state.plan.days[day].items.find(x => x.name === name);
+  if (!it) return 'brak';
+  const pl = plannedOf(it, w);
+  const rows = logGet(w, day, it.n);
+  // Ciężar planowany zmienia się wstecz przy każdej korekcie E1RM, więc oceniamy
+  // wobec tego, co plan przewidywał W CHWILI ZAPISU. Bez tego korekta w górę
+  // przerabiałaby dawne „czysto" na „niedowóz" i napędzała korektę w dół.
+  const wtedy = rows.find(r => r && r.pr != null);
+  return judgeSession({
+    sets: pl.sets,
+    reps: wtedy ? wtedy.pr : pl.target,
+    kg: wtedy && wtedy.pk !== undefined ? wtedy.pk : pl.planKg,
+  }, rows);
+}
+
+// Wchodzimy w tydzien N → oceniamy N−1 i N−2 i raz stosujemy korekte.
+function maybeAdjust() {
+  const w = state.week;
+  const out = [];
+  for (const key of ['bench', 'front', 'dl']) {
+    const a = state.adjust[key] || {};
+    if (a.week === w) { if (a.pct) out.push({ key, ...a }); continue; }   // już zastosowana
+    if (a.skipped === w) continue;                                        // cofnięta ręcznie
+    const [wo, wn] = windowWeeks(w);
+    const older = judgeWeek(key, wo), newer = judgeWeek(key, wn);
+    const { pct, powod } = adjustment(older, newer);
+    const before = state.e1rm[key];
+    const after = pct ? applyAdjustment(before, pct) : before;
+    state.adjust[key] = { week: w, pct, powod, before, after, from: [wo, wn] };
+    if (pct) { state.e1rm[key] = after; out.push({ key, pct, powod, before, after }); }
+  }
+  if (out.length) { save(); saveAdjust(); }
+  else saveAdjust();
+  return out;
+}
+
+function adjustCard() {
+  const w = state.week;
+  const list = ['bench', 'front', 'dl'].map(k => ({ k, a: state.adjust[k] })).filter(x => x.a && x.a.week === w && x.a.pct);
+  if (!list.length) return null;
+  const n = el('div', 'note adj');
+  const okno = (list[0].a.from || []).filter(Boolean);
+  n.append(el('b', null, okno.length === 2 ? `Korekta z tygodni ${okno[0]} i ${okno[1]}` : 'Korekta planu'));
+  for (const { k, a } of list) {
+    const L = LIFTS.find(x => x.key === k);
+    const p = el('div', 'adjrow');
+    const dot = el('span', 'dotc'); dot.style.background = L.color;
+    p.append(dot, el('span', null, `${L.short} ${a.pct > 0 ? '+' : ''}${fmt(a.pct * 100)}% → ${fmt(a.after)} kg`));
+    p.append(el('em', null, `było ${fmt(a.before)}`));
+    n.append(p);
+  }
+  const undo = el('button', 'mini', 'Cofnij');
+  undo.style.marginTop = '9px';
+  undo.onclick = () => {
+    for (const { k, a } of list) { state.e1rm[k] = a.before; state.adjust[k] = { week: null, skipped: w }; }
+    save(); saveAdjust(); render();
+  };
+  n.append(undo);
+  return n;
+}
+
 /* ---------- dźwięk ---------- */
 // Sygnał jest syntezowany w przeglądarce — zero plików do pobrania, więc offline
 // działa tak samo jak online.
@@ -889,6 +1147,108 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && state.view.startsWith('#/d/')) keepAwake(true);
 });
 
+/* ---------- dziennik i urządzenia ---------- */
+function settingsView() {
+  const frag = document.createDocumentFragment();
+  frag.append(backLink());
+  const body = el('div', 'stagger');
+  body.append(head('Dziennik i urządzenia', 'Kod planu, synchronizacja, kopia zapasowa', true));
+
+  const wpisy = Object.values(state.log).reduce((a, r) => a + r.filter(Boolean).length, 0);
+
+  const st = el('div', 'card');
+  st.append(el('h3', null, 'Synchronizacja'));
+  const line = el('div', 'e1row');
+  line.append(el('div', 'n', 'Stan'));
+  const badge = el('div', 'syncst ' + state.sync, syncLabel());
+  badge.id = 'syncst';
+  line.append(badge);
+  st.append(line);
+  const l2 = el('div', 'e1row');
+  l2.append(el('div', 'n', 'Zapisanych serii'));
+  l2.append(el('div', 'v', String(wpisy)));
+  st.append(l2);
+  const sync = el('button', 'btn ghost', 'Zsynchronizuj teraz');
+  sync.style.marginTop = '10px';
+  sync.onclick = async () => { await flushQueue(); await pullAll(); render(); };
+  st.append(sync);
+  body.append(st);
+
+  const kod = el('div', 'card');
+  kod.append(el('h3', null, 'Kod planu'));
+  kod.append(el('p', null, 'Przepisz go na drugie urządzenie, żeby widzieć ten sam dziennik. Kod nie trafia do adresu strony — nikt go nie zobaczy w historii ani w zakładkach.'));
+  const code = el('div', 'plankey', state.key);
+  kod.append(code);
+  const kopiuj = el('button', 'btn ghost', 'Skopiuj kod');
+  kopiuj.onclick = async () => {
+    try { await navigator.clipboard.writeText(state.key); kopiuj.textContent = 'Skopiowane ✓'; }
+    catch { kopiuj.textContent = 'Przepisz ręcznie'; }
+    setTimeout(() => { kopiuj.textContent = 'Skopiuj kod'; }, 1800);
+  };
+  kod.append(kopiuj);
+  body.append(kod);
+
+  const par = el('div', 'card');
+  par.append(el('h3', null, 'Połącz z innym urządzeniem'));
+  par.append(el('p', null, 'Wpisz kod z urządzenia, na którym prowadzisz dziennik. Wpisy z tego urządzenia zostaną zachowane i dosłane.'));
+  const inp = el('input', 'keyinput');
+  inp.type = 'text';
+  inp.placeholder = 'XXXX-XXXX-XXXX';
+  inp.autocapitalize = 'characters';
+  inp.spellcheck = false;
+  par.append(inp);
+  const info = el('p', null, '');
+  const go2 = el('button', 'btn primary', 'Połącz');
+  go2.style.marginTop = '10px';
+  go2.onclick = async () => {
+    const k = inp.value.trim().toUpperCase();
+    if (k.replace(/-/g, '').length < 12) { info.textContent = 'Kod ma 12 znaków.'; return; }
+    state.key = k;
+    localStorage.setItem(LS_KEY, k);
+    info.textContent = 'Pobieram dziennik…';
+    await flushQueue();
+    await pullAll();
+    render();
+  };
+  par.append(go2, info);
+  body.append(par);
+
+  const kop = el('div', 'card');
+  kop.append(el('h3', null, 'Kopia zapasowa'));
+  kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
+  const exp = el('button', 'btn ghost', 'Zapisz do pliku');
+  exp.onclick = () => {
+    const dane = { v: 1, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
+    a.download = 'dziennik-treningowy.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  const impLabel = el('label', 'btn ghost', 'Wczytaj z pliku');
+  impLabel.style.marginTop = '8px';
+  const imp = el('input');
+  imp.type = 'file'; imp.accept = 'application/json'; imp.style.display = 'none';
+  imp.onchange = async () => {
+    const f = imp.files[0];
+    if (!f) return;
+    try {
+      const d = JSON.parse(await f.text());
+      if (d.log) { state.log = d.log; saveLog(); }
+      if (d.e1rm) { state.e1rm = d.e1rm; save(); }
+      if (d.adjust) { state.adjust = d.adjust; saveAdjust(); }
+      if (d.acc) { state.acc = d.acc; saveAcc(); }
+      render();
+    } catch { alert('Nie udało się odczytać pliku.'); }
+  };
+  impLabel.append(imp);
+  kop.append(exp, impLabel);
+  body.append(kop);
+
+  frag.append(body);
+  return frag;
+}
+
 /* ---------- router ---------- */
 function go(hash) { location.hash = hash; window.scrollTo({ top: 0 }); }
 
@@ -897,13 +1257,14 @@ function render() {
   app.innerHTML = '';
   const v = state.view;
   const onDay = v.startsWith('#/d/');
-  if (v !== '#/zasady' && v !== '#/1rm') app.append(weekBar());
+  if (v !== '#/zasady' && v !== '#/1rm' && v !== '#/ustawienia') app.append(weekBar());
 
   if (onDay) app.append(dayView(v.slice(4)));
   else if (v === '#/cardio') app.append(cardioView());
   else if (v === '#/tabela') app.append(tableView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
+  else if (v === '#/ustawienia') app.append(settingsView());
   else app.append(homeView());
 
   keepAwake(onDay);
@@ -913,14 +1274,18 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=7')
+fetch('plan.json?v=11')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
     loadState();
+    loadStores();
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
+    maybeAdjust();
     render();
+    pullAll();
+    flushQueue();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   })
   .catch(() => {

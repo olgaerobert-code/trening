@@ -9,7 +9,13 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 ## Co jest w środku
 
 - **Dni A / B / C** — ćwiczenia z ciężarem na wybrany tydzień, superserie sparowane
-  wizualnie, opisy wykonania, odklikiwanie serii i pasek postępu sesji
+  wizualnie, opisy wykonania i pasek postępu sesji
+- **Dziennik serii** — przy każdej serii wpisujesz powtórzenia i ciężar (wypełnione
+  z planu, dotykasz tylko przy odchyłce)
+- **Samoregulacja** — dwa ostatnie tygodnie treningowe sterują E1RM na kolejny:
+  +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij
+- **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),
+  offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
 - **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
   (kolory wg standardu IPF)
 - **Kalkulator 1RM** — przeliczasz dowolną serię na przewidywany maks i jednym
@@ -80,14 +86,37 @@ dźwięk ze stron. Wtedy zostaje wibracja.
 
 ## Co się zapisuje
 
-Tylko trzy rzeczy, w `localStorage` pod kluczem `trening.v1`:
+W `localStorage`: numer tygodnia, trzy E1RM i przełącznik dźwięku (`trening.v1`),
+dziennik serii (`trening.log.v1`), historia korekt (`trening.adjust.v1`), własne
+ciężary ćwiczeń dodatkowych (`trening.acc.v1`), kolejka wysyłkowa (`trening.queue.v1`)
+i kod planu (`trening.key.v1`).
 
-- numer tygodnia (1–12)
-- trzy wartości E1RM
-- czy sygnał dźwiękowy jest włączony
+W Supabase: wyłącznie liczby — kod planu, tydzień, dzień, ćwiczenie, seria,
+powtórzenia, kilogramy, znacznik czasu. Tabela jest zamknięta dla klucza publikowalnego,
+cały ruch idzie przez funkcje wymagające kodu planu (`tools/supabase.sql`).
 
-Odklikane serie żyją w pamięci karty i znikają po jej zamknięciu. Link `?t=9`
-otwiera aplikację od razu na konkretnym tygodniu.
+Link `?t=9` otwiera aplikację od razu na konkretnym tygodniu. Kod planu **nigdy** nie
+trafia do adresu — przepisujesz go ręcznie w ustawieniach.
+
+## Logika progresji
+
+`progresja.js` to czyste funkcje bez DOM-u, wspólne dla przeglądarki i testów:
+
+```bash
+node tools/test-progresja.mjs
+```
+
+Dwie pułapki, które te testy pilnują:
+
+- **Nie liczymy E1RM z wykonanej serii.** Sufit RPE znaczy „zostaw co najmniej N
+  w zapasie", więc wzór zaniżałby plan u kogoś, kto sufitu pilnuje. Oceniamy odchyłkę
+  od prescription, nie wartość bezwzględną maksa.
+- **Zaokrąglenie w dół nie może zjeść korekty.** +2,5% z 80 kg to 82 kg, co po
+  zaokrągleniu w dół wraca do 80. Wymuszamy minimum jeden krok 2,5 kg.
+
+Trzecia, pilnowana w aplikacji: przy każdej serii zapisujemy też **planowane** wartości
+z chwili zapisu. Bez tego korekta w górę przerabiałaby dawne „czysto" na „niedowóz"
+i napędzała korektę w dół.
 
 ## Ikony
 

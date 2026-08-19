@@ -222,6 +222,44 @@ details.acc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
 .pl i{width:8px;height:20px;border-radius:2px;display:block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4)}
 .plnote{font-size:11.5px;color:var(--ink-3);align-self:center}
 
+/* ══ wiersze serii ══ */
+.sets{display:flex;flex-direction:column;gap:7px;margin-top:13px}
+.setrow{display:flex;align-items:center;gap:8px}
+.tick{width:34px;height:34px;flex:none;border-radius:50%;border:2px solid var(--line);
+  background:var(--s2);display:grid;place-items:center;font-size:13px;font-weight:660;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;
+  transition:transform .15s var(--ease),background .15s,border-color .15s,color .15s}
+.tick:active{transform:scale(.88)}
+.setrow.done .tick{background:color-mix(in srgb,var(--good) 26%,var(--s1));border-color:var(--good);color:#8ee0bb}
+.ministep{display:flex;align-items:center;background:var(--s2);border:1px solid var(--line);
+  border-radius:11px;padding:2px;flex:1;min-width:0}
+.ministep button{width:34px;height:32px;flex:none;border-radius:8px;display:grid;place-items:center;
+  font-size:17px;color:var(--ink-3);transition:background .12s,transform .12s}
+.ministep button:active{background:var(--s3);transform:scale(.9)}
+.ministep .mv{flex:1;text-align:center;min-width:0;line-height:1.05}
+.ministep .mv b{display:block;font-size:15px;font-weight:660;font-variant-numeric:tabular-nums}
+.ministep .mv i{display:block;font-style:normal;font-size:9px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-3)}
+.setrow.done .ministep{border-color:color-mix(in srgb,var(--good) 35%,var(--line))}
+
+/* ══ karta korekty ══ */
+.note.adj{border-left-color:var(--good)}
+.adjrow{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13.5px;color:var(--ink)}
+.adjrow .dotc{width:8px;height:8px;border-radius:50%;flex:none}
+.adjrow em{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--ink-3)}
+
+/* ══ ustawienia ══ */
+.syncst{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--s2);color:var(--ink-3)}
+.syncst.ok{color:#8ee0bb;background:color-mix(in srgb,var(--good) 20%,var(--s2))}
+.syncst.wait{color:#e8b855;background:color-mix(in srgb,var(--warn) 20%,var(--s2))}
+.plankey{font:600 22px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;
+  text-align:center;padding:14px;background:var(--s2);border:1px solid var(--line);
+  border-radius:12px;margin-bottom:10px;user-select:all}
+.keyinput{width:100%;padding:13px;border-radius:12px;background:var(--s2);border:1px solid var(--line);
+  color:var(--ink);font:600 17px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;
+  text-align:center;text-transform:uppercase}
+.keyinput:focus{outline:none;border-color:var(--a)}
+
 /* kropki serii */
 .dots{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
 .dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:var(--s2);
@@ -342,6 +380,7 @@ tr.now td:last-child{border-radius:0 7px 7px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="app.js?v=7"></script>
+<script src="progresja.js?v=11"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
