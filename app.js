@@ -12,6 +12,10 @@ const state = {
 // tylko na zamkniętej tabeli i kodzie planu — patrz tools/supabase.sql.
 const SB_URL = 'https://jvbdodnoxzowviqwhzfr.supabase.co';
 const SB_KEY = 'sb_publishable_RYMFMP8_vAaRy6vfgUFhjQ_qqhkOdr8';
+// Wspólny dziennik: każde urządzenie startuje z tym samym kodem, więc nie trzeba
+// niczego przepisywać. Świadomy wybór — kto zajrzy w źródło, może czytać i pisać.
+// Własny kod w ustawieniach zamyka dziennik dla siebie.
+const KOD_WSPOLNY = 'H4TQ-9MRW-2XKD';
 const calc = { lift: 'bench', kg: 100, reps: 5, rpe: 8 };
 
 const LIFTS = [
@@ -41,15 +45,18 @@ function loadState() {
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const save = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound }));
+const save = () => {
+  localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound }));
+  if (typeof pushStan === 'function') pushStan();
+};
 
 /* ---------- magazyn dziennika ---------- */
 const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening.acc.v1';
 const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1';
 const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
 const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
-const saveAdjust = () => localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust));
-const saveAcc = () => localStorage.setItem(LS_ACC, JSON.stringify(state.acc));
+const saveAdjust = () => { localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust)); pushStan(); };
+const saveAcc = () => { localStorage.setItem(LS_ACC, JSON.stringify(state.acc)); pushStan(); };
 const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 
 function loadStores() {
@@ -57,7 +64,7 @@ function loadStores() {
   state.adjust = readJSON(LS_ADJ, {});
   state.acc = readJSON(LS_ACC, {});
   state.queue = readJSON(LS_Q, []);
-  state.key = localStorage.getItem(LS_KEY) || newPlanKey();
+  state.key = localStorage.getItem(LS_KEY) || KOD_WSPOLNY;
   localStorage.setItem(LS_KEY, state.key);
 }
 
@@ -925,6 +932,54 @@ async function pullAll() {
   }
 }
 
+/* Stan planu — tydzień, E1RM, korekty, własne ciężary. Jeden wiersz nadpisywany
+   w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
+   lokalnego, dokładnie jak brak zasięgu. */
+let stanTs = null, stanTimer = null;
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, sound: state.sound });
+
+function pushStan() {
+  clearTimeout(stanTimer);
+  stanTimer = setTimeout(async () => {
+    if (!navigator.onLine) return;
+    const ts = new Date().toISOString();
+    try { await rpc('stan_push', { p_key: state.key, p_dane: stanLokalny(), p_ts: ts }); stanTs = ts; }
+    catch { /* brak tabeli albo sieci — stan zostaje lokalny */ }
+  }, 700);
+}
+
+async function pullStan() {
+  if (!navigator.onLine) return false;
+  try {
+    const r = await rpc('stan_pull', { p_key: state.key });
+    const row = r && r[0];
+    if (!row) return false;
+    if (stanTs && new Date(row.ts) <= new Date(stanTs)) return false;
+    const d = row.dane || {};
+    const inny = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
+    let zm = false;
+    if (d.week >= 1 && d.week <= 12 && d.week !== state.week) { state.week = d.week; zm = true; }
+    if (d.e1rm && inny(d.e1rm, state.e1rm)) { state.e1rm = d.e1rm; zm = true; }
+    if (d.adjust && inny(d.adjust, state.adjust)) { state.adjust = d.adjust; saveAdjust(); zm = true; }
+    if (d.acc && inny(d.acc, state.acc)) { state.acc = d.acc; saveAcc(); zm = true; }
+    stanTs = row.ts;
+    if (zm) { localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound })); return true; }
+  } catch { /* jak wyżej */ }
+  return false;
+}
+
+/* Odświeżanie na bieżąco: wysyłka idzie natychmiast, pobranie co 10 s przy
+   otwartej aplikacji i zawsze po powrocie do niej. */
+async function odswiez() {
+  if (document.visibilityState !== 'visible') return;
+  await flushQueue();
+  const zmienionyStan = await pullStan();
+  await pullAll();
+  if (zmienionyStan) render();
+}
+setInterval(odswiez, 10000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') odswiez(); });
+
 function setSync(s) {
   state.sync = s;
   const n = document.getElementById('syncst');
@@ -1211,7 +1266,10 @@ function settingsView() {
 
   const kod = el('div', 'card');
   kod.append(el('h3', null, 'Kod planu'));
-  kod.append(el('p', null, 'Przepisz go na drugie urządzenie, żeby widzieć ten sam dziennik. Kod nie trafia do adresu strony — nikt go nie zobaczy w historii ani w zakładkach.'));
+  const wspolny = state.key === KOD_WSPOLNY;
+  kod.append(el('p', null, wspolny
+    ? 'Domyślny kod jest wspólny — każde urządzenie widzi ten sam dziennik bez żadnej konfiguracji. Jeśli chcesz zamknąć dziennik tylko dla siebie, wygeneruj własny i przepisz go na pozostałe urządzenia.'
+    : 'Własny kod. Przepisz go na drugie urządzenie, żeby widzieć ten sam dziennik. Kod nie trafia do adresu strony — nikt go nie zobaczy w historii ani w zakładkach.'));
   const code = el('div', 'plankey', state.key);
   kod.append(code);
   const kopiuj = el('button', 'btn ghost', 'Skopiuj kod');
@@ -1221,6 +1279,17 @@ function settingsView() {
     setTimeout(() => { kopiuj.textContent = 'Skopiuj kod'; }, 1800);
   };
   kod.append(kopiuj);
+  if (wspolny) {
+    const wlasny = el('button', 'btn ghost', 'Wygeneruj własny kod');
+    wlasny.style.marginTop = '8px';
+    wlasny.onclick = async () => {
+      state.key = newPlanKey();
+      localStorage.setItem(LS_KEY, state.key);
+      stanTs = null;
+      await flushQueue(); pushStan(); render();
+    };
+    kod.append(wlasny);
+  }
   body.append(kod);
 
   const par = el('div', 'card');
@@ -1309,7 +1378,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=13')
+fetch('plan.json?v=14')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -1317,10 +1386,8 @@ fetch('plan.json?v=13')
     loadStores();
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
-    maybeAdjust();
     render();
-    pullAll();
-    flushQueue();
+    pullStan().then(() => { maybeAdjust(); render(); pullAll(); flushQueue(); });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   })
   .catch(() => {

@@ -85,3 +85,59 @@ grant execute on function public.log_push(text, jsonb) to anon, authenticated;
 
 -- Sprawdzenie po uruchomieniu — powinno zwrócić pustą tabelę, nie błąd:
 --   select * from public.log_pull('TEST-KOD-1234');
+
+-- ── stan planu ────────────────────────────────────────────────────────────────
+-- Tydzień, E1RM, historia korekt i własne ciężary ćwiczeń dodatkowych. Jeden
+-- wiersz na dziennik, nadpisywany w całości — wygrywa nowszy znacznik czasu.
+create table if not exists public.stan (
+  plan_key text        primary key check (char_length(plan_key) between 12 and 64),
+  dane     jsonb       not null,
+  ts       timestamptz not null default now()
+);
+
+alter table public.stan enable row level security;
+revoke all on table public.stan from anon, authenticated;
+
+create or replace function public.stan_pull(p_key text)
+returns table (dane jsonb, ts timestamptz)
+language sql
+security definer
+set search_path = public
+as $$
+  select s.dane, s.ts
+  from public.stan s
+  where char_length(p_key) >= 12
+    and s.plan_key = p_key;
+$$;
+
+create or replace function public.stan_push(p_key text, p_dane jsonb, p_ts timestamptz)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  zapisano boolean;
+begin
+  if char_length(p_key) < 12 then
+    raise exception 'nieprawidlowy kod planu';
+  end if;
+  if jsonb_typeof(p_dane) <> 'object' or pg_column_size(p_dane) > 200000 then
+    raise exception 'nieprawidlowe dane stanu';
+  end if;
+
+  insert into public.stan (plan_key, dane, ts)
+  values (p_key, p_dane, coalesce(p_ts, now()))
+  on conflict (plan_key) do update
+    set dane = excluded.dane, ts = excluded.ts
+    where excluded.ts > public.stan.ts;
+
+  get diagnostics zapisano = row_count;
+  return zapisano;
+end;
+$$;
+
+revoke all on function public.stan_pull(text)                        from public;
+revoke all on function public.stan_push(text, jsonb, timestamptz)    from public;
+grant execute on function public.stan_pull(text)                     to anon, authenticated;
+grant execute on function public.stan_push(text, jsonb, timestamptz) to anon, authenticated;
