@@ -223,29 +223,41 @@ details.acc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
 .plnote{font-size:11.5px;color:var(--ink-3);align-self:center}
 
 /* ══ wiersze serii ══ */
-.sets{display:flex;flex-direction:column;gap:7px;margin-top:13px}
-.setrow{display:flex;align-items:center;gap:8px}
-.tick{width:34px;height:34px;flex:none;border-radius:50%;border:2px solid var(--line);
+.sets{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.setrow{display:flex;align-items:center;gap:11px}
+.tick{width:36px;height:36px;flex:none;border-radius:50%;border:2px solid var(--line);
   background:var(--s2);display:grid;place-items:center;font-size:13px;font-weight:660;
   color:var(--ink-3);font-variant-numeric:tabular-nums;
-  transition:transform .15s var(--ease),background .15s,border-color .15s,color .15s}
-.tick:active{transform:scale(.88)}
+  transition:background .15s,border-color .15s,color .15s}
+.tick:active{transform:scale(.9)}
 .setrow.done .tick{background:color-mix(in srgb,var(--good) 26%,var(--s1));border-color:var(--good);color:#8ee0bb}
-.ministep{display:flex;align-items:center;background:var(--s2);border:1px solid var(--line);
-  border-radius:11px;padding:2px;flex:1;min-width:0;max-width:158px}
-.ministep button{width:34px;height:32px;flex:none;border-radius:8px;display:grid;place-items:center;
-  font-size:17px;color:var(--ink-3);transition:background .12s,transform .12s}
-.ministep button:active{background:var(--s3);transform:scale(.9)}
-.ministep .mv{flex:1;text-align:center;min-width:0;line-height:1.05}
-.ministep .mv b{display:block;font-size:15px;font-weight:660;font-variant-numeric:tabular-nums}
-.ministep .mv i{display:block;font-style:normal;font-size:9px;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--ink-3)}
-.setrow.done .ministep{border-color:color-mix(in srgb,var(--good) 35%,var(--line))}
+.setval{min-width:46px;text-align:right;line-height:1.1;font-variant-numeric:tabular-nums}
+.setval b{font-size:19px;font-weight:680}
+.setval i{font-style:normal;font-size:11px;color:var(--ink-3);margin-left:1px}
 
-.progchip{display:block;width:100%;margin-top:11px;padding:10px 12px;border-radius:11px;
-  background:color-mix(in srgb,var(--good) 16%,var(--s2));border:1px solid color-mix(in srgb,var(--good) 40%,var(--line));
-  color:#8ee0bb;font-size:12.5px;font-weight:600;text-align:center}
-.progchip:active{transform:scale(.985)}
+/* suwak — duży uchwyt, bo obsługiwany kciukiem między seriami */
+.suwak{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:34px;background:transparent;margin:0}
+.suwak::-webkit-slider-runnable-track{height:8px;border-radius:5px;
+  background:linear-gradient(90deg,var(--s3),var(--line))}
+.suwak::-moz-range-track{height:8px;border-radius:5px;background:var(--s3)}
+.suwak::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:28px;height:28px;
+  border-radius:50%;background:linear-gradient(180deg,#dfe7f2,#aebbcd);border:2px solid var(--s1);
+  box-shadow:0 2px 6px rgba(0,0,0,.5);margin-top:-10px}
+.suwak::-moz-range-thumb{width:26px;height:26px;border-radius:50%;
+  background:#dfe7f2;border:2px solid var(--s1);box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.setrow.done .suwak::-webkit-slider-runnable-track{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--good) 55%,var(--s3)),var(--line))}
+.setrow.done .suwak::-moz-range-track{background:color-mix(in srgb,var(--good) 45%,var(--s3))}
+
+/* wspólny ciężar na całe ćwiczenie */
+.kgslider{background:var(--s2);border:1px solid var(--line);border-radius:13px;
+  padding:10px 13px 4px;margin-top:14px}
+.kglab{display:flex;align-items:baseline;gap:7px;font-size:11px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-3)}
+.kglab b{margin-left:auto;font-size:23px;font-weight:700;letter-spacing:-.03em;color:var(--ink);
+  text-transform:none;letter-spacing:normal;font-variant-numeric:tabular-nums}
+.kglab i{font-style:normal;font-size:12px;color:var(--ink-3)}
+.kgslider .suwak{width:100%;flex:none}
 
 /* ══ karta korekty ══ */
 .note.adj{border-left-color:var(--good)}
@@ -385,7 +397,7 @@ tr.now td:last-child{border-radius:0 7px 7px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=15"></script>
-<script src="app.js?v=15"></script>
+<script src="progresja.js?v=16"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>

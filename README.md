@@ -10,8 +10,9 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 - **Dni A / B / C** — ćwiczenia z ciężarem na wybrany tydzień, superserie sparowane
   wizualnie, opisy wykonania i pasek postępu sesji
-- **Dziennik serii** — przy każdej serii wpisujesz powtórzenia i ciężar (wypełnione
-  z planu, dotykasz tylko przy odchyłce)
+- **Dziennik serii** — powtórzenia na suwaku przy każdej serii, ciężar **jeden na
+  ćwiczenie** (sztangę ładujesz raz). Wszystko wypełnione z planu, ruszasz tylko przy
+  odchyłce. Zmiany trafiają prosto do DOM-u, bez przebudowy ekranu — ~3 ms na ruch
 - **Samoregulacja** — dwa ostatnie tygodnie treningowe sterują E1RM na kolejny:
   +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij
 - **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),

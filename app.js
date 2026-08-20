@@ -173,7 +173,7 @@ function setWeek(w) {
 /* ---------- ekran główny ---------- */
 function homeView() {
   const p = state.plan, w = state.week, frag = document.createDocumentFragment();
-  const body = el('div', 'stagger');
+  const body = el('div', klasaWejscia());
   const deload = String(lowerRow(w).block).toLowerCase() === 'deload';
 
   const adj = adjustCard();
@@ -316,11 +316,12 @@ function dayView(key) {
   });
   if (total) {
     const sp = el('div', 'sprog');
-    sp.append(el('span', null, `${done}/${total} serii`));
+    sp.id = 'sprog';
+    sp.append(el('span', 'ile', `${done}/${total} serii`));
     const bar = el('div', 'bar'); const fill = el('div', 'fill');
     fill.style.width = (done / total * 100) + '%';
     bar.append(fill); sp.append(bar);
-    sp.append(el('span', null, Math.round(done / total * 100) + '%'));
+    sp.append(el('span', 'proc', Math.round(done / total * 100) + '%'));
     wrapper.append(sp);
   }
 
@@ -331,7 +332,7 @@ function dayView(key) {
     if (bh) wrapper.append(noteBox('Wysokość gryfu w ciągu:', ' ' + bh + '.'));
   }
 
-  const list = el('div', 'stagger');
+  const list = el('div', klasaWejscia());
   let ssBox = null;
   d.items.forEach((it, i) => {
     const prevSS = i > 0 ? d.items[i - 1].superset : null;
@@ -493,7 +494,7 @@ function warmupAcc(key) {
 function calcView() {
   const frag = document.createDocumentFragment();
   frag.append(backLink());
-  const body = el('div', 'stagger');
+  const body = el('div', klasaWejscia());
   const L = LIFTS.find(x => x.key === calc.lift);
   body.append(head('Kalkulator 1RM', 'Przelicz dowolną serię na przewidywany maks', true));
 
@@ -595,7 +596,7 @@ function stepper(label, hint, read, delta, apply) {
 function cardioView() {
   const p = state.plan, w = state.week, frag = document.createDocumentFragment();
   frag.append(backLink());
-  const body = el('div', 'stagger');
+  const body = el('div', klasaWejscia());
   body.append(head('Cardio', 'Wtorek i sobota · tydzień ' + w, true));
 
   const c = p.cardio[w - 1];
@@ -629,7 +630,7 @@ function cardioView() {
 function tableView() {
   const p = state.plan, w = state.week, frag = document.createDocumentFragment();
   frag.append(backLink());
-  const body = el('div', 'stagger');
+  const body = el('div', klasaWejscia());
   body.append(head('Ciężary i progresja', 'Przeliczone z aktualnych E1RM', true));
 
   const chartCard = el('div', 'card');
@@ -790,7 +791,7 @@ function progressChart() {
 function rulesView() {
   const frag = document.createDocumentFragment();
   frag.append(backLink());
-  const body = el('div', 'stagger');
+  const body = el('div', klasaWejscia());
   body.append(head('Zasady', 'Nadrzędne wobec każdej liczby w tabelach', true));
   state.plan.rules.forEach(r => {
     const b = el('div', 'card');
@@ -858,6 +859,9 @@ const accKey = it => 'x' + it.name.toLowerCase().replace(/[^a-z0-9]+/g, '').slic
 function logGet(w, day, n) { return state.log[logKey(w, day, n)] || []; }
 function logSet(w, day, n, idx, val) {
   const k = logKey(w, day, n);
+  const stary = (state.log[k] || [])[idx] || null;
+  const bezZmian = stary && val && stary.r === val.r && stary.kg === val.kg;
+  if (bezZmian) return;                       // suwak wrocil tam, gdzie byl
   const rows = (state.log[k] || []).slice();
   while (rows.length <= idx) rows.push(null);
   rows[idx] = val;
@@ -926,7 +930,7 @@ async function pullAll() {
       if (arr.length) state.log[k] = arr; else delete state.log[k];
     }
     setSync(state.queue.length ? 'wait' : 'ok');
-    if (changed) { saveLog(); render(); }
+    if (changed) { saveLog(); renderJesliSpokojnie(); }
   } catch {
     setSync('off');
   }
@@ -978,7 +982,7 @@ async function odswiez() {
   await flushQueue();
   const zmienionyStan = await pullStan();
   await pullAll();
-  if (zmienionyStan) render();
+  if (zmienionyStan) renderJesliSpokojnie();
 }
 setInterval(odswiez, 10000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') odswiez(); });
@@ -995,50 +999,89 @@ const syncLabel = () => state.sync === 'ok' ? 'zsynchronizowano'
 window.addEventListener('online', () => { flushQueue(); pullAll(); });
 window.addEventListener('offline', () => setSync('off'));
 
-// Wiersze serii: kolko „zrobione” plus dwa male steppery na odchylki od planu.
+// Wiersze serii. Ciezar jest JEDEN na cwiczenie, nie na serie — sztange ladujesz raz,
+// wiec pieciu identycznych pol nikt nie potrzebuje. Powtorzenia na suwaku, bo w trakcie
+// serii liczy sie jeden ruch kciukiem, a nie celowanie w male przyciski.
+//
+// Nic tutaj NIE wola render(). Pelna przebudowa ekranu przy kazdym ruchu suwaka
+// gubila pozycje przewijania, odgrywala animacje wejscia od nowa i po prostu mulila.
 function setRows(it, day, w, pl) {
   const box = el('div', 'sets');
-  const rows = logGet(w, day, it.n);
-  for (let i = 0; i < pl.sets; i++) {
-    const cur = rows[i] || null;
-    const r = el('div', 'setrow' + (cur ? ' done' : ''));
+  const id = day + '|' + it.n;
+  const rows = () => logGet(w, day, it.n);
 
-    const tick = el('button', 'tick');
-    tick.setAttribute('aria-label', `Seria ${i + 1} z ${pl.sets}`);
-    tick.textContent = String(i + 1);
-    tick.onclick = () => {
-      logSet(w, day, it.n, i, cur ? null : { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
-      render();
+  let kgTeraz = pl.kg;
+
+  if (pl.kg != null) {
+    const min = Math.max(2.5, floor25(pl.kg * 0.6));
+    const max = floor25(pl.kg * 1.4);
+    const kgBox = el('div', 'kgslider');
+    const lab = el('div', 'kglab');
+    const val = el('b', null, fmt(kgTeraz));
+    lab.append(el('span', null, 'Ciężar na sztandze'), val, el('i', null, 'kg'));
+    const sl = el('input', 'suwak');
+    sl.type = 'range'; sl.min = min; sl.max = max; sl.step = 2.5; sl.value = kgTeraz;
+    sl.setAttribute('aria-label', 'Ciężar w kilogramach');
+    sl.oninput = () => { kgTeraz = +sl.value; val.textContent = fmt(kgTeraz); };
+    sl.onchange = () => {
+      // Ciezar dotyczy calego cwiczenia: przepisujemy go na juz odklikane serie.
+      const r = rows();
+      for (let i = 0; i < r.length; i++) if (r[i]) logSet(w, day, it.n, i, { ...r[i], kg: kgTeraz });
+      if (pl.planKg == null) { state.acc[accKey(it)] = kgTeraz; saveAcc(); }
     };
-    r.append(tick);
+    kgBox.append(lab, sl);
+    box.append(kgBox);
+  }
 
-    const val = cur || { r: pl.target, kg: pl.kg };
-    r.append(miniStep(pl.unit === 's' ? 'sek' : pl.unit === 'm' ? 'm' : 'powt.', val.r, 1, nv => {
-      logSet(w, day, it.n, i, { r: Math.max(0, Math.min(50, nv)), kg: val.kg, pr: pl.target, pk: pl.planKg });
-      render();
-    }));
-    if (val.kg != null) {
-      r.append(miniStep('kg', val.kg, 2.5, nv => {
-        logSet(w, day, it.n, i, { r: val.r, kg: Math.max(0, Math.min(500, nv)), pr: pl.target, pk: pl.planKg });
-        render();
-      }));
-    }
+  for (let i = 0; i < pl.sets; i++) {
+    const zapis = rows()[i] || null;
+    const r = el('div', 'setrow' + (zapis ? ' done' : ''));
+    let powt = zapis ? zapis.r : pl.target;
+
+    const tick = el('button', 'tick', String(i + 1));
+    tick.setAttribute('aria-label', 'Seria ' + (i + 1) + ' z ' + pl.sets);
+    const sl = el('input', 'suwak');
+    sl.type = 'range'; sl.min = 0; sl.max = Math.max(pl.target * 2, pl.target + 6); sl.step = 1; sl.value = powt;
+    sl.setAttribute('aria-label', 'Powtórzenia w serii ' + (i + 1));
+    const val = el('div', 'setval');
+    const vb = el('b', null, String(powt));
+    val.append(vb, el('i', null, pl.unit === 's' ? 's' : pl.unit === 'm' ? 'm' : ''));
+
+    const zapisz = () => { logSet(w, day, it.n, i, { r: powt, kg: kgTeraz, pr: pl.target, pk: pl.planKg }); };
+
+    tick.onclick = () => {
+      const jest = r.classList.toggle('done');
+      if (jest) zapisz(); else logSet(w, day, it.n, i, null);
+      odswiezPostep(day, w);
+    };
+    sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
+    sl.onchange = () => {
+      powt = +sl.value;
+      if (!r.classList.contains('done')) r.classList.add('done');
+      zapisz();
+      odswiezPostep(day, w);
+    };
+
+    r.append(tick, sl, val);
     box.append(r);
   }
+  box.dataset.ex = id;
   return box;
 }
 
-function miniStep(label, value, delta, onChange) {
-  const s = el('div', 'ministep');
-  const minus = el('button', null, '−');
-  const plus = el('button', null, '+');
-  minus.onclick = () => onChange(value - delta);
-  plus.onclick = () => onChange(value + delta);
-  const v = el('div', 'mv');
-  v.append(el('b', null, fmt(value)));
-  v.append(el('i', null, label));
-  s.append(minus, v, plus);
-  return s;
+// Pasek postepu aktualizowany w miejscu — bez dotykania reszty ekranu.
+function odswiezPostep(day, w) {
+  const sp = document.getElementById('sprog');
+  if (!sp) return;
+  const d = state.plan.days[day];
+  let total = 0, done = 0;
+  d.items.forEach(it => {
+    total += plannedOf(it, w, day).sets;
+    done += logGet(w, day, it.n).filter(Boolean).length;
+  });
+  sp.querySelector('.ile').textContent = done + '/' + total + ' serii';
+  sp.querySelector('.fill').style.width = (total ? done / total * 100 : 0) + '%';
+  sp.querySelector('.proc').textContent = (total ? Math.round(done / total * 100) : 0) + '%';
 }
 
 /* ---------- korekta z dwóch tygodni ---------- */
@@ -1244,7 +1287,7 @@ document.addEventListener('visibilitychange', () => {
 function settingsView() {
   const frag = document.createDocumentFragment();
   frag.append(backLink());
-  const body = el('div', 'stagger');
+  const body = el('div', klasaWejscia());
   body.append(head('Dziennik i urządzenia', 'Kod planu, synchronizacja, kopia zapasowa', true));
 
   const wpisy = Object.values(state.log).reduce((a, r) => a + r.filter(Boolean).length, 0);
@@ -1359,6 +1402,18 @@ function settingsView() {
 /* ---------- router ---------- */
 function go(hash) { location.hash = hash; window.scrollTo({ top: 0 }); }
 
+// Animacja wejscia ma sie odegrac przy WEJSCIU w widok, nie przy kazdym renderze.
+// Wczesniej kazde tapniecie odpalalo ja od nowa i wygladalo jak migotanie.
+let ostatniWidok = null;
+const klasaWejscia = () => (state.view !== ostatniWidok ? 'stagger' : '');
+
+// Nie przebudowujemy ekranu, gdy ktos wlasnie go dotyka. Odswiezenie z bazy
+// poczeka kilka sekund zamiast wyrywac suwak spod palca.
+let ostatniDotyk = 0;
+['pointerdown', 'input'].forEach(z =>
+  document.addEventListener(z, () => { ostatniDotyk = Date.now(); }, true));
+const renderJesliSpokojnie = () => { if (Date.now() - ostatniDotyk > 6000) render(); };
+
 function render() {
   const app = $('#app');
   app.innerHTML = '';
@@ -1376,12 +1431,13 @@ function render() {
 
   keepAwake(onDay);
   renderTimer();
+  ostatniWidok = v;
 }
 
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=15')
+fetch('plan.json?v=16')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
