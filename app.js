@@ -841,7 +841,7 @@ function tonazChart() {
   const card = el('div', 'card');
   card.append(el('h3', null, 'Tonaż tygodniowy — wykonanie'));
 
-  const W = 340, H = 150, ML = 34, MR = 8, MT = 10, MB = 22;
+  const W = 340, H = 150, ML = 36, MR = 18, MT = 12, MB = 22;
   const max = Math.max(...dane.map(d => d.t));
   const gora = Math.ceil(max / 1000) * 1000 || 1000;
   const px = w => ML + (w - 1) / 11 * (W - ML - MR);
@@ -864,7 +864,8 @@ function tonazChart() {
     const t = gora * i / 2, y = py(t);
     add('line', { x1: ML, y1: y, x2: W - MR, y2: y }, 'grid');
     const lab = add('text', { x: ML - 6, y: y + 3, 'text-anchor': 'end' }, 'axis');
-    lab.textContent = Math.round(t / 1000) + 't';
+    // Zaokraglenie do pelnych ton klamalo: 1500 kg wyswietlalo sie jako "2t".
+    lab.textContent = fmt(Math.round(t / 100) / 10) + 't';
   }
   for (const w of [1, 4, 7, 10, 12]) {
     const lab = add('text', { x: px(w) + szer / 2, y: H - 7, 'text-anchor': 'middle' }, 'axis');
@@ -879,7 +880,7 @@ function tonazChart() {
   }
   const naj = dane.reduce((a, b) => (b.t > a.t ? b : a));
   const lab = add('text', { x: px(naj.w) + szer / 2, y: py(naj.t) - 5, 'text-anchor': 'middle' }, 'endlab');
-  lab.textContent = Math.round(naj.t / 100) / 10 + 't';
+  lab.textContent = fmt(Math.round(naj.t / 100) / 10) + 't';
 
   const wrap = el('div', 'chart');
   wrap.append(svg);
@@ -1566,7 +1567,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=17')
+fetch('plan.json?v=18')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
