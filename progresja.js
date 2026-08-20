@@ -82,6 +82,28 @@ function accSuggestion(older, newer, lastKg, krok = KROK) {
   return round25(lastKg + krok);
 }
 
+/* Opis wykonanej sesji do pokazania jako „ostatnio”.
+ * Jednakowe powtorzenia skracamy do "3 × 8"; rozne wypisujemy "8/8/6",
+ * bo wlasnie ta nierownosc niesie informacje.
+ */
+function opisWykonania(rows) {
+  const r = (rows || []).filter(Boolean);
+  if (!r.length) return null;
+  const powt = r.map(x => x.r);
+  const jednakowe = powt.every(x => x === powt[0]);
+  const zKg = r.find(x => x.kg != null);
+  const fmtKg = n => String(Math.round(n * 100) / 100).replace('.', ',');
+  return (jednakowe ? r.length + ' × ' + powt[0] : powt.join('/'))
+       + (zKg ? ' @ ' + fmtKg(zKg.kg) + ' kg' : '');
+}
+
+/* Tonaz: powtorzenia razy kilogramy. Serie bez liczbowego ciezaru (guma,
+ * masa ciala) nie wchodza — nie ma czego mnozyc, a doliczanie ich zerem
+ * albo zgadywana masa ciala zafalszowaloby trend. */
+function tonaz(rows) {
+  return (rows || []).reduce((a, x) => (x && x.kg != null ? a + x.r * x.kg : a), 0);
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { judgeSession, adjustment, applyAdjustment, accSuggestion, round25, KROK, LIMIT_KOREKTY };
+  module.exports = { judgeSession, adjustment, applyAdjustment, accSuggestion, opisWykonania, tonaz, round25, KROK, LIMIT_KOREKTY };
 }

@@ -349,6 +349,8 @@ function dayView(key) {
   });
   wrapper.append(list);
 
+  wrapper.append(podsumowanieSesji(key, w));
+
   const cuts = p.rules.find(r => r.heading === 'Czas trwania');
   if (cuts) {
     const acc = el('details', 'acc');
@@ -401,6 +403,13 @@ function exerciseCard(it, key, w) {
   const pl = plannedOf(it, w, key);
   if (pl.sets) box.append(setRows(it, key, w, pl));
 
+  const hist = ostatnieWykonanie(it, key, w);
+  if (hist) {
+    const h = el('div', 'ostatnio');
+    h.append(el('span', null, 'Ostatnio'), el('b', null, hist.opis), el('i', null, 'tydz. ' + hist.tydzien));
+    box.append(h);
+  }
+
   const prop = accProgress(it, key, w);
   if (prop != null) {
     const chip = el('button', 'progchip');
@@ -443,6 +452,38 @@ function platesEl(total) {
   }
   row.append(el('div', 'plnote', note + (pairs.length ? ' · gryf ' + fmt(state.plan.bar) + ' kg' : '')));
   return row;
+}
+
+function podsumowanieSesji(day, w) {
+  const teraz = tonazDnia(w, day);
+  const box = el('div', 'card podsum');
+  box.append(el('h3', null, 'Podsumowanie sesji'));
+  if (!teraz.serie) {
+    box.append(el('p', null, 'Jeszcze nic nie odklikane w tym tygodniu.'));
+    return box;
+  }
+  const grid = el('div', 'psgrid');
+  const kafel = (etykieta, wartosc, dopisek) => {
+    const k = el('div', 'ps');
+    k.append(el('div', 'pl2', etykieta), el('div', 'pv', wartosc));
+    if (dopisek) k.append(el('div', 'pd', dopisek));
+    return k;
+  };
+  let total = 0;
+  state.plan.days[day].items.forEach(it => { total += plannedOf(it, w, day).sets; });
+  grid.append(kafel('Serie', teraz.serie + '/' + total));
+  // Porownanie z ostatnim tygodniem, w ktorym ten dzien byl w ogole robiony.
+  let poprz = null;
+  for (let i = w - 1; i >= 1; i--) { const t = tonazDnia(i, day); if (t.serie) { poprz = { ...t, tydzien: i }; break; } }
+  let dopisek = null;
+  if (poprz && poprz.ton) {
+    const proc = Math.round((teraz.ton / poprz.ton - 1) * 100);
+    dopisek = (proc > 0 ? '+' : '') + proc + '% vs tydz. ' + poprz.tydzien;
+  }
+  grid.append(kafel('Tonaż', Math.round(teraz.ton).toLocaleString('pl-PL') + ' kg', dopisek));
+  box.append(grid);
+  box.append(el('p', null, 'Tonaż liczy tylko ćwiczenia z ciężarem w kilogramach — guma i masa ciała do niego nie wchodzą.'));
+  return box;
 }
 
 /* ---------- rozgrzewka ---------- */
@@ -638,6 +679,9 @@ function tableView() {
   chartCard.append(progressChart());
   body.append(chartCard);
 
+  const tonCard = tonazChart();
+  if (tonCard) body.append(tonCard);
+
   const mk = (title, headRow, rows) => {
     const b = el('div', 'card');
     b.append(el('h3', null, title));
@@ -785,6 +829,68 @@ function progressChart() {
   cap.style.fontSize = '12.5px'; cap.style.marginTop = '10px';
   box.append(cap);
   return box;
+}
+
+// Tonaz tygodniowy — jedna seria danych, wiec bez legendy: tytul ja nazywa.
+// Tygodnie bez zapisow nie dostaja slupka, zamiast zera — brak danych to nie jest zero pracy.
+function tonazChart() {
+  const dane = [];
+  for (let w = 1; w <= 12; w++) { const t = tonazTygodnia(w); if (t > 0) dane.push({ w, t }); }
+  if (!dane.length) return null;
+
+  const card = el('div', 'card');
+  card.append(el('h3', null, 'Tonaż tygodniowy — wykonanie'));
+
+  const W = 340, H = 150, ML = 34, MR = 8, MT = 10, MB = 22;
+  const max = Math.max(...dane.map(d => d.t));
+  const gora = Math.ceil(max / 1000) * 1000 || 1000;
+  const px = w => ML + (w - 1) / 11 * (W - ML - MR);
+  const szer = Math.max(6, (W - ML - MR) / 12 - 4);
+  const py = t => MT + (1 - t / gora) * (H - MT - MB);
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'Tonaż tygodniowy. Dokładne wartości w tabeli pod wykresem.');
+  const add = (tag, attrs, cls) => {
+    const n = document.createElementNS(ns, tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (cls) n.setAttribute('class', cls);
+    svg.append(n); return n;
+  };
+
+  for (let i = 0; i <= 2; i++) {
+    const t = gora * i / 2, y = py(t);
+    add('line', { x1: ML, y1: y, x2: W - MR, y2: y }, 'grid');
+    const lab = add('text', { x: ML - 6, y: y + 3, 'text-anchor': 'end' }, 'axis');
+    lab.textContent = Math.round(t / 1000) + 't';
+  }
+  for (const w of [1, 4, 7, 10, 12]) {
+    const lab = add('text', { x: px(w) + szer / 2, y: H - 7, 'text-anchor': 'middle' }, 'axis');
+    lab.textContent = w;
+  }
+  for (const d of dane) {
+    const y = py(d.t);
+    add('rect', {
+      x: px(d.w), y, width: szer, height: Math.max(2, H - MB - y), rx: 4,
+      fill: d.w === state.week ? 'var(--series-1)' : 'color-mix(in srgb, var(--series-1) 45%, var(--s2))',
+    });
+  }
+  const naj = dane.reduce((a, b) => (b.t > a.t ? b : a));
+  const lab = add('text', { x: px(naj.w) + szer / 2, y: py(naj.t) - 5, 'text-anchor': 'middle' }, 'endlab');
+  lab.textContent = Math.round(naj.t / 100) / 10 + 't';
+
+  const wrap = el('div', 'chart');
+  wrap.append(svg);
+  card.append(wrap);
+
+  const tw = el('div', 'scroll'); tw.style.margin = '12px 0 0'; tw.style.padding = '0';
+  const tab = el('table');
+  tab.innerHTML = '<thead><tr><th>Tydz.</th>' + dane.map(d => '<th>' + d.w + '</th>').join('') + '</tr></thead>' +
+    '<tbody><tr><td>Tonaż</td>' + dane.map(d => '<td>' + Math.round(d.t).toLocaleString('pl-PL') + '</td>').join('') + '</tr></tbody>';
+  tw.append(tab); card.append(tw);
+  return card;
 }
 
 /* ---------- zasady ---------- */
@@ -1083,6 +1189,29 @@ function odswiezPostep(day, w) {
   sp.querySelector('.fill').style.width = (total ? done / total * 100 : 0) + '%';
   sp.querySelector('.proc').textContent = (total ? Math.round(done / total * 100) : 0) + '%';
 }
+
+/* ---------- historia ---------- */
+// Ostatnie wykonanie tego cwiczenia: szukamy wstecz pierwszego tygodnia z zapisem.
+function ostatnieWykonanie(it, day, w) {
+  for (let i = w - 1; i >= 1; i--) {
+    const opis = opisWykonania(logGet(i, day, it.n));
+    if (opis) return { tydzien: i, opis };
+  }
+  return null;
+}
+
+// Tonaz = suma powtorzen razy kilogramy. Cwiczenia bez liczbowego ciezaru
+// (guma, masa ciala) nie wchodza — nie ma czego mnozyc.
+function tonazDnia(w, day) {
+  let ton = 0, serie = 0;
+  state.plan.days[day].items.forEach(it => {
+    const rows = logGet(w, day, it.n);
+    serie += rows.filter(Boolean).length;
+    ton += tonaz(rows);
+  });
+  return { ton, serie };
+}
+const tonazTygodnia = w => ['A', 'B', 'C'].reduce((a, d) => a + tonazDnia(w, d).ton, 0);
 
 /* ---------- korekta z dwóch tygodni ---------- */
 // Boj glowny dnia: z ktorego cwiczenia liczymy korekte dla ktorego E1RM.
@@ -1437,7 +1566,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=16')
+fetch('plan.json?v=17')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

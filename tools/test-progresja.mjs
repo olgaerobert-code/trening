@@ -67,5 +67,21 @@ console.log('\nScenariusz z planu: wyciskanie, E1RM 150');
   test('E1RM 150 → 152,5', P.applyAdjustment(150, k.pct), 152.5);
 }
 
+console.log('');
+console.log('Historia i tonaz');
+test('jednakowe powtorzenia skracamy',
+  P.opisWykonania([{r:8,kg:105},{r:8,kg:105},{r:8,kg:105}]), '3 × 8 @ 105 kg');
+test('nierowne powtorzenia wypisujemy',
+  P.opisWykonania([{r:8,kg:105},{r:8,kg:105},{r:6,kg:105}]), '8/8/6 @ 105 kg');
+test('bez ciezaru - sam zapis powtorzen',
+  P.opisWykonania([{r:12,kg:null},{r:12,kg:null}]), '2 × 12');
+test('puste wejscie -> nic', P.opisWykonania([]), null);
+test('dziury w tablicy pomijane', P.opisWykonania([null,{r:5,kg:60},null]), '1 × 5 @ 60 kg');
+test('przecinek dziesietny w ciezarze', P.opisWykonania([{r:4,kg:127.5}]), '1 × 4 @ 127,5 kg');
+test('tonaz 3 x 8 @ 105', P.tonaz([{r:8,kg:105},{r:8,kg:105},{r:8,kg:105}]), 2520);
+test('tonaz pomija serie bez ciezaru',
+  P.tonaz([{r:8,kg:105},{r:12,kg:null},{r:8,kg:105}]), 1680);
+test('tonaz z pustych serii to zero', P.tonaz([null,null]), 0);
+
 console.log('\n' + (zle ? `${zle} BŁĘDÓW, ${ok} ok` : `Wszystkie ${ok} testów przeszło`));
 process.exit(zle ? 1 : 0);
