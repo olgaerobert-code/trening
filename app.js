@@ -1029,8 +1029,14 @@ async function pullAll() {
       const arr = (state.log[k] || []).slice();
       while (arr.length <= i) arr.push(null);
       const mine = arr[i];
+      const zdalny = r.reps == null ? null : { r: r.reps, kg: r.kg == null ? null : +r.kg, ts: r.ts };
+      // Pusty wpis z bazy NIGDY nie kasuje zapisu, ktory jest na tym urzadzeniu.
+      // Kosztuje to jedno: odklikanie serii na jednym urzadzeniu nie zdejmie jej
+      // na drugim. Ale zamienia pomylke w cos odwracalnego zamiast bezpowrotnego —
+      // a dziennik treningowy jest wart wiecej niz ta wygoda.
+      if (zdalny == null && mine) continue;
       if (!mine || !mine.ts || new Date(r.ts) > new Date(mine.ts)) {      // wygrywa nowszy
-        arr[i] = r.reps == null ? null : { r: r.reps, kg: r.kg == null ? null : +r.kg, ts: r.ts };
+        arr[i] = zdalny;
         changed = true;
       }
       while (arr.length && arr[arr.length - 1] == null) arr.pop();
@@ -1567,7 +1573,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=18')
+fetch('plan.json?v=19')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
