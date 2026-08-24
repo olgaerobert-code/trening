@@ -1,6 +1,6 @@
 {
  "title": "Plan 12 tygodni",
- "schedule": "pon A · wt cardio · śr B · czw wolne · pt C · sob cardio · nd wolne",
+ "schedule": "pon A · śr B · pt C · nd mobilność",
  "bar": 20,
  "plates": [
   25,
@@ -655,103 +655,9 @@
    }
   },
   "skip": [
-   "Statycznego rozciągania przed treningiem — obniża wytwarzaną siłę na kilkadziesiąt minut. Rozciągaj po treningu albo w wolny dzień, nie przed.",
+   "Statycznego rozciągania przed treningiem — obniża wytwarzaną siłę na kilkadziesiąt minut. Od tego jest niedziela.",
    "Rolowania jako obowiązkowego punktu — daje chwilową ulgę, ale nie zmienia niczego trwale. Jeśli lubisz, rób, tylko nie zamiast reszty.",
    "Krążeń bioder i pracy w końcowych zakresach."
-  ]
- },
- "cardio": [
-  {
-   "week": 1,
-   "tue": "Strefa 2 — 35 min",
-   "sat": "Strefa 2 — 40 min",
-   "note": "Pierwsze 4 tygodnie tylko spokojna objętość."
-  },
-  {
-   "week": 2,
-   "tue": "Strefa 2 — 40 min",
-   "sat": "Strefa 2 — 45 min",
-   "note": ""
-  },
-  {
-   "week": 3,
-   "tue": "Strefa 2 — 40 min",
-   "sat": "Strefa 2 — 50 min",
-   "note": ""
-  },
-  {
-   "week": 4,
-   "tue": "Strefa 2 — 45 min",
-   "sat": "Strefa 2 — 50 min",
-   "note": ""
-  },
-  {
-   "week": 5,
-   "tue": "Strefa 2 — 45 min",
-   "sat": "10 min rozgrz. + 4 × 3 min mocno / 3 min lekko + 5 min schłodzenia",
-   "note": "Interwały wchodzą dopiero teraz — po miesiącu bazy."
-  },
-  {
-   "week": 6,
-   "tue": "Strefa 2 — 50 min",
-   "sat": "10 min + 4 × 4 min / 3 min + 5 min",
-   "note": ""
-  },
-  {
-   "week": 7,
-   "tue": "Strefa 2 — 40 min",
-   "sat": "Strefa 2 — 40 min",
-   "note": "Deload — interwały pomiń."
-  },
-  {
-   "week": 8,
-   "tue": "Strefa 2 — 50 min",
-   "sat": "10 min + 4 × 4 min / 3 min + 5 min",
-   "note": ""
-  },
-  {
-   "week": 9,
-   "tue": "Strefa 2 — 55 min",
-   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
-   "note": ""
-  },
-  {
-   "week": 10,
-   "tue": "Strefa 2 — 55 min",
-   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
-   "note": ""
-  },
-  {
-   "week": 11,
-   "tue": "Strefa 2 — 60 min",
-   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
-   "note": ""
-  },
-  {
-   "week": 12,
-   "tue": "Strefa 2 — 60 min",
-   "sat": "10 min + 5 × 4 min / 3 min + 5 min",
-   "note": "Docelowy tydzień. Dalej utrzymujesz, nie zwiększasz."
-  }
- ],
- "cardioInfo": {
-  "Czym jest strefa 2": [
-   "Tempo, w którym mówisz PEŁNYMI ZDANIAMI bez zadyszki, ale rozmowa już lekko przeszkadza.",
-   "Jeśli musisz łapać oddech w środku zdania — jedziesz za mocno. Jeśli możesz śpiewać — za lekko.",
-   "Tu buduje się wydolność podstawowa. Nudne tempo jest właściwym tempem."
-  ],
-  "Interwały — jak je robić": [
-   "4 min MOCNO = RPE 8–9: pod koniec każdego powtórzenia wypowiadasz najwyżej kilka słów.",
-   "3 min LEKKO = kręcisz na luzie, nie zatrzymujesz się.",
-   "Na rowerze: WYŻSZA KADENCJA, NIŻSZY OPÓR. Ta sama praca dla serca, znacznie mniejsza dla kolana."
-  ],
-  "Rower czy pływanie": [
-   "Strefa 2 — dowolnie, na przemian. Pływanie dodatkowo odciąża kręgosłup i rozrusza obręcz barkową.",
-   "Interwały — raczej rower: łatwiej kontrolujesz intensywność i opór, więc łatwiej oszczędzasz kolano."
-  ],
-  "Zasada nadrzędna": [
-   "Jeśli w danym tygodniu musisz coś odpuścić, odpuszczasz interwały, nie strefę 2.",
-   "I odpuszczasz cardio dopiero po tym, jak zrobiłeś trzy treningi siłowe — nie przed."
   ]
  },
  "rules": [
@@ -759,11 +665,11 @@
    "heading": "Układ tygodnia",
    "lines": [
     "Poniedziałek — Dzień A: GÓRA (wyciskanie i podciąganie jako boje główne)",
-    "Wtorek — cardio wg arkusza CARDIO",
+    "Wtorek — wolne",
     "Środa — Dzień B: DÓŁ, kontrola i stabilizacja (bez sztangi, bez obciążenia osiowego)",
     "Czwartek — wolne",
     "Piątek — Dzień C: DÓŁ (front squat + ciąg)",
-    "Sobota — cardio wg arkusza CARDIO · Niedziela — wolne",
+    "Sobota — wolne · Niedziela — mobilność (~34 min, bez obciążenia)",
     "Ciężki dzień dolny wypada w piątek, więc ma pełny weekend na regenerację, a środa trafia dokładnie w środek między nim a kolejnym."
    ]
   },
@@ -771,6 +677,7 @@
    "heading": "Czas trwania",
    "lines": [
     "Dzień A ~62 min, dzień B ~67 min, dzień C ~60 min. Plus 5–6 min rozgrzewki z osobnego arkusza.",
+    "Niedziela ~34 min, bez obciążenia — nie liczy się do objętości treningowej.",
     "PRZERWY: bój główny 3 min (wyciskanie od bloku 3: 4 min), pozostałe 90 s, izometrie 60 s.",
     "ROZGRZEWKA: pełny rozpis w osobnym arkuszu ROZGRZEWKA, z przeliczonymi ciężarami serii dojściowych.",
     "SUPERSERIE w dniu B (pary A1/A2 i B1/B2): robisz bez przerwy w środku, odpoczywasz po parze. To ~8 min oszczędności.",
@@ -850,5 +757,214 @@
     "To nie jest opóźnienie planu. To jest plan."
    ]
   }
- ]
+ ],
+ "mobility": {
+  "key": "D",
+  "title": "MOBILNOŚĆ",
+  "day": "Niedziela",
+  "minutes": 34,
+  "shortMinutes": 15,
+  "intro": "Jedyny dzień na rozciąganie statyczne. Bloki stoją dokładnie tam, gdzie plan tego wymaga: pozycja przednia sztangi, zejście w dół bez garbienia i miednica trzymana poziomo pod obciążeniem. Nic tu nie idzie do granicy wysiłku — to nie jest czwarty trening.",
+  "blocks": [
+   {
+    "n": 1,
+    "name": "Rozruch",
+    "minutes": 4,
+    "why": "Podnosisz temperaturę, zanim cokolwiek zaczniesz przytrzymywać.",
+    "items": [
+     {
+      "id": "d1",
+      "name": "Marsz w miejscu z wymachem ramion",
+      "dose": "2 min",
+      "sec": 120,
+      "core": true,
+      "note": "Kolano wysoko, ramiona swobodnie w przód i w tył. Spokojnie, bez zadyszki — chodzi tylko o rozgrzanie."
+     },
+     {
+      "id": "d2",
+      "name": "Koci grzbiet",
+      "dose": "2 × 10",
+      "sec": null,
+      "core": true,
+      "note": "Klęk podparty. Wdech — klatka opada, wzrok przed siebie. Wydech — plecy w łuk, broda do mostka. Jedno powtórzenie na jeden pełny oddech."
+     },
+     {
+      "id": "d3",
+      "name": "Krążenia biodrem w klęku podpartym",
+      "dose": "2 × 8 / stronę",
+      "sec": null,
+      "core": false,
+      "note": "Kolano zgięte 90°, prowadzisz je szerokim łukiem w bok i do tyłu. Tułów stoi nieruchomo — rusza się samo biodro."
+     }
+    ]
+   },
+   {
+    "n": 2,
+    "name": "Klatka i odcinek piersiowy",
+    "minutes": 7,
+    "why": "Pod pozycję przednią sztangi i pod wyciskanie z ustawionymi łopatkami.",
+    "items": [
+     {
+      "id": "d4",
+      "name": "Otwieranie klatki leżąc na boku",
+      "dose": "2 × 8 / stronę",
+      "sec": null,
+      "core": false,
+      "note": "Leżysz na boku, kolana zgięte 90°, ręce wyciągnięte przed sobą. Górna ręka zatacza łuk nad głową aż do podłogi po drugiej stronie, wzrok idzie za dłonią. Kolana zostają sklejone i na miejscu."
+     },
+     {
+      "id": "d5",
+      "name": "Wyprost na wałku",
+      "dose": "3 × 30 s",
+      "sec": 30,
+      "core": true,
+      "note": "Wałek w poprzek pleców pod łopatkami, ręce za głową, biodra na podłodze. Wydech i opadasz w tył. Po każdej serii przesuwasz wałek o dwa palce wyżej."
+     },
+     {
+      "id": "d6",
+      "name": "Siad na piętach z łokciami na ławce",
+      "dose": "2 × 45 s",
+      "sec": 45,
+      "core": false,
+      "note": "Klękasz przed ławką, łokcie na ławce na szerokość barków, biodra cofnięte do pięt. Klatka opada między ramionami. Oddychasz w boki żeber, nie w brzuch."
+     }
+    ]
+   },
+   {
+    "n": 3,
+    "name": "Biodra",
+    "minutes": 9,
+    "why": "Pod zejście w przysiadzie i ustawienie miednicy w ciągu.",
+    "items": [
+     {
+      "id": "d7",
+      "name": "Półklęk z podwinięciem miednicy",
+      "dose": "2 × 45 s / stronę",
+      "sec": 45,
+      "core": true,
+      "note": "Kolano tylnej nogi na macie, przednia stopa daleko z przodu. NAJPIERW ściągasz pośladek nogi klęczącej i podwijasz miednicę pod siebie, dopiero potem przenosisz ciężar do przodu. Żebra w dół — bez wyginania się w lędźwiach."
+     },
+     {
+      "id": "d8",
+      "name": "Pozycja 90/90",
+      "dose": "2 × 45 s / stronę",
+      "sec": 45,
+      "core": false,
+      "note": "Siad: przednia noga zgięta 90° przed sobą, tylna 90° z boku. Tułów prosto, potem powolny skłon nad przednią goleń. Strony zmieniasz przetaczając kolana przez środek, bez pomagania rękami."
+     },
+     {
+      "id": "d9",
+      "name": "Żaba",
+      "dose": "2 × 60 s",
+      "sec": 60,
+      "core": false,
+      "note": "Klęk podparty, kolana szeroko, golenie równolegle, stopy na zewnątrz. Kołyszesz biodrami w tył dokładnie do miejsca, w którym plecy jeszcze się nie zaokrąglają."
+     },
+     {
+      "id": "d10",
+      "name": "Czwórka leżąc",
+      "dose": "2 × 45 s / stronę",
+      "sec": 45,
+      "core": true,
+      "note": "Na plecach, kostka oparta o kolano drugiej nogi, przyciągasz udo do siebie. Głowa i oba barki zostają na podłodze."
+     }
+    ]
+   },
+   {
+    "n": 4,
+    "name": "Tył nóg i kostki",
+    "minutes": 6,
+    "why": "Pod głębokość przysiadu i pod ciąg z podwyższenia.",
+    "items": [
+     {
+      "id": "d11",
+      "name": "Skłon w rozkroku z prostym kręgosłupem",
+      "dose": "3 × 40 s",
+      "sec": 40,
+      "core": true,
+      "note": "Stopy szerzej niż barki, kolana mikro-ugięte. Prowadzisz biodra w tył i schodzisz z PROSTYMI plecami. Kark rozluźniasz dopiero na samym dole, kiedy nie schodzisz już niżej."
+     },
+     {
+      "id": "d12",
+      "name": "Zgięcie grzbietowe przy ścianie",
+      "dose": "2 × 10 / nogę",
+      "sec": null,
+      "core": true,
+      "note": "Palce ~10 cm od ściany, pięta przyklejona do podłogi, kolano jedzie prosto nad drugim palcem i dotyka ściany. Wolno, bez odbijania. To samo ćwiczenie co w dniu B — tu robisz je na spokojnie."
+     },
+     {
+      "id": "d13",
+      "name": "Rozciąganie łydki na stopniu",
+      "dose": "2 × 45 s / nogę",
+      "sec": 45,
+      "core": false,
+      "note": "Śródstopie na krawędzi stopnia, pięta opada pod własnym ciężarem. Pierwsza seria z kolanem prostym, druga z lekko ugiętym — to dwa różne mięśnie."
+     }
+    ]
+   },
+   {
+    "n": 5,
+    "name": "Barki i nadgarstki",
+    "minutes": 4,
+    "why": "Pod trzymanie sztangi z przodu i pod podciąganie.",
+    "items": [
+     {
+      "id": "d14",
+      "name": "Przewlekanie gumy nad głową",
+      "dose": "2 × 10",
+      "sec": null,
+      "core": false,
+      "note": "Szeroki chwyt, ręce proste przez cały ruch. Chwyt zwężasz dopiero wtedy, gdy przechodzi bez wzruszania barkami."
+     },
+     {
+      "id": "d15",
+      "name": "Mobilizacja nadgarstków w klęku",
+      "dose": "2 × 30 s w każdą stronę",
+      "sec": 30,
+      "core": false,
+      "note": "Dłonie na podłodze palcami do kolan, potem to samo grzbietami dłoni. Ciężar przenosisz powoli i tylko tyle, ile jest wygodne."
+     }
+    ]
+   },
+   {
+    "n": 6,
+    "name": "Kontrola i oddech",
+    "minutes": 4,
+    "why": "Zamknięcie dnia: miednica pod kontrolą i zejście z obrotów.",
+    "items": [
+     {
+      "id": "d16",
+      "name": "Dead bug",
+      "dose": "3 × 8 / stronę",
+      "sec": null,
+      "core": true,
+      "note": "Na plecach, lędźwie DOCIŚNIĘTE do podłogi. Wypuszczasz przeciwną rękę i nogę na wydechu, wracasz na wdechu. Jeśli plecy odrywają się choć na moment — skracasz zakres."
+     },
+     {
+      "id": "d17",
+      "name": "Bird dog",
+      "dose": "2 × 8 / stronę",
+      "sec": null,
+      "core": false,
+      "note": "Klęk podparty, wypychasz przeciwną rękę i nogę do linii tułowia. Miednica pozioma: postaw kubek na krzyżu i nie zrzuć go."
+     },
+     {
+      "id": "d18",
+      "name": "Oddech 4–6 leżąc",
+      "dose": "3 min",
+      "sec": 180,
+      "core": false,
+      "note": "Na plecach, łydki na ławce, dłoń na brzuchu. Wdech nosem 4 s, wydech ustami 6 s. Bez pauz i bez pośpiechu."
+     }
+    ]
+   }
+  ],
+  "rules": [
+   "Rozciąganie statyczne robisz TYLKO w tym dniu. Przed serią roboczą nigdy — obniża siłę na kilkadziesiąt minut.",
+   "Każda pozycja schodzi głębiej na wydechu. Jeśli musisz wstrzymać oddech, żeby ją utrzymać, jest za mocna — cofnij się.",
+   "Zakres ma rosnąć z tygodnia na tydzień, nie z minuty na minutę. Wracasz tu co siedem dni, więc nie ma po co przyspieszać.",
+   "Krótka wersja (~15 min) to same pozycje oznaczone kropką. Lepsza krótka niż żadna.",
+   "Jeśli piątek był ciężki, zrób tylko bloki 1, 3 i 6 — biodra i oddech. Reszta poczeka."
+  ]
+ }
 }

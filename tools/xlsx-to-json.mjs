@@ -164,25 +164,19 @@ const warmup = {
     C: { label: wu.A33, steps: readBlock(34, 39) },
   },
   skip: [
-    'Statycznego rozciągania przed treningiem — obniża wytwarzaną siłę na kilkadziesiąt minut. Rozciągaj po treningu albo w wolny dzień, nie przed.',
+    'Statycznego rozciągania przed treningiem — obniża wytwarzaną siłę na kilkadziesiąt minut. Od tego jest niedziela.',
     'Rolowania jako obowiązkowego punktu — daje chwilową ulgę, ale nie zmienia niczego trwale. Jeśli lubisz, rób, tylko nie zamiast reszty.',
     'Krążeń bioder i pracy w końcowych zakresach.',
   ],
 };
 warmup.days.B.steps.push({ what: 'BEZ krążeń bioder i szukania końcowych zakresów', dose: '', note: '' });
 
-/* ---------- Cardio ---------- */
-const cd = S('Cardio');
-const cardio = [];
-for (let r = 5; r <= 16; r++) {
-  cardio.push({ week: num(cd['A' + r]), tue: cd['B' + r], sat: cd['C' + r], note: cd['D' + r] || '' });
-}
-const cardioInfo = {
-  'Czym jest strefa 2': [cd.A20, cd.A21, cd.A22].filter(Boolean),
-  'Interwały — jak je robić': [cd.A25, cd.A26, cd.A27].filter(Boolean),
-  'Rower czy pływanie': [cd.A33, cd.A34].filter(Boolean),
-  'Zasada nadrzędna': [cd.A39, cd.A40].filter(Boolean),
-};
+/* ---------- Niedziela: mobilnosc ---------- */
+// Ten blok nie pochodzi ze skoroszytu — arkusz go nie ma. Trzymamy go w osobnym
+// pliku, zeby ponowna konwersja XLSX nie skasowala niedzieli z planu. Bezpiecznik
+// SENSITIVE i tak przejdzie po nim razem z reszta wyniku.
+const MOB = path.join(path.dirname(new URL(import.meta.url).pathname.slice(1)), 'niedziela.json');
+const mobility = JSON.parse(fs.readFileSync(MOB, 'utf8'));
 
 /* ---------- Zasady: wybrane bloki, filtrowane linia po linii ---------- */
 const zs = S('Zasady');
@@ -201,15 +195,16 @@ const rules = [
     heading: 'Układ tygodnia',
     lines: [
       'Poniedziałek — Dzień A: GÓRA (wyciskanie i podciąganie jako boje główne)',
-      'Wtorek — cardio wg arkusza CARDIO',
+      'Wtorek — wolne',
       'Środa — Dzień B: DÓŁ, kontrola i stabilizacja (bez sztangi, bez obciążenia osiowego)',
       'Czwartek — wolne',
       'Piątek — Dzień C: DÓŁ (front squat + ciąg)',
-      'Sobota — cardio wg arkusza CARDIO · Niedziela — wolne',
+      'Sobota — wolne · Niedziela — mobilność (~' + mobility.minutes + ' min, bez obciążenia)',
       'Ciężki dzień dolny wypada w piątek, więc ma pełny weekend na regenerację, a środa trafia dokładnie w środek między nim a kolejnym.',
     ],
   },
-  { heading: 'Czas trwania', lines: blockAfter('Czas trwania', 7) },
+  { heading: 'Czas trwania', lines: (l => (l.splice(1, 0,
+      'Niedziela ~' + mobility.minutes + ' min, bez obciążenia — nie liczy się do objętości treningowej.'), l))(blockAfter('Czas trwania', 7)) },
   {
     heading: 'Dwa reżimy w jednym planie',
     lines: [
@@ -254,16 +249,15 @@ const rules = [
 /* ---------- Sklad ---------- */
 const plan = {
   title: 'Plan 12 tygodni',
-  schedule: 'pon A · wt cardio · śr B · czw wolne · pt C · sob cardio · nd wolne',
+  schedule: 'pon A · śr B · pt C · nd mobilność',
   bar: 20,
   plates: [25, 20, 15, 10, 5, 2.5, 1.25],
   e1rm,
   weeks: { lower, upper },
   days,
   warmup,
-  cardio,
-  cardioInfo,
   rules,
+  mobility,
 };
 
 /* ---------- Bezpiecznik ---------- */
@@ -281,4 +275,6 @@ if (hits.length) {
 fs.writeFileSync(OUT, JSON.stringify(plan, null, 1), 'utf8');
 console.log('OK  ' + OUT);
 console.log('    dni: ' + Object.values(days).map(d => d.key + '=' + d.items.length).join(' ') +
-  ' | tygodnie: ' + lower.length + '/' + upper.length + ' | cardio: ' + cardio.length + ' | zasady: ' + rules.length);
+  ' | tygodnie: ' + lower.length + '/' + upper.length +
+  ' | niedziela: ' + mobility.blocks.reduce((a, b) => a + b.items.length, 0) + ' pozycji' +
+  ' | zasady: ' + rules.length);

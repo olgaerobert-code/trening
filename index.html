@@ -39,6 +39,7 @@
   --a:#3987e5;
   --b:#199e70;
   --c:#d95926;
+  --d:#7d5bd6;   /* niedziela — mobilność */
   --warn:#c98500;
   --good:#199e70;
 
@@ -303,6 +304,37 @@ details.acc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
   border-top:1px solid var(--line-soft);padding-top:10px}
 .exnote[hidden]{display:none}
 
+/* ══ niedziela — mobilność ══ */
+.mobsw{display:flex;gap:8px;margin-bottom:12px}
+.mobopt{flex:1;padding:10px;border-radius:12px;background:var(--s2);border:1px solid var(--line);
+  font-size:12.5px;color:var(--ink-2);font-weight:560;transition:background .16s,border-color .16s,color .16s}
+.mobopt.on{background:color-mix(in srgb,var(--dc,var(--d)) 20%, var(--s1));
+  border-color:color-mix(in srgb,var(--dc,var(--d)) 55%, var(--line));color:var(--ink)}
+.mobopt:active{transform:scale(.985)}
+
+.mobblock{display:flex;align-items:flex-start;gap:10px;margin:20px 0 10px}
+.mobblock:first-child{margin-top:4px}
+.mbn{width:24px;height:24px;flex:none;border-radius:8px;display:grid;place-items:center;
+  font-size:12px;font-weight:680;font-variant-numeric:tabular-nums;
+  background:color-mix(in srgb,var(--dc,var(--d)) 26%, var(--s1));
+  color:color-mix(in srgb,var(--dc,var(--d)) 62%, #ffffff)}
+.mbt{flex:1;min-width:0}
+.mbname{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-2);font-weight:640}
+.mbwhy{font-size:12.5px;color:var(--ink-3);line-height:1.5;margin-top:3px}
+.mbmin{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;padding-top:5px;white-space:nowrap}
+
+.ex.mob .exhead{align-items:center}
+.ex.mob .tick{font-size:16px}
+.ex.mob .metrics{margin-top:9px;align-items:center;gap:14px}
+.ex.zrobione{opacity:.55}
+.ex.zrobione .tick{background:color-mix(in srgb,var(--good) 26%,var(--s1));border-color:var(--good);color:#8ee0bb}
+.ex.zrobione .exname{text-decoration:line-through;text-decoration-color:var(--ink-3)}
+
+.timebtn{margin-left:auto;padding:9px 14px;border-radius:11px;background:var(--s2);
+  border:1px solid var(--line);font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.timebtn:active{transform:scale(.94)}
+.btn.warn{border-color:var(--warn);color:#e8b855}
+
 /* ══ tabele ══ */
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -15px;padding:0 15px}
 table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
@@ -409,7 +441,7 @@ tr.now td:last-child{border-radius:0 7px 7px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=19"></script>
-<script src="app.js?v=19"></script>
+<script src="progresja.js?v=20"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>

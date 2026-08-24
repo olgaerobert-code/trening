@@ -5,6 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, queue: [], key: null, sync: 'off',
+  mob: {}, mobShort: false,
 };
 
 /* ---------- Supabase ---------- */
@@ -23,7 +24,7 @@ const LIFTS = [
   { key: 'front', short: 'Front squat', full: 'Front squat', color: 'var(--series-2)' },
   { key: 'dl', short: 'Ciąg', full: 'Martwy ciąg z podwyższenia', color: 'var(--series-3)' },
 ];
-const DAY_COLOR = { A: 'var(--a)', B: 'var(--b)', C: 'var(--c)' };
+const DAY_COLOR = { A: 'var(--a)', B: 'var(--b)', C: 'var(--c)', D: 'var(--d)' };
 // Kolory talerzy wg standardu IPF — czysta pomoc wzrokowa przy składaniu sztangi.
 const PLATE_COLOR = { 25: '#c0392b', 20: '#2a6fc4', 15: '#d9b016', 10: '#1f8f4e', 5: '#e8e8e8', 2.5: '#1a1a1a', 1.25: '#9aa5b1' };
 
@@ -52,17 +53,21 @@ const save = () => {
 
 /* ---------- magazyn dziennika ---------- */
 const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening.acc.v1';
-const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1';
+const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1', LS_MOB = 'trening.mob.v1';
 const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
 const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
 const saveAdjust = () => { localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust)); pushStan(); };
 const saveAcc = () => { localStorage.setItem(LS_ACC, JSON.stringify(state.acc)); pushStan(); };
 const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
+// Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
+// razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
+const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
 
 function loadStores() {
   state.log = readJSON(LS_LOG, {});
   state.adjust = readJSON(LS_ADJ, {});
   state.acc = readJSON(LS_ACC, {});
+  state.mob = readJSON(LS_MOB, {});
   state.queue = readJSON(LS_Q, []);
   state.key = localStorage.getItem(LS_KEY) || KOD_WSPOLNY;
   localStorage.setItem(LS_KEY, state.key);
@@ -219,8 +224,14 @@ function homeView() {
       href: '#/d/' + k,
     }));
   }
-  const c = p.cardio[w - 1];
-  tiles.append(tile({ k: '↻', ghost: true, title: 'Cardio', sub: `Wt: ${c.tue} · Sob: ${c.sat}`, href: '#/cardio' }));
+  const m = p.mobility;
+  const mDone = mobDone(w), mAll = mobItems().length;
+  tiles.append(tile({
+    k: m.key, color: DAY_COLOR.D, title: m.title,
+    sub: `${m.day} · ${mAll} pozycji · ~${m.minutes} min`,
+    right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
+    href: '#/mobilnosc',
+  }));
   tiles.append(tile({ k: '1RM', ghost: true, title: 'Kalkulator 1RM', sub: 'Przelicz serię na maks i ustaw E1RM', href: '#/1rm' }));
   tiles.append(tile({ k: '≡', ghost: true, title: 'Ciężary i progresja', sub: 'Wykres i tabela na 12 tygodni', href: '#/tabela' }));
   tiles.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
@@ -633,38 +644,147 @@ function stepper(label, hint, read, delta, apply) {
   return f;
 }
 
-/* ---------- cardio ---------- */
-function cardioView() {
-  const p = state.plan, w = state.week, frag = document.createDocumentFragment();
+/* ---------- niedziela: mobilność ---------- */
+// Odklikane pozycje trzymamy per tydzień — w poniedziałek lista wstaje czysta,
+// a w podsumowaniu widać, ile niedziel faktycznie się odbyło.
+const mobItems = () => state.plan.mobility.blocks.flatMap(b => b.items);
+const mobWidoczne = () => (state.mobShort ? mobItems().filter(i => i.core) : mobItems());
+const mobDone = w => { const t = state.mob[w] || {}; return mobWidoczne().filter(i => t[i.id]).length; };
+const mobJest = (w, id) => !!(state.mob[w] || {})[id];
+function mobToggle(w, id) {
+  const t = state.mob[w] || (state.mob[w] = {});
+  if (t[id]) delete t[id]; else t[id] = 1;
+  if (!Object.keys(t).length) delete state.mob[w];
+  saveMob();
+}
+
+function mobilityView() {
+  const p = state.plan, w = state.week, m = p.mobility;
+  const frag = document.createDocumentFragment();
   frag.append(backLink());
-  const body = el('div', klasaWejscia());
-  body.append(head('Cardio', 'Wtorek i sobota · tydzień ' + w, true));
 
-  const c = p.cardio[w - 1];
-  const now = el('div', 'card');
-  now.append(el('h3', null, 'Ten tydzień'));
-  now.append(el('p', null, 'Wtorek — ' + c.tue));
-  now.append(el('p', null, 'Sobota — ' + c.sat));
-  if (c.note) now.append(el('p', null, c.note));
-  body.append(now);
+  const body = el('div');
+  body.style.setProperty('--dc', DAY_COLOR.D);
+  body.append(head(`Dzień ${m.key} — ${m.title}`,
+    `${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min · tydzień ${w}`, true));
 
-  const tbl = el('div', 'card');
-  tbl.append(el('h3', null, 'Pełna progresja'));
-  const wrap = el('div', 'scroll'); wrap.style.margin = '0'; wrap.style.padding = '0';
-  const t = el('table');
-  t.innerHTML = '<thead><tr><th>Tydz.</th><th>Wtorek</th><th>Sobota</th></tr></thead><tbody>' +
-    p.cardio.map(r => `<tr class="${r.week === w ? 'now' : ''}"><td>${r.week}</td><td>${esc(r.tue)}</td><td>${esc(r.sat)}</td></tr>`).join('') +
-    '</tbody>';
-  wrap.append(t); tbl.append(wrap); body.append(tbl);
+  const widoczne = mobWidoczne();
+  const done = mobDone(w), total = widoczne.length;
+  const sp = el('div', 'sprog');
+  sp.append(el('span', 'ile', `${done}/${total} pozycji`));
+  const bar = el('div', 'bar'), fill = el('div', 'fill');
+  fill.style.width = (total ? done / total * 100 : 0) + '%';
+  bar.append(fill); sp.append(bar);
+  sp.append(el('span', 'proc', Math.round(total ? done / total * 100 : 0) + '%'));
+  body.append(sp);
 
-  for (const [k, lines] of Object.entries(p.cardioInfo)) {
-    const b = el('div', 'card');
-    b.append(el('h3', null, k));
-    lines.forEach(l => b.append(el('p', null, l)));
-    body.append(b);
+  // Przełącznik wersji. Krótka zostawia same pozycje oznaczone jako `core`.
+  const sw = el('div', 'mobsw');
+  const przycisk = (etykieta, krotka) => {
+    const b = el('button', 'mobopt' + (state.mobShort === krotka ? ' on' : ''), etykieta);
+    b.onclick = () => { state.mobShort = krotka; render(); };
+    return b;
+  };
+  sw.append(przycisk(`Pełna · ~${m.minutes} min`, false), przycisk(`Krótka · ~${m.shortMinutes} min`, true));
+  body.append(sw);
+
+  body.append(noteBox('Po co to jest:', ' ' + m.intro));
+
+  const list = el('div', klasaWejscia());
+  for (const blok of m.blocks) {
+    const poz = state.mobShort ? blok.items.filter(i => i.core) : blok.items;
+    if (!poz.length) continue;
+    const hdr = el('div', 'mobblock');
+    hdr.append(el('div', 'mbn', String(blok.n)));
+    const mid = el('div', 'mbt');
+    mid.append(el('div', 'mbname', blok.name));
+    mid.append(el('div', 'mbwhy', blok.why));
+    hdr.append(mid);
+    hdr.append(el('div', 'mbmin', '~' + blok.minutes + ' min'));
+    list.append(hdr);
+    poz.forEach(it => list.append(mobCard(it, w)));
   }
+  body.append(list);
+
+  const zas = el('div', 'card');
+  zas.append(el('h3', null, 'Jak prowadzić ten dzień'));
+  m.rules.forEach(l => zas.append(el('p', null, l)));
+  body.append(zas);
+
+  body.append(mobReset(w));
   frag.append(body);
   return frag;
+}
+
+function mobCard(it, w) {
+  const box = el('div', 'ex mob');
+  const zrobione = mobJest(w, it.id);
+  if (zrobione) box.classList.add('zrobione');
+
+  const h = el('div', 'exhead');
+  const tick = el('button', 'tick', zrobione ? '✓' : '');
+  tick.setAttribute('aria-label', zrobione ? 'Cofnij' : 'Odhacz jako zrobione');
+  tick.onclick = () => {
+    mobToggle(w, it.id);
+    // Sama pozycja i pasek postępu — bez przebudowy całego ekranu, żeby lista
+    // nie skakała pod palcem przy odklikiwaniu.
+    const nowe = mobJest(w, it.id);
+    box.classList.toggle('zrobione', nowe);
+    tick.textContent = nowe ? '✓' : '';
+    tick.setAttribute('aria-label', nowe ? 'Cofnij' : 'Odhacz jako zrobione');
+    odswiezPasekMob(w);
+  };
+  h.append(tick);
+  h.append(el('div', 'exname', it.name));
+  const chips = el('div', 'chips');
+  if (it.core) chips.append(el('div', 'chip ss', '• krótka'));
+  if (chips.children.length) h.append(chips);
+  box.append(h);
+
+  const metrics = el('div', 'metrics');
+  metrics.append(metric('Dawka', it.dose, 'mv txt'));
+  if (it.sec) {
+    const b = el('button', 'timebtn', '⏱ ' + (it.sec >= 60 ? it.sec / 60 + ' min' : it.sec + ' s'));
+    b.onclick = () => startTimer(it.sec);
+    metrics.append(b);
+  }
+  box.append(metrics);
+
+  const note = el('div', 'exnote', it.note);
+  note.hidden = true;
+  const more = el('button', 'more', 'Jak to zrobić ▾');
+  more.onclick = () => {
+    note.hidden = !note.hidden;
+    more.textContent = note.hidden ? 'Jak to zrobić ▾' : 'Zwiń ▴';
+  };
+  box.append(more, note);
+  return box;
+}
+
+function odswiezPasekMob(w) {
+  const sp = $('.sprog');
+  if (!sp) return;
+  const total = mobWidoczne().length, done = mobDone(w);
+  const proc = total ? done / total * 100 : 0;
+  $('.ile', sp).textContent = `${done}/${total} pozycji`;
+  $('.fill', sp).style.width = proc + '%';
+  $('.proc', sp).textContent = Math.round(proc) + '%';
+}
+
+// Kasowanie zawsze przez potwierdzenie i tylko w obrębie jednego tygodnia —
+// jedno tapnięcie nie ma prawa zetrzeć niczego, czego nie widać na ekranie.
+function mobReset(w) {
+  const box = el('div', 'card');
+  const b = el('button', 'btn ghost', 'Odznacz wszystko w tygodniu ' + w);
+  let pewny = false;
+  b.onclick = () => {
+    if (!pewny) { pewny = true; b.textContent = 'Na pewno? Tapnij jeszcze raz'; b.classList.add('warn'); return; }
+    delete state.mob[w];
+    saveMob();
+    render();
+  };
+  box.append(b);
+  return box;
 }
 
 /* ---------- wykres progresji + tabele ---------- */
@@ -1053,7 +1173,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, sound: state.sound });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, sound: state.sound, mob: state.mob });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1082,6 +1202,9 @@ async function pullStan() {
     if (d.e1rm && inny(d.e1rm, state.e1rm)) { state.e1rm = d.e1rm; zm = true; }
     if (d.adjust && inny(d.adjust, state.adjust)) { state.adjust = d.adjust; saveAdjust(); zm = true; }
     if (d.acc && inny(d.acc, state.acc)) { state.acc = d.acc; saveAcc(); zm = true; }
+    // Brak pola `mob` w paczce znaczy „starsza wersja aplikacji", a nie „nic nie
+    // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
+    if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
     stanTs = row.ts;
     if (zm) { localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound })); return true; }
   } catch { /* jak wyżej */ }
@@ -1416,7 +1539,7 @@ async function keepAwake(on) {
   } catch { /* brak wsparcia albo odmowa — nieistotne */ }
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && state.view.startsWith('#/d/')) keepAwake(true);
+  if (document.visibilityState === 'visible' && (state.view.startsWith('#/d/') || state.view === '#/mobilnosc')) keepAwake(true);
 });
 
 /* ---------- dziennik i urządzenia ---------- */
@@ -1504,7 +1627,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 1, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc };
+    const dane = { v: 2, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, mob: state.mob };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -1524,6 +1647,7 @@ function settingsView() {
       if (d.e1rm) { state.e1rm = d.e1rm; save(); }
       if (d.adjust) { state.adjust = d.adjust; saveAdjust(); }
       if (d.acc) { state.acc = d.acc; saveAcc(); }
+      if (d.mob) { state.mob = d.mob; saveMob(); }
       render();
     } catch { alert('Nie udało się odczytać pliku.'); }
   };
@@ -1558,14 +1682,14 @@ function render() {
   if (v !== '#/zasady' && v !== '#/1rm' && v !== '#/ustawienia') app.append(weekBar());
 
   if (onDay) app.append(dayView(v.slice(4)));
-  else if (v === '#/cardio') app.append(cardioView());
+  else if (v === '#/mobilnosc') app.append(mobilityView());
   else if (v === '#/tabela') app.append(tableView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
   else if (v === '#/ustawienia') app.append(settingsView());
   else app.append(homeView());
 
-  keepAwake(onDay);
+  keepAwake(onDay || v === '#/mobilnosc');
   renderTimer();
   ostatniWidok = v;
 }
@@ -1573,7 +1697,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=19')
+fetch('plan.json?v=20')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

@@ -2,7 +2,7 @@
 
 Statyczna aplikacja (PWA) z 12-tygodniowym planem treningowym. Ustawiasz numer tygodnia
 na górze ekranu i wszystko poniżej przelicza się samo: ciężary bojów, schematy serii,
-sufity RPE, serie dojściowe w rozgrzewce i blok cardio.
+sufity RPE i serie dojściowe w rozgrzewce.
 
 Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
@@ -25,7 +25,9 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   krzyżyk i dymek pod palcem, tabele z dokładnymi wartościami pod spodem
 - **Timer przerwy** — pierścień odliczający, 60 / 90 / 120 / 180 s, sygnał dźwiękowy
   (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
-- **Cardio** i **Zasady** prowadzenia cyklu
+- **Niedziela — mobilność** — sześć bloków rozciągania i kontroli (~34 min), wersja
+  krótka ~15 min, odklikiwanie per tydzień i minutnik przy każdej pozycji z czasem
+- **Zasady** prowadzenia cyklu
 
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
 Przeszły komplet kontroli na powierzchni karty: pasmo jasności, próg chromy,
