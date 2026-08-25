@@ -36,6 +36,28 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   w suficie RPE") i proponuje rekalibrację +10% jednym tapnięciem, z możliwością cofnięcia
 - **Zasady** prowadzenia cyklu
 
+## Wygląd
+
+Kierunek nazywa się **żeliwo**: neutralne powierzchnie mają ciepłe odchylenie (sprzęt
+w piwnicy, nie ekran), a wszystkie dane — ciężary, procenty, RPE, tygodnie, serie —
+idą krojem monospace, bo dziennik treningowy i tabela obciążeń zawsze były pisane
+w kolumnach. Żadnych fontów z sieci: aplikacja ma działać offline.
+
+Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli.
+Nie ozdoba — instrukcja ładowania pokazana tak, jak ta rzecz wygląda na stojaku:
+kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie na zewnątrz, średnice
+i grubości w proporcji do prawdziwych krążków.
+
+Zmiana tła unieważnia pomiar kontrastu, więc paleta ma własny test:
+
+```bash
+node tools/test-kontrast.mjs
+```
+
+Czyta tokeny wprost z `index.html` i sprawdza 17 par: tekst na trzech powierzchniach
+(progi AAA/AA), kolory serii jako obiekty graficzne (≥ 3:1) i rozróżnialność samych
+powierzchni między sobą.
+
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
 Przeszły komplet kontroli na powierzchni karty: pasmo jasności, próg chromy,
 rozróżnialność przy zaburzeniach widzenia barw (najgorsza para ΔE 9,4 przy progu 8),

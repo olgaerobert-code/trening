@@ -118,6 +118,7 @@ for (const plik of ['progresja.js', 'app.js']) {
 vm.runInContext(`globalThis.API = {
   state, render, dzisiaj, najblizszaSesja, BLOKI, rekalDoWziecia, zastosujRekalibracje,
   cofnijRekalibracje, rekalibracjaCard, stanLokalny, plannedOf, logSet, judgeWeek, podsumowanieBlokow,
+  postepDnia, platesEl, plateList,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -209,6 +210,43 @@ test('Postep ma wykres, bloki i tabele',
 test('tonaz zniknal z widoku Postep', !app.textContent.includes('Tonaż tygodniowy'));
 test('stary adres #/tabela prowadzi do Postepu', (() => { S.view = '#/tabela'; A.render(); return app.textContent.includes('Postęp'); })());
 test('stary adres #/raport tez', (() => { S.view = '#/raport'; A.render(); return app.textContent.includes('Postęp'); })());
+
+/* ---------- zapis do innego tygodnia ---------- */
+console.log('');
+console.log('Zapis do wczesniejszego tygodnia');
+S.week = 4;
+S.view = '#/d/A/2'; A.render();
+test('adres #/d/A/2 renderuje sie', app.textContent.includes('Dzień A'));
+test('pasek mowi, ze zapis idzie do tygodnia 2', app.textContent.includes('Zapisuję do tygodnia'));
+test('i przypomina tydzien biezacy', app.textContent.includes('bieżący: 4'));
+test('tydzien biezacy sie NIE zmienil', S.week === 4);
+test('jest droga powrotna', app.textContent.includes('Wróć do tygodnia 4'));
+S.view = '#/d/A'; A.render();
+test('bez numeru w adresie pasek jest spokojny', !app.textContent.includes('Zapisuję do tygodnia'));
+S.view = '#/mobilnosc/2'; A.render();
+test('niedziela tez przyjmuje tydzien z adresu', app.textContent.includes('Zapisuję do tygodnia'));
+
+/* ---------- zaladowany gryf ---------- */
+console.log('');
+console.log('Zaladowany gryf');
+{
+  // Atrapa nie parsuje innerHTML, wiec sprawdzamy wygenerowany kod SVG.
+  const g = A.platesEl(107.5);
+  const svg = g.querySelector('.gryf').innerHTML;
+  const talerze = (svg.match(/class="talerz"/g) || []).length;
+  const lista = A.plateList(107.5);
+  const sztuk = lista.pairs.reduce((a, p) => a + p.n, 0) * 2;
+  test('rysuje tyle talerzy, ile liczy plateList', talerze === sztuk,
+    'narysowane: ' + talerze + ', policzone: ' + sztuk);
+  test('ma trzon, radelko i kolnierze',
+    svg.includes('class="trzon"') && svg.includes('class="radelko"') && svg.includes('class="kolnierz"'));
+  test('kolory talerzy wg IPF (107,5 = 25 + 15 + 2,5 + 1,25)',
+    svg.includes('#c0392b') && svg.includes('#d9b016') && svg.includes('#1a1a1a') && svg.includes('#9aa5b1'));
+  test('podpis liczbowy obok rysunku', g.textContent.includes('gryf'));
+  const samGryf = A.platesEl(20);
+  const svgPusty = samGryf.querySelector('.gryf').innerHTML;
+  test('sam gryf bez talerzy', !svgPusty.includes('class="talerz"') && samGryf.textContent.includes('sam gryf'));
+}
 
 /* ---------- niedziela ---------- */
 console.log('\nNiedziela');

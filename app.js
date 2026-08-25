@@ -256,10 +256,12 @@ function homeView() {
     const d = p.days[k];
     const lift = mainOf[k];
     const kg = lift ? kgOf(lift, w) : null;
+    const pg = postepDnia(w, k);
     tiles.append(tile({
       k, color: DAY_COLOR[k], title: d.title,
-      sub: `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
+      sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii zapisanych` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
       badge: k === dzis ? 'DZIŚ' : null,
+      progress: pg,
       right: kg != null ? { v: fmt(kg) + ' kg', u: lift === 'bench' ? 'wyciskanie' : 'front squat' } : null,
       href: '#/d/' + k,
     }));
@@ -270,6 +272,7 @@ function homeView() {
     k: m.key, color: DAY_COLOR.D, title: m.title,
     sub: `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
     badge: dzis === 'D' ? 'DZIŚ' : null,
+    progress: { done: mDone, total: mAll },
     right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
     href: '#/mobilnosc',
   }));
@@ -308,11 +311,24 @@ function miniBtn(label, fn) {
   return b;
 }
 
-function tile({ k, color, ghost, title, sub, right, href, badge }) {
+function tile({ k, color, ghost, title, sub, right, href, badge, progress }) {
   const b = el('button', 'tile');
   if (color) b.style.setProperty('--tc', color);
   if (badge) b.classList.add('dzis');
   const kk = el('div', 'k' + (ghost ? ' ghost' : ''), k);
+  // Pierścień wokół litery pokazuje, ile z sesji jest już zapisane. Jedno
+  // spojrzenie na ekran główny mówi, co w tym tygodniu zostało do zrobienia.
+  if (progress && progress.total) {
+    const R = 21, C = 2 * Math.PI * R;
+    const ile = Math.min(1, progress.done / progress.total);
+    const ring = el('div', 'kring');
+    if (ile >= 1) ring.classList.add('pelny');
+    ring.innerHTML =
+      `<svg viewBox="0 0 46 46"><circle class="kbg" cx="23" cy="23" r="${R}"/>` +
+      `<circle class="kfg" cx="23" cy="23" r="${R}" stroke-dasharray="${C.toFixed(1)}" ` +
+      `stroke-dashoffset="${(C * (1 - ile)).toFixed(1)}"/></svg>`;
+    kk.append(ring);
+  }
   b.append(kk);
   const mid = el('div');
   mid.style.minWidth = '0';
@@ -354,23 +370,69 @@ function head(title, sub, color) {
   return h;
 }
 
+// Ile serii z zaplanowanych jest już zapisanych w tym dniu i tygodniu.
+function postepDnia(w, key) {
+  let total = 0, done = 0;
+  state.plan.days[key].items.forEach(it => {
+    total += plannedOf(it, w, key).sets;
+    done += logGet(w, key, it.n).filter(Boolean).length;
+  });
+  return { done, total };
+}
+
+/* ---------- wybór tygodnia zapisu ---------- */
+// Plan mówi, co robić w tygodniu N. Życie mówi co innego — sesja wypada w czwartek,
+// dwie z rzędu przepadają, jedną trzeba poprawić po fakcie. Ten pasek pozwala pisać
+// do dowolnego tygodnia BEZ ruszania tygodnia bieżącego: numer w pasku na górze
+// zostaje tam, gdzie był, bo od niego zależą ciężary, korekty i synchronizacja.
+const tydzienZAdresu = t => { const n = +t; return n >= 1 && n <= 12 ? n : null; };
+
+function wyborTygodnia(w, trasa) {
+  const box = el('div', 'wybor');
+  const biezacy = w === state.week;
+
+  const naglowek = el('button', 'wyborbtn');
+  naglowek.append(el('span', 'wl', biezacy ? 'Tydzień' : 'Zapisuję do tygodnia'));
+  naglowek.append(el('b', null, String(w)));
+  if (!biezacy) naglowek.append(el('span', 'wost', `bieżący: ${state.week}`));
+  naglowek.append(el('span', 'wstrz', '▾'));
+  box.append(naglowek);
+
+  const chipy = el('div', 'wchipy');
+  chipy.hidden = biezacy ? true : false;
+  for (let i = 1; i <= 12; i++) {
+    const c = el('button', 'wchip' + (i === w ? ' on' : '') + (i === state.week ? ' biez' : ''), String(i));
+    if (isDeload(i)) c.classList.add('dl');
+    c.onclick = () => go(trasa(i));
+    chipy.append(c);
+  }
+  box.append(chipy);
+  naglowek.onclick = () => {
+    chipy.hidden = !chipy.hidden;
+    $('.wstrz', naglowek).textContent = chipy.hidden ? '▾' : '▴';
+  };
+
+  if (!biezacy) {
+    box.classList.add('obcy');
+    const wroc = el('button', 'wwroc', `‹ Wróć do tygodnia ${state.week}`);
+    wroc.onclick = () => go(trasa(state.week));
+    box.append(wroc);
+  }
+  return box;
+}
+
 /* ---------- dzień treningowy ---------- */
-function dayView(key) {
-  const p = state.plan, w = state.week, d = p.days[key];
+function dayView(key, wArg) {
+  const p = state.plan, w = wArg || state.week, d = p.days[key];
   const frag = document.createDocumentFragment();
   frag.append(backLink());
 
   const wrapper = el('div');
   wrapper.style.setProperty('--dc', DAY_COLOR[key]);
-  wrapper.append(head(`Dzień ${d.key} — ${d.title}`, `${d.day} · ~${d.minutes} min · tydzień ${w}`, true));
+  wrapper.append(head(`Dzień ${d.key} — ${d.title}`, `${d.day} · ~${d.minutes} min`, true));
+  wrapper.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
 
-  // Postęp sesji liczony z odklikanych serii.
-  let total = 0, done = 0;
-  d.items.forEach(it => {
-    const pl = plannedOf(it, w, key);
-    total += pl.sets;
-    done += logGet(w, key, it.n).filter(Boolean).length;
-  });
+  const { done, total } = postepDnia(w, key);
   if (total) {
     const sp = el('div', 'sprog');
     sp.id = 'sprog';
@@ -382,7 +444,7 @@ function dayView(key) {
     wrapper.append(sp);
   }
 
-  wrapper.append(warmupAcc(key));
+  wrapper.append(warmupAcc(key, w));
 
   if (key === 'C') {
     const bh = lowerRow(w).barHeight;
@@ -498,17 +560,65 @@ function metric(label, value, cls, unit) {
   return c;
 }
 
+// Proporcje talerzy żeliwnych: średnica i grubość względem krążka 25 kg.
+// Dzięki nim rysunek jest rozpoznawalny bez czytania podpisów — 20 kg widać
+// po tym, że jest tej samej wysokości co 25 i cieńszy, a 1,25 to mały spodek.
+const PLATE_GEO = {
+  25: { h: 1, w: 1 }, 20: { h: 1, w: .86 }, 15: { h: .88, w: .72 }, 10: { h: .72, w: .58 },
+  5: { h: .51, w: .42 }, 2.5: { h: .42, w: .3 }, 1.25: { h: .35, w: .24 },
+};
+
+/* Załadowany gryf zamiast listy pastylek.
+ * To nie jest ozdoba: instrukcja ładowania narysowana tak, jak ta rzecz wygląda
+ * na stojaku. Kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie
+ * na zewnątrz — czyli w kolejności, w jakiej je zakładasz. */
 function platesEl(total) {
-  const row = el('div', 'plates');
+  const box = el('div', 'plates');
   const { pairs, note } = plateList(total);
-  for (const p of pairs) {
-    const chip = el('div', 'pl');
-    const i = el('i'); i.style.background = PLATE_COLOR[p.kg] || '#8b95a3';
-    chip.append(i, document.createTextNode(p.n + ' × ' + fmt(p.kg) + ' kg'));
-    row.append(chip);
+  const W = 300, H = 74, CY = H / 2, UCHWYT = 28, JEDN = 12;
+
+  const szerSurowa = pairs.reduce((a, p) => a + p.n * (PLATE_GEO[p.kg] || { w: .5 }).w * JEDN, 0);
+  const dostepne = W / 2 - UCHWYT - 12;
+  const skala = szerSurowa > dostepne ? dostepne / szerSurowa : 1;
+
+  const czesci = [];
+  // Trzon z hintem radełkowania w środku.
+  czesci.push(`<rect class="trzon" x="0" y="${CY - 2.5}" width="${W}" height="5" rx="2.5"/>`);
+  for (let x = W / 2 - 20; x <= W / 2 + 20; x += 5) {
+    czesci.push(`<line class="radelko" x1="${x}" y1="${CY - 2}" x2="${x}" y2="${CY + 2}"/>`);
   }
-  row.append(el('div', 'plnote', note + (pairs.length ? ' · gryf ' + fmt(state.plan.bar) + ' kg' : '')));
-  return row;
+  // Kołnierze.
+  for (const zn of [-1, 1]) {
+    czesci.push(`<rect class="kolnierz" x="${W / 2 + zn * UCHWYT - (zn < 0 ? 5 : 0)}" y="${CY - 7}" width="5" height="14" rx="1"/>`);
+  }
+
+  let i = 0;
+  for (const zn of [-1, 1]) {
+    let kursor = W / 2 + zn * (UCHWYT + 5);
+    for (const p of pairs) {
+      const g = PLATE_GEO[p.kg] || { h: .5, w: .5 };
+      const szer = Math.max(3, g.w * JEDN * skala), wys = g.h * (H - 12);
+      for (let n = 0; n < p.n; n++) {
+        const x = zn < 0 ? kursor - szer : kursor;
+        czesci.push(
+          `<rect class="talerz" x="${x.toFixed(1)}" y="${(CY - wys / 2).toFixed(1)}" ` +
+          `width="${szer.toFixed(1)}" height="${wys.toFixed(1)}" rx="1.5" ` +
+          `fill="${PLATE_COLOR[p.kg] || '#8b95a3'}" style="animation-delay:${(i++ * 34)}ms"/>`);
+        kursor += zn * (szer + 1);
+      }
+    }
+  }
+
+  const svg = el('div', 'gryf');
+  svg.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${czesci.join('')}</svg>`;
+  box.append(svg);
+
+  // Podpis liczbowy zostaje — rysunek mówi „co", podpis mówi „ile".
+  const opis = el('div', 'plnote');
+  opis.append(el('b', null, pairs.length ? pairs.map(p => p.n + '×' + fmt(p.kg)).join('  ') : 'sam gryf'));
+  opis.append(el('span', null, note + (pairs.length ? ' · gryf ' + fmt(state.plan.bar) + ' kg' : '')));
+  box.append(opis);
+  return box;
 }
 
 function podsumowanieSesji(day, w) {
@@ -544,8 +654,8 @@ function podsumowanieSesji(day, w) {
 }
 
 /* ---------- rozgrzewka ---------- */
-function warmupAcc(key) {
-  const p = state.plan, w = state.week, wu = p.warmup.days[key];
+function warmupAcc(key, wArg) {
+  const p = state.plan, w = wArg || state.week, wu = p.warmup.days[key];
   const acc = el('details', 'acc');
   const label = (wu.label.split('·')[1] || '').trim();
   acc.append(el('summary', null, 'Rozgrzewka' + (label ? ' — ' + label : '')));
@@ -704,15 +814,16 @@ function mobToggle(w, id) {
   saveMob();
 }
 
-function mobilityView() {
-  const p = state.plan, w = state.week, m = p.mobility;
+function mobilityView(wArg) {
+  const p = state.plan, w = wArg || state.week, m = p.mobility;
   const frag = document.createDocumentFragment();
   frag.append(backLink());
 
   const body = el('div');
   body.style.setProperty('--dc', DAY_COLOR.D);
   body.append(head(`Dzień ${m.key} — ${m.title}`,
-    `${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min · tydzień ${w}`, true));
+    `${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true));
+  body.append(wyborTygodnia(w, x => '#/mobilnosc/' + x));
 
   const widoczne = mobWidoczne();
   const done = mobDone(w), total = widoczne.length;
@@ -1720,7 +1831,7 @@ async function keepAwake(on) {
   } catch { /* brak wsparcia albo odmowa — nieistotne */ }
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && (state.view.startsWith('#/d/') || state.view === '#/mobilnosc')) keepAwake(true);
+  if (document.visibilityState === 'visible' && (state.view.startsWith('#/d/') || state.view.startsWith('#/mobilnosc'))) keepAwake(true);
 });
 
 /* ---------- dziennik i urządzenia ---------- */
@@ -1870,17 +1981,20 @@ function render() {
   app.innerHTML = '';
   const v = state.view;
   const onDay = v.startsWith('#/d/');
+  const onMob = v === '#/mobilnosc' || v.startsWith('#/mobilnosc/');
   if (v !== '#/zasady' && v !== '#/1rm' && v !== '#/ustawienia') app.append(weekBar());
 
-  if (onDay) app.append(dayView(v.slice(4)));
-  else if (v === '#/mobilnosc') app.append(mobilityView());
+  // "#/d/A" albo "#/d/A/3" — druga forma zapisuje do wskazanego tygodnia,
+  // nie ruszając tygodnia bieżącego.
+  if (onDay) { const [k, t] = v.slice(4).split('/'); app.append(dayView(k, tydzienZAdresu(t))); }
+  else if (onMob) app.append(mobilityView(tydzienZAdresu(v.split('/')[2])));
   else if (v === '#/postep' || v === '#/tabela' || v === '#/raport') app.append(postepView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
   else if (v === '#/ustawienia') app.append(settingsView());
   else app.append(homeView());
 
-  keepAwake(onDay || v === '#/mobilnosc');
+  keepAwake(onDay || onMob);
   renderTimer();
   ostatniWidok = v;
 }
@@ -1888,7 +2002,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=23')
+fetch('plan.json?v=24')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
