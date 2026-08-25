@@ -28,6 +28,12 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 - **Niedziela — joga** — praktyka pod boje w sześciu blokach (~44 min): sekwencja
   stojąca, balans, biodra i pozycja przednia. Wersja krótka ~20 min, odklikiwanie
   liczone per tydzień, minutnik przy pozycjach z czasem
+- **Dziś** — aplikacja zna dzień tygodnia: startuje na dzisiejszej sesji
+  (pon → A, śr → B, pt → C, nd → joga), oznacza jej kafel i w dzień wolny mówi,
+  kiedy następna. Do wyłączenia w ustawieniach
+- **Raport bloków** — werdykt każdej sesji tydzień po tygodniu, frekwencja, tonaż
+  i odklikane niedziele. Po bloku 1 i 2 sprawdza warunek z arkusza („KAŻDA sesja
+  w suficie RPE") i proponuje rekalibrację +10% jednym tapnięciem, z możliwością cofnięcia
 - **Zasady** prowadzenia cyklu
 
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
@@ -107,8 +113,13 @@ trafia do adresu — przepisujesz go ręcznie w ustawieniach.
 `progresja.js` to czyste funkcje bez DOM-u, wspólne dla przeglądarki i testów:
 
 ```bash
-node tools/test-progresja.mjs
+node tools/test-progresja.mjs   # czysta logika: ocena sesji, korekty, rekalibracja
+node tools/test-widoki.mjs      # render wszystkich widoków na atrapie DOM-u
 ```
+
+`tools/test-widoki.mjs` uruchamia `app.js` w `node:vm` na atrapie DOM-u — tyle, ile
+aplikacja naprawdę używa. `navigator.onLine` jest tam na stałe `false`, więc test
+nie ma jak dotknąć Supabase. Złapał już błąd, który wywalał aplikację przy tygodniu 1.
 
 Dwie pułapki, które te testy pilnują:
 

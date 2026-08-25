@@ -67,6 +67,34 @@ console.log('\nScenariusz z planu: wyciskanie, E1RM 150');
   test('E1RM 150 → 152,5', P.applyAdjustment(150, k.pct), 152.5);
 }
 
+console.log('\nOcena bloku');
+test('trzy tygodnie czysto → komplet',
+  P.ocenaBloku(['czysto', 'czysto', 'czysto']),
+  { tygodni: 3, zapisanych: 3, niedowozy: 0, komplet: true });
+test('zapas nie psuje kompletu',
+  P.ocenaBloku(['czysto', 'zapas', 'czysto']),
+  { tygodni: 3, zapisanych: 3, niedowozy: 0, komplet: true });
+test('jeden niedowoz lamie komplet',
+  P.ocenaBloku(['czysto', 'niedowoz', 'czysto']),
+  { tygodni: 3, zapisanych: 3, niedowozy: 1, komplet: false });
+test('brak zapisu tez lamie komplet',
+  P.ocenaBloku(['czysto', 'brak', 'czysto']),
+  { tygodni: 3, zapisanych: 2, niedowozy: 0, komplet: false });
+test('pusty blok to nie komplet',
+  P.ocenaBloku([]), { tygodni: 0, zapisanych: 0, niedowozy: 0, komplet: false });
+
+console.log('\nRekalibracja +10% po bloku');
+const komplet = P.ocenaBloku(['czysto', 'czysto', 'czysto']);
+const zNiedowozem = P.ocenaBloku(['czysto', 'niedowoz', 'czysto']);
+test('front squat 80 → 87,5', P.rekalibracja(80, komplet), 87.5);
+test('ciag 105 → 115', P.rekalibracja(105, komplet), 115);
+test('wyciskanie 150 → 165', P.rekalibracja(150, komplet), 165);
+test('zaokraglenie w dol, nie do najblizszego', P.rekalibracja(100, komplet), 110);
+test('niedowoz blokuje rekalibracje', P.rekalibracja(80, zNiedowozem), null);
+test('brak oceny blokuje rekalibracje', P.rekalibracja(80, null), null);
+test('bez E1RM nie ma czego podnosic', P.rekalibracja(null, komplet), null);
+test('maly ciezar dostaje minimum jeden krok', P.rekalibracja(20, komplet), 22.5);
+
 console.log('');
 console.log('Historia i tonaz');
 test('jednakowe powtorzenia skracamy',

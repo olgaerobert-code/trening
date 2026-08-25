@@ -82,6 +82,38 @@ function accSuggestion(older, newer, lastKg, krok = KROK) {
   return round25(lastKg + krok);
 }
 
+/* Ocena calego bloku dla jednego boju.
+ *
+ * oceny = tablica wynikow judgeSession, po jednym na tydzien bloku, BEZ deloadu
+ * (deload jest z zalozenia lekki, wiec nie da sie go ocenic).
+ *
+ * Arkusz Zasady stawia warunek ostro: „jesli KAZDA sesja zmiescila sie w suficie
+ * RPE". Brak zapisu tez lamie komplet — nie dlatego, ze to kara, tylko dlatego,
+ * ze o tamtym tygodniu nic nie wiadomo, a rekalibracja o 10% to za duzo, zeby
+ * ja opierac na domysle.
+ */
+function ocenaBloku(oceny) {
+  const r = (oceny || []).filter(o => o != null);
+  const brak = r.filter(o => o === 'brak').length;
+  const slabe = r.filter(o => o === 'niedowoz').length;
+  return {
+    tygodni: r.length,
+    zapisanych: r.length - brak,
+    niedowozy: slabe,
+    komplet: r.length > 0 && brak === 0 && slabe === 0,
+  };
+}
+
+/* Rekalibracja po bloku: +10% i ani grama wiecej („nigdy wiecej niz 10% naraz").
+ * Zaokraglenie w dol do 2,5 kg, jak wszedzie indziej w planie, z gwarancja
+ * jednego kroku — inaczej przy lekkich ciezarach korekta znikalaby w podlodze.
+ */
+function rekalibracja(e1rm, ocena) {
+  if (e1rm == null || !ocena || !ocena.komplet) return null;
+  const out = Math.floor(e1rm * 1.1 / KROK) * KROK;
+  return out > e1rm ? out : e1rm + KROK;
+}
+
 /* Opis wykonanej sesji do pokazania jako „ostatnio”.
  * Jednakowe powtorzenia skracamy do "3 × 8"; rozne wypisujemy "8/8/6",
  * bo wlasnie ta nierownosc niesie informacje.
@@ -105,5 +137,5 @@ function tonaz(rows) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { judgeSession, adjustment, applyAdjustment, accSuggestion, opisWykonania, tonaz, round25, KROK, LIMIT_KOREKTY };
+  module.exports = { judgeSession, adjustment, applyAdjustment, accSuggestion, ocenaBloku, rekalibracja, opisWykonania, tonaz, round25, KROK, LIMIT_KOREKTY };
 }

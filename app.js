@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {},
 };
 
 /* ---------- Supabase ---------- */
@@ -28,6 +28,24 @@ const DAY_COLOR = { A: 'var(--a)', B: 'var(--b)', C: 'var(--c)', D: 'var(--d)' }
 // Kolory talerzy wg standardu IPF — czysta pomoc wzrokowa przy składaniu sztangi.
 const PLATE_COLOR = { 25: '#c0392b', 20: '#2a6fc4', 15: '#d9b016', 10: '#1f8f4e', 5: '#e8e8e8', 2.5: '#1a1a1a', 1.25: '#9aa5b1' };
 
+/* ---------- dziś ---------- */
+// getDay(): 0 = niedziela. Wtorek, czwartek i sobota są wolne i zwracają null.
+const DZIEN_TYG = { 1: 'A', 3: 'B', 5: 'C', 0: 'D' };
+const NAZWA_DNIA = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
+const dzisiaj = () => DZIEN_TYG[new Date().getDay()] || null;
+const trasaDnia = k => (k === 'D' ? '#/mobilnosc' : '#/d/' + k);
+const nazwaSesji = k => (k === 'D' ? 'joga' : 'Dzień ' + k);
+
+// Najbliższa sesja, gdy dziś wolne. Szukamy w przód, więc zawsze coś znajdzie.
+function najblizszaSesja() {
+  const d = new Date().getDay();
+  for (let i = 1; i <= 7; i++) {
+    const j = (d + i) % 7;
+    if (DZIEN_TYG[j]) return { key: DZIEN_TYG[j], dzien: NAZWA_DNIA[j], za: i };
+  }
+  return null;
+}
+
 /* ---------- pomocnicze ---------- */
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
@@ -48,18 +66,20 @@ function loadState() {
     if (raw.week >= 1 && raw.week <= 12) state.week = raw.week;
     if (raw.e1rm) state.e1rm = raw.e1rm;
     if (typeof raw.sound === 'boolean') state.sound = raw.sound;
+    if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
 const save = () => {
-  localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound }));
+  localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis }));
   if (typeof pushStan === 'function') pushStan();
 };
 
 /* ---------- magazyn dziennika ---------- */
 const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening.acc.v1';
 const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1', LS_MOB = 'trening.mob.v1';
+const LS_REK = 'trening.rekal.v1';
 const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
 const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
 const saveAdjust = () => { localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust)); pushStan(); };
@@ -68,12 +88,14 @@ const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
 const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
+const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); pushStan(); };
 
 function loadStores() {
   state.log = readJSON(LS_LOG, {});
   state.adjust = readJSON(LS_ADJ, {});
   state.acc = readJSON(LS_ACC, {});
   state.mob = readJSON(LS_MOB, {});
+  state.rekal = readJSON(LS_REK, {});
   state.queue = readJSON(LS_Q, []);
   state.key = localStorage.getItem(LS_KEY) || KOD_WSPOLNY;
   localStorage.setItem(LS_KEY, state.key);
@@ -190,6 +212,17 @@ function homeView() {
   const adj = adjustCard();
   if (adj) body.append(adj);
 
+  const rek = rekalibracjaCard();
+  if (rek) body.append(rek);
+
+  // W dzień bez sesji mówimy wprost, kiedy następna — inaczej ekran wygląda
+  // tak samo w poniedziałek i we wtorek.
+  const dzis = dzisiaj();
+  if (!dzis) {
+    const n = najblizszaSesja();
+    body.append(noteBox('Dziś wolne.', ` Najbliżej: ${n.dzien}, ${nazwaSesji(n.key)}.`));
+  }
+
   if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.'));
   if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.'));
 
@@ -226,6 +259,7 @@ function homeView() {
     tiles.append(tile({
       k, color: DAY_COLOR[k], title: d.title,
       sub: `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
+      badge: k === dzis ? 'DZIŚ' : null,
       right: kg != null ? { v: fmt(kg) + ' kg', u: lift === 'bench' ? 'wyciskanie' : 'front squat' } : null,
       href: '#/d/' + k,
     }));
@@ -235,11 +269,13 @@ function homeView() {
   tiles.append(tile({
     k: m.key, color: DAY_COLOR.D, title: m.title,
     sub: `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
+    badge: dzis === 'D' ? 'DZIŚ' : null,
     right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
     href: '#/mobilnosc',
   }));
   tiles.append(tile({ k: '1RM', ghost: true, title: 'Kalkulator 1RM', sub: 'Przelicz serię na maks i ustaw E1RM', href: '#/1rm' }));
   tiles.append(tile({ k: '≡', ghost: true, title: 'Ciężary i progresja', sub: 'Wykres i tabela na 12 tygodni', href: '#/tabela' }));
+  tiles.append(tile({ k: '◱', ghost: true, title: 'Raport bloków', sub: podsumowanieBlokow(), href: '#/raport' }));
   tiles.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
   tiles.append(tile({ k: '⚙', ghost: true, title: 'Dziennik i urządzenia', sub: syncLabel(), href: '#/ustawienia' }));
   body.append(tiles);
@@ -271,14 +307,17 @@ function miniBtn(label, fn) {
   return b;
 }
 
-function tile({ k, color, ghost, title, sub, right, href }) {
+function tile({ k, color, ghost, title, sub, right, href, badge }) {
   const b = el('button', 'tile');
   if (color) b.style.setProperty('--tc', color);
+  if (badge) b.classList.add('dzis');
   const kk = el('div', 'k' + (ghost ? ' ghost' : ''), k);
   b.append(kk);
   const mid = el('div');
   mid.style.minWidth = '0';
-  mid.append(el('div', 'tt', title));
+  const tt = el('div', 'tt', title);
+  if (badge) tt.append(el('span', 'bdg', badge));
+  mid.append(tt);
   mid.append(el('div', 'ts', sub));
   b.append(mid);
   if (right) {
@@ -793,6 +832,198 @@ function mobReset(w) {
   return box;
 }
 
+/* ---------- raport bloków i rekalibracja ---------- */
+// Podział na bloki idzie za regułą rekalibracji z arkusza Zasady („po tygodniu 3
+// i po tygodniu 7"), a nie za kolumną BLOK — ta wraca po deloadzie do wartości 2
+// i nie da się z niej wyciąć rozłącznych odcinków. Tydzień 7 jest w bloku 2, ale
+// jako deload nie wchodzi do oceny.
+const BLOKI = [
+  { n: 1, weeks: [1, 2, 3], rekal: 4 },
+  { n: 2, weeks: [4, 5, 6, 7], rekal: 8 },
+  { n: 3, weeks: [8, 9, 10, 11, 12], rekal: null },
+];
+// Rekalibracja dotyczy WYŁĄCZNIE dołu. Góra ma E1RM policzone z realnej serii,
+// więc arkusz nie każe jej ruszać.
+const REKAL_BOJE = ['front', 'dl'];
+
+const tygodnieOceniane = blok => blok.weeks.filter(x => !isDeload(x));
+const blokZakonczony = blok => state.week > blok.weeks[blok.weeks.length - 1];
+const blokTrwa = blok => blok.weeks.includes(state.week);
+
+// Ocena jednego boju w bloku: po jednym werdykcie na tydzień treningowy.
+const ocenaBojuWBloku = (key, blok) => ocenaBloku(tygodnieOceniane(blok).map(x => judgeWeek(key, x)));
+
+// Czy blok kwalifikuje się do rekalibracji i czy nie jest już rozliczony.
+function rekalDoWziecia(blok) {
+  if (!blok.rekal || state.week < blok.rekal) return null;
+  if (state.rekal[blok.rekal]) return null;
+  const zmiany = {};
+  for (const key of REKAL_BOJE) {
+    const ocena = ocenaBojuWBloku(key, blok);
+    const nowe = rekalibracja(state.e1rm[key], ocena);
+    if (nowe == null) return { blok, ocena: false };
+    zmiany[key] = { before: state.e1rm[key], after: nowe };
+  }
+  return { blok, ocena: true, zmiany };
+}
+
+function zastosujRekalibracje(blok, zmiany) {
+  for (const key of REKAL_BOJE) state.e1rm[key] = zmiany[key].after;
+  state.rekal[blok.rekal] = { ...zmiany, ts: new Date().toISOString() };
+  save(); saveRekal();
+}
+
+function cofnijRekalibracje(trigger) {
+  const r = state.rekal[trigger];
+  if (!r || r.pominieta) return;
+  for (const key of REKAL_BOJE) if (r[key]) state.e1rm[key] = r[key].before;
+  state.rekal[trigger] = { ...r, pominieta: true };
+  save(); saveRekal();
+}
+
+// Karta na ekranie głównym: pojawia się tylko wtedy, gdy jest co zrobić.
+function rekalibracjaCard() {
+  const blok = BLOKI.find(b => b.rekal && state.week >= b.rekal && !state.rekal[b.rekal]);
+  if (!blok) return null;
+  const w = rekalDoWziecia(blok);
+  if (!w) return null;
+
+  const n = el('div', 'note rekal');
+  n.append(el('b', null, `Rekalibracja po bloku ${blok.n}`));
+
+  if (!w.ocena) {
+    const braki = REKAL_BOJE.map(k => ({ k, o: ocenaBojuWBloku(k, blok) })).filter(x => !x.o.komplet);
+    const opis = braki.map(({ k, o }) => {
+      const L = LIFTS.find(x => x.key === k);
+      return o.niedowozy ? `${L.short}: ${o.niedowozy} × niedowóz`
+                         : `${L.short}: ${o.zapisanych}/${o.tygodni} tygodni zapisanych`;
+    }).join(' · ');
+    n.append(el('div', 'adjrow', 'Bez podwyżki — nie każda sesja weszła w plan.'));
+    n.append(el('div', 'adjrow', opis));
+    const ok = el('button', 'mini', 'Rozumiem, schowaj');
+    ok.onclick = () => { state.rekal[blok.rekal] = { pominieta: true, ts: new Date().toISOString() }; saveRekal(); render(); };
+    const doRaportu = el('button', 'mini', 'Zobacz raport');
+    doRaportu.onclick = () => go('#/raport');
+    n.append(ok, doRaportu);
+    return n;
+  }
+
+  n.append(el('div', 'adjrow', 'Każda sesja dołu weszła w plan. Arkusz mówi: +10%.'));
+  for (const key of REKAL_BOJE) {
+    const L = LIFTS.find(x => x.key === key), z = w.zmiany[key];
+    const p = el('div', 'adjrow');
+    const dot = el('span', 'dotc'); dot.style.background = L.color;
+    p.append(dot, el('span', null, `${L.short} → ${fmt(z.after)} kg`));
+    p.append(el('em', null, `było ${fmt(z.before)}`));
+    n.append(p);
+  }
+  const tak = el('button', 'mini', 'Podnieś o 10%');
+  tak.onclick = () => { zastosujRekalibracje(blok, w.zmiany); render(); };
+  const nie = el('button', 'mini', 'Zostaw jak jest');
+  nie.onclick = () => { state.rekal[blok.rekal] = { pominieta: true, ts: new Date().toISOString() }; saveRekal(); render(); };
+  n.append(tak, nie);
+  n.append(el('div', 'adjmini', 'Sufit RPE jest nadrzędny. Jeśli pierwszy tydzień po podwyżce wyjdzie ciężej niż sufit, cofnij ją w raporcie.'));
+  return n;
+}
+
+function podsumowanieBlokow() {
+  const gotowe = BLOKI.filter(blokZakonczony).length;
+  const czeka = BLOKI.some(b => b.rekal && state.week >= b.rekal && !state.rekal[b.rekal]);
+  if (czeka) return 'Rekalibracja czeka na decyzję';
+  if (!gotowe) return 'Tonaż, frekwencja i werdykty sesji';
+  return `${gotowe} ${odmiana(gotowe, 'blok zamknięty', 'bloki zamknięte', 'bloków zamkniętych')} · tonaż i werdykty`;
+}
+
+const SLOWNIK_OCEN = { czysto: 'czysto', zapas: 'z zapasem', niedowoz: 'niedowóz', brak: '—' };
+
+function raportView() {
+  const frag = document.createDocumentFragment();
+  frag.append(backLink());
+  const body = el('div', klasaWejscia());
+  body.append(head('Raport bloków', 'Co pokazuje dziennik, blok po bloku', true));
+
+  body.append(noteBox('Skąd te werdykty:',
+    ' aplikacja porównuje zapisane serie z tym, co plan przewidywał W CHWILI ZAPISU. ' +
+    'Odczucia z sufitu RPE zna tylko Twoja głowa — jeśli sesja weszła w powtórzenia, ale kosztowała więcej niż powinna, ostatnie słowo należy do Ciebie.'));
+
+  for (const blok of [...BLOKI].reverse()) {
+    if (!blokZakonczony(blok) && !blokTrwa(blok)) continue;
+    const card = el('div', 'card');
+    const zakres = blok.weeks[0] + '–' + blok.weeks[blok.weeks.length - 1];
+    card.append(el('h3', null, `Blok ${blok.n} · tygodnie ${zakres}${blokTrwa(blok) ? ' · w toku' : ''}`));
+
+    // Werdykty: wiersz na tydzień, kolumna na bój.
+    const wrap = el('div', 'scroll'); wrap.style.margin = '0'; wrap.style.padding = '0';
+    const t = el('table');
+    t.innerHTML = '<thead><tr><th>Tydz.</th>' + LIFTS.map(L => '<th>' + esc(L.short) + '</th>').join('') + '</tr></thead><tbody>' +
+      blok.weeks.filter(x => x <= state.week).map(x => {
+        const dl = isDeload(x);
+        const kom = dl ? '<td colspan="3">deload — nie oceniamy</td>'
+                       : LIFTS.map(L => '<td>' + esc(SLOWNIK_OCEN[judgeWeek(L.key, x)]) + '</td>').join('');
+        return `<tr class="${x === state.week ? 'now' : ''}"><td>${x}</td>${kom}</tr>`;
+      }).join('') + '</tbody>';
+    wrap.append(t); card.append(wrap);
+
+    // Frekwencja i tonaż liczone z dziennika.
+    const doTeraz = blok.weeks.filter(x => x <= state.week);
+    let sesjeZapisane = 0, ton = 0;
+    for (const x of doTeraz) {
+      for (const d of ['A', 'B', 'C']) if (tonazDnia(x, d).serie) sesjeZapisane++;
+      ton += tonazTygodnia(x);
+    }
+    const niedziele = doTeraz.filter(x => Object.keys(state.mob[x] || {}).length).length;
+
+    const grid = el('div', 'psgrid trzy');
+    const kafel = (etykieta, wartosc, dopisek) => {
+      const k = el('div', 'ps');
+      k.append(el('div', 'pl2', etykieta), el('div', 'pv', wartosc));
+      if (dopisek) k.append(el('div', 'pd', dopisek));
+      return k;
+    };
+    grid.append(kafel('Sesje', `${sesjeZapisane}/${doTeraz.length * 3}`, 'zapisane w dzienniku'));
+    grid.append(kafel('Tonaż', ton >= 1000 ? fmt(Math.round(ton / 100) / 10) + ' t' : fmt(Math.round(ton)) + ' kg', 'suma bloku'));
+    grid.append(kafel('Niedziele', `${niedziele}/${doTeraz.length}`, 'z odklikaną jogą'));
+    card.append(grid);
+
+    card.append(rekalibracjaHistoria(blok));
+    body.append(card);
+  }
+
+  frag.append(body);
+  return frag;
+}
+
+function rekalibracjaHistoria(blok) {
+  const box = el('div', 'rekhist');
+  if (!blok.rekal) {
+    box.append(el('p', null, 'Ostatni blok — arkusz nie przewiduje tu rekalibracji. Tydzień 12 zamyka cykl testem.'));
+    return box;
+  }
+  const r = state.rekal[blok.rekal];
+  if (!r) {
+    box.append(el('p', null, state.week >= blok.rekal
+      ? 'Rekalibracja czeka na decyzję — karta jest na ekranie głównym.'
+      : `Rekalibracja po tym bloku: w tygodniu ${blok.rekal}.`));
+    return box;
+  }
+  if (r.pominieta) {
+    box.append(el('p', null, 'Rekalibracja pominięta — ciężary zostały bez zmian.'));
+    return box;
+  }
+  for (const key of REKAL_BOJE) {
+    if (!r[key]) continue;
+    const L = LIFTS.find(x => x.key === key);
+    const p = el('div', 'adjrow');
+    const dot = el('span', 'dotc'); dot.style.background = L.color;
+    p.append(dot, el('span', null, `${L.short}: ${fmt(r[key].before)} → ${fmt(r[key].after)} kg`));
+    box.append(p);
+  }
+  const cof = el('button', 'mini', 'Cofnij rekalibrację');
+  cof.onclick = () => { cofnijRekalibracje(blok.rekal); render(); };
+  box.append(cof);
+  return box;
+}
+
 /* ---------- wykres progresji + tabele ---------- */
 function tableView() {
   const p = state.plan, w = state.week, frag = document.createDocumentFragment();
@@ -1179,7 +1410,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, sound: state.sound, mob: state.mob });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, sound: state.sound, mob: state.mob, rekal: state.rekal });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1211,6 +1442,7 @@ async function pullStan() {
     // Brak pola `mob` w paczce znaczy „starsza wersja aplikacji", a nie „nic nie
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
+    if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
     stanTs = row.ts;
     if (zm) { localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound })); return true; }
   } catch { /* jak wyżej */ }
@@ -1364,7 +1596,10 @@ function windowWeeks(w) {
 }
 
 function judgeWeek(liftKey, w) {
-  if (w < 1 || w > 12) return 'brak';
+  // W tygodniu 1 okno jest puste, więc w bywa undefined — a undefined nie jest
+  // ani mniejsze od 1, ani większe od 12, i bez tego testu leciało dalej prosto
+  // w odczyt wiersza tabeli, którego nie ma.
+  if (w == null || w < 1 || w > 12) return 'brak';
   if (isDeload(w)) return 'brak';
   const { day, name } = MAIN[liftKey];
   const it = state.plan.days[day].items.find(x => x.name === name);
@@ -1628,12 +1863,21 @@ function settingsView() {
   par.append(go2, info);
   body.append(par);
 
+  const pref = el('div', 'card');
+  pref.append(el('h3', null, 'Otwieranie'));
+  const prow = el('div', 'e1row');
+  prow.append(el('div', 'n', 'Startuj na dzisiejszym dniu'));
+  prow.append(miniBtn(state.autoDzis ? 'Włączone' : 'Wyłączone', () => { state.autoDzis = !state.autoDzis; save(); render(); }));
+  pref.append(prow);
+  pref.append(el('p', null, 'Poniedziałek → A, środa → B, piątek → C, niedziela → joga. W dzień wolny aplikacja i tak otwiera ekran główny, a wejście z linku zawsze ma pierwszeństwo.'));
+  body.append(pref);
+
   const kop = el('div', 'card');
   kop.append(el('h3', null, 'Kopia zapasowa'));
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 2, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, mob: state.mob };
+    const dane = { v: 2, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, mob: state.mob, rekal: state.rekal };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -1654,6 +1898,7 @@ function settingsView() {
       if (d.adjust) { state.adjust = d.adjust; saveAdjust(); }
       if (d.acc) { state.acc = d.acc; saveAcc(); }
       if (d.mob) { state.mob = d.mob; saveMob(); }
+      if (d.rekal) { state.rekal = d.rekal; saveRekal(); }
       render();
     } catch { alert('Nie udało się odczytać pliku.'); }
   };
@@ -1690,6 +1935,7 @@ function render() {
   if (onDay) app.append(dayView(v.slice(4)));
   else if (v === '#/mobilnosc') app.append(mobilityView());
   else if (v === '#/tabela') app.append(tableView());
+  else if (v === '#/raport') app.append(raportView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
   else if (v === '#/ustawienia') app.append(settingsView());
@@ -1703,7 +1949,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=21')
+fetch('plan.json?v=22')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -1711,6 +1957,12 @@ fetch('plan.json?v=21')
     loadStores();
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
+    // Zimny start bez hasha: wchodzimy prosto w dzisiejszą sesję. Wejście z linkiem
+    // albo z zakładki ma pierwszeństwo, bo wtedy wiadomo, czego ktoś chciał.
+    if (!location.hash && state.autoDzis && dzisiaj()) {
+      state.view = trasaDnia(dzisiaj());
+      history.replaceState(null, '', state.view);
+    }
     render();
     pullStan().then(() => { maybeAdjust(); render(); pullAll(); flushQueue(); });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
