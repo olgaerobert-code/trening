@@ -273,9 +273,7 @@ function homeView() {
     right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
     href: '#/mobilnosc',
   }));
-  tiles.append(tile({ k: '1RM', ghost: true, title: 'Kalkulator 1RM', sub: 'Przelicz serię na maks i ustaw E1RM', href: '#/1rm' }));
-  tiles.append(tile({ k: '≡', ghost: true, title: 'Ciężary i progresja', sub: 'Wykres i tabela na 12 tygodni', href: '#/tabela' }));
-  tiles.append(tile({ k: '◱', ghost: true, title: 'Raport bloków', sub: podsumowanieBlokow(), href: '#/raport' }));
+  tiles.append(tile({ k: '≡', ghost: true, title: 'Postęp', sub: podsumowanieBlokow(), href: '#/postep' }));
   tiles.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
   tiles.append(tile({ k: '⚙', ghost: true, title: 'Dziennik i urządzenia', sub: syncLabel(), href: '#/ustawienia' }));
   body.append(tiles);
@@ -290,10 +288,13 @@ function homeView() {
     r.append(miniBtn('+10%', () => { state.e1rm[L.key] = round25(state.e1rm[L.key] * 1.1); save(); render(); }));
     box.append(r);
   }
-  const reset = el('button', 'btn ghost', 'Przywróć wartości z planu');
-  reset.style.marginTop = '12px';
+  const pod = el('div', 'e1stopka');
+  const kal = el('button', 'link', 'Przelicz z serii →');
+  kal.onclick = () => go('#/1rm');
+  const reset = el('button', 'link', 'Przywróć wartości z planu');
   reset.onclick = () => { state.e1rm = { ...state.plan.e1rm }; save(); render(); };
-  box.append(reset);
+  pod.append(kal, reset);
+  box.append(pod);
   body.append(box);
 
   body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
@@ -930,17 +931,22 @@ function podsumowanieBlokow() {
   const gotowe = BLOKI.filter(blokZakonczony).length;
   const czeka = BLOKI.some(b => b.rekal && state.week >= b.rekal && !state.rekal[b.rekal]);
   if (czeka) return 'Rekalibracja czeka na decyzję';
-  if (!gotowe) return 'Tonaż, frekwencja i werdykty sesji';
-  return `${gotowe} ${odmiana(gotowe, 'blok zamknięty', 'bloki zamknięte', 'bloków zamkniętych')} · tonaż i werdykty`;
+  if (!gotowe) return 'Wykres, werdykty sesji i tabele';
+  return `${gotowe} ${odmiana(gotowe, 'blok zamknięty', 'bloki zamknięte', 'bloków zamkniętych')} · wykres i werdykty`;
 }
 
 const SLOWNIK_OCEN = { czysto: 'czysto', zapas: 'z zapasem', niedowoz: 'niedowóz', brak: '—' };
 
-function raportView() {
+function postepView() {
   const frag = document.createDocumentFragment();
   frag.append(backLink());
   const body = el('div', klasaWejscia());
-  body.append(head('Raport bloków', 'Co pokazuje dziennik, blok po bloku', true));
+  body.append(head('Postęp', 'Wykres, bloki i tabele na 12 tygodni', true));
+
+  const chartCard = el('div', 'card');
+  chartCard.append(el('h3', null, 'Ciężar roboczy przez 12 tygodni'));
+  chartCard.append(progressChart());
+  body.append(chartCard);
 
   body.append(noteBox('Skąd te werdykty:',
     ' aplikacja porównuje zapisane serie z tym, co plan przewidywał W CHWILI ZAPISU. ' +
@@ -964,12 +970,15 @@ function raportView() {
       }).join('') + '</tbody>';
     wrap.append(t); card.append(wrap);
 
-    // Frekwencja i tonaż liczone z dziennika.
+    // Frekwencja i liczba serii — liczone z dziennika.
     const doTeraz = blok.weeks.filter(x => x <= state.week);
-    let sesjeZapisane = 0, ton = 0;
+    let sesjeZapisane = 0, serie = 0;
     for (const x of doTeraz) {
-      for (const d of ['A', 'B', 'C']) if (tonazDnia(x, d).serie) sesjeZapisane++;
-      ton += tonazTygodnia(x);
+      for (const d of ['A', 'B', 'C']) {
+        const t = tonazDnia(x, d);
+        if (t.serie) sesjeZapisane++;
+        serie += t.serie;
+      }
     }
     const niedziele = doTeraz.filter(x => Object.keys(state.mob[x] || {}).length).length;
 
@@ -981,7 +990,7 @@ function raportView() {
       return k;
     };
     grid.append(kafel('Sesje', `${sesjeZapisane}/${doTeraz.length * 3}`, 'zapisane w dzienniku'));
-    grid.append(kafel('Tonaż', ton >= 1000 ? fmt(Math.round(ton / 100) / 10) + ' t' : fmt(Math.round(ton)) + ' kg', 'suma bloku'));
+    grid.append(kafel('Serie', String(serie), 'zapisane w bloku'));
     grid.append(kafel('Niedziele', `${niedziele}/${doTeraz.length}`, 'z odklikaną jogą'));
     card.append(grid);
 
@@ -989,6 +998,7 @@ function raportView() {
     body.append(card);
   }
 
+  body.append(tabeleTygodni());
   frag.append(body);
   return frag;
 }
@@ -1025,19 +1035,13 @@ function rekalibracjaHistoria(blok) {
 }
 
 /* ---------- wykres progresji + tabele ---------- */
-function tableView() {
-  const p = state.plan, w = state.week, frag = document.createDocumentFragment();
-  frag.append(backLink());
-  const body = el('div', klasaWejscia());
-  body.append(head('Ciężary i progresja', 'Przeliczone z aktualnych E1RM', true));
-
-  const chartCard = el('div', 'card');
-  chartCard.append(el('h3', null, 'Ciężar roboczy przez 12 tygodni'));
-  chartCard.append(progressChart());
-  body.append(chartCard);
-
-  const tonCard = tonazChart();
-  if (tonCard) body.append(tonCard);
+// Tabele tygodni jako materiał do przejrzenia, nie do czytania na siłowni —
+// dlatego siedzą zwinięte w akordeonie widoku Postęp.
+function tabeleTygodni() {
+  const p = state.plan, w = state.week;
+  const acc = el('details', 'acc');
+  acc.append(el('summary', null, 'Tabele tygodni — pełne 12 tygodni'));
+  const body = el('div', 'accbody');
 
   const mk = (title, headRow, rows) => {
     const b = el('div', 'card');
@@ -1067,8 +1071,8 @@ function tableView() {
   p.weeks.lower.forEach(r => { if (r.barHeight !== last) { b.append(el('p', null, `Tydzień ${r.week}+ — ${r.barHeight}`)); last = r.barHeight; } });
   body.append(b);
 
-  frag.append(body);
-  return frag;
+  acc.append(body);
+  return acc;
 }
 
 // Wykres liniowy: 3 serie, jedna oś (wszystko w kg), siatka włosowa,
@@ -1186,69 +1190,6 @@ function progressChart() {
   cap.style.fontSize = '12.5px'; cap.style.marginTop = '10px';
   box.append(cap);
   return box;
-}
-
-// Tonaz tygodniowy — jedna seria danych, wiec bez legendy: tytul ja nazywa.
-// Tygodnie bez zapisow nie dostaja slupka, zamiast zera — brak danych to nie jest zero pracy.
-function tonazChart() {
-  const dane = [];
-  for (let w = 1; w <= 12; w++) { const t = tonazTygodnia(w); if (t > 0) dane.push({ w, t }); }
-  if (!dane.length) return null;
-
-  const card = el('div', 'card');
-  card.append(el('h3', null, 'Tonaż tygodniowy — wykonanie'));
-
-  const W = 340, H = 150, ML = 36, MR = 18, MT = 12, MB = 22;
-  const max = Math.max(...dane.map(d => d.t));
-  const gora = Math.ceil(max / 1000) * 1000 || 1000;
-  const px = w => ML + (w - 1) / 11 * (W - ML - MR);
-  const szer = Math.max(6, (W - ML - MR) / 12 - 4);
-  const py = t => MT + (1 - t / gora) * (H - MT - MB);
-
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Tonaż tygodniowy. Dokładne wartości w tabeli pod wykresem.');
-  const add = (tag, attrs, cls) => {
-    const n = document.createElementNS(ns, tag);
-    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
-    if (cls) n.setAttribute('class', cls);
-    svg.append(n); return n;
-  };
-
-  for (let i = 0; i <= 2; i++) {
-    const t = gora * i / 2, y = py(t);
-    add('line', { x1: ML, y1: y, x2: W - MR, y2: y }, 'grid');
-    const lab = add('text', { x: ML - 6, y: y + 3, 'text-anchor': 'end' }, 'axis');
-    // Zaokraglenie do pelnych ton klamalo: 1500 kg wyswietlalo sie jako "2t".
-    lab.textContent = fmt(Math.round(t / 100) / 10) + 't';
-  }
-  for (const w of [1, 4, 7, 10, 12]) {
-    const lab = add('text', { x: px(w) + szer / 2, y: H - 7, 'text-anchor': 'middle' }, 'axis');
-    lab.textContent = w;
-  }
-  for (const d of dane) {
-    const y = py(d.t);
-    add('rect', {
-      x: px(d.w), y, width: szer, height: Math.max(2, H - MB - y), rx: 4,
-      fill: d.w === state.week ? 'var(--series-1)' : 'color-mix(in srgb, var(--series-1) 45%, var(--s2))',
-    });
-  }
-  const naj = dane.reduce((a, b) => (b.t > a.t ? b : a));
-  const lab = add('text', { x: px(naj.w) + szer / 2, y: py(naj.t) - 5, 'text-anchor': 'middle' }, 'endlab');
-  lab.textContent = fmt(Math.round(naj.t / 100) / 10) + 't';
-
-  const wrap = el('div', 'chart');
-  wrap.append(svg);
-  card.append(wrap);
-
-  const tw = el('div', 'scroll'); tw.style.margin = '12px 0 0'; tw.style.padding = '0';
-  const tab = el('table');
-  tab.innerHTML = '<thead><tr><th>Tydz.</th>' + dane.map(d => '<th>' + d.w + '</th>').join('') + '</tr></thead>' +
-    '<tbody><tr><td>Tonaż</td>' + dane.map(d => '<td>' + Math.round(d.t).toLocaleString('pl-PL') + '</td>').join('') + '</tr></tbody>';
-  tw.append(tab); card.append(tw);
-  return card;
 }
 
 /* ---------- zasady ---------- */
@@ -1579,7 +1520,6 @@ function tonazDnia(w, day) {
   });
   return { ton, serie };
 }
-const tonazTygodnia = w => ['A', 'B', 'C'].reduce((a, d) => a + tonazDnia(w, d).ton, 0);
 
 /* ---------- korekta z dwóch tygodni ---------- */
 // Boj glowny dnia: z ktorego cwiczenia liczymy korekte dla ktorego E1RM.
@@ -1934,8 +1874,7 @@ function render() {
 
   if (onDay) app.append(dayView(v.slice(4)));
   else if (v === '#/mobilnosc') app.append(mobilityView());
-  else if (v === '#/tabela') app.append(tableView());
-  else if (v === '#/raport') app.append(raportView());
+  else if (v === '#/postep' || v === '#/tabela' || v === '#/raport') app.append(postepView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
   else if (v === '#/ustawienia') app.append(settingsView());
@@ -1949,7 +1888,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=22')
+fetch('plan.json?v=23')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

@@ -128,7 +128,7 @@ test('E1RM ustawione z planu', S.e1rm && S.e1rm.bench > 0);
 
 /* ---------- kazdy widok sie renderuje ---------- */
 console.log('\nWidoki');
-const WIDOKI = ['#/', '#/d/A', '#/d/B', '#/d/C', '#/mobilnosc', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'];
+const WIDOKI = ['#/', '#/d/A', '#/d/B', '#/d/C', '#/mobilnosc', '#/postep', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'];
 for (const v of WIDOKI) {
   S.view = v;
   let blad = null;
@@ -152,7 +152,7 @@ for (const [nr, oczek] of Object.entries(DNI)) {
 
 /* ---------- raport blokow ---------- */
 console.log('\nRaport blokow');
-S.week = 4; S.view = '#/raport'; A.render();
+S.week = 4; S.view = '#/postep'; A.render();
 test('w tygodniu 4 widac blok 1', app.textContent.includes('Blok 1'));
 test('i blok 2 jako w toku', app.textContent.includes('Blok 2') && app.textContent.includes('w toku'));
 S.week = 1; A.render();
@@ -193,6 +193,22 @@ test('rekalibracja jedzie do synchronizacji', 'rekal' in A.stanLokalny());
 A.cofnijRekalibracje(4);
 test('cofniecie wraca do poprzednich ciezarow', S.e1rm.front === przed.front && S.e1rm.dl === przed.dl);
 test('i nie proponuje jej drugi raz', A.rekalibracjaCard() === null);
+
+/* ---------- odchudzanie ---------- */
+console.log('');
+console.log('Odchudzanie');
+S.week = 4; S.view = '#/'; A.render();
+const kafle = app.querySelectorAll('.tile');
+test('siedem kafli na ekranie glownym', kafle.length === 7, 'jest: ' + kafle.length);
+test('nie ma juz osobnego kafla 1RM', !app.textContent.includes('Kalkulator 1RM'));
+test('kalkulator dostepny z karty E1RM', app.textContent.includes('Przelicz z serii'));
+S.view = '#/postep'; A.render();
+test('Postep ma wykres, bloki i tabele',
+  app.querySelectorAll('.chart').length + app.querySelectorAll('svg').length > 0
+  && app.textContent.includes('Blok 1') && app.textContent.includes('Tabele tygodni'));
+test('tonaz zniknal z widoku Postep', !app.textContent.includes('Tonaż tygodniowy'));
+test('stary adres #/tabela prowadzi do Postepu', (() => { S.view = '#/tabela'; A.render(); return app.textContent.includes('Postęp'); })());
+test('stary adres #/raport tez', (() => { S.view = '#/raport'; A.render(); return app.textContent.includes('Postęp'); })());
 
 /* ---------- niedziela ---------- */
 console.log('\nNiedziela');

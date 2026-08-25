@@ -19,10 +19,10 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
 - **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
   (kolory wg standardu IPF)
-- **Kalkulator 1RM** — przeliczasz dowolną serię na przewidywany maks i jednym
-  przyciskiem ustawiasz go jako E1RM; cały plan przelicza się natychmiast
-- **Wykres progresji** — trzy boje przez 12 tygodni, jedna oś (wszystko w kg),
-  krzyżyk i dymek pod palcem, tabele z dokładnymi wartościami pod spodem
+- **Postęp** — wykres trzech bojów przez 12 tygodni (jedna oś, krzyżyk i dymek pod
+  palcem), pod nim bloki z werdyktami sesji i rekalibracją, a na dole zwinięte tabele
+  tygodni. Kalkulator 1RM siedzi pod kartą E1RM na ekranie głównym — używa się go
+  dwa razy na cykl, więc nie zajmuje kafla
 - **Timer przerwy** — pierścień odliczający, 60 / 90 / 120 / 180 s, sygnał dźwiękowy
   (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
 - **Niedziela — joga** — praktyka pod boje w sześciu blokach (~44 min): sekwencja
