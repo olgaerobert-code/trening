@@ -25,8 +25,9 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   krzyżyk i dymek pod palcem, tabele z dokładnymi wartościami pod spodem
 - **Timer przerwy** — pierścień odliczający, 60 / 90 / 120 / 180 s, sygnał dźwiękowy
   (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
-- **Niedziela — mobilność** — sześć bloków rozciągania i kontroli (~34 min), wersja
-  krótka ~15 min, odklikiwanie per tydzień i minutnik przy każdej pozycji z czasem
+- **Niedziela — joga** — praktyka pod boje w sześciu blokach (~44 min): sekwencja
+  stojąca, balans, biodra i pozycja przednia. Wersja krótka ~20 min, odklikiwanie
+  liczone per tydzień, minutnik przy pozycjach z czasem
 - **Zasady** prowadzenia cyklu
 
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.

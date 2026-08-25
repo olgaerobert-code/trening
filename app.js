@@ -35,6 +35,12 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const floor25 = x => Math.floor(x / 2.5) * 2.5;
 // round25 pochodzi z progresja.js — jeden wspólny zasięg globalny, jedna definicja.
 const fmt = n => (n == null ? '—' : String(Math.round(n * 100) / 100).replace('.', ','));
+// Polska odmiana po liczebniku: 1 pozycja, 22 pozycje, ale 12 i 25 pozycji.
+const odmiana = (n, jedna, kilka, wielu) => {
+  const d = n % 10, s = n % 100;
+  if (n === 1) return jedna;
+  return (d >= 2 && d <= 4 && (s < 12 || s > 14)) ? kilka : wielu;
+};
 
 function loadState() {
   try {
@@ -228,7 +234,7 @@ function homeView() {
   const mDone = mobDone(w), mAll = mobItems().length;
   tiles.append(tile({
     k: m.key, color: DAY_COLOR.D, title: m.title,
-    sub: `${m.day} · ${mAll} pozycji · ~${m.minutes} min`,
+    sub: `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
     right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
     href: '#/mobilnosc',
   }));
@@ -1697,7 +1703,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=20')
+fetch('plan.json?v=21')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

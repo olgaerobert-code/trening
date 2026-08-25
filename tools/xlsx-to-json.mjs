@@ -199,7 +199,7 @@ const rules = [
       'Środa — Dzień B: DÓŁ, kontrola i stabilizacja (bez sztangi, bez obciążenia osiowego)',
       'Czwartek — wolne',
       'Piątek — Dzień C: DÓŁ (front squat + ciąg)',
-      'Sobota — wolne · Niedziela — mobilność (~' + mobility.minutes + ' min, bez obciążenia)',
+      'Sobota — wolne · Niedziela — joga (~' + mobility.minutes + ' min, bez obciążenia)',
       'Ciężki dzień dolny wypada w piątek, więc ma pełny weekend na regenerację, a środa trafia dokładnie w środek między nim a kolejnym.',
     ],
   },
@@ -249,7 +249,7 @@ const rules = [
 /* ---------- Sklad ---------- */
 const plan = {
   title: 'Plan 12 tygodni',
-  schedule: 'pon A · śr B · pt C · nd mobilność',
+  schedule: 'pon A · śr B · pt C · nd joga',
   bar: 20,
   plates: [25, 20, 15, 10, 5, 2.5, 1.25],
   e1rm,

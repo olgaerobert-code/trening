@@ -1,209 +1,242 @@
 {
  "key": "D",
- "title": "MOBILNOŚĆ",
+ "title": "JOGA",
  "day": "Niedziela",
- "minutes": 34,
- "shortMinutes": 15,
- "intro": "Jedyny dzień na rozciąganie statyczne. Bloki stoją dokładnie tam, gdzie plan tego wymaga: pozycja przednia sztangi, zejście w dół bez garbienia i miednica trzymana poziomo pod obciążeniem. Nic tu nie idzie do granicy wysiłku — to nie jest czwarty trening.",
+ "minutes": 44,
+ "shortMinutes": 20,
+ "intro": "Praktyka ustawiona pod boje, a nie obok nich: pozycja przednia sztangi, głębokość zejścia, miednica trzymana poziomo i zgięcie grzbietowe stopy. Pozycje znasz — w opisach jest to, co masz w nich robić INACZEJ, kiedy w tygodniu podnosisz, a nie jak w nie wejść.",
  "blocks": [
   {
    "n": 1,
-   "name": "Rozruch",
-   "minutes": 4,
-   "why": "Podnosisz temperaturę, zanim cokolwiek zaczniesz przytrzymywać.",
+   "name": "Ugruntowanie",
+   "minutes": 5,
+   "why": "Ustawiasz rytm oddechu, którym przez resztę praktyki liczysz pozycje.",
    "items": [
     {
-     "id": "d1",
-     "name": "Marsz w miejscu z wymachem ramion",
-     "dose": "2 min",
-     "sec": 120,
+     "id": "y1",
+     "name": "Siad z oddechem (Sukhasana, ujjayi)",
+     "dose": "3 min",
+     "sec": 180,
      "core": true,
-     "note": "Kolano wysoko, ramiona swobodnie w przód i w tył. Spokojnie, bez zadyszki — chodzi tylko o rozgrzanie."
+     "note": "Oddech w boczne i tylne żebra, nie w brzuch. Wydech dłuższy od wdechu. Rytm ustalasz tu raz — reszta praktyki idzie na oddechy, nie na sekundy."
     },
     {
-     "id": "d2",
-     "name": "Koci grzbiet",
-     "dose": "2 × 10",
-     "sec": null,
-     "core": true,
-     "note": "Klęk podparty. Wdech — klatka opada, wzrok przed siebie. Wydech — plecy w łuk, broda do mostka. Jedno powtórzenie na jeden pełny oddech."
-    },
-    {
-     "id": "d3",
-     "name": "Krążenia biodrem w klęku podpartym",
-     "dose": "2 × 8 / stronę",
+     "id": "y2",
+     "name": "Dziecko z przewlekaniem ramienia (Balasana + thread the needle)",
+     "dose": "5 oddechów / stronę",
      "sec": null,
      "core": false,
-     "note": "Kolano zgięte 90°, prowadzisz je szerokim łukiem w bok i do tyłu. Tułów stoi nieruchomo — rusza się samo biodro."
+     "note": "Biodra na piętach, ramię pod tułowiem. Bez dociskania barkiem — zakres wyznacza miejsce, w którym oddech nadal wchodzi w bok żeber."
     }
    ]
   },
   {
    "n": 2,
-   "name": "Klatka i odcinek piersiowy",
-   "minutes": 7,
-   "why": "Pod pozycję przednią sztangi i pod wyciskanie z ustawionymi łopatkami.",
+   "name": "Powitanie słońca",
+   "minutes": 8,
+   "why": "Rozgrzewka na tempie oddechowym; chaturanga jako ekscentryka pod wyciskanie.",
    "items": [
     {
-     "id": "d4",
-     "name": "Otwieranie klatki leżąc na boku",
-     "dose": "2 × 8 / stronę",
+     "id": "y3",
+     "name": "Surya Namaskar A",
+     "dose": "3 rundy",
+     "sec": null,
+     "core": true,
+     "note": "Jedna faza na jeden oddech. Chaturangę schodzisz wolno, łokcie przy tułowiu — to ten sam tor co w wyciskaniu, tylko bez sztangi i bez pośpiechu."
+    },
+    {
+     "id": "y4",
+     "name": "Surya Namaskar B",
+     "dose": "2 rundy",
      "sec": null,
      "core": false,
-     "note": "Leżysz na boku, kolana zgięte 90°, ręce wyciągnięte przed sobą. Górna ręka zatacza łuk nad głową aż do podłogi po drugiej stronie, wzrok idzie za dłonią. Kolana zostają sklejone i na miejscu."
+     "note": "Utkatasana z żebrami w dół — obciążenie idzie w biodra, nie w lędźwie. W Wojowniku I zejście prowadzisz biodrem, nie odchyleniem tułowia."
     },
     {
-     "id": "d5",
-     "name": "Wyprost na wałku",
-     "dose": "3 × 30 s",
-     "sec": 30,
-     "core": true,
-     "note": "Wałek w poprzek pleców pod łopatkami, ręce za głową, biodra na podłodze. Wydech i opadasz w tył. Po każdej serii przesuwasz wałek o dwa palce wyżej."
-    },
-    {
-     "id": "d6",
-     "name": "Siad na piętach z łokciami na ławce",
-     "dose": "2 × 45 s",
-     "sec": 45,
+     "id": "y5",
+     "name": "Pies z głową w dół — pedałowanie (Adho Mukha Svanasana)",
+     "dose": "10 oddechów",
+     "sec": 60,
      "core": false,
-     "note": "Klękasz przed ławką, łokcie na ławce na szerokość barków, biodra cofnięte do pięt. Klatka opada między ramionami. Oddychasz w boki żeber, nie w brzuch."
+     "note": "Naprzemienne prostowanie kolan, pięta schodzi bez wymuszania. Pierwsza dziś praca nad zgięciem grzbietowym stopy — ta sama, którą mierzysz przy ścianie w środę."
     }
    ]
   },
   {
    "n": 3,
-   "name": "Biodra",
-   "minutes": 9,
-   "why": "Pod zejście w przysiadzie i ustawienie miednicy w ciągu.",
+   "name": "Sekwencja stojąca",
+   "minutes": 10,
+   "why": "Pod głębokość front squata i pod zawias biodrowy w ciągu.",
    "items": [
     {
-     "id": "d7",
-     "name": "Półklęk z podwinięciem miednicy",
-     "dose": "2 × 45 s / stronę",
-     "sec": 45,
-     "core": true,
-     "note": "Kolano tylnej nogi na macie, przednia stopa daleko z przodu. NAJPIERW ściągasz pośladek nogi klęczącej i podwijasz miednicę pod siebie, dopiero potem przenosisz ciężar do przodu. Żebra w dół — bez wyginania się w lędźwiach."
-    },
-    {
-     "id": "d8",
-     "name": "Pozycja 90/90",
-     "dose": "2 × 45 s / stronę",
-     "sec": 45,
+     "id": "y6",
+     "name": "Wojownik II → Kąt boczny (Virabhadrasana II → Utthita Parsvakonasana)",
+     "dose": "6 oddechów / stronę",
+     "sec": null,
      "core": false,
-     "note": "Siad: przednia noga zgięta 90° przed sobą, tylna 90° z boku. Tułów prosto, potem powolny skłon nad przednią goleń. Strony zmieniasz przetaczając kolana przez środek, bez pomagania rękami."
+     "note": "Kolano nad środkiem stopy i tułów pionowo w Wojowniku; dopiero z tego ustawienia schodzisz w kąt boczny. To ten sam tor kolana, którego pilnujesz w bułgarskim."
     },
     {
-     "id": "d9",
-     "name": "Żaba",
-     "dose": "2 × 60 s",
+     "id": "y7",
+     "name": "Trójkąt obrócony (Parivrtta Trikonasana)",
+     "dose": "5 oddechów / stronę",
+     "sec": null,
+     "core": false,
+     "note": "Najpierw miednica POZIOMO, dopiero potem rotacja prowadzona z klatki. Ręka na podłodze, na goleni albo na klocku — wysokość nie ma znaczenia, ustawienie miednicy ma."
+    },
+    {
+     "id": "y8",
+     "name": "Piramida z odwróconą modlitwą (Parsvottanasana, paschima namaskar)",
+     "dose": "6 oddechów / stronę",
+     "sec": null,
+     "core": true,
+     "note": "Dłonie złożone za plecami, jeśli nadgarstki na to pozwalają — inaczej chwyt za przeciwne łokcie. Zejście z prostym kręgosłupem i cofniętym biodrem: mechanika ciągu plus rotacja zewnętrzna barków pod pozycję przednią. Dwie rzeczy naraz."
+    },
+    {
+     "id": "y9",
+     "name": "Girlanda (Malasana)",
+     "dose": "10 oddechów",
      "sec": 60,
-     "core": false,
-     "note": "Klęk podparty, kolana szeroko, golenie równolegle, stopy na zewnątrz. Kołyszesz biodrami w tył dokładnie do miejsca, w którym plecy jeszcze się nie zaokrąglają."
+     "core": true,
+     "note": "Pełne zejście, pięty na podłodze albo na złożonym ręczniku. Łokcie rozpychają kolana, kręgosłup rośnie w górę. Najbliższa dziś pozycja do dołu front squata."
     },
     {
-     "id": "d10",
-     "name": "Czwórka leżąc",
-     "dose": "2 × 45 s / stronę",
-     "sec": 45,
-     "core": true,
-     "note": "Na plecach, kostka oparta o kolano drugiej nogi, przyciągasz udo do siebie. Głowa i oba barki zostają na podłodze."
+     "id": "y10",
+     "name": "Rozkrok w przód, wariant C (Prasarita Padottanasana C)",
+     "dose": "8 oddechów",
+     "sec": null,
+     "core": false,
+     "note": "Dłonie splecione za plecami i prowadzone nad głową bez wypychania żeber. Kolana mikro-ugięte, ciężar lekko na śródstopiu."
     }
    ]
   },
   {
    "n": 4,
-   "name": "Tył nóg i kostki",
+   "name": "Balans i kontrola",
    "minutes": 6,
-   "why": "Pod głębokość przysiadu i pod ciąg z podwyższenia.",
+   "why": "Miednica pozioma na jednej nodze — dokładnie to, co robi dzień B, tylko na dłuższej dźwigni.",
    "items": [
     {
-     "id": "d11",
-     "name": "Skłon w rozkroku z prostym kręgosłupem",
-     "dose": "3 × 40 s",
-     "sec": 40,
-     "core": true,
-     "note": "Stopy szerzej niż barki, kolana mikro-ugięte. Prowadzisz biodra w tył i schodzisz z PROSTYMI plecami. Kark rozluźniasz dopiero na samym dole, kiedy nie schodzisz już niżej."
-    },
-    {
-     "id": "d12",
-     "name": "Zgięcie grzbietowe przy ścianie",
-     "dose": "2 × 10 / nogę",
+     "id": "y11",
+     "name": "Półksiężyc (Ardha Chandrasana)",
+     "dose": "5 oddechów / stronę",
      "sec": null,
      "core": true,
-     "note": "Palce ~10 cm od ściany, pięta przyklejona do podłogi, kolano jedzie prosto nad drugim palcem i dotyka ściany. Wolno, bez odbijania. To samo ćwiczenie co w dniu B — tu robisz je na spokojnie."
+     "note": "Ręka na klocku albo na podłodze, stopa stojąca aktywna, biodro górne otwarte bez odkręcania miednicy do tyłu. Sprawdzian tego samego, co stanie na jednej nodze w środę."
     },
     {
-     "id": "d13",
-     "name": "Rozciąganie łydki na stopniu",
-     "dose": "2 × 45 s / nogę",
-     "sec": 45,
+     "id": "y12",
+     "name": "Wojownik III (Virabhadrasana III)",
+     "dose": "5 oddechów / stronę",
+     "sec": null,
      "core": false,
-     "note": "Śródstopie na krawędzi stopnia, pięta opada pod własnym ciężarem. Pierwsza seria z kolanem prostym, druga z lekko ugiętym — to dwa różne mięśnie."
+     "note": "Biodro nogi uniesionej NIE odkręca się w górę. Jedna linia od pięty do czubka głowy; niżej i równo bije wyżej i krzywo."
+    },
+    {
+     "id": "y13",
+     "name": "Deska bokiem (Vasisthasana)",
+     "dose": "6 oddechów / stronę",
+     "sec": 40,
+     "core": false,
+     "note": "Wariant z uniesioną nogą albo z chwytem za paluch, jeśli ustawienie trzyma bez zapadania biodra. To samo ćwiczenie co w dniu B — tu dłużej i wolniej."
+    },
+    {
+     "id": "y14",
+     "name": "Łódka (Navasana)",
+     "dose": "3 × 8 oddechów",
+     "sec": 30,
+     "core": false,
+     "note": "Lędźwie nie zapadają się w podłogę. Trudniej robisz prostując nogi, nie podnosząc tułowia wyżej."
     }
    ]
   },
   {
    "n": 5,
-   "name": "Barki i nadgarstki",
-   "minutes": 4,
-   "why": "Pod trzymanie sztangi z przodu i pod podciąganie.",
+   "name": "Biodra na podłodze",
+   "minutes": 8,
+   "why": "Zakres w biodrze pod zejście i pod ustawienie miednicy przy sztandze.",
    "items": [
     {
-     "id": "d14",
-     "name": "Przewlekanie gumy nad głową",
-     "dose": "2 × 10",
-     "sec": null,
-     "core": false,
-     "note": "Szeroki chwyt, ręce proste przez cały ruch. Chwyt zwężasz dopiero wtedy, gdy przechodzi bez wzruszania barkami."
+     "id": "y15",
+     "name": "Gołąb, wersja przygotowawcza (Eka Pada Rajakapotasana, prep)",
+     "dose": "8 oddechów / stronę",
+     "sec": 45,
+     "core": true,
+     "note": "Biodra równolegle, złożony koc pod pośladkiem zgiętej nogi. Zostajesz w wersji przygotowawczej — pełne wygięcie nie wchodzi do tej praktyki."
     },
     {
-     "id": "d15",
-     "name": "Mobilizacja nadgarstków w klęku",
-     "dose": "2 × 30 s w każdą stronę",
-     "sec": 30,
+     "id": "y16",
+     "name": "Kłoda (Agnistambhasana)",
+     "dose": "8 oddechów / stronę",
+     "sec": 45,
      "core": false,
-     "note": "Dłonie na podłodze palcami do kolan, potem to samo grzbietami dłoni. Ciężar przenosisz powoli i tylko tyle, ile jest wygodne."
+     "note": "Golenie jedna nad drugą, stopy aktywne przez cały czas. Skłon prowadzisz z bioder, plecy proste — kiedy zaczynają się zaokrąglać, jesteś na końcu pozycji."
+    },
+    {
+     "id": "y17",
+     "name": "Leżący chwyt za paluch I i II (Supta Padangusthasana)",
+     "dose": "6 oddechów × 2 warianty / stronę",
+     "sec": null,
+     "core": false,
+     "note": "Pasek na śródstopiu. Wariant I w przód pod tył uda, wariant II na bok pod przywodziciele. Druga noga przez cały czas dociśnięta do podłogi — to ona decyduje, czy pozycja coś daje."
+    },
+    {
+     "id": "y18",
+     "name": "Skręt leżąc (Jathara Parivartanasana)",
+     "dose": "8 oddechów / stronę",
+     "sec": 45,
+     "core": false,
+     "note": "Oba barki zostają na podłodze i to one wyznaczają zakres, nie to, jak nisko zejdą kolana."
     }
    ]
   },
   {
    "n": 6,
-   "name": "Kontrola i oddech",
-   "minutes": 4,
-   "why": "Zamknięcie dnia: miednica pod kontrolą i zejście z obrotów.",
+   "name": "Barki, nadgarstki, wyciszenie",
+   "minutes": 7,
+   "why": "Pozycja przednia sztangi i zejście z obrotów przed poniedziałkiem.",
    "items": [
     {
-     "id": "d16",
-     "name": "Dead bug",
-     "dose": "3 × 8 / stronę",
+     "id": "y19",
+     "name": "Ramiona krowy (Gomukhasana, same ramiona)",
+     "dose": "6 oddechów / stronę",
      "sec": null,
      "core": true,
-     "note": "Na plecach, lędźwie DOCIŚNIĘTE do podłogi. Wypuszczasz przeciwną rękę i nogę na wydechu, wracasz na wdechu. Jeśli plecy odrywają się choć na moment — skracasz zakres."
+     "note": "Pasek między dłońmi, jeśli nie schodzą się bez wypychania żeber do przodu. Górny łokieć pionowo w górę, dolny w dół — obie rotacje jednocześnie, i to jest cała pozycja przednia."
     },
     {
-     "id": "d17",
-     "name": "Bird dog",
-     "dose": "2 × 8 / stronę",
-     "sec": null,
+     "id": "y20",
+     "name": "Nadgarstki w klęku",
+     "dose": "30 s w każdą stronę",
+     "sec": 30,
      "core": false,
-     "note": "Klęk podparty, wypychasz przeciwną rękę i nogę do linii tułowia. Miednica pozioma: postaw kubek na krzyżu i nie zrzuć go."
+     "note": "Palce do kolan, potem grzbiety dłoni. Bezpośrednio pod trzymanie sztangi z przodu i pod obciążenie dłoni w deskach."
     },
     {
-     "id": "d18",
-     "name": "Oddech 4–6 leżąc",
+     "id": "y21",
+     "name": "Nogi na ścianie (Viparita Karani)",
+     "dose": "3 min",
+     "sec": 180,
+     "core": true,
+     "note": "Biodra przy ścianie albo kilka centymetrów od niej, cokolwiek pozwala rozluźnić nogi. Oddech 4–6: wdech nosem cztery sekundy, wydech sześć."
+    },
+    {
+     "id": "y22",
+     "name": "Savasana",
      "dose": "3 min",
      "sec": 180,
      "core": false,
-     "note": "Na plecach, łydki na ławce, dłoń na brzuchu. Wdech nosem 4 s, wydech ustami 6 s. Bez pauz i bez pośpiechu."
+     "note": "Bez telefonu. Jeśli masz zasnąć, ustaw budzik i śpij — to też jest wynik."
     }
    ]
   }
  ],
  "rules": [
+  "Liczysz oddechami, nie sekundami. Minutnik jest tylko dla pozycji, w których łatwo stracić rachubę.",
+  "Praktyka nie szuka końcowych zakresów. W otwarciach zatrzymujesz się tam, gdzie oddech zostaje równy — zakres, który utrzymasz pod sztangą, jest wart więcej niż ten, który pokażesz raz.",
+  "Głębokie wygięcia w tył i stanie na barkach zostają poza tą praktyką. Wyprost odcinka piersiowego masz już z wałka i z bojów, a kark w niedzielę ma wolne.",
   "Rozciąganie statyczne robisz TYLKO w tym dniu. Przed serią roboczą nigdy — obniża siłę na kilkadziesiąt minut.",
-  "Każda pozycja schodzi głębiej na wydechu. Jeśli musisz wstrzymać oddech, żeby ją utrzymać, jest za mocna — cofnij się.",
-  "Zakres ma rosnąć z tygodnia na tydzień, nie z minuty na minutę. Wracasz tu co siedem dni, więc nie ma po co przyspieszać.",
-  "Krótka wersja (~15 min) to same pozycje oznaczone kropką. Lepsza krótka niż żadna.",
-  "Jeśli piątek był ciężki, zrób tylko bloki 1, 3 i 6 — biodra i oddech. Reszta poczeka."
+  "Krótka wersja (~20 min) to pozycje oznaczone kropką: po jednej z każdego bloku, dwie z sekwencji stojącej.",
+  "Po ciężkim piątku zrób bloki 1, 5 i 6. Sekwencja stojąca i balans poczekają do następnej niedzieli."
  ]
 }
