@@ -4,7 +4,7 @@
 const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
-  log: {}, adjust: {}, acc: {}, queue: [], key: null, sync: 'off',
+  log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
   mob: {}, mobShort: false, autoDzis: true, rekal: {},
 };
 
@@ -79,11 +79,14 @@ const save = () => {
 /* ---------- magazyn dziennika ---------- */
 const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening.acc.v1';
 const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1', LS_MOB = 'trening.mob.v1';
-const LS_REK = 'trening.rekal.v1';
+const LS_REK = 'trening.rekal.v1', LS_KGW = 'trening.kgw.v1';
 const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
 const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
 const saveAdjust = () => { localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust)); pushStan(); };
 const saveAcc = () => { localStorage.setItem(LS_ACC, JSON.stringify(state.acc)); pushStan(); };
+// Ciezar boju zmieniony recznie: plan zostaje planem, ale sztanga wazy tyle,
+// ile wpisano. Zapis per tydzien, bo plan co tydzien podaje inna liczbe.
+const saveKgw = () => { localStorage.setItem(LS_KGW, JSON.stringify(state.kgw)); pushStan(); };
 const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
@@ -94,6 +97,7 @@ function loadStores() {
   state.log = readJSON(LS_LOG, {});
   state.adjust = readJSON(LS_ADJ, {});
   state.acc = readJSON(LS_ACC, {});
+  state.kgw = readJSON(LS_KGW, {});
   state.mob = readJSON(LS_MOB, {});
   state.rekal = readJSON(LS_REK, {});
   state.queue = readJSON(LS_Q, []);
@@ -500,18 +504,28 @@ function exerciseCard(it, key, w) {
   const load = resolve(it.load, w);
   const rpe = resolve(it.rpe, w);
 
+  const pl = plannedOf(it, w, key);
+
   const metrics = el('div', 'metrics');
   metrics.append(metric('Serie × powt.', scheme, 'mv'));
-  let platesRow = null;
+  let platesRow = null, odswiezKg = null;
   if (isKg(load)) {
-    const m = metric('Ciężar', fmt(load), 'mv kg', 'kg');
+    // Liczba na karcie i talerze na gryfie pokazuja ciezar, ktory naprawde stoi
+    // na stojaku — czyli z wlasna poprawka, jesli ktos ja wprowadzil.
+    const m = metric('Ciężar', fmt(pl.kg), 'mv kg', 'kg');
     const v = $('.mv', m);
     v.classList.add('kgbtn');
     v.setAttribute('role', 'button');
     v.title = 'Pokaż talerze';
-    platesRow = platesEl(load);
+    platesRow = platesEl(pl.kg);
     v.onclick = () => platesRow.classList.toggle('on');
     metrics.append(m);
+    odswiezKg = kg => {
+      v.textContent = fmt(kg);
+      v.append(el('u', null, 'kg'));
+      platesRow.innerHTML = '';
+      platesRow.append(...[...platesEl(kg).children]);
+    };
   } else if (load) {
     metrics.append(metric('Ciężar', load, 'mv txt'));
   }
@@ -519,8 +533,7 @@ function exerciseCard(it, key, w) {
   box.append(metrics);
   if (platesRow) box.append(platesRow);
 
-  const pl = plannedOf(it, w, key);
-  if (pl.sets) box.append(setRows(it, key, w, pl));
+  if (pl.sets) box.append(setRows(it, key, w, pl, odswiezKg));
 
   const hist = ostatnieWykonanie(it, key, w);
   if (hist) {
@@ -1338,11 +1351,15 @@ function plannedOf(it, w, day) {
   // Przy ćwiczeniu dodatkowym ciężaru nie ma w planie — bierzemy własne ustawienie,
   // a jak go nie ma, to ostatni zapisany, żeby nie przepisywać go co tydzień.
   const wlasny = acc != null ? acc : (day ? lastKgOf(it, w, day) : null);
+  // Przy boju ciężar JEST w planie, ale suwak może go nadpisać: sztanga stoi
+  // w piwnicy, a nie w arkuszu. Nadpisanie trzyma się jednego tygodnia, bo plan
+  // co tydzień podaje inną liczbę i przenoszenie odchyłki na zawsze byłoby kłamstwem.
+  const wlasnyBoj = day ? kgwGet(w, day, it.n) : null;
   return {
     sets: m ? Math.min(+m[1], 12) : 0,
     target: m ? +m[2] : null,
     unit: m && m[3] ? m[3] : null,
-    kg: isKg(load) ? load : wlasny,
+    kg: isKg(load) ? (wlasnyBoj != null ? wlasnyBoj : load) : wlasny,
     planKg: isKg(load) ? load : null,     // czy ciezar pochodzi z planu, czy jest wlasny
   };
 }
@@ -1371,6 +1388,19 @@ function accProgress(it, day, w) {
   return prop != null && prop > pl.kg ? prop : null;
 }
 const accKey = it => 'x' + it.name.toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 24);
+
+/* Wlasny ciezar boju: klucz jak w dzienniku, "tydzien|dzien|numer cwiczenia". */
+const kgwKey = (w, day, n) => `${w}|${day}|${n}`;
+const kgwGet = (w, day, n) => { const v = state.kgw[kgwKey(w, day, n)]; return v == null ? null : +v; };
+// Powrot na wartosc z planu kasuje wpis, zeby pozniejsza zmiana E1RM albo
+// rekalibracja znowu przeliczyly ciezar same z siebie.
+function kgwSet(w, day, n, kg, planKg) {
+  const k = kgwKey(w, day, n);
+  const stare = state.kgw[k];
+  if (kg == null || kg === planKg) { if (stare == null) return; delete state.kgw[k]; }
+  else { if (stare === kg) return; state.kgw[k] = kg; }
+  saveKgw();
+}
 
 function logGet(w, day, n) { return state.log[logKey(w, day, n)] || []; }
 function logSet(w, day, n, idx, val) {
@@ -1462,7 +1492,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, sound: state.sound, mob: state.mob, rekal: state.rekal });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1491,6 +1521,7 @@ async function pullStan() {
     if (d.e1rm && inny(d.e1rm, state.e1rm)) { state.e1rm = d.e1rm; zm = true; }
     if (d.adjust && inny(d.adjust, state.adjust)) { state.adjust = d.adjust; saveAdjust(); zm = true; }
     if (d.acc && inny(d.acc, state.acc)) { state.acc = d.acc; saveAcc(); zm = true; }
+    if (d.kgw && inny(d.kgw, state.kgw)) { state.kgw = d.kgw; saveKgw(); zm = true; }
     // Brak pola `mob` w paczce znaczy „starsza wersja aplikacji", a nie „nic nie
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
@@ -1531,7 +1562,7 @@ window.addEventListener('offline', () => setSync('off'));
 //
 // Nic tutaj NIE wola render(). Pelna przebudowa ekranu przy kazdym ruchu suwaka
 // gubila pozycje przewijania, odgrywala animacje wejscia od nowa i po prostu mulila.
-function setRows(it, day, w, pl) {
+function setRows(it, day, w, pl, onKg) {
   const box = el('div', 'sets');
   const id = day + '|' + it.n;
   const rows = () => logGet(w, day, it.n);
@@ -1539,8 +1570,12 @@ function setRows(it, day, w, pl) {
   let kgTeraz = pl.kg;
 
   if (pl.kg != null) {
-    const min = Math.max(2.5, floor25(pl.kg * 0.6));
-    const max = floor25(pl.kg * 1.4);
+    // Zakres liczymy od ciezaru z planu, zeby nie wedrowal przy kazdej odchylce,
+    // ale nigdy nie ucinamy tego, co juz jest ustawione — inaczej przegladarka
+    // przyciela by wartosc suwaka i zmiana wracalaby do zakresu.
+    const baza = pl.planKg != null ? pl.planKg : pl.kg;
+    const min = Math.min(Math.max(2.5, floor25(baza * 0.6)), kgTeraz);
+    const max = Math.max(floor25(baza * 1.4), kgTeraz);
     const kgBox = el('div', 'kgslider');
     const lab = el('div', 'kglab');
     const val = el('b', null, fmt(kgTeraz));
@@ -1548,14 +1583,41 @@ function setRows(it, day, w, pl) {
     const sl = el('input', 'suwak');
     sl.type = 'range'; sl.min = min; sl.max = max; sl.step = 2.5; sl.value = kgTeraz;
     sl.setAttribute('aria-label', 'Ciężar w kilogramach');
-    sl.oninput = () => { kgTeraz = +sl.value; val.textContent = fmt(kgTeraz); };
-    sl.onchange = () => {
+
+    // Odchylka od planu jest widoczna razem z droga powrotna — inaczej po zmianie
+    // nie da sie odczytac, co plan w ogole kazal zrobic.
+    let plan = null;
+    if (pl.planKg != null) {
+      plan = el('div', 'kgplan');
+      plan.append(el('span', null, 'Plan: ' + fmt(pl.planKg) + ' kg'));
+      const wroc = el('button', 'kgwroc', 'Wróć do planu');
+      wroc.onclick = () => { sl.value = pl.planKg; podglad(pl.planKg); zapiszKg(); };
+      plan.append(wroc);
+      kgBox.append(lab, sl, plan);
+    } else {
+      kgBox.append(lab, sl);
+    }
+
+    // W trakcie ciagniecia suwaka ruszamy tylko liczbe — przerysowanie gryfu przy
+    // kazdym kroku kosztowaloby wiecej niz caly ten ekran jest wart.
+    const podglad = kg => {
+      kgTeraz = kg;
+      val.textContent = fmt(kgTeraz);
+      if (plan) plan.hidden = kgTeraz === pl.planKg;
+    };
+    const zapiszKg = () => {
       // Ciezar dotyczy calego cwiczenia: przepisujemy go na juz odklikane serie.
       const r = rows();
       for (let i = 0; i < r.length; i++) if (r[i]) logSet(w, day, it.n, i, { ...r[i], kg: kgTeraz });
+      // I zostaje zapisany na stale. Bez tego pierwsze odswiezenie ekranu
+      // przywracalo liczbe z planu, a kolejne serie szly ze starym ciezarem.
       if (pl.planKg == null) { state.acc[accKey(it)] = kgTeraz; saveAcc(); }
+      else kgwSet(w, day, it.n, kgTeraz, pl.planKg);
+      if (onKg) onKg(kgTeraz);            // liczba na karcie i talerze na gryfie
     };
-    kgBox.append(lab, sl);
+    sl.oninput = () => podglad(+sl.value);
+    sl.onchange = () => { podglad(+sl.value); zapiszKg(); };
+    if (plan) plan.hidden = kgTeraz === pl.planKg;
     box.append(kgBox);
   }
 
@@ -1928,7 +1990,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 2, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, mob: state.mob, rekal: state.rekal };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -1948,6 +2010,7 @@ function settingsView() {
       if (d.e1rm) { state.e1rm = d.e1rm; save(); }
       if (d.adjust) { state.adjust = d.adjust; saveAdjust(); }
       if (d.acc) { state.acc = d.acc; saveAcc(); }
+      if (d.kgw) { state.kgw = d.kgw; saveKgw(); }
       if (d.mob) { state.mob = d.mob; saveMob(); }
       if (d.rekal) { state.rekal = d.rekal; saveRekal(); }
       render();

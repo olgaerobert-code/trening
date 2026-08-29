@@ -13,6 +13,11 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 - **Dziennik serii** — powtórzenia na suwaku przy każdej serii, ciężar **jeden na
   ćwiczenie** (sztangę ładujesz raz). Wszystko wypełnione z planu, ruszasz tylko przy
   odchyłce. Zmiany trafiają prosto do DOM-u, bez przebudowy ekranu — ~3 ms na ruch
+- **Własny ciężar boju** — zjechanie suwakiem z liczby, którą podał plan, zostaje
+  zapisane: na ten jeden tydzień to jest ciężar tego ćwiczenia. Karta i gryf pokazują
+  go od razu, kolejne serie idą z nim, a pod suwakiem stoi liczba z planu i przycisk
+  **Wróć do planu**. Ocena sesji liczy się dalej wobec planu — zjazd w dół to
+  niedowóz, bo tym właśnie jest
 - **Samoregulacja** — dwa ostatnie tygodnie treningowe sterują E1RM na kolejny:
   +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij
 - **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),
