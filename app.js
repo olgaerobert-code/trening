@@ -2065,7 +2065,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=24')
+fetch('plan.json?v=25')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
