@@ -8,11 +8,13 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 
-const ROOT = path.join(path.dirname(new URL(import.meta.url).pathname.slice(1)), '..');
+const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 let ok = 0, zle = 0;
+const fmtPl = n => String(n).replace('.', ',');
 const test = (nazwa, warunek, dopisek = '') => {
   if (warunek) { ok++; console.log('  OK   ' + nazwa); }
   else { zle++; console.log('  BLAD ' + nazwa + (dopisek ? '\n         ' + dopisek : '')); }
@@ -23,7 +25,8 @@ class Klasy {
   constructor(el) { this.el = el; }
   add(...n) { for (const x of n) { if (/\s/.test(x)) throw new Error('classList.add ze spacja: ' + x); this.el._cls.add(x); } }
   remove(...n) { for (const x of n) this.el._cls.delete(x); }
-  toggle(n, si) { const ma = si === undefined ? !this.el._cls.has(n) : si; ma ? this.el._cls.add(n) : this.el._cls.delete(n); }
+  // Zwraca stan PO przelaczeniu, tak jak przegladarka — app.js na tym polega.
+  toggle(n, si) { const ma = si === undefined ? !this.el._cls.has(n) : si; ma ? this.el._cls.add(n) : this.el._cls.delete(n); return ma; }
   contains(n) { return this.el._cls.has(n); }
 }
 
@@ -246,6 +249,44 @@ console.log('Zaladowany gryf');
   const samGryf = A.platesEl(20);
   const svgPusty = samGryf.querySelector('.gryf').innerHTML;
   test('sam gryf bez talerzy', !svgPusty.includes('class="talerz"') && samGryf.textContent.includes('sam gryf'));
+}
+
+/* ---------- ciezar na sztandze ---------- */
+console.log('');
+console.log('Ciezar na sztandze');
+{
+  const W = 5;
+  const bojA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').planKg != null);
+  const planKg = A.plannedOf(bojA, W, 'A').planKg;
+  const kartaBoju = () => app.querySelectorAll('.ex').find(k => k.textContent.includes(bojA.name));
+  const suwakKg = () => kartaBoju().querySelector('.kgslider').querySelector('.suwak');
+
+  S.week = W; S.view = '#/d/A'; A.render();
+  const nowy = planKg - 5;
+  const sl = suwakKg();
+  sl.value = String(nowy);
+  sl.onchange();
+  test('zmiana ciezaru wchodzi do planu tygodnia', A.plannedOf(bojA, W, 'A').kg === nowy,
+    'jest: ' + A.plannedOf(bojA, W, 'A').kg);
+  test('i trafia do localStorage', (magazyn.get('trening.kgw.v1') || '').includes(W + '|A|' + bojA.n));
+  test('plan zostaje planem', A.plannedOf(bojA, W, 'A').planKg === planKg);
+  test('jedzie do synchronizacji', 'kgw' in A.stanLokalny());
+
+  A.render();                                     // pelna przebudowa, jak po odswiezeniu z bazy
+  test('po przebudowie ekranu ciezar zostaje', +suwakKg().value === nowy, 'jest: ' + suwakKg().value);
+  test('karta pokazuje nowy ciezar', kartaBoju().querySelector('.kgbtn').textContent.includes(fmtPl(nowy)));
+
+  // Kolejna seria idzie z nowym ciezarem, a nie ze starym z planu.
+  const wiersze = kartaBoju().querySelector('.sets');
+  wiersze.querySelector('.tick').click();
+  test('odklikana seria zapisuje sie z nowym ciezarem', A.state.log[W + '|A|' + bojA.n][0].kg === nowy);
+
+  // Inny tydzien ma swoj wlasny ciezar — odchylka nie rozlewa sie na caly plan.
+  test('inny tydzien nie jest ruszony', A.plannedOf(bojA, W + 1, 'A').kg === A.plannedOf(bojA, W + 1, 'A').planKg);
+
+  kartaBoju().querySelector('.kgwroc').click();
+  test('Wroc do planu kasuje wlasny ciezar', A.plannedOf(bojA, W, 'A').kg === planKg
+    && !(W + '|A|' + bojA.n in S.kgw));
 }
 
 /* ---------- niedziela ---------- */

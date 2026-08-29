@@ -8,6 +8,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { readWorkbook } from './xlsx.mjs';
 
 const SRC = process.argv[2] || path.join(process.env.USERPROFILE || '', 'Desktop', 'plan-12-tygodni.xlsx');
@@ -175,7 +176,7 @@ warmup.days.B.steps.push({ what: 'BEZ krążeń bioder i szukania końcowych zak
 // Ten blok nie pochodzi ze skoroszytu — arkusz go nie ma. Trzymamy go w osobnym
 // pliku, zeby ponowna konwersja XLSX nie skasowala niedzieli z planu. Bezpiecznik
 // SENSITIVE i tak przejdzie po nim razem z reszta wyniku.
-const MOB = path.join(path.dirname(new URL(import.meta.url).pathname.slice(1)), 'niedziela.json');
+const MOB = path.join(path.dirname(fileURLToPath(import.meta.url)), 'niedziela.json');
 const mobility = JSON.parse(fs.readFileSync(MOB, 'utf8'));
 
 /* ---------- Zasady: wybrane bloki, filtrowane linia po linii ---------- */
