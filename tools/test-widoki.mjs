@@ -301,5 +301,32 @@ S.mobShort = true; A.render();
 test('krotka wersja: 8 pozycji', app.querySelectorAll('.ex.mob').length === 8);
 S.mobShort = false;
 
+// Instrukcja pozycji. Bez niej niedziela jest lista nazw po sanskrycku.
+A.render();
+{
+  const poz = S.plan.mobility.blocks.flatMap(b => b.items);
+  const bezKrokow = poz.filter(i => !Array.isArray(i.steps) || i.steps.length < 3);
+  test('kazda z ' + poz.length + ' pozycji ma min. 3 kroki', bezKrokow.length === 0,
+    'bez krokow: ' + bezKrokow.map(i => i.id).join(', '));
+  test('i kazda ma opisany czesty blad', poz.every(i => i.blad && i.blad.length > 20));
+  test('intro nie zaklada juz, ze pozycje sa znane', !S.plan.mobility.intro.includes('Pozycje znasz'));
+
+  const karta = app.querySelectorAll('.ex.mob')[0];
+  const pierwsza = poz[0];
+  test('kroki sa wyrenderowane jako lista', karta.querySelectorAll('.kroki').length === 1
+    && karta.querySelectorAll('li').length === pierwsza.steps.length,
+    'li: ' + karta.querySelectorAll('li').length + ', krokow: ' + pierwsza.steps.length);
+  test('pierwszy krok jest w tresci karty', karta.textContent.includes(pierwsza.steps[0]));
+  test('blad i wskazowka pod sztange tez', karta.querySelectorAll('.blad').length === 1
+    && karta.querySelectorAll('.posztange').length === 1);
+
+  // Domyslnie zwiniete: 22 pozycje rozwiniete na raz to sciana tekstu.
+  const opis = karta.querySelectorAll('.exnote')[0];
+  test('opis startuje zwiniety', opis.hidden === true);
+  const more = karta.querySelectorAll('.more')[0];
+  more.click();
+  test('przycisk go rozwija', opis.hidden === false && more.textContent.includes('Zwiń'));
+}
+
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));
 process.exit(zle ? 1 : 0);

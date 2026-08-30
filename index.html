@@ -377,6 +377,23 @@ details.acc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
   border-top:1px solid var(--line-soft);padding-top:10px}
 .exnote[hidden]{display:none}
 
+/* instrukcja pozycji: numerowane kroki, potem błąd, potem po co to jest */
+.kroki{margin:0;padding:0;list-style:none;counter-reset:krok}
+.kroki li{counter-increment:krok;position:relative;padding-left:29px;margin-bottom:9px}
+.kroki li:last-child{margin-bottom:0}
+.kroki li::before{content:counter(krok);position:absolute;left:0;top:1px;
+  width:20px;height:20px;border-radius:6px;display:grid;place-items:center;
+  font-size:11px;font-weight:680;font-variant-numeric:tabular-nums;
+  font-family:var(--mono);
+  background:color-mix(in srgb,var(--dc,var(--d)) 24%, var(--s1));
+  color:color-mix(in srgb,var(--dc,var(--d)) 62%, #ffffff)}
+.blad,.posztange{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.blad span,.posztange span{display:block;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;font-weight:640;margin-bottom:3px}
+.blad span{color:var(--warn)}
+.posztange span{color:var(--ink-3)}
+.blad p,.posztange p{margin:0}
+
 /* ══ niedziela — mobilność ══ */
 .mobsw{display:flex;gap:8px;margin-bottom:12px}
 .mobopt{flex:1;padding:10px;border-radius:12px;background:var(--s2);border:1px solid var(--line);
@@ -514,7 +531,7 @@ tr.now td:last-child{border-radius:0 7px 7px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=25"></script>
-<script src="app.js?v=25"></script>
+<script src="progresja.js?v=26"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>

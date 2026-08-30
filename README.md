@@ -32,7 +32,9 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
 - **Niedziela — joga** — praktyka pod boje w sześciu blokach (~44 min): sekwencja
   stojąca, balans, biodra i pozycja przednia. Wersja krótka ~20 min, odklikiwanie
-  liczone per tydzień, minutnik przy pozycjach z czasem
+  liczone per tydzień, minutnik przy pozycjach z czasem. Każda z 22 pozycji ma pod
+  „Jak to zrobić" **wejście krok po kroku**, częsty błąd i zdanie o tym, co daje pod
+  sztangą — praktyka nie zakłada, że znasz nazwy z sanskrytu
 - **Dziś** — aplikacja zna dzień tygodnia: startuje na dzisiejszej sesji
   (pon → A, śr → B, pt → C, nd → joga), oznacza jej kafel i w dzień wolny mówi,
   kiedy następna. Do wyłączenia w ustawieniach
