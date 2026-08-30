@@ -764,7 +764,7 @@
   "day": "Niedziela",
   "minutes": 44,
   "shortMinutes": 20,
-  "intro": "Praktyka ustawiona pod boje, a nie obok nich: pozycja przednia sztangi, głębokość zejścia, miednica trzymana poziomo i zgięcie grzbietowe stopy. Pozycje znasz — w opisach jest to, co masz w nich robić INACZEJ, kiedy w tygodniu podnosisz, a nie jak w nie wejść.",
+  "intro": "Praktyka ustawiona pod boje, a nie obok nich: pozycja przednia sztangi, głębokość zejścia, miednica trzymana poziomo i zgięcie grzbietowe stopy. Każda pozycja ma rozpisane wejście krok po kroku, częsty błąd i jedno zdanie o tym, po co ona jest pod sztangą — rozwiń „Jak to zrobić”. Przyda się pasek albo ręcznik, klocek albo gruba książka i złożony koc. Nie znasz pozycji — idź krokami, nie porównuj się z obrazkiem.",
   "blocks": [
    {
     "n": 1,
@@ -778,6 +778,14 @@
       "dose": "3 min",
       "sec": 180,
       "core": true,
+      "steps": [
+       "Usiądź na brzegu złożonego koca albo poduszki, żeby biodra były WYŻEJ niż kolana. Bez tego plecy będą się zaokrąglać przez całe trzy minuty.",
+       "Skrzyżuj golenie luźno, każda stopa pod przeciwległym kolanem. Kolana mogą zostać wysoko — nie dociskaj ich do podłogi.",
+       "Wyciągnij się w górę: czubek głowy wysoko, żebra spuszczone w dół, dłonie luźno na udach.",
+       "Zamknij usta i oddychaj nosem. Lekko zwęź gardło, jakbyś chuchał na szybę — usłyszysz własny cichy szum. To jest ujjayi.",
+       "Wdech na cztery sekundy w BOKI żeber, wydech na sześć. Trzymaj ten rytm trzy minuty."
+      ],
+      "blad": "Oddech pompowany w brzuch. Połóż dłonie po bokach klatki — na wdechu mają się rozsuwać na boki, a nie brzuch do przodu.",
       "note": "Oddech w boczne i tylne żebra, nie w brzuch. Wydech dłuższy od wdechu. Rytm ustalasz tu raz — reszta praktyki idzie na oddechy, nie na sekundy."
      },
      {
@@ -786,6 +794,15 @@
       "dose": "5 oddechów / stronę",
       "sec": null,
       "core": false,
+      "steps": [
+       "Klęknij, duże palce stóp razem, kolana szeroko rozstawione.",
+       "Usiądź biodrami na piętach, tułów opuść między uda, czoło na macie. To jest pozycja dziecka.",
+       "Wyciągnij obie ręce daleko przed siebie.",
+       "Prawą rękę przesuń po macie w lewo, POD tułowiem, wnętrzem dłoni do góry. Prawy bark i prawa skroń schodzą na matę.",
+       "Lewą dłoń oprzyj przy głowie — służy tylko do regulacji, nie do dociskania.",
+       "Pięć spokojnych oddechów, wróć i zmień stronę."
+      ],
+      "blad": "Odrywanie bioder od pięt, żeby zejść niżej barkiem. Biodra zostają na piętach, nawet jeśli skręt wyjdzie mniejszy.",
       "note": "Biodra na piętach, ramię pod tułowiem. Bez dociskania barkiem — zakres wyznacza miejsce, w którym oddech nadal wchodzi w bok żeber."
      }
     ]
@@ -802,6 +819,17 @@
       "dose": "3 rundy",
       "sec": null,
       "core": true,
+      "steps": [
+       "Stań prosto, stopy razem, dłonie złożone przy mostku.",
+       "WDECH: ręce przez boki w górę, spójrz na dłonie.",
+       "WYDECH: zawias w biodrach i opadnij do skłonu. Dłonie na macie albo na goleniach, kolana mogą być ugięte.",
+       "WDECH: wyprostuj plecy do połowy, palce na goleniach, wzrok przed siebie.",
+       "WYDECH: odejdź stopami w tył do deski i zejdź WOLNO w chaturangę — łokcie sunące przy tułowiu, ciało jedną linią. Możesz oprzeć kolana o matę.",
+       "WDECH: pies z głową w górę albo kobra — barki nad nadgarstkami, klatka do przodu.",
+       "WYDECH: biodra w górę i w tył, pies z głową w dół. Zostań tu na pięć oddechów.",
+       "Podejdź stopami do dłoni i wróć do stania. To jedna runda — zrób trzy."
+      ],
+      "blad": "Rozpychanie łokci na boki przy schodzeniu w chaturangę. Łokcie mają sunąć wzdłuż żeber — to ten sam tor co w wyciskaniu.",
       "note": "Jedna faza na jeden oddech. Chaturangę schodzisz wolno, łokcie przy tułowiu — to ten sam tor co w wyciskaniu, tylko bez sztangi i bez pośpiechu."
      },
      {
@@ -810,6 +838,15 @@
       "dose": "2 rundy",
       "sec": null,
       "core": false,
+      "steps": [
+       "Zacznij jak w wersji A, ale po wdechu z rękami w górze ZEGNIJ kolana: biodra w tył, kolana nad stopami, żebra w dół. To krzesło (utkatasana).",
+       "WYDECH: skłon. WDECH: półwyprost pleców. WYDECH: deska i chaturanga.",
+       "WDECH: pies z głową w górę. WYDECH: pies z głową w dół.",
+       "WDECH: postaw prawą stopę między dłonie, tylną stopę obróć pod kątem około 45°, wyprostuj się z rękami w górze. To Wojownik I. Pięć oddechów.",
+       "WYDECH: dłonie na matę, chaturanga, pies w górę, pies w dół. Powtórz Wojownika na lewą nogę.",
+       "Podejdź do dłoni, wróć do stania. To jedna runda — zrób dwie."
+      ],
+      "blad": "Schodzenie niżej w Wojowniku przez odchylanie tułowia do tyłu. Zejście prowadzi zgięcie przedniego biodra i kolana, tułów zostaje pionowo.",
       "note": "Utkatasana z żebrami w dół — obciążenie idzie w biodra, nie w lędźwie. W Wojowniku I zejście prowadzisz biodrem, nie odchyleniem tułowia."
      },
      {
@@ -818,6 +855,14 @@
       "dose": "10 oddechów",
       "sec": 60,
       "core": false,
+      "steps": [
+       "Zacznij z klęku podpartego: dłonie pod barkami, kolana pod biodrami.",
+       "Podwiń palce stóp i wypchnij biodra w górę i w tył. Ciało robi literę A.",
+       "Rozłóż palce dłoni szeroko i dociskaj podstawę palca wskazującego. Ramiona proste, uszy między ramionami.",
+       "Kolana mogą zostać ugięte. DŁUGIE PLECY są ważniejsze niż proste nogi — jeśli plecy się garbią, ugnij kolana mocniej.",
+       "Zegnij jedno kolano i pozwól drugiej pięcie zejść w stronę maty. Zmieniaj naprzemiennie, spokojnie, przez dziesięć oddechów."
+      ],
+      "blad": "Ciągnięcie pięt do maty na siłę. Pięta schodzi tyle, ile zejdzie sama — to zgięcie w kostce buduje się miesiącami, nie w jednym podejściu.",
       "note": "Naprzemienne prostowanie kolan, pięta schodzi bez wymuszania. Pierwsza dziś praca nad zgięciem grzbietowym stopy — ta sama, którą mierzysz przy ścianie w środę."
      }
     ]
@@ -834,6 +879,15 @@
       "dose": "6 oddechów / stronę",
       "sec": null,
       "core": false,
+      "steps": [
+       "Rozstaw stopy szeroko, mniej więcej na długość własnej nogi. Prawą stopę obróć palcami w prawo, lewą lekko do środka.",
+       "Ustaw prawą piętę w jednej linii ze ŚRODKIEM lewej stopy.",
+       "Zegnij prawe kolano, aż udo zejdzie blisko poziomu. Kolano ma iść nad środkiem stopy — nie do środka.",
+       "Ręce rozłóż na boki na wysokości barków, wzrok na prawą dłoń. Tułów PIONOWO, nie pochylaj się nad przednią nogą. Trzy oddechy.",
+       "Teraz kąt boczny: oprzyj prawe przedramię na prawym udzie (albo dłoń na klocku przy stopie), lewą rękę wyciągnij nad uchem w skos.",
+       "Trzy oddechy, wróć do Wojownika, zmień stronę."
+      ],
+      "blad": "Kolano uciekające do środka. Popychaj je lekko na zewnątrz, w stronę małego palca — to ten sam tor, którego pilnujesz w bułgarskim.",
       "note": "Kolano nad środkiem stopy i tułów pionowo w Wojowniku; dopiero z tego ustawienia schodzisz w kąt boczny. To ten sam tor kolana, którego pilnujesz w bułgarskim."
      },
      {
@@ -842,6 +896,15 @@
       "dose": "5 oddechów / stronę",
       "sec": null,
       "core": false,
+      "steps": [
+       "Stopy w rozkroku około 80–90 cm, prawa stopa w przód, lewa obrócona w skos, mniej więcej 45°.",
+       "Przesuń tylną stopę pół stopy w bok od linii przedniej — inaczej nie utrzymasz równowagi.",
+       "Ustaw MIEDNICĘ RÓWNO: oba biodra skierowane prosto do przodu. Sprawdź to dłońmi na kolcach biodrowych.",
+       "Zawias w biodrach: tułów schodzi w przód nad prawą nogą, plecy proste.",
+       "Lewą dłoń postaw na klocku po ZEWNĘTRZNEJ stronie prawej stopy. Dopiero teraz obróć klatkę w prawo i wyprowadź prawą rękę w górę.",
+       "Pięć oddechów, zmiana strony."
+      ],
+      "blad": "Skręt kręcony z dolnego odcinka pleców przy skręconej miednicy. Najpierw miednica poziomo, dopiero potem rotacja — i tylko z klatki.",
       "note": "Najpierw miednica POZIOMO, dopiero potem rotacja prowadzona z klatki. Ręka na podłodze, na goleni albo na klocku — wysokość nie ma znaczenia, ustawienie miednicy ma."
      },
      {
@@ -850,6 +913,15 @@
       "dose": "6 oddechów / stronę",
       "sec": null,
       "core": true,
+      "steps": [
+       "Stopy w jednej linii, prawa w przód, około 60–80 cm od tylnej. Tylna stopa obrócona w skos.",
+       "Wyrównaj biodra: prawe cofnij, lewe wysuń do przodu, aż oba patrzą prosto.",
+       "Za plecami złóż dłonie w modlitwę palcami do góry. Nie idzie — złap się za przeciwne łokcie, to pełnoprawna wersja.",
+       "WDECH: wydłuż mostek do przodu, klatka wysoko.",
+       "WYDECH: zawias w biodrze, tułów schodzi nad przednią nogę. Przednie kolano lekko ugięte.",
+       "Sześć oddechów, zmiana strony."
+      ],
+      "blad": "Zaokrąglanie pleców, żeby zejść niżej głową. Zatrzymaj się dokładnie tam, gdzie plecy są jeszcze proste.",
       "note": "Dłonie złożone za plecami, jeśli nadgarstki na to pozwalają — inaczej chwyt za przeciwne łokcie. Zejście z prostym kręgosłupem i cofniętym biodrem: mechanika ciągu plus rotacja zewnętrzna barków pod pozycję przednią. Dwie rzeczy naraz."
      },
      {
@@ -858,6 +930,15 @@
       "dose": "10 oddechów",
       "sec": 60,
       "core": true,
+      "steps": [
+       "Stopy trochę szerzej niż biodra, palce skierowane lekko na zewnątrz.",
+       "Zejdź w pełny przysiad, biodra nisko, pięty na podłodze.",
+       "Pięty się odrywają — podłóż pod nie złożony koc albo brzeg maty. To nie oszustwo, tylko warunek, żeby pozycja miała sens.",
+       "Oprzyj łokcie o wewnętrzne strony kolan, dłonie złóż razem przy mostku.",
+       "Łokciami rozepchnij kolana na zewnątrz, jednocześnie trzymając klatkę wysoko i kręgosłup długi.",
+       "Dziesięć oddechów, wzrok przed siebie."
+      ],
+      "blad": "Zapadnięta klatka i zaokrąglony dół pleców. Lepiej siedzieć wyżej i prosto niż nisko i w kabłąk — pod front squat pracuje tu wyprostowany tułów.",
       "note": "Pełne zejście, pięty na podłodze albo na złożonym ręczniku. Łokcie rozpychają kolana, kręgosłup rośnie w górę. Najbliższa dziś pozycja do dołu front squata."
      },
      {
@@ -866,6 +947,15 @@
       "dose": "8 oddechów",
       "sec": null,
       "core": false,
+      "steps": [
+       "Rozstaw stopy szeroko, około 1–1,2 m, palce lekko do środka, zewnętrzne krawędzie stóp równolegle.",
+       "Za plecami spleć palce dłoni i wyprostuj ramiona.",
+       "WDECH: wyprostuj się, mostek w górę, łopatki razem.",
+       "WYDECH: zawias w biodrach i schodź tułowiem w dół, głowa w stronę maty.",
+       "Ręce opadają za głowę TYLE, ile pozwolą barki. Nic nie ciągnij.",
+       "Ciężar trzymaj lekko w przodzie stóp. Osiem oddechów. Wychodź z prostymi plecami."
+      ],
+      "blad": "Siłowe przeciąganie splecionych rąk do podłogi. Barki mają być rozluźnione — ręce schodzą same albo wcale.",
       "note": "Dłonie splecione za plecami i prowadzone nad głową bez wypychania żeber. Kolana mikro-ugięte, ciężar lekko na śródstopiu."
      }
     ]
@@ -882,6 +972,15 @@
       "dose": "5 oddechów / stronę",
       "sec": null,
       "core": true,
+      "steps": [
+       "Zacznij z Wojownika II na prawą stronę.",
+       "Połóż klocek (albo grubą książkę) około 30 cm przed prawą stopą, lekko na zewnątrz, i oprzyj na nim prawą dłoń.",
+       "Przenieś ciężar na prawą nogę i unieś lewą do poziomu, jednocześnie prostując prawe kolano.",
+       "Lewą stopę zegnij, palce skieruj w BOK, nie do podłogi.",
+       "Otwórz miednicę i klatkę do góry, lewą rękę wyprowadź w górę. Wzrok w bok, a jeśli równowaga pozwoli — na górną dłoń.",
+       "Pięć oddechów, zmiana strony."
+      ],
+      "blad": "Opadające biodro uniesionej nogi. Miednica poziomo — to jest cała ta pozycja i dokładnie to, co trenuje dzień B.",
       "note": "Ręka na klocku albo na podłodze, stopa stojąca aktywna, biodro górne otwarte bez odkręcania miednicy do tyłu. Sprawdzian tego samego, co stanie na jednej nodze w środę."
      },
      {
@@ -890,6 +989,15 @@
       "dose": "5 oddechów / stronę",
       "sec": null,
       "core": false,
+      "steps": [
+       "Stań na prawej nodze, lewą cofnij i oprzyj palcami o matę.",
+       "Ręce złóż przy mostku (łatwiejsza wersja) albo wyciągnij przed siebie.",
+       "Zrób zawias w prawym biodrze: tułów schodzi do poziomu, lewa noga jednocześnie unosi się do poziomu.",
+       "Ciało od pięty do czubka głowy w JEDNEJ linii. Prawe kolano zostaw lekko ugięte.",
+       "Trzymaj biodra poziomo — lewe biodro nie odkręca się do góry. Palce uniesionej stopy patrzą prosto w podłogę.",
+       "Pięć oddechów, zmiana strony."
+      ],
+      "blad": "Odkręcone biodro uniesionej nogi. Skieruj palce tej stopy w podłogę i sprawdź — to od razu ustawia miednicę.",
       "note": "Biodro nogi uniesionej NIE odkręca się w górę. Jedna linia od pięty do czubka głowy; niżej i równo bije wyżej i krzywo."
      },
      {
@@ -898,6 +1006,15 @@
       "dose": "6 oddechów / stronę",
       "sec": 40,
       "core": false,
+      "steps": [
+       "Zacznij z deski na prostych rękach.",
+       "Przenieś ciężar na prawą dłoń i zewnętrzną krawędź prawej stopy, obracając się na bok.",
+       "Stopy ułóż jedna na drugiej albo — stabilniej — górną postaw na macie przed dolną.",
+       "Prawa dłoń dokładnie pod barkiem, ramię proste. Lewą rękę wyprowadź prosto w górę.",
+       "Wypchnij biodra w górę, aż ciało będzie jedną linią od pięt do głowy.",
+       "Sześć oddechów, zmiana strony. Za trudne — oprzyj dolne kolano na macie."
+      ],
+      "blad": "Obwisłe biodra. Lepiej wytrzymać krócej z wysokimi biodrami niż długo w banana.",
       "note": "Wariant z uniesioną nogą albo z chwytem za paluch, jeśli ustawienie trzyma bez zapadania biodra. To samo ćwiczenie co w dniu B — tu dłużej i wolniej."
      },
      {
@@ -906,6 +1023,14 @@
       "dose": "3 × 8 oddechów",
       "sec": 30,
       "core": false,
+      "steps": [
+       "Usiądź, kolana zgięte, stopy na podłodze, dłonie chwytają uda pod kolanami.",
+       "Odchyl tułów do tyłu dokładnie tyle, żeby poczuć brzuch, ale ZANIM plecy zaczną się zaokrąglać.",
+       "Oderwij stopy od podłogi i unieś golenie do poziomu. Kolana zostają zgięte.",
+       "Mostek w górę, klatka wysoko, plecy proste. Ręce wyciągnij przy goleniach, dłońmi do siebie.",
+       "Osiem oddechów, opuść stopy, odpocznij kilka sekund. Zrób trzy takie serie."
+      ],
+      "blad": "Prostowanie nóg kosztem zaokrąglonych pleców. Proste plecy są ważniejsze niż proste nogi — zawsze.",
       "note": "Lędźwie nie zapadają się w podłogę. Trudniej robisz prostując nogi, nie podnosząc tułowia wyżej."
      }
     ]
@@ -922,6 +1047,14 @@
       "dose": "8 oddechów / stronę",
       "sec": 45,
       "core": true,
+      "steps": [
+       "Z psa z głową w dół przyprowadź prawe kolano za prawy nadgarstek.",
+       "Ułóż prawą goleń skośnie pod tułowiem. Im bliżej równolegle do przedniej krawędzi maty, tym mocniej — ZACZNIJ od pięty blisko pachwiny.",
+       "Lewą nogę wyprostuj daleko w tył, kolano i podbicie na macie, lewe biodro skierowane w dół.",
+       "Pod prawy pośladek podłóż złożony koc albo klocek, aż miednica będzie POZIOMA. Bez tego cały ciężar zjeżdża w kolano.",
+       "Zostań na prostych rękach albo zejdź na przedramiona. Osiem oddechów, zmiana strony."
+      ],
+      "blad": "Ból z przodu albo z boku kolana. Natychmiast zmniejsz kąt goleni, dołóż podparcie pod pośladek — albo zrób zamiast tego leżącą czwórkę: na plecach, kostka na przeciwnym kolanie, obie ręce ciągną udo do siebie.",
       "note": "Biodra równolegle, złożony koc pod pośladkiem zgiętej nogi. Zostajesz w wersji przygotowawczej — pełne wygięcie nie wchodzi do tej praktyki."
      },
      {
@@ -930,6 +1063,15 @@
       "dose": "8 oddechów / stronę",
       "sec": 45,
       "core": false,
+      "steps": [
+       "Usiądź na brzegu złożonego koca, kolana zgięte.",
+       "Ułóż prawą goleń przed sobą, równolegle do przedniej krawędzi maty.",
+       "Lewą goleń połóż NA prawej: lewa kostka na prawym kolanie, lewe kolano na prawej stopie. Golenie mają leżeć równolegle jak dwa polana.",
+       "Górne kolano zostaje wysoko w powietrzu — podłóż pod nie klocek albo poduszkę i zostań w tej wersji. Bez podparcia zamiast biodra pracuje kolano.",
+       "Plecy proste. Wdech — wyciągnij się w górę, wydech — zejdź lekko w przód z zawiasem w biodrach.",
+       "Osiem oddechów, zmiana strony."
+      ],
+      "blad": "Schodzenie w przód z zaokrąglonymi plecami przy uciekającym górnym kolanie. Dołóż podparcie i zostań wyżej.",
       "note": "Golenie jedna nad drugą, stopy aktywne przez cały czas. Skłon prowadzisz z bioder, plecy proste — kiedy zaczynają się zaokrąglać, jesteś na końcu pozycji."
      },
      {
@@ -938,6 +1080,14 @@
       "dose": "6 oddechów × 2 warianty / stronę",
       "sec": null,
       "core": false,
+      "steps": [
+       "Połóż się na plecach, obie nogi proste.",
+       "Zarzuć pasek (albo ręcznik) na śródstopie prawej nogi i złap oba końce.",
+       "WARIANT I: unieś prostą prawą nogę do góry, lewą nogę dociśnij do maty. Stopa zgięta, pięta wypychana w górę. Sześć oddechów.",
+       "WARIANT II: przełóż oba końce paska do prawej ręki i opuść prostą nogę w bok, w prawo, do wysokości, na której LEWE biodro zostaje na macie. Lewą ręką dociskaj to biodro. Sześć oddechów.",
+       "Wróć nogą do góry, opuść, zmień stronę."
+      ],
+      "blad": "Unoszące się przeciwne biodro w wariancie II. Zatrzymaj nogę wyżej — biodro na macie jest ważniejsze niż niska noga.",
       "note": "Pasek na śródstopiu. Wariant I w przód pod tył uda, wariant II na bok pod przywodziciele. Druga noga przez cały czas dociśnięta do podłogi — to ona decyduje, czy pozycja coś daje."
      },
      {
@@ -946,6 +1096,15 @@
       "dose": "8 oddechów / stronę",
       "sec": 45,
       "core": false,
+      "steps": [
+       "Połóż się na plecach, ręce rozłóż w bok na wysokości barków, dłońmi do góry.",
+       "Podciągnij oba kolana do klatki.",
+       "Opuść oba kolana w prawo — na matę albo na poduszkę, jeśli nie sięgają.",
+       "OBA barki zostają na podłodze. To jest warunek, nie detal.",
+       "Głowę odwróć w lewo, jeśli kark na to bez oporu pozwala.",
+       "Osiem spokojnych oddechów; z każdym wydechem pozwól kolanom zejść odrobinę niżej. Zmiana strony."
+      ],
+      "blad": "Odrywający się przeciwny bark. Podłóż poduszkę pod kolana i zostaw bark na podłodze — skręt ma iść z klatki, nie z lędźwi.",
       "note": "Oba barki zostają na podłodze i to one wyznaczają zakres, nie to, jak nisko zejdą kolana."
      }
     ]
@@ -962,6 +1121,15 @@
       "dose": "6 oddechów / stronę",
       "sec": null,
       "core": true,
+      "steps": [
+       "Usiądź wygodnie, plecy proste.",
+       "Unieś prawą rękę w górę, zegnij łokieć i opuść dłoń za kark, w stronę łopatek. Łokieć skierowany w sufit.",
+       "Lewą rękę zegnij za plecami, grzbietem dłoni prowadź po kręgosłupie w górę, na spotkanie prawej.",
+       "Dłonie się nie spotykają — złap pasek albo ręcznik i trzymaj oba końce. Tak ma to wyglądać u większości ludzi.",
+       "Klatka wysoko, ŻEBRA W DÓŁ, głowa pionowo — nie pchaj jej do przodu przed łokieć.",
+       "Sześć oddechów, zmiana strony."
+      ],
+      "blad": "Wypchnięte do przodu żebra i przeprost w dolnych plecach, żeby łokieć zaszedł wyżej. Napnij lekko brzuch i schowaj żebra — dopiero ten zakres przeniesie się na pozycję przednią sztangi.",
       "note": "Pasek między dłońmi, jeśli nie schodzą się bez wypychania żeber do przodu. Górny łokieć pionowo w górę, dolny w dół — obie rotacje jednocześnie, i to jest cała pozycja przednia."
      },
      {
@@ -970,6 +1138,14 @@
       "dose": "30 s w każdą stronę",
       "sec": 30,
       "core": false,
+      "steps": [
+       "Klęknij, dłonie na macie pod barkami, palce skierowane do przodu.",
+       "Powoli przenoś ciężar do przodu, prostując nadgarstki. Trzydzieści sekund.",
+       "Obróć dłonie palcami do kolan, wnętrzem dłoni nadal w dół, i delikatnie odchyl ciężar w tył. Trzydzieści sekund.",
+       "Odwróć dłonie GRZBIETEM do maty, palcami do kolan. Dociśnij bardzo lekko. Trzydzieści sekund.",
+       "Na koniec kilkanaście razy zaciśnij i rozprostuj pięści."
+      ],
+      "blad": "Dociskanie do bólu. Ma ciągnąć, nie kłuć — te nadgarstki w poniedziałek trzymają sztangę.",
       "note": "Palce do kolan, potem grzbiety dłoni. Bezpośrednio pod trzymanie sztangi z przodu i pod obciążenie dłoni w deskach."
      },
      {
@@ -978,6 +1154,14 @@
       "dose": "3 min",
       "sec": 180,
       "core": true,
+      "steps": [
+       "Usiądź bokiem tuż przy ścianie, biodrem tak blisko niej, jak się da.",
+       "Połóż się na plecach i jednocześnie obróć, zarzucając obie nogi na ścianę.",
+       "Popraw odległość: pośladki przy ścianie albo kilka centymetrów od niej. Pod miednicę możesz podłożyć złożony koc.",
+       "Ręce luźno w bok, dłońmi do góry. Nogi proste, ale bez napinania.",
+       "Trzy minuty spokojnego oddechu. Wychodź przez zgięcie kolan i obrót na bok."
+      ],
+      "blad": "Ściana za daleko i wygięty dół pleców. Dosuń biodra do ściany albo odsuń się i lekko zegnij kolana.",
       "note": "Biodra przy ścianie albo kilka centymetrów od niej, cokolwiek pozwala rozluźnić nogi. Oddech 4–6: wdech nosem cztery sekundy, wydech sześć."
      },
      {
@@ -986,6 +1170,14 @@
       "dose": "3 min",
       "sec": 180,
       "core": false,
+      "steps": [
+       "Połóż się na plecach, nogi luźno rozstawione, stopy niech opadną na boki.",
+       "Ręce kilkanaście centymetrów od tułowia, dłonie do góry.",
+       "Pod kolana możesz podłożyć zwinięty koc — zdejmuje napięcie z dolnych pleców.",
+       "Zamknij oczy. Przestań sterować oddechem, niech idzie sam.",
+       "Trzy minuty. Wychodź powoli: najpierw porusz palcami, potem obróć się na prawy bok, dopiero z niego usiądź."
+      ],
+      "blad": "Pominięcie tej pozycji, bo „nic się nie dzieje\". To tutaj odkłada się reszta praktyki.",
       "note": "Bez telefonu. Jeśli masz zasnąć, ustaw budzik i śpij — to też jest wynik."
      }
     ]

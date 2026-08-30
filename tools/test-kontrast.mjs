@@ -64,6 +64,9 @@ console.log('\nTekst na powierzchni podniesionej (s2)');
 test('drugorzedny', kontrast(ink2, s2), 4.5);
 test('pomocniczy', kontrast(ink3, s2), 3);
 
+console.log('\nEtykieta ostrzegawcza (Czesty blad) na karcie');
+test('warn ' + tok('warn'), kontrast(tok('warn'), s1), 4.5);
+
 console.log('\nKolory serii na karcie (s1) — obiekty graficzne');
 for (const [n, h] of Object.entries(serie)) test(n + ' ' + h, kontrast(h, s1), 3);
 

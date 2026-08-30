@@ -920,14 +920,34 @@ function mobCard(it, w) {
   }
   box.append(metrics);
 
-  const note = el('div', 'exnote', it.note);
-  note.hidden = true;
+  // Instrukcja pozycji. Wcześniej pod „Jak to zrobić" siedziała sama wskazówka
+  // dla kogoś, kto pozycję już zna — a to jest niedziela, nie egzamin z jogi.
+  // Kolejność jest celowa: najpierw JAK wejść, potem czego nie robić, na końcu
+  // po co to w ogóle jest. Kto nie zna pozycji, potrzebuje pierwszego; kto zna,
+  // przewija do ostatniego.
+  const opis = el('div', 'exnote');
+  if (it.steps && it.steps.length) {
+    const ol = el('ol', 'kroki');
+    it.steps.forEach(k => ol.append(el('li', null, k)));
+    opis.append(ol);
+  }
+  if (it.blad) {
+    const b = el('div', 'blad');
+    b.append(el('span', null, 'Częsty błąd'), el('p', null, it.blad));
+    opis.append(b);
+  }
+  if (it.note) {
+    const n = el('div', 'posztange');
+    n.append(el('span', null, 'Pod sztangę'), el('p', null, it.note));
+    opis.append(n);
+  }
+  opis.hidden = true;
   const more = el('button', 'more', 'Jak to zrobić ▾');
   more.onclick = () => {
-    note.hidden = !note.hidden;
-    more.textContent = note.hidden ? 'Jak to zrobić ▾' : 'Zwiń ▴';
+    opis.hidden = !opis.hidden;
+    more.textContent = opis.hidden ? 'Jak to zrobić ▾' : 'Zwiń ▴';
   };
-  box.append(more, note);
+  box.append(more, opis);
   return box;
 }
 
@@ -2065,7 +2085,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=25')
+fetch('plan.json?v=26')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
