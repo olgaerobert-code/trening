@@ -38,8 +38,11 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   liczone per tydzień, minutnik przy pozycjach z czasem. Każda z 22 pozycji ma pod
   „Jak to zrobić" **wejście krok po kroku**, częsty błąd i zdanie o tym, co daje pod
   sztangą — praktyka nie zakłada, że znasz nazwy z sanskrytu
-- **Dziś** — aplikacja zna dzień tygodnia: startuje na dzisiejszej sesji
-  (pon → A, śr → B, pt → C, nd → joga), oznacza jej kafel i w dzień wolny mówi,
+- **Dziś** — aplikacja startuje na **najświeższej sesji tygodnia, która nie jest
+  jeszcze zapisana w całości**: dziennik uzupełnia się po treningu, często dopiero
+  następnego dnia, więc w sobotę otwiera piątkowy dzień C, a nie ekran główny.
+  Sesji z przyszłości nie proponuje. Przy komplecie wraca do dzisiejszego dnia
+  (pon → A, śr → B, pt → C, nd → joga), oznacza jego kafel i w dzień wolny mówi,
   kiedy następna. Do wyłączenia w ustawieniach
 - **Raport bloków** — werdykt każdej sesji tydzień po tygodniu, frekwencja, tonaż
   i odklikane niedziele. Po bloku 1 i 2 sprawdza warunek z arkusza („KAŻDA sesja
