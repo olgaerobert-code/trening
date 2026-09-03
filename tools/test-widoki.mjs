@@ -514,5 +514,49 @@ console.log('Przeniesiony tydzien wobec bazy');
   delete S.log[Z + '|A|' + it.n];
 }
 
+/* ---------- ciezar po przeniesieniu tygodnia ---------- */
+console.log('');
+console.log('Ciezar po przeniesieniu');
+{
+  // Plan podaje INNY ciezar boju w kazdym tygodniu. Sesja przeniesiona z 9 na 5
+  // byla wykonana ciezarem z dziewiatki — i to ma stac na ekranie, a nie liczba,
+  // ktora plan przewiduje dla piatki.
+  const Z = 9, NA = 3;
+  for (const w of [Z, NA]) {
+    for (const k of Object.keys(S.log)) if (+k.split('|')[0] === w) delete S.log[k];
+    for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === w) delete S.kgw[k];
+  }
+  S.moves = []; S.queue = [];
+
+  const it = S.plan.days.C.items.find(i => A.plannedOf(i, Z, 'C').planKg != null);
+  const planZ = A.plannedOf(it, Z, 'C').planKg;
+  const planNa = A.plannedOf(it, NA, 'C').planKg;
+  test('plan daje inny ciezar w tygodniu ' + Z + ' i ' + NA + ' (' + planZ + ' vs ' + planNa + ')',
+    planZ !== planNa);
+
+  const pl = A.plannedOf(it, Z, 'C');
+  for (let i = 0; i < pl.sets; i++) A.logSet(Z, 'C', it.n, i, { r: pl.target, kg: planZ, pr: pl.target, pk: planZ });
+
+  A.przeniesTydzien(Z, NA);
+
+  const po = A.plannedOf(it, NA, 'C');
+  test('po przeniesieniu ekran pokazuje ciezar, ktory byl na sztandze', po.kg === planZ,
+    'pokazuje: ' + po.kg + ', dzwigane: ' + planZ);
+  test('a plan tygodnia docelowego zostaje planem', po.planKg === planNa);
+  test('kilogramy sa w zapisanych seriach', A.logGet(NA, 'C', it.n).every(r => r.kg === planZ));
+
+  S.week = NA; S.view = '#/d/C'; A.render();
+  const karta = app.querySelectorAll('.ex').find(k => k.textContent.includes(it.name));
+  test('suwak startuje na dzwiganym ciezarze', +karta.querySelector('.kgslider').querySelector('.suwak').value === planZ);
+  test('karta pokazuje ten sam ciezar', karta.querySelector('.kgbtn').textContent.includes(String(planZ).replace('.', ',')));
+  test('i widac, ile mowil plan', karta.textContent.includes('Plan: ' + String(planNa).replace('.', ',') + ' kg'));
+
+  // Bez zapisu nic sie nie zmienia: plan zostaje planem.
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === NA) delete S.log[k];
+  for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === NA) delete S.kgw[k];
+  test('pusty tydzien dalej bierze ciezar z planu', A.plannedOf(it, NA, 'C').kg === planNa);
+  S.moves = [];
+}
+
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));
 process.exit(zle ? 1 : 0);
