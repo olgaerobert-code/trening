@@ -46,6 +46,38 @@ function najblizszaSesja() {
   return null;
 }
 
+/* Sesja, na ktorej aplikacja sie otwiera.
+ *
+ * Wczesniej byl to po prostu dzisiejszy dzien, a w dzien wolny ekran glowny.
+ * Tyle ze dziennik uzupelnia sie PO treningu, czesto nastepnego dnia — i wtedy
+ * aplikacja pokazywala cokolwiek, tylko nie te sesje, ktora zostala do wpisania.
+ *
+ * Teraz otwieramy najswiezsza sesje tygodnia, ktora nie jest zapisana w calosci,
+ * liczac tylko dni, ktore juz byly (z dzisiejszym wlacznie). Sesji z przyszlosci
+ * nie proponujemy — w czwartek nie ma czego wpisywac do piatku. Dopiero gdy
+ * wszystko jest kompletne, wraca stara zasada: dzisiejszy dzien albo nic.
+ */
+const POZYCJA_DNIA = { A: 0, B: 2, C: 4, D: 6 };        // poniedzialek 0 … niedziela 6
+const pozycjaDzis = () => (new Date().getDay() + 6) % 7;
+
+function sesjaKompletna(key, w) {
+  if (key === 'D') {
+    const odklikane = state.mob[w] || {};
+    const widoczne = mobWidoczne();
+    return widoczne.length > 0 && widoczne.every(i => odklikane[i.id]);
+  }
+  const { done, total } = postepDnia(w, key);
+  return total > 0 && done >= total;
+}
+
+function domyslnaSesja() {
+  const w = state.week, dzis = pozycjaDzis();
+  const zalegle = Object.keys(POZYCJA_DNIA)
+    .filter(k => POZYCJA_DNIA[k] <= dzis && !sesjaKompletna(k, w))
+    .sort((a, b) => POZYCJA_DNIA[b] - POZYCJA_DNIA[a]);
+  return zalegle[0] || dzisiaj();
+}
+
 /* ---------- pomocnicze ---------- */
 const $ = (sel, root = document) => root.querySelector(sel);
 const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
@@ -2151,10 +2183,10 @@ function settingsView() {
   const pref = el('div', 'card');
   pref.append(el('h3', null, 'Otwieranie'));
   const prow = el('div', 'e1row');
-  prow.append(el('div', 'n', 'Startuj na dzisiejszym dniu'));
+  prow.append(el('div', 'n', 'Startuj na niedokończonej sesji'));
   prow.append(miniBtn(state.autoDzis ? 'Włączone' : 'Wyłączone', () => { state.autoDzis = !state.autoDzis; save(); render(); }));
   pref.append(prow);
-  pref.append(el('p', null, 'Poniedziałek → A, środa → B, piątek → C, niedziela → joga. W dzień wolny aplikacja i tak otwiera ekran główny, a wejście z linku zawsze ma pierwszeństwo.'));
+  pref.append(el('p', null, 'Aplikacja otwiera najświeższą sesję tego tygodnia, która nie jest jeszcze zapisana w całości — także wtedy, gdy trening był wczoraj, a dziennik został do uzupełnienia. Sesji z przyszłości nie proponuje. Gdy wszystko jest zapisane, startuje na dzisiejszym dniu (poniedziałek → A, środa → B, piątek → C, niedziela → joga), a w dzień wolny na ekranie głównym. Wejście z linku zawsze ma pierwszeństwo.'));
   body.append(pref);
 
   body.append(przeniesCard());
@@ -2240,7 +2272,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=27')
+fetch('plan.json?v=28')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -2250,8 +2282,9 @@ fetch('plan.json?v=27')
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
     // Zimny start bez hasha: wchodzimy prosto w dzisiejszą sesję. Wejście z linkiem
     // albo z zakładki ma pierwszeństwo, bo wtedy wiadomo, czego ktoś chciał.
-    if (!location.hash && state.autoDzis && dzisiaj()) {
-      state.view = trasaDnia(dzisiaj());
+    const start = state.autoDzis ? domyslnaSesja() : null;
+    if (!location.hash && start) {
+      state.view = trasaDnia(start);
       history.replaceState(null, '', state.view);
     }
     render();

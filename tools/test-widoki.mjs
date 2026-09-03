@@ -123,6 +123,7 @@ vm.runInContext(`globalThis.API = {
   cofnijRekalibracje, rekalibracjaCard, stanLokalny, plannedOf, logSet, judgeWeek, podsumowanieBlokow,
   postepDnia, platesEl, plateList,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
+  domyslnaSesja, sesjaKompletna, mobWidoczne,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -405,6 +406,59 @@ console.log('Przenoszenie tygodnia');
   przycisk().click();
   test('drugie wykonuje ruch', !A.tydzienMaDane(zrodlo) && A.tydzienMaDane(cel));
   test('i mowi, co sie stalo', app.textContent.includes(`Przeniesione z tygodnia ${zrodlo} na ${cel}`));
+}
+
+/* ---------- na czym otwiera sie aplikacja ---------- */
+console.log('');
+console.log('Sesja na starcie');
+{
+  const W = 11;
+  S.week = W;
+  const wyczysc = () => {
+    for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+    delete S.mob[W];
+  };
+  const wDzien = (nr, fn) => {                        // udajemy konkretny dzien tygodnia
+    const realny = Date.prototype.getDay;
+    Date.prototype.getDay = () => nr;
+    try { return fn(); } finally { Date.prototype.getDay = realny; }
+  };
+  const zapisz = key => S.plan.days[key].items.forEach(it => {
+    const pl = A.plannedOf(it, W, key);
+    for (let i = 0; i < pl.sets; i++) A.logSet(W, key, it.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  });
+  const SOB = 6, PT = 5, CZW = 4, ND = 0;
+
+  wyczysc();
+  test('piatek, nic nie zapisane → dzisiejsze C', wDzien(PT, A.domyslnaSesja) === 'C');
+  // Sobota jest wolna. Wczesniej otwieral sie ekran glowny, mimo ze piatkowy
+  // dziennik zostal pusty — to jest dokladnie ta usterka.
+  test('sobota po niezapisanym piatku → C, nie ekran glowny', wDzien(SOB, A.domyslnaSesja) === 'C');
+
+  zapisz('C');
+  test('dzien C liczony jako kompletny', A.sesjaKompletna('C', W) === true);
+  test('sobota cofa sie do starszej zaleglosci: B', wDzien(SOB, A.domyslnaSesja) === 'B');
+  zapisz('B');
+  test('a po zapisaniu B do A', wDzien(SOB, A.domyslnaSesja) === 'A');
+  zapisz('A');
+  test('komplet w tygodniu → sobota nie otwiera nic', wDzien(SOB, A.domyslnaSesja) == null);
+  test('a piatek wraca do starej zasady, czyli dzisiejszego C', wDzien(PT, A.domyslnaSesja) === 'C');
+
+  // Sesji z przyszlosci nie proponujemy — w czwartek nie ma czego wpisywac do piatku.
+  wyczysc();
+  test('czwartek nie proponuje piatkowego C', wDzien(CZW, A.domyslnaSesja) !== 'C');
+  test('czwartek bierze najswiezsza zaleglosc, czyli B', wDzien(CZW, A.domyslnaSesja) === 'B');
+
+  // Niedziela: joga liczy sie po odklikanych pozycjach, nie po seriach.
+  zapisz('A'); zapisz('B'); zapisz('C');
+  test('niedziela z nieodklikana joga → D', wDzien(ND, A.domyslnaSesja) === 'D');
+  S.mob[W] = {};
+  A.mobWidoczne().forEach(i => { S.mob[W][i.id] = true; });
+  test('odklikana joga jest kompletna', A.sesjaKompletna('D', W) === true);
+  // Komplet nie znaczy „ekran glowny": w dzien, ktory MA sesje, zostaje stara
+  // zasada i otwiera sie dzisiejszy dzien. Pusto jest tylko w dzien wolny.
+  test('a przy komplecie niedziela zostaje na dzisiejszym D', wDzien(ND, A.domyslnaSesja) === 'D');
+  wyczysc();
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));
