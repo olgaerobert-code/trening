@@ -124,6 +124,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
+  scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -371,6 +372,11 @@ console.log('Przenoszenie tygodnia');
   test('stary tydzien wyslany jako pusty', doBazy.some(r => r.week === Z && r.reps === null));
   test('ruch zapisany do synchronizacji', A.stanLokalny().moves.length === 1);
 
+  // Znacznik czasu serii idzie na chwile przeniesienia — na tym stoi rozstrzyganie,
+  // czyj zapis jest nowszy, i sprzatanie po kolejnych ruchach.
+  test('przestawione serie maja znacznik z chwili przeniesienia',
+    S.log[NA + '|A|' + it.n].filter(Boolean).every(r => r.ts === S.moves[S.moves.length - 1].ts));
+
   // Powrot: ten sam ruch w druga strone.
   A.przeniesTydzien(NA, Z);
   test('ruch w druga strone cofa zmiane', A.zawartoscTygodnia(Z).serie === pl.sets && !A.tydzienMaDane(NA));
@@ -459,6 +465,53 @@ console.log('Sesja na starcie');
   // zasada i otwiera sie dzisiejszy dzien. Pusto jest tylko w dzien wolny.
   test('a przy komplecie niedziela zostaje na dzisiejszym D', wDzien(ND, A.domyslnaSesja) === 'D');
   wyczysc();
+}
+
+/* ---------- przeniesiony tydzien nie wraca z bazy ---------- */
+console.log('');
+console.log('Przeniesiony tydzien wobec bazy');
+{
+  const Z = 10, NA = 6;
+  for (const w of [Z, NA]) {
+    for (const k of Object.keys(S.log)) if (+k.split('|')[0] === w) delete S.log[k];
+  }
+  S.moves = [];
+  S.queue = [];
+  const it = S.plan.days.A.items.find(i => A.plannedOf(i, Z, 'A').sets > 0);
+  const pl = A.plannedOf(it, Z, 'A');
+  const stary = '2026-08-01T10:00:00.000Z';
+  S.log[Z + '|A|' + it.n] = [{ r: pl.target, kg: pl.kg, ts: stary }];
+
+  A.przeniesTydzien(Z, NA);
+  test('po przeniesieniu tydzien 10 jest pusty', A.logGet(Z, 'A', it.n).length === 0);
+
+  // Wysylka kolejki i pobranie chodza osobno. Baza oddaje jeszcze STARY komplet:
+  // wiersz tygodnia 10 z wartosciami, sprzed przeniesienia. Wlasnie to wracalo.
+  const zBazy = [{ week: Z, day: 'A', ex: it.n, set_no: 1, reps: pl.target, kg: pl.kg, ts: stary }];
+  A.scalZdalneWiersze(zBazy);
+  test('stary wiersz z bazy NIE wskrzesza tygodnia 10', A.logGet(Z, 'A', it.n).length === 0,
+    'wrocilo: ' + JSON.stringify(A.logGet(Z, 'A', it.n)));
+  test('a tydzien 6 ma swoje serie', A.logGet(NA, 'A', it.n).filter(Boolean).length === 1);
+
+  // Sesja zapisana w tym tygodniu PO przeniesieniu to normalny, zywy zapis.
+  const nowy = new Date(Date.now() + 60000).toISOString();
+  A.scalZdalneWiersze([{ week: Z, day: 'A', ex: it.n, set_no: 1, reps: 5, kg: 50, ts: nowy }]);
+  test('nowy zapis w tym samym tygodniu wchodzi normalnie',
+    A.logGet(Z, 'A', it.n).filter(Boolean).length === 1);
+  test('i to ten nowy, nie odgrzany stary', A.logGet(Z, 'A', it.n)[0].r === 5);
+
+  // Naprawa stanu, ktory zdazyl sie juz odbudowac na urzadzeniu.
+  S.log[Z + '|A|' + it.n] = [{ r: pl.target, kg: pl.kg, ts: stary }];
+  test('sprzatanie usuwa to, co wrocilo przed poprawka',
+    A.sprzatnijPoPrzeniesieniach() === true && A.logGet(Z, 'A', it.n).length === 0);
+  test('i nie ma czego sprzatac za drugim razem', A.sprzatnijPoPrzeniesieniach() === false);
+
+  // Zapis nowszy niz przeniesienie zostaje nietkniety.
+  S.log[Z + '|A|' + it.n] = [{ r: 7, kg: 40, ts: nowy }];
+  A.sprzatnijPoPrzeniesieniach();
+  test('sprzatanie nie rusza zapisu nowszego niz przeniesienie',
+    A.logGet(Z, 'A', it.n).length === 1 && A.logGet(Z, 'A', it.n)[0].r === 7);
+  delete S.log[Z + '|A|' + it.n];
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));
