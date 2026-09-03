@@ -16,8 +16,10 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 - **Własny ciężar boju** — zjechanie suwakiem z liczby, którą podał plan, zostaje
   zapisane: na ten jeden tydzień to jest ciężar tego ćwiczenia. Karta i gryf pokazują
   go od razu, kolejne serie idą z nim, a pod suwakiem stoi liczba z planu i przycisk
-  **Wróć do planu**. Ocena sesji liczy się dalej wobec planu — zjazd w dół to
-  niedowóz, bo tym właśnie jest
+  **Wróć do planu**. Zapisana sesja pokazuje ciężar z dziennika, nie z planu:
+  po przeniesieniu tygodnia albo po wczytaniu kopii na ekranie stoi to, co
+  naprawdę było na sztandze. Ocena sesji liczy się dalej wobec planu — zjazd
+  w dół to niedowóz, bo tym właśnie jest
 - **Samoregulacja** — dwa ostatnie tygodnie treningowe sterują E1RM na kolejny:
   +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij
 - **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),

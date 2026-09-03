@@ -1411,11 +1411,18 @@ function plannedOf(it, w, day) {
   // w piwnicy, a nie w arkuszu. Nadpisanie trzyma się jednego tygodnia, bo plan
   // co tydzień podaje inną liczbę i przenoszenie odchyłki na zawsze byłoby kłamstwem.
   const wlasnyBoj = day ? kgwGet(w, day, it.n) : null;
+  // A gdy sesja jest już zapisana, prawdą o tym, co było na sztandze, jest sam
+  // dziennik — plan mówi tylko, co miało być. Ma to znaczenie po przeniesieniu
+  // tygodnia (plan podaje tam inną liczbę niż ta, którą się dźwigało) i po
+  // wczytaniu kopii zapasowej. Ciężar jest jeden na ćwiczenie, więc bierzemy
+  // pierwszą zapisaną serię z liczbowym ciężarem.
+  const zDziennika = day ? (logGet(w, day, it.n).find(r => r && r.kg != null) || {}).kg : null;
+  const boj = wlasnyBoj != null ? wlasnyBoj : (zDziennika != null ? zDziennika : load);
   return {
     sets: m ? Math.min(+m[1], 12) : 0,
     target: m ? +m[2] : null,
     unit: m && m[3] ? m[3] : null,
-    kg: isKg(load) ? (wlasnyBoj != null ? wlasnyBoj : load) : wlasny,
+    kg: isKg(load) ? boj : wlasny,
     planKg: isKg(load) ? load : null,     // czy ciezar pochodzi z planu, czy jest wlasny
   };
 }
@@ -2317,7 +2324,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=29')
+fetch('plan.json?v=30')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
