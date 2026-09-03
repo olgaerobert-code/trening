@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {},
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [],
 };
 
 /* ---------- Supabase ---------- */
@@ -79,7 +79,7 @@ const save = () => {
 /* ---------- magazyn dziennika ---------- */
 const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening.acc.v1';
 const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1', LS_MOB = 'trening.mob.v1';
-const LS_REK = 'trening.rekal.v1', LS_KGW = 'trening.kgw.v1';
+const LS_REK = 'trening.rekal.v1', LS_KGW = 'trening.kgw.v1', LS_MOV = 'trening.moves.v1';
 const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
 const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
 const saveAdjust = () => { localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust)); pushStan(); };
@@ -87,6 +87,9 @@ const saveAcc = () => { localStorage.setItem(LS_ACC, JSON.stringify(state.acc));
 // Ciezar boju zmieniony recznie: plan zostaje planem, ale sztanga wazy tyle,
 // ile wpisano. Zapis per tydzien, bo plan co tydzien podaje inna liczbe.
 const saveKgw = () => { localStorage.setItem(LS_KGW, JSON.stringify(state.kgw)); pushStan(); };
+// Lista przeniesień tygodni. Jedzie w paczce stanu, bo drugie urządzenie musi
+// wykonać ten sam ruch u siebie — inaczej zostałoby z danymi w obu tygodniach.
+const saveMoves = () => { localStorage.setItem(LS_MOV, JSON.stringify(state.moves)); pushStan(); };
 const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
@@ -98,6 +101,7 @@ function loadStores() {
   state.adjust = readJSON(LS_ADJ, {});
   state.acc = readJSON(LS_ACC, {});
   state.kgw = readJSON(LS_KGW, {});
+  state.moves = readJSON(LS_MOV, []);
   state.mob = readJSON(LS_MOB, {});
   state.rekal = readJSON(LS_REK, {});
   state.queue = readJSON(LS_Q, []);
@@ -1422,6 +1426,80 @@ function kgwSet(w, day, n, kg, planKg) {
   saveKgw();
 }
 
+/* ---------- przenoszenie tygodnia ---------- */
+// Numer tygodnia ustawia się ręcznie, więc sesja potrafi trafić pod numer, który
+// został z poprzedniego razu. Przeniesienie przepina cały tydzień: dziennik serii,
+// własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.
+
+const kluczeTygodnia = (obj, w) => Object.keys(obj).filter(k => +k.split('|')[0] === w);
+
+function zawartoscTygodnia(w) {
+  const klucze = kluczeTygodnia(state.log, w).filter(k => state.log[k].some(Boolean));
+  return {
+    serie: klucze.reduce((a, k) => a + state.log[k].filter(Boolean).length, 0),
+    dni: [...new Set(klucze.map(k => k.split('|')[1]))].sort(),
+    kgw: kluczeTygodnia(state.kgw, w).length,
+    mob: Object.keys(state.mob[w] || {}).length,
+  };
+}
+const tydzienMaDane = w => { const z = zawartoscTygodnia(w); return z.serie > 0 || z.kgw > 0 || z.mob > 0; };
+
+/* Sam ruch. Bez pytań o zgodę i bez sprawdzania, czy cel jest pusty — o tym
+   decyduje ekran, który to wywołuje, albo urządzenie, które ruch już wykonało.
+   opcje.sync = false przy powtarzaniu cudzego przeniesienia: wiersze w bazie
+   są już przestawione, więc drugi raz ich nie wysyłamy.
+   opcje.id niesie identyfikator z drugiego urządzenia, żeby ruch nie odbił się
+   z powrotem jako nowy. */
+function przeniesTydzien(from, to, opcje = {}) {
+  const ts = opcje.ts || new Date().toISOString();
+  const sync = opcje.sync !== false;
+
+  for (const k of kluczeTygodnia(state.log, from)) {
+    const [, day, n] = k.split('|');
+    const rows = state.log[k];
+    state.log[logKey(to, day, n)] = rows;
+    delete state.log[k];
+    // Do bazy idą obie strony: nowy tydzień z wartościami, stary wyzerowany.
+    if (sync) rows.forEach((r, i) => {
+      queuePush({ week: to, day, ex: +n, set_no: i + 1, reps: r ? r.r : null, kg: r ? r.kg : null, ts });
+      queuePush({ week: from, day, ex: +n, set_no: i + 1, reps: null, kg: null, ts });
+    });
+  }
+  saveLog();
+
+  for (const k of kluczeTygodnia(state.kgw, from)) {
+    const [, day, n] = k.split('|');
+    state.kgw[kgwKey(to, day, n)] = state.kgw[k];
+    delete state.kgw[k];
+  }
+  saveKgw();
+
+  if (state.mob[from]) { state.mob[to] = state.mob[from]; delete state.mob[from]; }
+  saveMob();
+
+  state.moves.push({ id: opcje.id || ts + '|' + from + '>' + to, from, to, ts });
+  // Lista jedzie w każdej paczce stanu, więc trzymamy sam ogon.
+  if (state.moves.length > 20) state.moves = state.moves.slice(-20);
+  saveMoves();
+}
+
+/* Przeniesienia wykonane na drugim urządzeniu. Baza `sety` trzyma wiersz na
+   tydzień, a scalanie z założenia nie kasuje lokalnego zapisu pustym wpisem —
+   więc bez powtórzenia ruchu u siebie to urządzenie zostałoby z kompletem
+   w OBU tygodniach. Identyfikator pilnuje, żeby ruch wykonał się raz. */
+function zastosujZdalnePrzeniesienia(zdalne) {
+  if (!Array.isArray(zdalne)) return false;
+  const znane = new Set(state.moves.map(m => m.id));
+  let zm = false;
+  for (const m of zdalne) {
+    if (!m || !m.id || znane.has(m.id)) continue;
+    if (!(m.from >= 1 && m.from <= 12 && m.to >= 1 && m.to <= 12)) continue;
+    przeniesTydzien(m.from, m.to, { sync: false, id: m.id, ts: m.ts });
+    zm = true;
+  }
+  return zm;
+}
+
 function logGet(w, day, n) { return state.log[logKey(w, day, n)] || []; }
 function logSet(w, day, n, idx, val) {
   const k = logKey(w, day, n);
@@ -1512,7 +1590,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1546,6 +1624,8 @@ async function pullStan() {
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
+    // Na końcu, bo `kgw` i `mob` przyjechały już przestawione — zostaje sam dziennik.
+    if (zastosujZdalnePrzeniesienia(d.moves)) zm = true;
     stanTs = row.ts;
     if (zm) { localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound })); return true; }
   } catch { /* jak wyżej */ }
@@ -1917,6 +1997,78 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ---------- dziennik i urządzenia ---------- */
+/* Przepięcie tygodnia z poziomu ustawień. Zasada jest jedna i bez wyjątków:
+   cel musi być pusty. Scalanie dwóch tygodni w jeden zabrałoby zapis, którego
+   nie da się odtworzyć, a dziennik treningowy jest wart więcej niż wygoda. */
+function przeniesCard() {
+  const box = el('div', 'card');
+  let z = null, na = null, pewny = false;
+
+  // Kropka na kafelku tygodnia mówi, gdzie cokolwiek jest zapisane — bez tego
+  // wybór numeru byłby zgadywanką.
+  const rzad = (etykieta, wybrany, ustaw) => {
+    const w = el('div', 'przenrzad');
+    w.append(el('div', 'przenlab', etykieta));
+    const chipy = el('div', 'wchipy');
+    for (let i = 1; i <= 12; i++) {
+      const c = el('button', 'wchip' + (i === wybrany ? ' on' : '') + (tydzienMaDane(i) ? ' ma' : ''), String(i));
+      c.onclick = () => { ustaw(i); pewny = false; odswiez(); };
+      chipy.append(c);
+    }
+    w.append(chipy);
+    return w;
+  };
+
+  const opis = t => {
+    const c = zawartoscTygodnia(t), cz = [];
+    if (c.serie) cz.push(c.serie + ' ' + odmiana(c.serie, 'seria', 'serie', 'serii')
+      + (c.dni.length ? ' (dni ' + c.dni.join(', ') + ')' : ''));
+    if (c.kgw) cz.push(c.kgw + ' ' + odmiana(c.kgw, 'własny ciężar', 'własne ciężary', 'własnych ciężarów'));
+    if (c.mob) cz.push(c.mob + ' ' + odmiana(c.mob, 'pozycja jogi', 'pozycje jogi', 'pozycji jogi'));
+    return cz.join(', ');
+  };
+
+  let komunikat = null;                      // zostaje pod spodem po wykonanym ruchu
+
+  function odswiez() {
+    box.innerHTML = '';
+    box.append(el('h3', null, 'Przenieś dziennik między tygodniami'));
+    box.append(el('p', null, 'Numer tygodnia ustawiasz ręcznie, więc sesja potrafi trafić pod numer, który został z poprzedniego razu. Tutaj przepinasz cały tydzień naraz: serie, własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.'));
+    box.append(rzad('Z tygodnia', z, i => { z = i; }));
+    box.append(rzad('Na tydzień', na, i => { na = i; }));
+
+    let blokada = null;
+    if (z == null || na == null) blokada = 'Wybierz tydzień, z którego przenosisz, i ten, na który ma trafić. Kropka oznacza tydzień, w którym coś jest zapisane.';
+    else if (z === na) blokada = 'To ten sam tydzień.';
+    else if (!tydzienMaDane(z)) blokada = 'Tydzień ' + z + ' jest pusty — nie ma czego przenosić.';
+    else if (tydzienMaDane(na)) blokada = 'Tydzień ' + na + ' nie jest pusty: ' + opis(na)
+      + '. Przeniesienie nadpisałoby ten zapis, więc jest zablokowane.';
+
+    const info = el('div', 'przeninfo' + (blokada && z != null && na != null ? ' stop' : ''));
+    info.textContent = blokada || ('Z tygodnia ' + z + ' na ' + na + ': ' + opis(z) + '.');
+    box.append(info);
+
+    if (!blokada) {
+      const b = el('button', 'btn ghost' + (pewny ? ' warn' : ''),
+        pewny ? 'Na pewno? Tapnij jeszcze raz' : `Przenieś tydzień ${z} na ${na}`);
+      b.onclick = () => {
+        if (!pewny) { pewny = true; odswiez(); return; }
+        const zrodlo = z, cel = na, co = opis(z);
+        przeniesTydzien(zrodlo, cel);
+        z = null; na = null; pewny = false;
+        komunikat = `Przeniesione z tygodnia ${zrodlo} na ${cel}: ${co}. Drugie urządzenie `
+          + 'wykona ten sam ruch przy najbliższej synchronizacji.';
+        odswiez();
+      };
+      box.append(b);
+    }
+    if (komunikat) box.append(el('div', 'przeninfo ok', komunikat));
+  }
+
+  odswiez();
+  return box;
+}
+
 function settingsView() {
   const frag = document.createDocumentFragment();
   frag.append(backLink());
@@ -2005,12 +2157,14 @@ function settingsView() {
   pref.append(el('p', null, 'Poniedziałek → A, środa → B, piątek → C, niedziela → joga. W dzień wolny aplikacja i tak otwiera ekran główny, a wejście z linku zawsze ma pierwszeństwo.'));
   body.append(pref);
 
+  body.append(przeniesCard());
+
   const kop = el('div', 'card');
   kop.append(el('h3', null, 'Kopia zapasowa'));
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -2033,6 +2187,7 @@ function settingsView() {
       if (d.kgw) { state.kgw = d.kgw; saveKgw(); }
       if (d.mob) { state.mob = d.mob; saveMob(); }
       if (d.rekal) { state.rekal = d.rekal; saveRekal(); }
+      if (Array.isArray(d.moves)) { state.moves = d.moves; saveMoves(); }
       render();
     } catch { alert('Nie udało się odczytać pliku.'); }
   };
@@ -2085,7 +2240,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=26')
+fetch('plan.json?v=27')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

@@ -122,6 +122,7 @@ vm.runInContext(`globalThis.API = {
   state, render, dzisiaj, najblizszaSesja, BLOKI, rekalDoWziecia, zastosujRekalibracje,
   cofnijRekalibracje, rekalibracjaCard, stanLokalny, plannedOf, logSet, judgeWeek, podsumowanieBlokow,
   postepDnia, platesEl, plateList,
+  przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -326,6 +327,84 @@ A.render();
   const more = karta.querySelectorAll('.more')[0];
   more.click();
   test('przycisk go rozwija', opis.hidden === false && more.textContent.includes('Zwiń'));
+}
+
+/* ---------- przenoszenie tygodnia ---------- */
+console.log('');
+console.log('Przenoszenie tygodnia');
+{
+  const Z = 9, NA = 5;
+  const dzien = S.plan.days.A;
+  const it = dzien.items.find(i => A.plannedOf(i, Z, 'A').sets > 0);
+  const pl = A.plannedOf(it, Z, 'A');
+
+  // Czysty start: kasujemy oba tygodnie po wczesniejszych testach.
+  for (const w of [Z, NA]) {
+    for (const k of Object.keys(S.log)) if (+k.split('|')[0] === w) delete S.log[k];
+    for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === w) delete S.kgw[k];
+    delete S.mob[w];
+  }
+  S.moves = [];
+  S.queue = [];
+
+  for (let i = 0; i < pl.sets; i++) A.logSet(Z, 'A', it.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  S.kgw[Z + '|A|' + it.n] = 60;
+  S.mob[Z] = { y1: true, y3: true };
+
+  test('tydzien 9 ma dane, 5 jest pusty', A.tydzienMaDane(Z) && !A.tydzienMaDane(NA));
+  const przed = A.zawartoscTygodnia(Z);
+  test('zawartosc policzona: ' + przed.serie + ' serii, ' + przed.kgw + ' ciezar, ' + przed.mob + ' pozycje jogi',
+    przed.serie === pl.sets && przed.kgw === 1 && przed.mob === 2);
+
+  A.przeniesTydzien(Z, NA);
+
+  test('dziennik przeniesiony', S.log[NA + '|A|' + it.n] && !S.log[Z + '|A|' + it.n]);
+  test('serie w komplecie', A.zawartoscTygodnia(NA).serie === pl.sets);
+  test('wlasny ciezar boju poszedl razem z nimi', S.kgw[NA + '|A|' + it.n] === 60 && !(Z + '|A|' + it.n in S.kgw));
+  test('odklikana joga tez', Object.keys(S.mob[NA] || {}).length === 2 && !S.mob[Z]);
+  test('zrodlowy tydzien jest pusty', !A.tydzienMaDane(Z));
+
+  // Do bazy musza pojsc obie strony, inaczej drugie urzadzenie zobaczy duplikat.
+  const doBazy = S.queue.filter(r => r.day === 'A' && r.ex === it.n);
+  test('nowy tydzien wyslany z wartosciami', doBazy.some(r => r.week === NA && r.reps === pl.target));
+  test('stary tydzien wyslany jako pusty', doBazy.some(r => r.week === Z && r.reps === null));
+  test('ruch zapisany do synchronizacji', A.stanLokalny().moves.length === 1);
+
+  // Powrot: ten sam ruch w druga strone.
+  A.przeniesTydzien(NA, Z);
+  test('ruch w druga strone cofa zmiane', A.zawartoscTygodnia(Z).serie === pl.sets && !A.tydzienMaDane(NA));
+
+  // Przeniesienie z drugiego urzadzenia wykonuje sie raz.
+  const zdalne = [{ id: 'test-1', from: Z, to: NA, ts: new Date().toISOString() }];
+  test('zdalny ruch zostaje wykonany', A.zastosujZdalnePrzeniesienia(zdalne) === true
+    && A.zawartoscTygodnia(NA).serie === pl.sets);
+  test('i nie powtarza sie przy kolejnym pobraniu', A.zastosujZdalnePrzeniesienia(zdalne) === false);
+  test('wlasny ruch nie odbija sie jako zdalny',
+    A.zastosujZdalnePrzeniesienia(A.stanLokalny().moves) === false);
+
+  // Ekran ustawien: cel z danymi blokuje ruch.
+  S.view = '#/ustawienia'; A.render();
+  test('ustawienia maja karte przenoszenia', app.textContent.includes('Przenieś dziennik między tygodniami'));
+  const kropki = app.querySelectorAll('.wchip').filter(c => c._cls.has('ma'));
+  test('tygodnie z danymi sa oznaczone kropka', kropki.length > 0);
+
+  // Sciezka, ktora naprawde przechodzi uzytkownik: dwa tapniecia w numery,
+  // potwierdzenie, ruch. Po nim tydzien zrodlowy jest pusty.
+  const zrodlo = A.tydzienMaDane(NA) ? NA : Z, cel = zrodlo === NA ? Z : NA;
+  const rzedy = app.querySelectorAll('.przenrzad');
+  test('karta ma dwa rzedy numerow', rzedy.length === 2);
+  rzedy[0].querySelectorAll('.wchip')[zrodlo - 1].click();
+  rzedy[1].querySelectorAll('.wchip')[cel - 1].click();
+  const przycisk = () => app.querySelectorAll('.btn').find(b => b.textContent.includes('Przenieś tydzień')
+    || b.textContent.includes('Na pewno'));
+  test('po wybraniu pary pojawia sie przycisk', !!przycisk()
+    && przycisk().textContent.includes(`Przenieś tydzień ${zrodlo} na ${cel}`));
+  przycisk().click();
+  test('pierwsze tapniecie tylko pyta o potwierdzenie',
+    przycisk().textContent.includes('Na pewno') && A.tydzienMaDane(zrodlo));
+  przycisk().click();
+  test('drugie wykonuje ruch', !A.tydzienMaDane(zrodlo) && A.tydzienMaDane(cel));
+  test('i mowi, co sie stalo', app.textContent.includes(`Przeniesione z tygodnia ${zrodlo} na ${cel}`));
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));

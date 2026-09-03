@@ -22,6 +22,9 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij
 - **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),
   offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
+- **Przeniesienie tygodnia** — sesja zapisana pod złym numerem przepina się w ustawieniach
+  jednym ruchem: serie, własne ciężary bojów i odklikana joga. Cel musi być pusty,
+  ruch w drugą stronę cofa zmianę, a drugie urządzenie powtarza go u siebie
 - **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
   (kolory wg standardu IPF)
 - **Postęp** — wykres trzech bojów przez 12 tygodni (jedna oś, krzyżyk i dymek pod

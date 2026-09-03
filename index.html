@@ -270,6 +270,21 @@ details.acc[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
 .wchip.biez{border-color:color-mix(in srgb,var(--a) 55%,var(--line))}
 .wchip.on{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:700}
 .wchip:active{transform:scale(.93)}
+/* kropka = w tym tygodniu coś jest zapisane */
+.wchip.ma{position:relative}
+.wchip.ma::after{content:'';position:absolute;left:50%;bottom:4px;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--good)}
+.wchip.on.ma::after{background:var(--bg)}
+
+/* przenoszenie tygodnia */
+.przenrzad{margin-top:12px}
+.przenlab{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:640}
+.przenrzad .wchipy{margin-top:6px}
+.przeninfo{margin-top:13px;padding:10px 12px;border-radius:10px;background:var(--s2);
+  border:1px solid var(--line);font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.przeninfo.stop{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 9%,var(--s2))}
+.przeninfo.ok{border-color:var(--good);background:color-mix(in srgb,var(--good) 9%,var(--s2))}
+.przeninfo+.btn{margin-top:9px}
 .wwroc{display:block;width:100%;margin-top:7px;padding:9px;text-align:center;
   font-family:var(--mono);font-size:11.5px;color:var(--warn);
   background:var(--s2);border:1px solid var(--line);border-radius:var(--r-s)}
@@ -531,7 +546,7 @@ tr.now td:last-child{border-radius:0 7px 7px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=26"></script>
-<script src="app.js?v=26"></script>
+<script src="progresja.js?v=27"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>
