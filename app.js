@@ -1488,7 +1488,12 @@ function przeniesTydzien(from, to, opcje = {}) {
 
   for (const k of kluczeTygodnia(state.log, from)) {
     const [, day, n] = k.split('|');
-    const rows = state.log[k];
+    // Znacznik czasu serii przestawiamy na chwilę przeniesienia. To nie jest
+    // „kiedy trenowałaś" — tego pola nikt nie pokazuje — tylko rozstrzygnięcie,
+    // czyj zapis jest nowszy przy scalaniu. Zapis powstał tu teraz, więc tak ma
+    // stać: inaczej przeniesienie w tydzień, z którego kiedyś już coś wyszło,
+    // wpadałoby pod sprzątanie po tamtym, starszym ruchu.
+    const rows = state.log[k].map(r => (r ? { ...r, ts } : r));
     state.log[logKey(to, day, n)] = rows;
     delete state.log[k];
     // Do bazy idą obie strony: nowy tydzień z wartościami, stary wyzerowany.
@@ -1515,6 +1520,33 @@ function przeniesTydzien(from, to, opcje = {}) {
   saveMoves();
 }
 
+/* Wiersz z tygodnia ŹRÓDŁOWEGO przeniesienia, starszy niż samo przeniesienie,
+   jest martwy: ten zapis stoi teraz gdzie indziej. Baza potrafi go jeszcze zwracać,
+   bo wysyłka kolejki i pobranie chodzą osobno i umieją się rozminąć — a gdy raz
+   wróci na urządzenie, zasada „puste z bazy nie kasuje lokalnego" broni go już
+   na zawsze. Stąd granica po czasie, a nie zwykłe „ignoruj ten tydzień": sesja
+   zapisana w tym tygodniu PO przeniesieniu jest normalnym, żywym zapisem. */
+const poPrzeniesieniu = (week, ts) =>
+  state.moves.some(m => m.from === week && (!ts || new Date(ts) <= new Date(m.ts)));
+
+/* Ten sam warunek zastosowany do tego, co już leży na urządzeniu. Naprawia stan
+   po rozminięciu opisanym wyżej — i po każdym kolejnym, gdyby do niego doszło. */
+function sprzatnijPoPrzeniesieniach() {
+  let zm = false;
+  for (const m of state.moves) {
+    for (const k of kluczeTygodnia(state.log, m.from)) {
+      const stare = state.log[k];
+      const rows = stare.map(r => (r && poPrzeniesieniu(m.from, r.ts) ? null : r));
+      if (rows.every((r, i) => r === stare[i])) continue;
+      while (rows.length && rows[rows.length - 1] == null) rows.pop();
+      if (rows.length) state.log[k] = rows; else delete state.log[k];
+      zm = true;
+    }
+  }
+  if (zm) saveLog();
+  return zm;
+}
+
 /* Przeniesienia wykonane na drugim urządzeniu. Baza `sety` trzyma wiersz na
    tydzień, a scalanie z założenia nie kasuje lokalnego zapisu pustym wpisem —
    więc bez powtórzenia ruchu u siebie to urządzenie zostałoby z kompletem
@@ -1529,6 +1561,9 @@ function zastosujZdalnePrzeniesienia(zdalne) {
     przeniesTydzien(m.from, m.to, { sync: false, id: m.id, ts: m.ts });
     zm = true;
   }
+  // Tydzień źródłowy mógł się już zdążyć odbudować z bazy — czyścimy go tym
+  // samym warunkiem, którym scalanie odrzuca stare wiersze.
+  if (zm) sprzatnijPoPrzeniesieniach();
   return zm;
 }
 
@@ -1588,29 +1623,39 @@ async function flushQueue() {
   if (state.queue.length && state.sync !== 'off') flushQueue();
 }
 
+/* Scalanie paczki z bazy z dziennikiem na urządzeniu. Wydzielone z pullAll,
+   żeby dało się je sprawdzić testem bez sieci — to tutaj rozstrzyga się, czyj
+   zapis wygrywa. */
+function scalZdalneWiersze(rows) {
+  let changed = false;
+  for (const r of rows) {
+    // Zapis, który przeniesienie już przestawiło gdzie indziej.
+    if (poPrzeniesieniu(r.week, r.ts)) continue;
+    const k = logKey(r.week, r.day, r.ex), i = r.set_no - 1;
+    const arr = (state.log[k] || []).slice();
+    while (arr.length <= i) arr.push(null);
+    const mine = arr[i];
+    const zdalny = r.reps == null ? null : { r: r.reps, kg: r.kg == null ? null : +r.kg, ts: r.ts };
+    // Pusty wpis z bazy NIGDY nie kasuje zapisu, ktory jest na tym urzadzeniu.
+    // Kosztuje to jedno: odklikanie serii na jednym urzadzeniu nie zdejmie jej
+    // na drugim. Ale zamienia pomylke w cos odwracalnego zamiast bezpowrotnego —
+    // a dziennik treningowy jest wart wiecej niz ta wygoda.
+    if (zdalny == null && mine) continue;
+    if (!mine || !mine.ts || new Date(r.ts) > new Date(mine.ts)) {      // wygrywa nowszy
+      arr[i] = zdalny;
+      changed = true;
+    }
+    while (arr.length && arr[arr.length - 1] == null) arr.pop();
+    if (arr.length) state.log[k] = arr; else delete state.log[k];
+  }
+  return changed;
+}
+
 async function pullAll() {
   if (!navigator.onLine) return setSync('off');
   try {
     const rows = await rpc('log_pull', { p_key: state.key });
-    let changed = false;
-    for (const r of rows) {
-      const k = logKey(r.week, r.day, r.ex), i = r.set_no - 1;
-      const arr = (state.log[k] || []).slice();
-      while (arr.length <= i) arr.push(null);
-      const mine = arr[i];
-      const zdalny = r.reps == null ? null : { r: r.reps, kg: r.kg == null ? null : +r.kg, ts: r.ts };
-      // Pusty wpis z bazy NIGDY nie kasuje zapisu, ktory jest na tym urzadzeniu.
-      // Kosztuje to jedno: odklikanie serii na jednym urzadzeniu nie zdejmie jej
-      // na drugim. Ale zamienia pomylke w cos odwracalnego zamiast bezpowrotnego —
-      // a dziennik treningowy jest wart wiecej niz ta wygoda.
-      if (zdalny == null && mine) continue;
-      if (!mine || !mine.ts || new Date(r.ts) > new Date(mine.ts)) {      // wygrywa nowszy
-        arr[i] = zdalny;
-        changed = true;
-      }
-      while (arr.length && arr[arr.length - 1] == null) arr.pop();
-      if (arr.length) state.log[k] = arr; else delete state.log[k];
-    }
+    const changed = scalZdalneWiersze(rows);
     setSync(state.queue.length ? 'wait' : 'ok');
     if (changed) { saveLog(); renderJesliSpokojnie(); }
   } catch {
@@ -2272,16 +2317,19 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=28')
+fetch('plan.json?v=29')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
     loadState();
     loadStores();
+    // Naprawa przed pierwszym renderem: tydzień, z którego coś przeniesiono, mógł
+    // się odbudować z bazy, zanim wysyłka kolejki zdążyła go tam wyzerować.
+    sprzatnijPoPrzeniesieniach();
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
-    // Zimny start bez hasha: wchodzimy prosto w dzisiejszą sesję. Wejście z linkiem
-    // albo z zakładki ma pierwszeństwo, bo wtedy wiadomo, czego ktoś chciał.
+    // Zimny start bez hasha: wchodzimy prosto w niedokończoną sesję. Wejście
+    // z linkiem albo z zakładki ma pierwszeństwo — wtedy wiadomo, czego ktoś chciał.
     const start = state.autoDzis ? domyslnaSesja() : null;
     if (!location.hash && start) {
       state.view = trasaDnia(start);
