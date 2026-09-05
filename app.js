@@ -239,7 +239,7 @@ function weekBar() {
 
 function setWeek(w) {
   if (w < 1 || w > 12) return;
-  state.week = w; save(); maybeAdjust(); render();
+  state.week = w; save(); przeliczPlan(); render();
   window.scrollTo({ top: 0 });
 }
 
@@ -1050,8 +1050,38 @@ function rekalDoWziecia(blok) {
 
 function zastosujRekalibracje(blok, zmiany) {
   for (const key of REKAL_BOJE) state.e1rm[key] = zmiany[key].after;
-  state.rekal[blok.rekal] = { ...zmiany, ts: new Date().toISOString() };
+  state.rekal[blok.rekal] = { ...zmiany, ts: new Date().toISOString(), auto: true };
   save(); saveRekal();
+}
+
+/* Rekalibracja idzie sama, jak korekta z dwóch tygodni. Warunek z arkusza jest
+   ostry i policzalny — „KAŻDA sesja zmieściła się w suficie RPE" — więc nie ma
+   tu czego rozstrzygać; pytanie o zgodę było tylko przeniesieniem roboty na
+   głowę, która przyszła potrenować.
+ *
+ * Bloku NIE zamykamy, kiedy podwyżki nie ma. Dziennik uzupełnia się po fakcie,
+ * czasem tydzień później, więc komplet potrafi się domknąć z opóźnieniem —
+ * i wtedy podwyżka ma wejść, a nie przepaść przez to, że akurat nikt jej
+ * wcześniej nie odklikał. */
+function maybeRekalibruj() {
+  const out = [];
+  for (const blok of BLOKI) {
+    if (!blok.rekal || state.week < blok.rekal || state.rekal[blok.rekal]) continue;
+    const w = rekalDoWziecia(blok);
+    if (!w || !w.ocena) continue;
+    zastosujRekalibracje(blok, w.zmiany);
+    out.push({ blok, zmiany: w.zmiany });
+  }
+  return out;
+}
+
+/* Jedno wejście na wszystkie automatyczne przeliczenia. Kolejność ma znaczenie:
+   rekalibracja bloku idzie PIERWSZA, a korekta z dwóch tygodni omija boje, które
+   właśnie dostały +10% — inaczej w tygodniu wyzwalającym zsumowałoby się to do
+   ponad dwunastu procent, a arkusz mówi „nigdy więcej niż 10% naraz". */
+function przeliczPlan() {
+  maybeRekalibruj();
+  return maybeAdjust();
 }
 
 function cofnijRekalibracje(trigger) {
@@ -1062,55 +1092,71 @@ function cofnijRekalibracje(trigger) {
   save(); saveRekal();
 }
 
-// Karta na ekranie głównym: pojawia się tylko wtedy, gdy jest co zrobić.
+// Karta na ekranie głównym. Nie pyta o zgodę — mówi, co się stało z ciężarami,
+// i zostawia drogę powrotną. Znika po tapnięciu „OK", bo informacja przeczytana
+// przestaje być informacją i robi się szumem.
 function rekalibracjaCard() {
-  const blok = BLOKI.find(b => b.rekal && state.week >= b.rekal && !state.rekal[b.rekal]);
-  if (!blok) return null;
-  const w = rekalDoWziecia(blok);
-  if (!w) return null;
-
-  const n = el('div', 'note rekal');
-  n.append(el('b', null, `Rekalibracja po bloku ${blok.n}`));
-
-  if (!w.ocena) {
-    const braki = REKAL_BOJE.map(k => ({ k, o: ocenaBojuWBloku(k, blok) })).filter(x => !x.o.komplet);
-    const opis = braki.map(({ k, o }) => {
-      const L = LIFTS.find(x => x.key === k);
-      return o.niedowozy ? `${L.short}: ${o.niedowozy} × niedowóz`
-                         : `${L.short}: ${o.zapisanych}/${o.tygodni} tygodni zapisanych`;
-    }).join(' · ');
-    n.append(el('div', 'adjrow', 'Bez podwyżki — nie każda sesja weszła w plan.'));
-    n.append(el('div', 'adjrow', opis));
-    const ok = el('button', 'mini', 'Rozumiem, schowaj');
-    ok.onclick = () => { state.rekal[blok.rekal] = { pominieta: true, ts: new Date().toISOString() }; saveRekal(); render(); };
-    const doRaportu = el('button', 'mini', 'Zobacz raport');
-    doRaportu.onclick = () => go('#/raport');
-    n.append(ok, doRaportu);
-    return n;
+  for (const blok of [...BLOKI].reverse()) {
+    if (!blok.rekal || state.week < blok.rekal) continue;
+    const r = state.rekal[blok.rekal];
+    if (r) {
+      if (r.pominieta || r.widziana) continue;
+      return kartaPodwyzki(blok, r);
+    }
+    // Podwyżki nie ma. Mówimy o tym raz, w tygodniu wyzwalającym, i nic nie
+    // zamykamy — dziennik może się jeszcze uzupełnić.
+    if (state.week === blok.rekal) {
+      const w = rekalDoWziecia(blok);
+      if (w && !w.ocena) return kartaBezPodwyzki(blok);
+    }
   }
+  return null;
+}
 
-  n.append(el('div', 'adjrow', 'Każda sesja dołu weszła w plan. Arkusz mówi: +10%.'));
+function kartaPodwyzki(blok, r) {
+  const n = el('div', 'note rekal');
+  n.append(el('b', null, `Ciężary dołu w górę o 10% — po bloku ${blok.n}`));
+  n.append(el('div', 'adjrow', 'Każda sesja dołu weszła w plan, więc podwyżka zastosowała się sama.'));
   for (const key of REKAL_BOJE) {
-    const L = LIFTS.find(x => x.key === key), z = w.zmiany[key];
+    if (!r[key]) continue;
+    const L = LIFTS.find(x => x.key === key);
     const p = el('div', 'adjrow');
     const dot = el('span', 'dotc'); dot.style.background = L.color;
-    p.append(dot, el('span', null, `${L.short} → ${fmt(z.after)} kg`));
-    p.append(el('em', null, `było ${fmt(z.before)}`));
+    p.append(dot, el('span', null, `${L.short} → ${fmt(r[key].after)} kg`));
+    p.append(el('em', null, `było ${fmt(r[key].before)}`));
     n.append(p);
   }
-  const tak = el('button', 'mini', 'Podnieś o 10%');
-  tak.onclick = () => { zastosujRekalibracje(blok, w.zmiany); render(); };
-  const nie = el('button', 'mini', 'Zostaw jak jest');
-  nie.onclick = () => { state.rekal[blok.rekal] = { pominieta: true, ts: new Date().toISOString() }; saveRekal(); render(); };
-  n.append(tak, nie);
-  n.append(el('div', 'adjmini', 'Sufit RPE jest nadrzędny. Jeśli pierwszy tydzień po podwyżce wyjdzie ciężej niż sufit, cofnij ją w raporcie.'));
+  const ok = el('button', 'mini', 'OK');
+  ok.onclick = () => { state.rekal[blok.rekal] = { ...r, widziana: true }; saveRekal(); render(); };
+  const cof = el('button', 'mini', 'Cofnij podwyżkę');
+  cof.onclick = () => { cofnijRekalibracje(blok.rekal); render(); };
+  n.append(ok, cof);
+  n.append(el('div', 'adjmini', 'Sufit RPE jest nadrzędny. Jeśli pierwszy tydzień po podwyżce wyjdzie ciężej niż sufit, cofnij ją tutaj albo w widoku Postęp.'));
+  return n;
+}
+
+function kartaBezPodwyzki(blok) {
+  const n = el('div', 'note rekal');
+  n.append(el('b', null, `Po bloku ${blok.n} bez podwyżki`));
+  const braki = REKAL_BOJE.map(k => ({ k, o: ocenaBojuWBloku(k, blok) })).filter(x => !x.o.komplet);
+  const opis = braki.map(({ k, o }) => {
+    const L = LIFTS.find(x => x.key === k);
+    return o.niedowozy ? `${L.short}: ${o.niedowozy} × niedowóz`
+                       : `${L.short}: ${o.zapisanych}/${o.tygodni} tygodni zapisanych`;
+  }).join(' · ');
+  n.append(el('div', 'adjrow', 'Nie każda sesja bloku weszła w plan. Ciężary zostają.'));
+  if (opis) n.append(el('div', 'adjrow', opis));
+  const doRaportu = el('button', 'mini', 'Zobacz raport');
+  doRaportu.onclick = () => go('#/postep');
+  n.append(doRaportu);
+  n.append(el('div', 'adjmini', 'Nic nie jest zamknięte: jeśli uzupełnisz brakujący dziennik, podwyżka wejdzie sama.'));
   return n;
 }
 
 function podsumowanieBlokow() {
   const gotowe = BLOKI.filter(blokZakonczony).length;
   const czeka = BLOKI.some(b => b.rekal && state.week >= b.rekal && !state.rekal[b.rekal]);
-  if (czeka) return 'Rekalibracja czeka na decyzję';
+  if (czeka) return 'Rekalibracja czeka na komplet sesji';
   if (!gotowe) return 'Wykres, werdykty sesji i tabele';
   return `${gotowe} ${odmiana(gotowe, 'blok zamknięty', 'bloki zamknięte', 'bloków zamkniętych')} · wykres i werdykty`;
 }
@@ -1192,8 +1238,8 @@ function rekalibracjaHistoria(blok) {
   const r = state.rekal[blok.rekal];
   if (!r) {
     box.append(el('p', null, state.week >= blok.rekal
-      ? 'Rekalibracja czeka na decyzję — karta jest na ekranie głównym.'
-      : `Rekalibracja po tym bloku: w tygodniu ${blok.rekal}.`));
+      ? 'Bez podwyżki — nie każda sesja bloku weszła w plan. Aplikacja sprawdza to dalej: uzupełniony dziennik może ją jeszcze odblokować.'
+      : `Rekalibracja po tym bloku: w tygodniu ${blok.rekal}. Zastosuje się sama, jeśli każda sesja dołu wejdzie w plan.`));
     return box;
   }
   if (r.pominieta) {
@@ -1208,6 +1254,7 @@ function rekalibracjaHistoria(blok) {
     p.append(dot, el('span', null, `${L.short}: ${fmt(r[key].before)} → ${fmt(r[key].after)} kg`));
     box.append(p);
   }
+  box.append(el('p', null, r.auto ? 'Podwyżka +10% zastosowana automatycznie.' : 'Podwyżka +10%.'));
   const cof = el('button', 'mini', 'Cofnij rekalibrację');
   cof.onclick = () => { cofnijRekalibracje(blok.rekal); render(); };
   box.append(cof);
@@ -1918,10 +1965,14 @@ function judgeWeek(liftKey, w) {
 function maybeAdjust() {
   const w = state.week;
   const out = [];
+  // Bój, który w tym tygodniu dostał +10% z rekalibracji bloku, ma już swoje
+  // i drugiej podwyżki nie dokładamy.
+  const rek = state.rekal[w];
   for (const key of ['bench', 'front', 'dl']) {
     const a = state.adjust[key] || {};
     if (a.week === w) { if (a.pct) out.push({ key, ...a }); continue; }   // już zastosowana
     if (a.skipped === w) continue;                                        // cofnięta ręcznie
+    if (rek && !rek.pominieta && rek[key]) { state.adjust[key] = { week: w, pct: 0, powod: 'rekalibracja bloku' }; continue; }
     const [wo, wn] = windowWeeks(w);
     const older = judgeWeek(key, wo), newer = judgeWeek(key, wn);
     const { pct, powod } = adjustment(older, newer);
@@ -2324,7 +2375,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=30')
+fetch('plan.json?v=31')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -2343,7 +2394,7 @@ fetch('plan.json?v=30')
       history.replaceState(null, '', state.view);
     }
     render();
-    pullStan().then(() => { maybeAdjust(); render(); pullAll(); flushQueue(); });
+    pullStan().then(() => { przeliczPlan(); render(); pullAll(); flushQueue(); });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   })
   .catch(() => {

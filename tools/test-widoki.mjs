@@ -121,7 +121,7 @@ for (const plik of ['progresja.js', 'app.js']) {
 vm.runInContext(`globalThis.API = {
   state, render, dzisiaj, najblizszaSesja, BLOKI, rekalDoWziecia, zastosujRekalibracje,
   cofnijRekalibracje, rekalibracjaCard, stanLokalny, plannedOf, logSet, judgeWeek, podsumowanieBlokow,
-  postepDnia, platesEl, plateList,
+  postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
@@ -192,14 +192,58 @@ test('komplet w tygodniach 1-3 odblokowuje +10%', gotowe.ocena === true);
 test('front squat ' + przed.front + ' → ' + (gotowe.zmiany && gotowe.zmiany.front.after),
   gotowe.zmiany && gotowe.zmiany.front.after === Math.floor(przed.front * 1.1 / 2.5) * 2.5);
 
-A.zastosujRekalibracje(blok1, gotowe.zmiany);
-test('po zastosowaniu E1RM rosnie', S.e1rm.front > przed.front && S.e1rm.dl > przed.dl);
-test('karta znika z ekranu glownego', A.rekalibracjaCard() === null);
+// Nikt nic nie tapie: przeliczenie planu przy wejsciu podnosi ciezary samo.
+S.rekal = {};
+S.e1rm.front = przed.front; S.e1rm.dl = przed.dl;
+S.adjust = {};
+A.maybeRekalibruj();
+test('podwyzka wchodzi sama, bez tapniecia', S.e1rm.front > przed.front && S.e1rm.dl > przed.dl);
+test('i jest oznaczona jako automatyczna', S.rekal[4] && S.rekal[4].auto === true);
 test('rekalibracja jedzie do synchronizacji', 'rekal' in A.stanLokalny());
+
+// Karta nie pyta o zgode, tylko mowi, co sie stalo.
+const karta = A.rekalibracjaCard();
+test('karta informuje o podwyzce', karta && karta.textContent.includes('w górę o 10%'));
+test('i ma droge powrotna', karta && karta.textContent.includes('Cofnij podwyżkę'));
+test('bez pytania o zgode', karta && !karta.textContent.includes('Podnieś o 10%'));
+
+const przyciskOK = karta.querySelectorAll('.mini').find(b => b.textContent === 'OK');
+przyciskOK.click();
+test('OK chowa karte', A.rekalibracjaCard() === null);
+test('ale podwyzka zostaje', S.e1rm.front > przed.front);
+
+// Drugie wejscie do planu nie podnosi drugi raz.
+const poPierwszej = S.e1rm.front;
+A.maybeRekalibruj();
+test('kolejne wejscie nie podnosi drugi raz', S.e1rm.front === poPierwszej);
+
+// Rekalibracja i korekta z dwoch tygodni nie sumuja sie ponad 10%.
+S.adjust = {};
+A.maybeAdjust();
+test('korekta z dwoch tygodni omija swiezo podniesione boje',
+  S.e1rm.front === poPierwszej && S.adjust.front.powod === 'rekalibracja bloku');
 
 A.cofnijRekalibracje(4);
 test('cofniecie wraca do poprzednich ciezarow', S.e1rm.front === przed.front && S.e1rm.dl === przed.dl);
-test('i nie proponuje jej drugi raz', A.rekalibracjaCard() === null);
+test('i karta nie wraca', A.rekalibracjaCard() === null);
+test('ani podwyzka przy nastepnym wejsciu', (() => { A.maybeRekalibruj(); return S.e1rm.front === przed.front; })());
+
+// Blok bez kompletu NIE jest zamykany: dziennik uzupelnia sie po fakcie.
+S.rekal = {};
+const zapisFront = { ...S.log['3|C|' + front.n] };
+delete S.log['3|C|' + front.n];
+A.maybeRekalibruj();
+test('brak kompletu → bez podwyzki', S.e1rm.front === przed.front);
+test('i blok zostaje otwarty', !S.rekal[4]);
+const brak = A.rekalibracjaCard();
+test('karta mowi, ze podwyzki nie ma', brak && brak.textContent.includes('bez podwyżki'));
+test('i ze nic nie jest zamkniete', brak && brak.textContent.includes('wejdzie sama'));
+
+S.log['3|C|' + front.n] = Object.values(zapisFront);
+A.maybeRekalibruj();
+test('uzupelniony dziennik odblokowuje podwyzke pozniej', S.e1rm.front > przed.front);
+A.cofnijRekalibracje(4);
+S.adjust = {};
 
 /* ---------- odchudzanie ---------- */
 console.log('');

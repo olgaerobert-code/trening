@@ -21,7 +21,8 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   naprawdę było na sztandze. Ocena sesji liczy się dalej wobec planu — zjazd
   w dół to niedowóz, bo tym właśnie jest
 - **Samoregulacja** — dwa ostatnie tygodnie treningowe sterują E1RM na kolejny:
-  +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij
+  +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij. Nic nie pyta o zgodę:
+  plan przelicza się przy wejściu, a decyzje zostają do cofnięcia, nie do podjęcia
 - **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),
   offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
 - **Przeniesienie tygodnia** — sesja zapisana pod złym numerem przepina się w ustawieniach
@@ -48,7 +49,11 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   kiedy następna. Do wyłączenia w ustawieniach
 - **Raport bloków** — werdykt każdej sesji tydzień po tygodniu, frekwencja, tonaż
   i odklikane niedziele. Po bloku 1 i 2 sprawdza warunek z arkusza („KAŻDA sesja
-  w suficie RPE") i proponuje rekalibrację +10% jednym tapnięciem, z możliwością cofnięcia
+  w suficie RPE") i sama podnosi ciężary dołu o 10%, a karta na ekranie głównym
+  mówi, co się zmieniło, i zostawia „Cofnij". Blok bez kompletu **nie jest
+  zamykany**: dziennik uzupełnia się po fakcie, więc podwyżka wejdzie później,
+  jeśli brakujące sesje się znajdą. W tygodniu z rekalibracją korekta z dwóch
+  tygodni omija podniesione boje — „nigdy więcej niż 10% naraz"
 - **Zasady** prowadzenia cyklu
 
 ## Wygląd
