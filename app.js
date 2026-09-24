@@ -204,40 +204,37 @@ function setCount(scheme) {
 }
 const isMainLift = name => ['Wyciskanie leżąc', 'Podciąganie', 'Front squat', 'Martwy ciąg z podwyższenia'].includes(name);
 
-/* ---------- pasek tygodnia ---------- */
-// Dwanaście pigułek do przewijania zamiast strzałek: tydzień wybiera się jednym
-// tapnięciem, a cały cykl widać naraz — co za nami, co przed nami, gdzie deload.
+/* ---------- nagłówek tygodnia ---------- */
+// Duży tytuł jak w aplikacji na telefon: data, numer tygodnia, miejsce w cyklu.
+// Pod nim dwanaście tygodni jednym rzędem — tapnięcie przestawia tydzień.
 let kierunekTygodnia = '';                      // 'w-up' / 'w-down' po zmianie tygodnia
+const MIESIAC = ['stycznia', 'lutego', 'marca', 'kwietnia', 'maja', 'czerwca', 'lipca', 'sierpnia', 'września', 'października', 'listopada', 'grudnia'];
 
 function weekBar() {
-  const w = state.week, L = lowerRow(w);
-  const bar = el('div', 'weekbar');
-  const row = el('div', 'weekrow');
-  const mid = el('div', 'wmid');
-  mid.append(el('div', 'wlbl', 'Tydzień'));
-  mid.append(el('div', 'wval' + (kierunekTygodnia ? ' ' + kierunekTygodnia : ''), String(w)));
-  mid.append(el('div', 'wsub', `blok ${L.block} · ${state.plan.schedule}`));
-  row.append(mid);
-  bar.append(row);
+  const w = state.week, L = lowerRow(w), d = new Date();
+  const bar = el('header', 'top');
+  bar.append(el('div', 'data', `${NAZWA_DNIA[d.getDay()]}, ${d.getDate()} ${MIESIAC[d.getMonth()]}`));
+  const row = el('div', 'toprow');
+  const t = el('h1', 'wval' + (kierunekTygodnia ? ' ' + kierunekTygodnia : ''));
+  t.append(el('span', 'wlbl', 'Tydzień '), el('b', null, String(w)));
+  row.append(t);
   kierunekTygodnia = '';
+  const doTestu = 12 - w;
+  const blok = isDeload(w) ? 'Deload' : 'Blok ' + (BLOKI.find(b => b.weeks.includes(w)) || {}).n;
+  row.append(el('div', 'wsub', w === 12 ? `${blok} · tydzień testów` : `${blok} · ${doTestu} ${odmiana(doTestu, 'tydzień', 'tygodnie', 'tygodni')} do testu`));
+  bar.append(row);
 
   const strip = el('div', 'wstrip');
-  let biezacy = null;
   for (let i = 1; i <= 12; i++) {
     const p = el('button', 'wp', String(i));
     if (isDeload(i)) p.classList.add('dl');
     if (i < w) p.classList.add('done');
-    if (i === w) { p.classList.add('now'); biezacy = p; }
-    p.setAttribute('aria-label', 'Tydzień ' + i);
+    if (i === w) p.classList.add('now');
+    p.setAttribute('aria-label', 'Tydzień ' + i + (isDeload(i) ? ', deload' : ''));
     p.onclick = () => setWeek(i);
     strip.append(p);
   }
   bar.append(strip);
-  // Bieżący tydzień w kadrze — po wstawieniu do dokumentu, bo wcześniej nie ma wymiarów.
-  setTimeout(() => {
-    try { if (biezacy.offsetLeft != null && strip.clientWidth) strip.scrollLeft = biezacy.offsetLeft - strip.clientWidth / 2 + biezacy.offsetWidth / 2; }
-    catch { /* mini-DOM w testach */ }
-  }, 0);
   return bar;
 }
 
@@ -251,54 +248,37 @@ function setWeek(w) {
 /* ---------- ekran główny ---------- */
 function homeView() {
   const p = state.plan, w = state.week, frag = document.createDocumentFragment();
-  const body = el('div', klasaWejscia());
-  const deload = String(lowerRow(w).block).toLowerCase() === 'deload';
+  const body = el('div', 'home ' + klasaWejscia());
+  const deload = isDeload(w);
 
-  // Sesja, o którą teraz chodzi, jako plakat na całą szerokość: dzisiejsza,
-  // zaległa do wpisania, a w dzień wolny — najbliższa. Pozostałe trzy jadą
-  // pod nią w szynie do przewijania.
+  body.append(dniTygodnia(w));
+
+  // Karta „Dziś": sesja, o którą teraz chodzi — dzisiejsza, zaległa do wpisania,
+  // a w dzień wolny najbliższa. Na wierzchu to, po co się otwiera aplikację:
+  // ile ma być na sztandze i w jakim schemacie.
   const dzis = dzisiaj();
   const nast = najblizszaSesja();
   const heroKey = domyslnaSesja() || nast.key;
-  const mainOf = { A: 'bench', B: null, C: 'front' };
-  const daneSesji = k => {
-    if (k === 'D') {
-      const m = p.mobility, mDone = mobDone(w), mAll = mobItems().length;
-      return {
-        k: m.key, color: DAY_COLOR.D, title: m.title,
-        sub: mDone ? `${m.day} · ${mDone}/${mAll} pozycji` : `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
-        progress: { done: mDone, total: mAll }, href: '#/mobilnosc',
-      };
-    }
-    const d = p.days[k], lift = mainOf[k], kg = lift ? kgOf(lift, w) : null, pg = postepDnia(w, k);
-    return {
-      k, color: DAY_COLOR[k], title: d.title,
-      sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
-      progress: pg, href: '#/d/' + k,
-      right: kg != null ? { v: fmt(kg) + ' kg', u: lift === 'bench' ? 'wyciskanie' : 'front squat' } : null,
-    };
-  };
-  const badgeHero = heroKey === dzis ? 'Dziś'
+  const etykieta = heroKey === dzis ? 'Dziś'
     : POZYCJA_DNIA[heroKey] <= pozycjaDzis() ? 'Do wpisania'
-    : nast.dzien;
-  body.append(tile({ ...daneSesji(heroKey), hero: true, badge: badgeHero }));
-
-  const rail = el('div', 'rail');
-  for (const k of ['A', 'B', 'C', 'D'].filter(x => x !== heroKey)) {
-    rail.append(tile({ ...daneSesji(k), rail: true, badge: k === dzis ? 'Dziś' : null }));
-  }
-  body.append(rail);
+    : 'Następny · ' + nast.dzien;
+  body.append(kartaDzis(heroKey, w, etykieta));
 
   const adj = adjustCard();
   if (adj) body.append(adj);
-
   const rek = rekalibracjaCard();
   if (rek) body.append(rek);
-
   if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.', 'uwaga'));
   if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.', 'uwaga'));
 
-  // Trzy boje główne jako kafle stat — z różnicą względem poprzedniego tygodnia.
+  // Pozostałe sesje tygodnia: jedna lista, nie cztery osobne karty.
+  body.append(el('h2', 'sekcja', 'Ten tydzień'));
+  const lista = el('div', 'lista');
+  for (const k of ['A', 'B', 'C', 'D'].filter(x => x !== heroKey)) lista.append(tile(daneSesji(k, w)));
+  body.append(lista);
+
+  // Ciężary robocze tygodnia — trzy liczby w jednym rzędzie, z różnicą do poprzedniego.
+  body.append(el('h2', 'sekcja', 'Na sztandze w tym tygodniu'));
   const stats = el('div', 'stats');
   for (const L of LIFTS) {
     const kg = kgOf(L.key, w);
@@ -307,36 +287,32 @@ function homeView() {
     s.style.setProperty('--sc', L.color);
     s.append(el('div', 'sl', L.short));
     const v = el('div', 'sv');
-    if (kg == null) { v.textContent = 'test'; v.style.fontSize = '20px'; }
+    if (kg == null) v.textContent = 'test';
     else { v.textContent = fmt(kg); v.dataset.cnt = kg; v.dataset.krok = 2.5; v.append(el('u', null, 'kg')); }
     s.append(v);
     let d = '—';
     if (kg != null && prev != null) {
       const diff = kg - prev;
-      d = diff > 0 ? '↑ +' + fmt(diff) + ' kg' : diff < 0 ? '↓ ' + fmt(-diff) + ' kg' : 'bez zmian';
+      d = diff > 0 ? '+' + fmt(diff) + ' kg' : diff < 0 ? '−' + fmt(-diff) + ' kg' : 'bez zmian';
     } else if (kg != null && w === 1) d = 'start cyklu';
     const dd = el('div', 'sd', d);
     if (kg != null && prev != null && kg > prev) dd.classList.add('up');
+    if (kg != null && prev != null && kg < prev) dd.classList.add('down');
     s.append(dd);
     stats.append(s);
   }
   body.append(stats);
 
-  // Postęp, zasady i dziennik: trzy w rzędzie, mniejsze — to nie są sesje.
-  const drobne = el('div', 'tiles drobne');
-  drobne.append(tile({ k: '≡', ghost: true, title: 'Postęp', sub: podsumowanieBlokow(), href: '#/postep' }));
-  drobne.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
-  drobne.append(tile({ k: '⚙', ghost: true, title: 'Dziennik', sub: syncLabel(), href: '#/ustawienia' }));
-  body.append(drobne);
-
-  const box = el('div', 'card');
-  box.append(el('h3', null, 'E1RM — podstawa wszystkich ciężarów'));
+  body.append(el('h2', 'sekcja', 'Maksy (E1RM)'));
+  const box = el('div', 'card e1');
   for (const L of LIFTS) {
     const r = el('div', 'e1row');
     const d = el('div', 'dotc'); d.style.background = L.color;
-    r.append(d, el('div', 'n', L.full), el('div', 'v', fmt(state.e1rm[L.key]) + ' kg'));
-    r.append(miniBtn('−10%', () => { state.e1rm[L.key] = round25(state.e1rm[L.key] / 1.1); save(); render(); }));
-    r.append(miniBtn('+10%', () => { state.e1rm[L.key] = round25(state.e1rm[L.key] * 1.1); save(); render(); }));
+    r.append(d, el('div', 'n', L.short), el('div', 'v', fmt(state.e1rm[L.key]) + ' kg'));
+    const st = el('div', 'pm');
+    st.append(miniBtn('−10%', () => { state.e1rm[L.key] = round25(state.e1rm[L.key] / 1.1); save(); render(); }));
+    st.append(miniBtn('+10%', () => { state.e1rm[L.key] = round25(state.e1rm[L.key] * 1.1); save(); render(); }));
+    r.append(st);
     box.append(r);
   }
   const pod = el('div', 'e1stopka');
@@ -353,6 +329,105 @@ function homeView() {
   return frag;
 }
 
+const MAIN_OF = { A: 'bench', B: null, C: 'front' };
+
+function daneSesji(k, w) {
+  const p = state.plan;
+  if (k === 'D') {
+    const m = p.mobility, mDone = mobDone(w), mAll = mobWidoczne().length;
+    return {
+      k: m.key, color: DAY_COLOR.D, title: 'Joga',
+      sub: mDone ? `${m.day} · ${mDone}/${mAll} pozycji` : `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
+      progress: { done: mDone, total: mAll }, href: '#/mobilnosc',
+    };
+  }
+  const d = p.days[k], pg = postepDnia(w, k);
+  return {
+    k, color: DAY_COLOR[k], title: tytulDnia(d.title),
+    sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
+    progress: pg, href: '#/d/' + k,
+  };
+}
+// „DÓŁ · kontrola i stabilizacja" → „Dół · kontrola i stabilizacja"
+const tytulDnia = t => String(t).split(' · ').map((c, i) => (i === 0 ? c.charAt(0) + c.slice(1).toLowerCase() : c)).join(' · ');
+
+// Pasek dni: siedem kolumn, w każdej litera sesji albo kreska dnia wolnego.
+// Stan widać bez czytania: pełne kółko = zapisane w całości, łuk = w trakcie.
+function dniTygodnia(w) {
+  const box = el('div', 'dni');
+  const skrot = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+  const sesja = { 0: 'A', 2: 'B', 4: 'C', 6: 'D' };
+  const dzis = pozycjaDzis();
+  for (let i = 0; i < 7; i++) {
+    const k = sesja[i];
+    const b = el(k ? 'button' : 'div', 'dzien' + (i === dzis ? ' teraz' : ''));
+    b.append(el('span', 'dn', skrot[i]));
+    if (k) {
+      const pg = daneSesji(k, w).progress;
+      const ile = pg.total ? Math.min(1, pg.done / pg.total) : 0;
+      b.style.setProperty('--tc', DAY_COLOR[k]);
+      const c = el('span', 'dk' + (ile >= 1 ? ' pelny' : ile > 0 ? ' czesc' : ''), ile >= 1 ? '✓' : k);
+      c.style.setProperty('--ile', ile);
+      b.append(c);
+      b.setAttribute('aria-label', nazwaSesji(k) + (ile >= 1 ? ', zapisane' : ''));
+      b.onclick = () => go(trasaDnia(k));
+    } else {
+      b.append(el('span', 'dk wolne', '·'));
+    }
+    box.append(b);
+  }
+  return box;
+}
+
+function kartaDzis(k, w, etykieta) {
+  const dane = daneSesji(k, w);
+  const b = el('button', 'tile hero-s');
+  b.style.setProperty('--tc', dane.color);
+  b.append(el('div', 'eyebrow', etykieta));
+  const tyt = el('div', 'htop');
+  tyt.append(el('span', 'hk', k), el('span', 'tt', dane.title));
+  b.append(tyt);
+
+  const lift = MAIN_OF[k];
+  if (lift) {
+    const it = state.plan.days[k].items.find(x => x.name === MAIN[lift].name);
+    const pl = it ? plannedOf(it, w, k) : null;
+    const kg = pl && pl.kg != null ? pl.kg : kgOf(lift, w);
+    const presk = el('div', 'presk');
+    const v = el('div', 'hv');
+    if (kg != null) { v.textContent = fmt(kg); v.dataset.cnt = kg; v.dataset.krok = 2.5; v.append(el('u', null, 'kg')); }
+    else v.textContent = 'test 1RM';
+    presk.append(v);
+    const L = LIFTS.find(x => x.key === lift);
+    const rpe = it ? resolve(it.rpe, w) : null;
+    presk.append(el('div', 'hs', `${L.full} · ${it ? resolve(it.scheme, w) : ''}${rpe != null && rpe !== '—' ? ' · RPE ' + fmt(rpe) : ''}`));
+    b.append(presk);
+  } else {
+    const d = k === 'D' ? state.plan.mobility : state.plan.days[k];
+    const presk = el('div', 'presk');
+    const v = el('div', 'hv', '~' + d.minutes);
+    v.append(el('u', null, 'min'));
+    presk.append(v);
+    presk.append(el('div', 'hs', k === 'D'
+      ? `${mobWidoczne().length} pozycji · bez obciążenia`
+      : `${d.items.length} ćwiczeń · bez sztangi, bez obciążenia osiowego`));
+    b.append(presk);
+  }
+
+  const pg = dane.progress;
+  const ile = pg.total ? Math.min(1, pg.done / pg.total) : 0;
+  const pas = el('div', 'hbar');
+  const fill = el('i');
+  fill.style.width = (ile * 100) + '%';
+  pas.append(fill);
+  const dol = el('div', 'hdol');
+  dol.append(el('span', 'hpg', pg.total ? `${pg.done}/${pg.total} ${k === 'D' ? 'pozycji' : 'serii'}` : ''));
+  dol.append(el('span', 'cta', ile >= 1 ? 'Zobacz sesję' : pg.done ? 'Kontynuuj' : 'Zacznij trening'));
+  b.append(pas, dol);
+  b.onclick = () => go(dane.href);
+  return b;
+}
+
 function miniBtn(label, fn) {
   const b = el('button', 'mini', label);
   b.onclick = fn;
@@ -360,7 +435,7 @@ function miniBtn(label, fn) {
 }
 
 // Pierścień postępu: obwód siedzi w --c, żeby CSS mógł go animować od zera.
-function ring(ile, r = 22) {
+function ring(ile, r = 20) {
   const C = 2 * Math.PI * r;
   const box = el('div', 'kring' + (ile >= 1 ? ' pelny' : ''));
   box.style.setProperty('--c', C.toFixed(1));
@@ -368,31 +443,19 @@ function ring(ile, r = 22) {
     `<svg viewBox="0 0 48 48"><circle class="kbg" cx="24" cy="24" r="${r}"/>` +
     `<circle class="kfg" cx="24" cy="24" r="${r}" stroke-dasharray="${C.toFixed(1)}" ` +
     `stroke-dashoffset="${(C * (1 - ile)).toFixed(1)}"/></svg>`;
-  box.append(el('div', 'kpr', Math.round(ile * 100) + '%'));
   return box;
 }
 
-function tile({ k, color, ghost, title, sub, right, href, badge, progress, hero, rail }) {
-  const b = el('button', 'tile' + (ghost ? ' drobny' : hero ? ' hero-s' : rail ? ' rail-s' : ''));
+function tile({ k, color, title, sub, href, progress }) {
+  const b = el('button', 'tile');
   if (color) b.style.setProperty('--tc', color);
-  if (badge) b.classList.add('dzis');
-  b.append(el('div', 'k' + (ghost ? ' ghost' : ''), k));
+  b.append(el('div', 'k', k));
   const mid = el('div', 'tmid');
-  if (badge) mid.append(el('span', 'bdg', badge));
   mid.append(el('div', 'tt', title));
   mid.append(el('div', 'ts', sub));
-  if (right) {
-    const r = el('div', 'tr');
-    r.append(el('div', 'v', right.v));
-    r.append(el('div', 'u', right.u));
-    mid.append(r);
-  }
-  if (hero) mid.append(el('div', 'cta', progress && progress.done ? 'Wróć do sesji' : 'Otwórz sesję'));
   b.append(mid);
-  // Pierścień mówi, ile z sesji jest już zapisane — jedno spojrzenie na ekran
-  // główny i wiadomo, co w tym tygodniu zostało do zrobienia.
-  if (progress && progress.total) b.append(ring(Math.min(1, progress.done / progress.total)));
-  else if (!hero && !rail) b.append(el('div', 'go', '›'));
+  if (progress && progress.total) b.append(ring(Math.min(1, progress.done / progress.total), 20));
+  b.append(el('div', 'go', '›'));
   b.onclick = () => go(href);
   return b;
 }
@@ -405,7 +468,7 @@ function noteBox(title, bodyText, cls) {
 }
 
 function backLink() {
-  const a = el('button', 'back', '‹ Wróć');
+  const a = el('button', 'back', '‹ Dziś');
   a.onclick = () => go('#/');
   return a;
 }
@@ -478,7 +541,7 @@ function dayView(key, wArg) {
 
   const wrapper = el('div');
   wrapper.style.setProperty('--dc', DAY_COLOR[key]);
-  wrapper.append(head(`Dzień ${d.key} — ${d.title}`, `${d.day} · ~${d.minutes} min`, true, d.key));
+  wrapper.append(head(tytulDnia(d.title), `Dzień ${d.key} · ${d.day} · ~${d.minutes} min`, true, d.key));
   wrapper.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
 
   const { done, total } = postepDnia(w, key);
@@ -883,8 +946,8 @@ function mobilityView(wArg) {
 
   const body = el('div');
   body.style.setProperty('--dc', DAY_COLOR.D);
-  body.append(head(`Dzień ${m.key} — ${m.title}`,
-    `${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true, m.key));
+  body.append(head('Joga',
+    `Dzień ${m.key} · ${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true, m.key));
   body.append(wyborTygodnia(w, x => '#/mobilnosc/' + x));
 
   const widoczne = mobWidoczne();
@@ -1871,8 +1934,8 @@ function setRows(it, day, w, pl, onKg) {
     const r = el('div', 'setrow' + (zapis ? ' done' : ''));
     let powt = zapis ? zapis.r : pl.target;
 
-    const tick = el('button', 'tick', String(i + 1));
-    tick.setAttribute('aria-label', 'Seria ' + (i + 1) + ' z ' + pl.sets);
+    const tick = el('button', 'tick', '✓');
+    tick.setAttribute('aria-label', 'Odhacz serię ' + (i + 1) + ' z ' + pl.sets);
     const sl = el('input', 'suwak');
     sl.type = 'range'; sl.min = 0; sl.max = Math.max(pl.target * 2, pl.target + 6); sl.step = 1; sl.value = powt;
     sl.setAttribute('aria-label', 'Powtórzenia w serii ' + (i + 1));
@@ -1895,7 +1958,7 @@ function setRows(it, day, w, pl, onKg) {
       odswiezPostep(day, w);
     };
 
-    r.append(tick, sl, val);
+    r.append(el('span', 'snum', String(i + 1)), sl, val, tick);
     box.append(r);
   }
   box.dataset.ex = id;
@@ -2102,9 +2165,38 @@ function cancelBeeps() {
 let tLeft = 0, tTotal = 0, tId = null, tFired = false;
 const R = 24, CIRC = 2 * Math.PI * R;
 
+// Dolny pasek ma dwie role. Na ekranach przeglądowych to zakładki; w trakcie
+// sesji (albo gdy przerwa jeszcze się liczy) to timer — jedno miejsce pod
+// kciukiem, zawsze w tym samym punkcie ekranu.
+const ZAKLADKI = [
+  { href: '#/', label: 'Dziś', ico: '<path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/>' },
+  { href: '#/postep', label: 'Postęp', ico: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>' },
+  { href: '#/zasady', label: 'Zasady', ico: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>' },
+  { href: '#/ustawienia', label: 'Dziennik', ico: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>' },
+];
+
 function renderTimer() {
   const box = $('#timer');
   box.innerHTML = '';
+  const v = state.view || '#/';
+  const wSesji = v.startsWith('#/d/') || v.startsWith('#/mobilnosc');
+  if (!wSesji && !tId) {
+    box.className = 'timer tabs';
+    const nav = el('nav', 'in');
+    for (const z of ZAKLADKI) {
+      const aktywna = z.href === '#/' ? !['#/postep', '#/tabela', '#/raport', '#/zasady', '#/ustawienia', '#/1rm'].includes(v) && !wSesji
+        : v === z.href || (z.href === '#/postep' && (v === '#/tabela' || v === '#/raport'));
+      const b = el('button', 'tab' + (aktywna ? ' on' : ''));
+      b.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${z.ico}</svg>`;
+      b.append(el('span', null, z.label));
+      if (aktywna) b.setAttribute('aria-current', 'page');
+      b.onclick = () => go(z.href);
+      nav.append(b);
+    }
+    box.append(nav);
+    return;
+  }
+  box.className = 'timer';
   const inner = el('div', 'in');
 
   const ring = el('div', 'ring' + (tId ? '' : tFired ? ' done' : ' idle'));
@@ -2398,7 +2490,9 @@ function render() {
   const v = state.view;
   const onDay = v.startsWith('#/d/');
   const onMob = v === '#/mobilnosc' || v.startsWith('#/mobilnosc/');
-  if (v !== '#/zasady' && v !== '#/1rm' && v !== '#/ustawienia') app.append(weekBar());
+  const naGlownym = !onDay && !onMob && !['#/postep', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'].includes(v);
+  if (naGlownym) app.append(weekBar());
+  document.body.classList.toggle('w-sesji', onDay || onMob);
 
   // "#/d/A" albo "#/d/A/3" — druga forma zapisuje do wskazanego tygodnia,
   // nie ruszając tygodnia bieżącego.
@@ -2419,7 +2513,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=33')
+fetch('plan.json?v=34')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
