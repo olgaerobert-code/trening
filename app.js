@@ -219,7 +219,9 @@ function weekBar() {
 
   const mid = el('div', 'wmid');
   mid.append(el('div', 'wlbl', 'Tydzień treningowy'));
-  mid.append(el('div', 'wval', String(w)));
+  const wv = el('div', 'wval', String(w));
+  wv.append(el('u', null, '/12'));
+  mid.append(wv);
   mid.append(el('div', 'wsub', `blok ${L.block} · ${state.plan.schedule}`));
   row.append(prev, mid, next);
   bar.append(row);
@@ -263,8 +265,8 @@ function homeView() {
     body.append(noteBox('Dziś wolne.', ` Najbliżej: ${n.dzien}, ${nazwaSesji(n.key)}.`));
   }
 
-  if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.'));
-  if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.'));
+  if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.', 'uwaga'));
+  if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.', 'uwaga'));
 
   // Trzy boje główne jako kafle stat — z różnicą względem poprzedniego tygodnia.
   const stats = el('div', 'stats');
@@ -316,10 +318,14 @@ function homeView() {
     right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
     href: '#/mobilnosc',
   }));
-  tiles.append(tile({ k: '≡', ghost: true, title: 'Postęp', sub: podsumowanieBlokow(), href: '#/postep' }));
-  tiles.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
-  tiles.append(tile({ k: '⚙', ghost: true, title: 'Dziennik i urządzenia', sub: syncLabel(), href: '#/ustawienia' }));
   body.append(tiles);
+
+  // Postęp, zasady i dziennik: trzy w rzędzie, mniejsze — to nie są sesje.
+  const drobne = el('div', 'tiles drobne');
+  drobne.append(tile({ k: '≡', ghost: true, title: 'Postęp', sub: podsumowanieBlokow(), href: '#/postep' }));
+  drobne.append(tile({ k: '§', ghost: true, title: 'Zasady', sub: 'Jak prowadzić cykl', href: '#/zasady' }));
+  drobne.append(tile({ k: '⚙', ghost: true, title: 'Dziennik', sub: syncLabel(), href: '#/ustawienia' }));
+  body.append(drobne);
 
   const box = el('div', 'card');
   box.append(el('h3', null, 'E1RM — podstawa wszystkich ciężarów'));
@@ -352,22 +358,17 @@ function miniBtn(label, fn) {
 }
 
 function tile({ k, color, ghost, title, sub, right, href, badge, progress }) {
-  const b = el('button', 'tile');
+  const b = el('button', 'tile' + (ghost ? ' drobny' : ''));
   if (color) b.style.setProperty('--tc', color);
   if (badge) b.classList.add('dzis');
   const kk = el('div', 'k' + (ghost ? ' ghost' : ''), k);
-  // Pierścień wokół litery pokazuje, ile z sesji jest już zapisane. Jedno
-  // spojrzenie na ekran główny mówi, co w tym tygodniu zostało do zrobienia.
+  // Pasek na dolnej krawędzi plakatu pokazuje, ile z sesji jest już zapisane.
+  // Jedno spojrzenie na ekran główny mówi, co w tym tygodniu zostało do zrobienia.
   if (progress && progress.total) {
-    const R = 21, C = 2 * Math.PI * R;
     const ile = Math.min(1, progress.done / progress.total);
-    const ring = el('div', 'kring');
-    if (ile >= 1) ring.classList.add('pelny');
-    ring.innerHTML =
-      `<svg viewBox="0 0 46 46"><circle class="kbg" cx="23" cy="23" r="${R}"/>` +
-      `<circle class="kfg" cx="23" cy="23" r="${R}" stroke-dasharray="${C.toFixed(1)}" ` +
-      `stroke-dashoffset="${(C * (1 - ile)).toFixed(1)}"/></svg>`;
-    kk.append(ring);
+    b.style.setProperty('--pg', ile);
+    if (ile >= 1) b.classList.add('pelny');
+    b.append(el('div', 'tbar'));
   }
   b.append(kk);
   const mid = el('div');
@@ -389,8 +390,8 @@ function tile({ k, color, ghost, title, sub, right, href, badge, progress }) {
   return b;
 }
 
-function noteBox(title, bodyText) {
-  const n = el('div', 'note');
+function noteBox(title, bodyText, cls) {
+  const n = el('div', 'note' + (cls ? ' ' + cls : ''));
   n.append(el('b', null, title));
   n.append(document.createTextNode(bodyText));
   return n;
@@ -402,8 +403,9 @@ function backLink() {
   return a;
 }
 
-function head(title, sub, color) {
+function head(title, sub, color, litera) {
   const h = el('div', 'dayhead');
+  if (litera) h.dataset.k = litera;                 // litera dnia w tle, jak numer na koszulce
   h.append(el('div', 't', title));
   if (sub) h.append(el('div', 's', sub));
   if (color) { const acc = el('div', 'accent'); h.append(acc); }
@@ -469,7 +471,7 @@ function dayView(key, wArg) {
 
   const wrapper = el('div');
   wrapper.style.setProperty('--dc', DAY_COLOR[key]);
-  wrapper.append(head(`Dzień ${d.key} — ${d.title}`, `${d.day} · ~${d.minutes} min`, true));
+  wrapper.append(head(`Dzień ${d.key} — ${d.title}`, `${d.day} · ~${d.minutes} min`, true, d.key));
   wrapper.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
 
   const { done, total } = postepDnia(w, key);
@@ -528,7 +530,7 @@ function exerciseCard(it, key, w) {
   if (isMainLift(it.name)) box.classList.add('main');
 
   const h = el('div', 'exhead');
-  h.append(el('div', 'exn', it.n + '.'));
+  h.append(el('div', 'exn', String(it.n).padStart(2, '0')));
   h.append(el('div', 'exname', it.name));
   const chips = el('div', 'chips');
   if (it.superset) chips.append(el('div', 'chip ss', it.superset));
@@ -784,7 +786,7 @@ function calcView() {
   body.append(inputs);
 
   if (calc.reps === 1 && calc.rpe === 10) {
-    body.append(noteBox('Pojedyncze powtórzenie do upadku.', ' To już jest Twój maks, więc wzór nie dokłada narzutu na zapas — wynik to wprost podniesiony ciężar.'));
+    body.append(noteBox('Pojedyncze powtórzenie do upadku.', ' To już jest Twój maks, więc wzór nie dokłada narzutu na zapas — wynik to wprost podniesiony ciężar.', 'uwaga'));
   }
 
   const apply = el('button', 'btn primary', `Ustaw jako E1RM: ${L.full}`);
@@ -871,7 +873,7 @@ function mobilityView(wArg) {
   const body = el('div');
   body.style.setProperty('--dc', DAY_COLOR.D);
   body.append(head(`Dzień ${m.key} — ${m.title}`,
-    `${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true));
+    `${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true, m.key));
   body.append(wyborTygodnia(w, x => '#/mobilnosc/' + x));
 
   const widoczne = mobWidoczne();
@@ -2375,7 +2377,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=31')
+fetch('plan.json?v=32')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
