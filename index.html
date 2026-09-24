@@ -18,7 +18,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=34) format('woff2');
+  src:url(fonts/Archivo.woff2?v=35) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -137,29 +137,61 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-a
 .dzien.teraz .dk.wolne{color:var(--ink)}
 button.dzien:active .dk{transform:scale(.9)}
 
-/* ══ karta „Dziś" ══ */
-.tile.hero-s{display:block;width:100%;background:var(--s1);border-radius:var(--r-l);padding:18px 18px 16px;
-  box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:12px}
-.tile.hero-s::before{content:'';position:absolute;left:0;top:0;right:0;height:4px;background:var(--tc)}
-.tile.hero-s:active{background:var(--s1)}
-.eyebrow{font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+/* ══ karta „Dziś" — kolor dnia, przyciemniony, żeby biały tekst trzymał kontrast ══ */
+.tile.hero-s{display:block;width:100%;border-radius:var(--r-l);padding:20px 20px 18px;position:relative;overflow:hidden;margin-bottom:12px;
+  color:#fff;isolation:isolate;
+  background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb,var(--tc) 85%,#fff) 0%, transparent 55%),
+    linear-gradient(155deg, color-mix(in srgb,var(--tc) 72%,#000), color-mix(in srgb,var(--tc) 38%,#000));
+  box-shadow:0 18px 40px -18px color-mix(in srgb,var(--tc) 70%,transparent)}
+.tile.hero-s::after{content:attr(data-k);position:absolute;right:-12px;bottom:-54px;z-index:-1;
+  font:900 240px/1 var(--disp);font-stretch:75%;color:rgba(255,255,255,.08);pointer-events:none}
+.tile.hero-s:active{background:
+    radial-gradient(120% 90% at 100% 0%, color-mix(in srgb,var(--tc) 85%,#fff) 0%, transparent 55%),
+    linear-gradient(155deg, color-mix(in srgb,var(--tc) 72%,#000), color-mix(in srgb,var(--tc) 38%,#000))}
+.eyebrow{font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75)}
 .htop{display:flex;align-items:center;gap:10px;margin-top:10px}
 .hk{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;
-  font:800 15px/1 var(--disp);color:#fff;background:var(--tc)}
+  font:800 15px/1 var(--disp);color:color-mix(in srgb,var(--tc) 60%,#000);background:#fff}
 .tile.hero-s .tt{font:800 22px/1.15 var(--disp);font-stretch:90%;letter-spacing:-.01em}
-.presk{margin-top:16px}
-.tile.hero-s .hv{font:900 64px/.95 var(--disp);font-stretch:78%;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.tile.hero-s .hv u{text-decoration:none;font:700 20px var(--sans);color:var(--ink-3);margin-left:4px}
-.tile.hero-s .hs{font-size:14px;color:var(--ink-2);margin-top:6px}
-.hbar{height:6px;border-radius:3px;background:var(--s3);overflow:hidden;margin-top:18px}
-.hbar i{display:block;height:100%;border-radius:3px;background:var(--tc);transition:width .6s var(--ease)}
+.presk{margin-top:18px}
+.tile.hero-s .hv{font:900 72px/.92 var(--disp);font-stretch:76%;letter-spacing:-.02em}
+.tile.hero-s .hv u{text-decoration:none;font:700 20px var(--sans);color:rgba(255,255,255,.7);margin-left:4px}
+.tile.hero-s .hs{font-size:14px;color:rgba(255,255,255,.88);margin-top:8px}
+.hbar{height:6px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:20px}
+.hbar i{display:block;height:100%;border-radius:3px;background:#fff;transition:width .6s var(--ease)}
 .stagger .hbar i{animation:rosnij .9s var(--ease) .15s backwards}
 .hdol{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
-.hpg{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.hpg{font-size:13px;color:rgba(255,255,255,.8);font-variant-numeric:tabular-nums}
 .cta{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;border-radius:999px;
-  background:var(--ink);color:var(--on-ink);font:700 15px/1 var(--sans);transition:transform .15s}
+  background:#fff;color:#0D0F12;font:700 15px/1 var(--sans);transition:transform .15s;box-shadow:0 6px 16px rgba(0,0,0,.18)}
 .cta::after{content:'→'}
 .tile.hero-s:active .cta{transform:scale(.96)}
+
+/* ══ panel tygodnia — zawsze ciemny, jak widżet aktywności ══ */
+.panel{display:grid;grid-template-columns:auto 1fr;gap:16px 18px;align-items:center;margin:16px 0 12px;padding:18px;
+  border-radius:var(--r-l);background:#0F1114;color:#F4F5F7;
+  box-shadow:0 18px 40px -20px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.06)}
+.pring{position:relative;width:148px;height:148px}
+.pring svg{display:block}
+.pring .pr{animation:wypelnij 1.1s var(--ease) .15s backwards}
+.pmid{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1}
+.pmid b{font:900 26px/1 var(--disp);font-stretch:80%}
+.pmid span{font-size:10.5px;color:#9AA1AC;margin-top:3px;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.pleg{display:flex;flex-direction:column;gap:2px;min-width:0}
+.plr{display:flex;align-items:center;gap:8px;padding:7px 4px;border-radius:8px;font-size:13.5px;color:#F4F5F7}
+.plr:active{background:rgba(255,255,255,.06)}
+.plr i{width:10px;height:10px;border-radius:50%;background:var(--tc);flex:none}
+.pln{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plv{font:800 14px/1 var(--disp);color:#9AA1AC;font-variant-numeric:tabular-nums}
+.plr.ok .plv{color:#34D17F}
+.pdol{grid-column:1 / -1;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+.pk{min-width:0}
+.pk+.pk{border-left:1px solid rgba(255,255,255,.08);padding-left:12px}
+.pk b{display:block;font:900 26px/1 var(--disp);font-stretch:78%;white-space:nowrap}
+.pk b u{text-decoration:none;font:700 11px var(--sans);color:#9AA1AC;margin-left:3px}
+.pk span{display:block;font-size:11.5px;color:#9AA1AC;margin-top:4px}
+@media (max-width:360px){.panel{grid-template-columns:1fr;justify-items:center}.pleg{width:100%}}
 
 /* ══ listy ══ */
 .sekcja{font:800 13px/1 var(--disp);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:26px 4px 10px}
@@ -190,7 +222,7 @@ button.dzien:active .dk{transform:scale(.9)}
 .stat .sl::before{content:'';width:8px;height:8px;border-radius:2px;flex:none;background:var(--sc)}
 .stat .sv{font:900 30px/1 var(--disp);font-stretch:78%;margin-top:8px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .stat .sv u{text-decoration:none;font:700 12px var(--sans);color:var(--ink-3);margin-left:3px}
-.stat .sd{font-size:12px;color:var(--ink-3);margin-top:5px;white-space:nowrap}
+.stat .sd{font-size:12px;color:var(--ink-3);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat .sd.up{color:var(--good)}
 
 /* ══ karty ══ */
@@ -436,10 +468,10 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .chart svg{display:block;width:100%;height:auto}
 .grid{stroke:var(--line);stroke-width:1}
 .axis{fill:var(--ink-3);font-size:9.5px;font-variant-numeric:tabular-nums}
-.serie{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;
+.serie{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
   stroke-dasharray:1000;stroke-dashoffset:0;animation:kreska 1.2s var(--ease) .1s backwards}
 @keyframes kreska{from{stroke-dashoffset:1000}}
-.nowline{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:2 3}
+.nowline{stroke:var(--ink-3);stroke-width:1;opacity:.6}
 .hitline{stroke:var(--ink-2);stroke-width:1;opacity:0}
 .hitline.on{opacity:.5}
 .endlab{font-size:10px;font-weight:700;fill:var(--ink-2)}
@@ -452,6 +484,47 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .tip .row{display:flex;align-items:center;gap:7px;margin-top:4px;font-variant-numeric:tabular-nums}
 .tip .row i{width:10px;height:3px;border-radius:2px;flex:none}
 .tip .row b{margin-left:auto;font-weight:700}
+
+/* kolumny tonażu */
+.kolumny svg{overflow:visible}
+.kol{fill:color-mix(in srgb,var(--ink) 22%,var(--s1));transform-box:fill-box;transform-origin:50% 100%;
+  animation:slup .6s var(--ease) backwards;animation-delay:calc(var(--i) * 35ms)}
+.kol.teraz{fill:var(--ink)}
+.kol.dl{fill:color-mix(in srgb,var(--warn) 45%,var(--s1))}
+.kol.przysz{fill:var(--s3);animation:none}
+@keyframes slup{from{transform:scaleY(0)}}
+.stats.kpi{margin-bottom:12px}
+.stats.kpi .sl::before{display:none}
+
+/* ══ zaliczenie sesji ══ */
+.zal{position:fixed;inset:0;z-index:60;display:grid;place-items:end center;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));
+  background:rgba(5,6,8,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:zalTlo .25s ease}
+@keyframes zalTlo{from{opacity:0}}
+.zkarta{width:100%;max-width:440px;border-radius:28px;padding:26px 22px 18px;color:#fff;position:relative;overflow:hidden;isolation:isolate;
+  background:radial-gradient(120% 70% at 100% 0%, color-mix(in srgb,var(--tc) 80%,#fff) 0%, transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb,var(--tc) 70%,#000), #0F1114 78%);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6);animation:zalWjazd .5s var(--spring)}
+@keyframes zalWjazd{from{transform:translateY(40px) scale(.96);opacity:0}}
+.zcheck{width:56px;height:56px}
+.zcheck svg{width:100%;height:100%;fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.zcheck circle{stroke-opacity:.35;stroke-dasharray:151;animation:zalKolo .6s var(--ease) .15s backwards}
+.zcheck path{stroke-dasharray:34;animation:zalPtaszek .35s var(--ease) .55s backwards}
+@keyframes zalKolo{from{stroke-dashoffset:151}}
+@keyframes zalPtaszek{from{stroke-dashoffset:34}}
+.zeye{margin-top:16px;font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.zt{font:900 34px/1.05 var(--disp);font-stretch:82%;margin-top:6px}
+.zbig{font:900 84px/.95 var(--disp);font-stretch:76%;margin-top:18px}
+.zbig u{text-decoration:none;font:700 22px var(--sans);color:rgba(255,255,255,.7);margin-left:4px}
+.zbl{font-size:12.5px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-top:4px}
+.zgl{font-size:14.5px;color:rgba(255,255,255,.9);margin-top:12px}
+.zrow{display:flex;align-items:center;gap:14px;margin:18px 0 18px;padding:12px;border-radius:18px;background:rgba(255,255,255,.07)}
+.zring svg{display:block}
+.zring .pr{animation:wypelnij 1s var(--ease) .4s backwards}
+.zro b{display:block;font-size:15px}
+.zro span{display:block;font-size:12.5px;color:rgba(255,255,255,.72);margin-top:2px}
+.zkarta .btn.primary{background:#fff;color:#0D0F12}
+.zkarta .btn.ghost{background:transparent;color:rgba(255,255,255,.8);margin-top:4px}
+.zinfo{font-size:12.5px;color:rgba(255,255,255,.75);text-align:center;min-height:18px;margin:8px 0 2px}
 
 /* ══ kalkulator 1RM ══ */
 .seg-ctl{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--s3);margin-bottom:14px}
@@ -524,7 +597,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=34"></script>
-<script src="app.js?v=34"></script>
+<script src="progresja.js?v=35"></script>
+<script src="app.js?v=35"></script>
 </body>
 </html>

@@ -68,6 +68,18 @@ według ustawienia telefonu.
   sesji i jej stanem (łuk = w trakcie, zielone ✓ = zapisane), a potem karta
   sesji z tym, po co się otwiera aplikację: ciężar boju dużą cyfrą, schemat
   i sufit RPE, postęp i czarna pigułka „Zacznij trening"
+- **Panel tygodnia** jak widżet aktywności: cztery koncentryczne pierścienie
+  (A, B, C, joga), tonaż tygodnia, ile tygodni z rzędu z kompletem A, B i C
+  i miejsce w cyklu. Zawsze ciemny, w obu motywach
+- **Sesja zaliczona**: po odhaczeniu ostatniej serii (albo ostatniej pozycji
+  jogi) wjeżdża karta z tonażem, bojem i pierścieniami tygodnia, a przycisk
+  **Udostępnij na story** rysuje z tych danych obraz 1080 × 1920 i otwiera
+  systemowe menu udostępniania (Instagram, WhatsApp…). Gdzie przeglądarka
+  tego nie umie, plik ląduje w pobranych. Ta sama karta jest pod
+  podsumowaniem każdej sesji
+- **Postęp**: rząd trzech liczb (tonaż cyklu, sesje, tygodnie z rzędu),
+  kolumny tonażu tydzień po tygodniu i wykres ciężarów według zasad skilla
+  dataviz — linie 2 px, kropki końcowe z obwódką, etykiety w kolorze tekstu
 - **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
   wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
 - **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
