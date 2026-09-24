@@ -58,10 +58,23 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 ## Wygląd
 
-Kierunek nazywa się **żeliwo**: neutralne powierzchnie mają ciepłe odchylenie (sprzęt
-w piwnicy, nie ekran), a wszystkie dane — ciężary, procenty, RPE, tygodnie, serie —
-idą krojem monospace, bo dziennik treningowy i tabela obciążeń zawsze były pisane
-w kolumnach. Żadnych fontów z sieci: aplikacja ma działać offline.
+Kierunek nazywa się **tablica wyników**: czerń jak guma podłogi, jeden kolor
+sygnałowy i wąska wersalika z plakatu zawodów. Nie pulpit z szarymi kartami —
+plakat, na którym liczby są największe.
+
+- **Jeden kolor sygnałowy** (`--vol`, żółtozielony) znaczy zawsze to samo: *teraz*.
+  Bieżący tydzień na torze, zrobiona seria (stempel), sesja na dziś, główny
+  przycisk. Nic innego nie ma prawa go używać — dlatego działa
+- **Bebas Neue** dla wszystkiego, co jest liczbą albo nagłówkiem: numer tygodnia,
+  ciężar na karcie, litera dnia, etykiety. Krój jedzie z aplikacją
+  (`fonts/`, licencja OFL obok) i siedzi w cache service workera, więc offline
+  zostaje offline. Tekst do czytania zostaje w kroju systemowym
+- **Plakaty sesji** na ekranie głównym: litera dnia w swoim kolorze, tytuł
+  wersalikami, ciężar boju po prawej, a na dolnej krawędzi pasek z postępem
+  zapisu. Postęp, zasady i dziennik siedzą pod nimi jako trzy małe kafle
+- **Litera dnia w tle** nagłówka sesji, jak numer na koszulce; tor tygodni
+  z pochylonych pól, deload w prążki
+- Kanty niemal proste (3–6 px), zero cieni i ramek — bloki leżą na czerni
 
 Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli.
 Nie ozdoba — instrukcja ładowania pokazana tak, jak ta rzecz wygląda na stojaku:
@@ -74,9 +87,9 @@ Zmiana tła unieważnia pomiar kontrastu, więc paleta ma własny test:
 node tools/test-kontrast.mjs
 ```
 
-Czyta tokeny wprost z `index.html` i sprawdza 17 par: tekst na trzech powierzchniach
-(progi AAA/AA), kolory serii jako obiekty graficzne (≥ 3:1) i rozróżnialność samych
-powierzchni między sobą.
+Czyta tokeny wprost z `index.html` i sprawdza 22 pary: tekst na trzech powierzchniach
+(progi AAA/AA), kolor sygnałowy jako tekst i jako tło przycisku, kolory serii jako
+obiekty graficzne (≥ 3:1) i rozróżnialność samych powierzchni między sobą.
 
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
 Przeszły komplet kontroli na powierzchni karty: pasmo jasności, próg chromy,
