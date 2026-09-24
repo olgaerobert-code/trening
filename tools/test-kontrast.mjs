@@ -67,15 +67,16 @@ test('pomocniczy', kontrast(ink3, s2), 3);
 console.log('\nEtykieta ostrzegawcza (Czesty blad) na karcie');
 test('warn ' + tok('warn'), kontrast(tok('warn'), s1), 4.5);
 
-console.log('\nGradient sygnalowy (biezacy tydzien, zrobiona seria, glowny przycisk)');
-test('acc ' + tok('acc') + ' jako tekst na tle strony', kontrast(tok('acc'), bg), 4.5);
-test('acc ' + tok('acc') + ' jako tekst na karcie', kontrast(tok('acc'), s1), 4.5);
-test('acc2 ' + tok('acc2') + ' jako tekst na karcie', kontrast(tok('acc2'), s1), 4.5);
-test('bialy napis na fioletowym koncu gradientu (duzy tekst)', kontrast('#ffffff', tok('acc')), 3);
-test('bialy napis na rozowym koncu gradientu (duzy tekst)', kontrast('#ffffff', tok('acc2')), 3);
+console.log('\nGlowny przycisk (czarna pigulka)');
+test('napis on-ink na ink', kontrast(tok('on-ink'), ink), 7);
 
-console.log('\nZielony „zrobione" ' + tok('good'));
+console.log('\nZielony „zapisane" ' + tok('good'));
 test('good jako tekst na karcie', kontrast(tok('good'), s1), 4.5);
+test('good jako tekst na tle „zapisane"', kontrast(tok('good'), tok('good-bg')), 4.5);
+test('bialy ✓ na zielonym', kontrast('#ffffff', tok('good')), 4.5);
+
+console.log('\nOstrzezenie na swoim tle');
+test('warn na warn-bg', kontrast(tok('warn'), tok('warn-bg')), 4.5);
 
 console.log('\nKolory serii na karcie (s1) — obiekty graficzne');
 for (const [n, h] of Object.entries(serie)) test(n + ' ' + h, kontrast(h, s1), 3);

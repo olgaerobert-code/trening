@@ -58,48 +58,42 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 ## Wygląd
 
-Kierunek nazywa się **zorza**: granat nocy, dwie rozmyte plamy światła, które
-dryfują za wszystkim przez pół minuty, szkło zamiast kart i jeden gradient
-sygnałowy (fiolet → róż) na wszystko, co znaczy *teraz*. Nie pulpit — ekran,
-który się rusza.
+Kierunek: **natywna aplikacja treningowa**, taka, za którą płaci się abonament
+(punkt odniesienia: Nike Training Club, Strong, Apple Fitness). Powściągliwie,
+z danymi na pierwszym planie. Jasny motyw jest bazą, ciemny włącza się sam
+według ustawienia telefonu.
 
-- **Sesja na dziś jako plakat** na całą szerokość: gradient w kolorze dnia,
-  litera w tle, pierścień postępu, przycisk z przebłyskiem. Pozostałe trzy
-  sesje jadą pod nim w szynie do przewijania; Postęp, Zasady i Dziennik to
-  trzy małe kafle
-- **Dwanaście pigułek tygodni** do przewijania zamiast strzałek — cały cykl
-  widać naraz, deload w kreskowanej ramce, bieżący tydzień świeci
-- **Syne** (OFL, `fonts/`) dla liczb i nagłówków: szeroki, geometryczny, nie
-  do pomylenia z krojem systemowym. Jedzie z aplikacją i siedzi w cache
-  service workera, więc offline zostaje offline. Tekst do czytania w kroju
-  systemowym
-- **Ruch, ale tylko tam, gdzie coś się dzieje**: liczby wjeżdżają od zera przy
-  wejściu w widok, pierścienie i paski wypełniają się, linie wykresu rysują
-  się, zrobiona seria strzela falą, numer tygodnia przelatuje w stronę zmiany,
-  timer pulsuje w trakcie i drga na końcu, komplet serii błyska na zielono.
-  Animacje klasowe (`swiezo`) gra się wyłącznie na elemencie, który właśnie
-  się zmienił — odświeżenie z bazy niczego nie odtwarza. `prefers-reduced-motion`
-  wyłącza wszystko
+- **Ekran Dziś**: duży tytuł z datą i numerem tygodnia, pod nim dwanaście
+  tygodni jednym rzędem (deload na bursztynowo), pasek dni Pn–Nd z literą
+  sesji i jej stanem (łuk = w trakcie, zielone ✓ = zapisane), a potem karta
+  sesji z tym, po co się otwiera aplikację: ciężar boju dużą cyfrą, schemat
+  i sufit RPE, postęp i czarna pigułka „Zacznij trening"
+- **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
+  wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
+- **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
+  sesji zamienia się w timer przerwy
+- **Archivo** w zwężonej, ciężkiej odmianie na liczby i tytuły — tak wygląda
+  tablica z ciężarami. Przycięty do polskiej łaciny (49 KB, `fonts/`, OFL),
+  siedzi w cache service workera. Tekst do czytania idzie krojem systemowym
+- Jedyny kolor poza kolorami dni i serii to zieleń „zapisane" i bursztyn
+  ostrzeżeń. Główny przycisk jest czarny (w ciemnym motywie biały)
+- **Ruch** tylko tam, gdzie coś się dzieje: wypełnianie pierścieni i pasków
+  przy wejściu, liczby odliczane od zera, sprężynowe odhaczenie serii, linie
+  wykresu rysowane od lewej. `prefers-reduced-motion` wyłącza wszystko
 
-Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli.
-Nie ozdoba — instrukcja ładowania pokazana tak, jak ta rzecz wygląda na stojaku:
+Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli:
 kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie na zewnątrz, średnice
 i grubości w proporcji do prawdziwych krążków.
 
-Zmiana tła unieważnia pomiar kontrastu, więc paleta ma własny test:
+Zmiana palety unieważnia pomiar kontrastu, więc paleta ma własny test:
 
 ```bash
 node tools/test-kontrast.mjs
 ```
 
-Czyta tokeny wprost z `index.html` i sprawdza 24 pary: tekst na trzech powierzchniach
-(progi AAA/AA), oba końce gradientu jako tekst i jako tło pod białym napisem,
-kolory serii jako obiekty graficzne (≥ 3:1) i rozróżnialność samych powierzchni.
-
-Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
-Przeszły komplet kontroli na powierzchni karty: pasmo jasności, próg chromy,
-rozróżnialność przy zaburzeniach widzenia barw (najgorsza para ΔE 9,4 przy progu 8),
-próg dla widzenia normalnego (20,9 przy progu 15) i kontrast ≥ 3:1.
+Czyta tokeny jasnego motywu wprost z `index.html` i sprawdza 23 pary: tekst na trzech
+powierzchniach (progi AAA/AA), napis na czarnym przycisku, zieleń i bursztyn na swoich
+tłach, kolory serii jako obiekty graficzne (≥ 3:1) i rozróżnialność powierzchni.
 
 ## Uruchomienie lokalnie
 
