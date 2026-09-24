@@ -251,7 +251,7 @@ function homeView() {
   const body = el('div', 'home ' + klasaWejscia());
   const deload = isDeload(w);
 
-  body.append(dniTygodnia(w));
+  body.append(panelTygodnia(w));
 
   // Karta „Dziś": sesja, o którą teraz chodzi — dzisiejsza, zaległa do wpisania,
   // a w dzień wolny najbliższa. Na wierzchu to, po co się otwiera aplikację:
@@ -382,7 +382,8 @@ function dniTygodnia(w) {
 function kartaDzis(k, w, etykieta) {
   const dane = daneSesji(k, w);
   const b = el('button', 'tile hero-s');
-  b.style.setProperty('--tc', dane.color);
+  b.style.setProperty('--tc', DAY_HEX[k]);
+  b.dataset.k = k;
   b.append(el('div', 'eyebrow', etykieta));
   const tyt = el('div', 'htop');
   tyt.append(el('span', 'hk', k), el('span', 'tt', dane.title));
@@ -774,6 +775,10 @@ function podsumowanieSesji(day, w) {
   grid.append(kafel('Tonaż', Math.round(teraz.ton).toLocaleString('pl-PL') + ' kg', dopisek));
   box.append(grid);
   box.append(el('p', null, 'Tonaż liczy tylko ćwiczenia z ciężarem w kilogramach — guma i masa ciała do niego nie wchodzą.'));
+  const pochwal = el('button', 'btn primary', 'Karta na story');
+  pochwal.style.marginTop = '12px';
+  pochwal.onclick = () => pokazZaliczenie(day, w);
+  box.append(pochwal);
   return box;
 }
 
@@ -1013,6 +1018,7 @@ function mobCard(it, w) {
     const nowe = mobJest(w, it.id);
     box.classList.toggle('zrobione', nowe);
     if (nowe) blysk(tick);
+    if (nowe && sesjaKompletna('D', w)) setTimeout(() => pokazZaliczenie('D', w), 450);
     tick.textContent = nowe ? '✓' : '';
     tick.setAttribute('aria-label', nowe ? 'Cofnij' : 'Odhacz jako zrobione');
     odswiezPasekMob(w);
@@ -1246,6 +1252,32 @@ function postepView() {
   const body = el('div', klasaWejscia());
   body.append(head('Postęp', 'Wykres, bloki i tabele na 12 tygodni', true));
 
+  // Rząd trzech liczb: cały cykl do dziś.
+  let tonCykl = 0, sesje = 0, serieCykl = 0;
+  for (let x = 1; x <= state.week; x++) {
+    tonCykl += tonazTygodnia(x);
+    for (const d of ['A', 'B', 'C']) { const t = tonazDnia(x, d); if (t.serie) sesje++; serieCykl += t.serie; }
+  }
+  const kpi = el('div', 'stats kpi');
+  const kaf = (l, v, u, d, tys) => {
+    const s = el('div', 'stat');
+    s.append(el('div', 'sl', l));
+    const b = el('div', 'sv', tys ? fmtTys(v) : String(v));
+    b.dataset.cnt = v; b.dataset.krok = 1; if (tys) b.dataset.tys = 1;
+    if (u) b.append(el('u', null, u));
+    s.append(b, el('div', 'sd', d));
+    return s;
+  };
+  kpi.append(kaf('Tonaż cyklu', Math.round(tonCykl), 'kg', `tyg. 1–${state.week}`, true),
+    kaf('Sesje', sesje, null, `z ${state.week * 3}`),
+    kaf('Z rzędu', seriaTygodni(), null, 'tyg. z kompletem'));
+  body.append(kpi);
+
+  const tonCard = el('div', 'card');
+  tonCard.append(el('h3', null, 'Tonaż tydzień po tygodniu'));
+  tonCard.append(wykresTonazu());
+  body.append(tonCard);
+
   const chartCard = el('div', 'card');
   chartCard.append(el('h3', null, 'Ciężar roboczy przez 12 tygodni'));
   chartCard.append(progressChart());
@@ -1434,9 +1466,9 @@ function progressChart() {
     const d = s.pts.map((pt, i) => (i ? 'L' : 'M') + px(pt.w).toFixed(1) + ' ' + py(pt.kg).toFixed(1)).join(' ');
     add('path', { d, stroke: s.color }, 'serie');
     const last = s.pts[s.pts.length - 1];
-    const lab = add('text', { x: px(last.w) + 6, y: py(last.kg) + 3 }, 'endlab');
+    add('circle', { cx: px(last.w), cy: py(last.kg), r: 4, fill: s.color, stroke: 'var(--s1)', 'stroke-width': 2 });
+    const lab = add('text', { x: px(last.w) + 8, y: py(last.kg) + 3 }, 'endlab');
     lab.textContent = fmt(last.kg);
-    lab.setAttribute('fill', s.color);
   }
   // kropki aktualnego tygodnia
   const marks = [];
@@ -1493,6 +1525,41 @@ function progressChart() {
   const cap = el('p', null, 'Tydzień 7 to deload, dlatego wszystkie trzy linie schodzą. Wyciskanie kończy się na tygodniu 11 — dwunasty to test maksa, bez zaplanowanego ciężaru.');
   cap.style.fontSize = '12.5px'; cap.style.marginTop = '10px';
   box.append(cap);
+  return box;
+}
+
+// Kolumny: jedna na tydzień, ≤ 24 px, zaokrąglony koniec, prosta podstawa.
+// Bieżący tydzień w kolorze tekstu, reszta wyciszona; deload w bursztynie.
+function wykresTonazu() {
+  const W = 340, H = 150, ML = 8, MR = 8, MT = 22, MB = 22;
+  const dane = Array.from({ length: 12 }, (_, i) => ({ w: i + 1, t: i + 1 <= state.week ? tonazTygodnia(i + 1) : null }));
+  const max = Math.max(1, ...dane.map(d => d.t || 0));
+  const slot = (W - ML - MR) / 12, bw = Math.min(24, slot - 6);
+  const py = v => MT + (1 - v / max) * (H - MT - MB);
+  const wrap = el('div', 'chart kolumny');
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tonaż w każdym tygodniu cyklu">`;
+  svg += `<line class="grid" x1="${ML}" x2="${W - MR}" y1="${H - MB}" y2="${H - MB}"/>`;
+  let najw = null;
+  dane.forEach(d => { if (d.t && (!najw || d.t > najw.t)) najw = d; });
+  dane.forEach((d, i) => {
+    const x = ML + i * slot + (slot - bw) / 2, y0 = H - MB;
+    const cls = d.w === state.week ? 'kol teraz' : isDeload(d.w) ? 'kol dl' : 'kol';
+    if (d.t) {
+      const y = py(d.t), h = y0 - y, r = Math.min(4, h);
+      svg += `<path class="${cls}" style="--i:${i}" d="M${x} ${y0}V${y + r}Q${x} ${y} ${x + r} ${y}H${x + bw - r}Q${x + bw} ${y} ${x + bw} ${y + r}V${y0}Z"/>`;
+    } else if (d.w > state.week) {
+      svg += `<rect class="kol przysz" x="${x}" y="${y0 - 3}" width="${bw}" height="3" rx="1.5"/>`;
+    }
+    svg += `<text class="axis" x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${d.w}</text>`;
+  });
+  if (najw) svg += `<text class="endlab" x="${ML + (najw.w - 1) * slot + slot / 2}" y="${py(najw.t) - 7}" text-anchor="middle">${fmtTys(najw.t)}</text>`;
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+  const opis = el('p', null, najw
+    ? `Najwięcej: tydzień ${najw.w}, ${fmtTys(najw.t)} kg. Liczą się ćwiczenia z ciężarem w kilogramach.`
+    : 'Pierwsza zapisana seria z ciężarem pojawi się tutaj.');
+  opis.style.fontSize = '12.5px'; opis.style.marginTop = '8px';
+  const box = el('div'); box.append(wrap, opis);
   return box;
 }
 
@@ -1979,7 +2046,7 @@ function odswiezPostep(day, w) {
   sp.querySelector('.fill').style.width = (total ? done / total * 100 : 0) + '%';
   sp.querySelector('.proc').textContent = (total ? Math.round(done / total * 100) : 0) + '%';
   const komplet = total > 0 && done >= total;
-  if (komplet && !sp.classList.contains('komplet')) blysk(sp, 1400);
+  if (komplet && !sp.classList.contains('komplet')) { blysk(sp, 1400); setTimeout(() => pokazZaliczenie(day, w), 450); }
   sp.classList.toggle('komplet', komplet);
 }
 
@@ -2002,8 +2069,9 @@ function odliczLiczby(root) {
     const t0 = performance.now(), dur = 700;
     const klatka = now => {
       const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
-      t.nodeValue = fmt(Math.round(cel * e / krok) * krok);
-      if (p < 1) requestAnimationFrame(klatka); else t.nodeValue = fmt(cel);
+      const f = n.dataset.tys ? fmtTys : fmt;
+      t.nodeValue = f(Math.round(cel * e / krok) * krok);
+      if (p < 1) requestAnimationFrame(klatka); else t.nodeValue = f(cel);
     };
     requestAnimationFrame(klatka);
   });
@@ -2469,6 +2537,222 @@ function settingsView() {
   return frag;
 }
 
+/* ---------- tydzień w pierścieniach, zaliczenie, karta do udostępnienia ---------- */
+const SESJE = ['A', 'B', 'C', 'D'];
+const SKROT_DNIA = { A: 'Pn', B: 'Śr', C: 'Pt', D: 'Nd' };
+
+function postepSesji(k, w) {
+  const pg = daneSesji(k, w).progress;
+  return { ...pg, ile: pg.total ? Math.min(1, pg.done / pg.total) : 0 };
+}
+
+// Tonaż całego tygodnia (A, B, C) — joga nie ma kilogramów.
+const tonazTygodnia = w => ['A', 'B', 'C'].reduce((a, d) => a + tonazDnia(w, d).ton, 0);
+const tydzienZaliczony = w => ['A', 'B', 'C'].every(d => sesjaKompletna(d, w));
+
+// Ile tygodni z rzędu ma komplet trzech sesji z ciężarem, licząc wstecz od
+// bieżącego (bieżący wlicza się dopiero, gdy jest pełny — inaczej seria
+// spadałaby do zera w każdy poniedziałek).
+function seriaTygodni(w = state.week) {
+  let n = 0;
+  for (let i = tydzienZaliczony(w) ? w : w - 1; i >= 1 && tydzienZaliczony(i); i--) n++;
+  return n;
+}
+const fmtTys = n => Math.round(n).toLocaleString('pl-PL');
+
+// Cztery koncentryczne pierścienie: zewnętrzny A, wewnętrzny D. Tor to ta sama
+// barwa na ~22%, łuk startuje z godziny dwunastej.
+function pierscienieSvg(w, size = 148, grub = 12, odstep = 4) {
+  const c = size / 2;
+  let out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Postęp sesji w tygodniu ${w}">`;
+  SESJE.forEach((k, i) => {
+    const r = c - grub / 2 - i * (grub + odstep);
+    const C = 2 * Math.PI * r, ile = postepSesji(k, w).ile;
+    out += `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${DAY_HEX[k]}" stroke-opacity=".22" stroke-width="${grub}"/>`;
+    if (ile > 0) out += `<circle class="pr" style="--c:${C.toFixed(1)}" cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${DAY_HEX[k]}" stroke-width="${grub}" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - ile)).toFixed(1)}" transform="rotate(-90 ${c} ${c})"/>`;
+  });
+  return out + '</svg>';
+}
+const DAY_HEX = { A: '#3987e5', B: '#199e70', C: '#d95926', D: '#7C5CD6' };
+
+function panelTygodnia(w) {
+  const box = el('section', 'panel');
+  const ringi = el('div', 'pring');
+  ringi.innerHTML = pierscienieSvg(w);
+  const zrob = SESJE.filter(k => postepSesji(k, w).ile >= 1).length;
+  const srodek = el('div', 'pmid');
+  srodek.append(el('b', null, zrob + '/4'), el('span', null, 'sesje'));
+  ringi.append(srodek);
+  box.append(ringi);
+
+  const leg = el('div', 'pleg');
+  for (const k of SESJE) {
+    const pg = postepSesji(k, w);
+    const r = el('button', 'plr' + (pg.ile >= 1 ? ' ok' : ''));
+    r.style.setProperty('--tc', DAY_HEX[k]);
+    const nazwa = k === 'D' ? 'Joga' : tytulDnia(state.plan.days[k].title).split(' · ')[0];
+    r.append(el('i'), el('span', 'pln', `${SKROT_DNIA[k]} · ${nazwa}`),
+      el('span', 'plv', pg.ile >= 1 ? '✓' : pg.total ? Math.round(pg.ile * 100) + '%' : '—'));
+    r.onclick = () => go(trasaDnia(k));
+    leg.append(r);
+  }
+  box.append(leg);
+
+  const dol = el('div', 'pdol');
+  const seria = seriaTygodni(w);
+  const kafel = (v, u, l) => { const d = el('div', 'pk'); const b = el('b', null, v); if (u) b.append(el('u', null, u)); d.append(b, el('span', null, l)); return d; };
+  const ton = tonazTygodnia(w);
+  const tv = kafel(fmtTys(ton), 'kg', 'tonaż tygodnia');
+  tv.querySelector('b').dataset.cnt = Math.round(ton); tv.querySelector('b').dataset.krok = 1; tv.querySelector('b').dataset.tys = 1;
+  dol.append(tv, kafel(String(seria), null, odmiana(seria, 'tydzień z rzędu', 'tygodnie z rzędu', 'tygodni z rzędu')),
+    kafel(`${w}/12`, null, 'tydzień cyklu'));
+  box.append(dol);
+  return box;
+}
+
+/* Zaliczenie sesji: jeden moment na cały trening, kiedy aplikacja mówi
+   „zrobione" głośno — i daje od razu kartę do pokazania. */
+function statySesji(day, w) {
+  if (day === 'D') {
+    const pg = postepSesji('D', w);
+    return { big: `${pg.done}/${pg.total}`, bigU: '', bigL: 'pozycji jogi', serie: null, glowny: `~${state.plan.mobility.minutes} min mobilności` };
+  }
+  const t = tonazDnia(w, day), pg = postepDnia(w, day);
+  let glowny = `${state.plan.days[day].items.length} ćwiczeń`;
+  const lift = MAIN_OF[day];
+  if (lift) {
+    const it = state.plan.days[day].items.find(x => x.name === MAIN[lift].name);
+    const rows = logGet(w, day, it.n);
+    glowny = LIFTS.find(x => x.key === lift).full + ' · ' + (opisWykonania(rows) || resolve(it.scheme, w));
+  }
+  return { big: t.ton ? fmtTys(t.ton) : String(pg.done), bigU: t.ton ? 'kg' : '', bigL: t.ton ? 'tonaż sesji' : 'serii', serie: `${pg.done}/${pg.total}`, glowny };
+}
+
+function pokazZaliczenie(day, w) {
+  if (!document.body || !document.body.appendChild) return;
+  const stare = document.querySelector('.zal');
+  if (stare && stare.remove) stare.remove();
+  const st = statySesji(day, w);
+  const z = el('div', 'zal');
+  z.style.setProperty('--tc', DAY_HEX[day]);
+  const karta = el('div', 'zkarta');
+  const znak = el('div', 'zcheck');
+  znak.innerHTML = '<svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg>';
+  karta.append(znak);
+  karta.append(el('div', 'zeye', `Tydzień ${w} · ${nazwaSesji(day)}`));
+  karta.append(el('h2', 'zt', day === 'D' ? 'Joga zaliczona' : 'Sesja zaliczona'));
+  const big = el('div', 'zbig', st.big);
+  if (st.bigU) big.append(el('u', null, st.bigU));
+  karta.append(big, el('div', 'zbl', st.bigL));
+  karta.append(el('div', 'zgl', st.glowny));
+  const ringi = el('div', 'zring');
+  ringi.innerHTML = pierscienieSvg(w, 96, 8, 3);
+  const seria = seriaTygodni(w);
+  const opis = el('div', 'zro');
+  opis.append(el('b', null, SESJE.filter(k => postepSesji(k, w).ile >= 1).length + '/4 sesje tygodnia'),
+    el('span', null, seria ? `${seria} ${odmiana(seria, 'tydzień', 'tygodnie', 'tygodni')} z kompletem z rzędu` : 'Komplet A, B i C zaczyna serię tygodni'));
+  const rz = el('div', 'zrow'); rz.append(ringi, opis);
+  karta.append(rz);
+  const dziel = el('button', 'btn primary', 'Udostępnij na story');
+  const info = el('div', 'zinfo');
+  dziel.onclick = async () => { dziel.disabled = true; info.textContent = await udostepnij(day, w); dziel.disabled = false; };
+  const zamknij = el('button', 'btn ghost', 'Zamknij');
+  zamknij.onclick = () => z.remove();
+  karta.append(dziel, info, zamknij);
+  z.append(karta);
+  z.onclick = e => { if (e.target === z) z.remove(); };
+  document.body.appendChild(z);
+  if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
+}
+
+/* Karta na story, 1080 × 1920, rysowana na płótnie z danych sesji. */
+async function kartaStory(day, w) {
+  const W = 1080, H = 1920, cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  try { await document.fonts.load('900 100px Archivo'); await document.fonts.load('700 40px Archivo'); } catch { /* bez fontu też narysujemy */ }
+  const kol = DAY_HEX[day], st = statySesji(day, w);
+  const D = "'Archivo','Arial Narrow',sans-serif", S = "system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+  // Zwężenie trzeba ustawiać po każdym `font` — przypisanie kroju je zeruje.
+  const F = (css, waski) => { g.font = css; if ('fontStretch' in g) g.fontStretch = waski === false ? 'normal' : 'condensed'; };
+  // Tekst dopasowany do szerokości: zmniejszamy stopień, aż się zmieści.
+  const zmiesc = (tekst, waga, px, max) => { for (; px > 20; px -= 4) { F(`${waga} ${px}px ${D}`); if (g.measureText(tekst).width <= max) break; } return px; };
+
+  g.fillStyle = '#0B0C0E'; g.fillRect(0, 0, W, H);
+  const blask = (x, y, r, c, a) => { const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c + a); gr.addColorStop(1, c + '00'); g.fillStyle = gr; g.fillRect(0, 0, W, H); };
+  blask(W * .9, H * .12, 1000, kol, 'aa');
+  blask(W * .05, H * .95, 900, kol, '44');
+
+  // litera dnia w tle, jak numer na koszulce
+  g.fillStyle = 'rgba(255,255,255,.05)'; F(`900 1100px ${D}`); g.textBaseline = 'alphabetic';
+  g.fillText(day, 420, 1250);
+
+  g.fillStyle = 'rgba(255,255,255,.72)'; F(`700 38px ${D}`);
+  g.fillText('PLAN 12 TYGODNI', 90, 160);
+  const d = new Date(), data = `${d.getDate()} ${MIESIAC[d.getMonth()]}`;
+  g.textAlign = 'right'; g.fillText(data.toUpperCase(), W - 90, 160); g.textAlign = 'left';
+
+  g.fillStyle = kol; g.beginPath(); g.roundRect ? g.roundRect(90, 250, 110, 110, 28) : g.rect(90, 250, 110, 110); g.fill();
+  g.fillStyle = '#fff'; F(`900 72px ${D}`); g.textAlign = 'center'; g.fillText(day, 145, 332); g.textAlign = 'left';
+  const tytul = day === 'D' ? 'Joga' : tytulDnia(state.plan.days[day].title);
+  F(`900 110px ${D}`); g.fillText(tytul.split(' · ')[0], 230, 336);
+  g.fillStyle = 'rgba(255,255,255,.7)'; F(`500 40px ${S}`, false);
+  g.fillText((tytul.split(' · ')[1] || (day === 'D' ? 'mobilność pod boje' : '')), 90, 430);
+
+  g.fillStyle = '#fff';
+  F(`700 90px ${D}`); const szerU = st.bigU ? g.measureText(st.bigU).width + 24 : 0;
+  zmiesc(st.big, 900, 400, W - 170 - szerU);
+  g.fillText(st.big, 80, 840);
+  if (st.bigU) { const x = 80 + g.measureText(st.big).width + 20; F(`700 90px ${D}`); g.fillStyle = 'rgba(255,255,255,.6)'; g.fillText(st.bigU, x, 840); }
+  g.fillStyle = 'rgba(255,255,255,.6)'; F(`700 42px ${D}`); g.fillText(st.bigL.toUpperCase(), 90, 905);
+
+  g.fillStyle = 'rgba(255,255,255,.9)'; F(`600 44px ${S}`, false);
+  const zawijaj = (t, x, y, max, lh) => { let l = ''; for (const s of t.split(' ')) { if (g.measureText(l + s).width > max && l) { g.fillText(l.trim(), x, y); y += lh; l = ''; } l += s + ' '; } g.fillText(l.trim(), x, y); return y; };
+  const yg = zawijaj(st.glowny, 90, 1000, W - 180, 58);
+
+  // trzy liczby w rzędzie
+  const kafle = [[st.serie || '—', 'serie'], [`${w}/12`, 'tydzień cyklu'], [String(seriaTygodni(w)), 'tyg. z rzędu']];
+  kafle.forEach(([v, l], i) => {
+    const x = 90 + i * 310, y = Math.max(yg + 110, 1120);
+    g.fillStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.roundRect ? g.roundRect(x, y, 280, 190, 36) : g.rect(x, y, 280, 190); g.fill();
+    g.fillStyle = '#fff'; zmiesc(v, 900, 104, 220); g.fillText(v, x + 34, y + 112);
+    g.fillStyle = 'rgba(255,255,255,.6)'; F(`600 30px ${S}`, false); g.fillText(l, x + 36, y + 160);
+  });
+
+  // pierścienie tygodnia
+  const img = new Image();
+  const svg = pierscienieSvg(w, 300, 26, 9);
+  await new Promise(res => { img.onload = res; img.onerror = res; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
+  const ry = 1440;
+  try { g.drawImage(img, 90, ry, 300, 300); } catch { /* bez pierścieni */ }
+  SESJE.forEach((k, i) => {
+    const pg = postepSesji(k, w), y = ry + 62 + i * 64;
+    g.fillStyle = DAY_HEX[k]; g.beginPath(); g.arc(462, y - 14, 14, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#fff'; F(`700 44px ${D}`); g.fillText(`${SKROT_DNIA[k]} · ${k === 'D' ? 'Joga' : tytulDnia(state.plan.days[k].title).split(' · ')[0]}`, 496, y);
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.textAlign = 'right'; g.fillText(pg.ile >= 1 ? '✓' : Math.round(pg.ile * 100) + '%', W - 90, y); g.textAlign = 'left';
+  });
+
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+
+async function udostepnij(day, w) {
+  const blob = await kartaStory(day, w);
+  if (!blob) return 'Nie udało się narysować karty.';
+  const nazwa = `trening-tydz${w}-${day}.png`;
+  try {
+    const plik = new File([blob], nazwa, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [plik] })) {
+      await navigator.share({ files: [plik] });
+      return 'Udostępnione.';
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return ''; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = nazwa;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  return 'Zapisane w pobranych — dodaj je do story z galerii.';
+}
+
 /* ---------- router ---------- */
 function go(hash) { location.hash = hash; window.scrollTo({ top: 0 }); }
 
@@ -2513,7 +2797,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=34')
+fetch('plan.json?v=35')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
