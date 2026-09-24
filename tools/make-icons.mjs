@@ -47,8 +47,8 @@ function png(size, draw) {
   ]);
 }
 
-const BG = [8, 8, 8];
-const FG = [214, 255, 61];   // --vol z index.html
+const BG = [11, 10, 20];
+const FG = [255, 79, 216];   // --acc2 z index.html
 
 // Sztanga: gryf przez srodek + po dwa talerze z kazdej strony.
 function draw(size) {

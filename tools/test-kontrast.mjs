@@ -67,13 +67,15 @@ test('pomocniczy', kontrast(ink3, s2), 3);
 console.log('\nEtykieta ostrzegawcza (Czesty blad) na karcie');
 test('warn ' + tok('warn'), kontrast(tok('warn'), s1), 4.5);
 
-console.log('\nKolor sygnalowy (bieżący tydzień, zrobiona seria, główny przycisk)');
-test('vol ' + tok('vol') + ' jako tekst na tle strony', kontrast(tok('vol'), bg), 4.5);
-test('vol ' + tok('vol') + ' jako tekst na karcie', kontrast(tok('vol'), s1), 4.5);
-test('napis ' + tok('vol-ink') + ' na przycisku vol', kontrast(tok('vol-ink'), tok('vol')), 7);
+console.log('\nGradient sygnalowy (biezacy tydzien, zrobiona seria, glowny przycisk)');
+test('acc ' + tok('acc') + ' jako tekst na tle strony', kontrast(tok('acc'), bg), 4.5);
+test('acc ' + tok('acc') + ' jako tekst na karcie', kontrast(tok('acc'), s1), 4.5);
+test('acc2 ' + tok('acc2') + ' jako tekst na karcie', kontrast(tok('acc2'), s1), 4.5);
+test('bialy napis na fioletowym koncu gradientu (duzy tekst)', kontrast('#ffffff', tok('acc')), 3);
+test('bialy napis na rozowym koncu gradientu (duzy tekst)', kontrast('#ffffff', tok('acc2')), 3);
 
-console.log('\nNiedziela: fiolet ' + tok('d') + ' jako numer bloku na karcie');
-test('d na s1', kontrast(tok('d'), s1), 4.5);
+console.log('\nZielony „zrobione" ' + tok('good'));
+test('good jako tekst na karcie', kontrast(tok('good'), s1), 4.5);
 
 console.log('\nKolory serii na karcie (s1) — obiekty graficzne');
 for (const [n, h] of Object.entries(serie)) test(n + ' ' + h, kontrast(h, s1), 3);
