@@ -58,23 +58,28 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 ## Wygląd
 
-Kierunek nazywa się **tablica wyników**: czerń jak guma podłogi, jeden kolor
-sygnałowy i wąska wersalika z plakatu zawodów. Nie pulpit z szarymi kartami —
-plakat, na którym liczby są największe.
+Kierunek nazywa się **zorza**: granat nocy, dwie rozmyte plamy światła, które
+dryfują za wszystkim przez pół minuty, szkło zamiast kart i jeden gradient
+sygnałowy (fiolet → róż) na wszystko, co znaczy *teraz*. Nie pulpit — ekran,
+który się rusza.
 
-- **Jeden kolor sygnałowy** (`--vol`, żółtozielony) znaczy zawsze to samo: *teraz*.
-  Bieżący tydzień na torze, zrobiona seria (stempel), sesja na dziś, główny
-  przycisk. Nic innego nie ma prawa go używać — dlatego działa
-- **Bebas Neue** dla wszystkiego, co jest liczbą albo nagłówkiem: numer tygodnia,
-  ciężar na karcie, litera dnia, etykiety. Krój jedzie z aplikacją
-  (`fonts/`, licencja OFL obok) i siedzi w cache service workera, więc offline
-  zostaje offline. Tekst do czytania zostaje w kroju systemowym
-- **Plakaty sesji** na ekranie głównym: litera dnia w swoim kolorze, tytuł
-  wersalikami, ciężar boju po prawej, a na dolnej krawędzi pasek z postępem
-  zapisu. Postęp, zasady i dziennik siedzą pod nimi jako trzy małe kafle
-- **Litera dnia w tle** nagłówka sesji, jak numer na koszulce; tor tygodni
-  z pochylonych pól, deload w prążki
-- Kanty niemal proste (3–6 px), zero cieni i ramek — bloki leżą na czerni
+- **Sesja na dziś jako plakat** na całą szerokość: gradient w kolorze dnia,
+  litera w tle, pierścień postępu, przycisk z przebłyskiem. Pozostałe trzy
+  sesje jadą pod nim w szynie do przewijania; Postęp, Zasady i Dziennik to
+  trzy małe kafle
+- **Dwanaście pigułek tygodni** do przewijania zamiast strzałek — cały cykl
+  widać naraz, deload w kreskowanej ramce, bieżący tydzień świeci
+- **Syne** (OFL, `fonts/`) dla liczb i nagłówków: szeroki, geometryczny, nie
+  do pomylenia z krojem systemowym. Jedzie z aplikacją i siedzi w cache
+  service workera, więc offline zostaje offline. Tekst do czytania w kroju
+  systemowym
+- **Ruch, ale tylko tam, gdzie coś się dzieje**: liczby wjeżdżają od zera przy
+  wejściu w widok, pierścienie i paski wypełniają się, linie wykresu rysują
+  się, zrobiona seria strzela falą, numer tygodnia przelatuje w stronę zmiany,
+  timer pulsuje w trakcie i drga na końcu, komplet serii błyska na zielono.
+  Animacje klasowe (`swiezo`) gra się wyłącznie na elemencie, który właśnie
+  się zmienił — odświeżenie z bazy niczego nie odtwarza. `prefers-reduced-motion`
+  wyłącza wszystko
 
 Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli.
 Nie ozdoba — instrukcja ładowania pokazana tak, jak ta rzecz wygląda na stojaku:
@@ -87,9 +92,9 @@ Zmiana tła unieważnia pomiar kontrastu, więc paleta ma własny test:
 node tools/test-kontrast.mjs
 ```
 
-Czyta tokeny wprost z `index.html` i sprawdza 22 pary: tekst na trzech powierzchniach
-(progi AAA/AA), kolor sygnałowy jako tekst i jako tło przycisku, kolory serii jako
-obiekty graficzne (≥ 3:1) i rozróżnialność samych powierzchni między sobą.
+Czyta tokeny wprost z `index.html` i sprawdza 24 pary: tekst na trzech powierzchniach
+(progi AAA/AA), oba końce gradientu jako tekst i jako tło pod białym napisem,
+kolory serii jako obiekty graficzne (≥ 3:1) i rozróżnialność samych powierzchni.
 
 Kolory serii na wykresie to sloty 1–3 palety kategorycznej w wariancie dark.
 Przeszły komplet kontroli na powierzchni karty: pasmo jasności, próg chromy,

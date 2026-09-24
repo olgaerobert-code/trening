@@ -205,42 +205,45 @@ function setCount(scheme) {
 const isMainLift = name => ['Wyciskanie leżąc', 'Podciąganie', 'Front squat', 'Martwy ciąg z podwyższenia'].includes(name);
 
 /* ---------- pasek tygodnia ---------- */
+// Dwanaście pigułek do przewijania zamiast strzałek: tydzień wybiera się jednym
+// tapnięciem, a cały cykl widać naraz — co za nami, co przed nami, gdzie deload.
+let kierunekTygodnia = '';                      // 'w-up' / 'w-down' po zmianie tygodnia
+
 function weekBar() {
   const w = state.week, L = lowerRow(w);
   const bar = el('div', 'weekbar');
   const row = el('div', 'weekrow');
-
-  const prev = el('button', 'wbtn', '‹'); prev.disabled = w <= 1;
-  const next = el('button', 'wbtn', '›'); next.disabled = w >= 12;
-  prev.setAttribute('aria-label', 'Poprzedni tydzień');
-  next.setAttribute('aria-label', 'Następny tydzień');
-  prev.onclick = () => setWeek(w - 1);
-  next.onclick = () => setWeek(w + 1);
-
   const mid = el('div', 'wmid');
-  mid.append(el('div', 'wlbl', 'Tydzień treningowy'));
-  const wv = el('div', 'wval', String(w));
-  wv.append(el('u', null, '/12'));
-  mid.append(wv);
+  mid.append(el('div', 'wlbl', 'Tydzień'));
+  mid.append(el('div', 'wval' + (kierunekTygodnia ? ' ' + kierunekTygodnia : ''), String(w)));
   mid.append(el('div', 'wsub', `blok ${L.block} · ${state.plan.schedule}`));
-  row.append(prev, mid, next);
+  row.append(mid);
   bar.append(row);
+  kierunekTygodnia = '';
 
-  const track = el('div', 'track');
+  const strip = el('div', 'wstrip');
+  let biezacy = null;
   for (let i = 1; i <= 12; i++) {
-    const s = el('div', 'seg');
-    if (String(lowerRow(i).block).toLowerCase() === 'deload') s.classList.add('dl');
-    if (i < w) s.classList.add('done');
-    if (i === w) s.classList.add('now');
-    s.title = 'Tydzień ' + i;
-    track.append(s);
+    const p = el('button', 'wp', String(i));
+    if (isDeload(i)) p.classList.add('dl');
+    if (i < w) p.classList.add('done');
+    if (i === w) { p.classList.add('now'); biezacy = p; }
+    p.setAttribute('aria-label', 'Tydzień ' + i);
+    p.onclick = () => setWeek(i);
+    strip.append(p);
   }
-  bar.append(track);
+  bar.append(strip);
+  // Bieżący tydzień w kadrze — po wstawieniu do dokumentu, bo wcześniej nie ma wymiarów.
+  setTimeout(() => {
+    try { if (biezacy.offsetLeft != null && strip.clientWidth) strip.scrollLeft = biezacy.offsetLeft - strip.clientWidth / 2 + biezacy.offsetWidth / 2; }
+    catch { /* mini-DOM w testach */ }
+  }, 0);
   return bar;
 }
 
 function setWeek(w) {
-  if (w < 1 || w > 12) return;
+  if (w < 1 || w > 12 || w === state.week) return;
+  kierunekTygodnia = w > state.week ? 'w-up' : 'w-down';
   state.week = w; save(); przeliczPlan(); render();
   window.scrollTo({ top: 0 });
 }
@@ -251,19 +254,46 @@ function homeView() {
   const body = el('div', klasaWejscia());
   const deload = String(lowerRow(w).block).toLowerCase() === 'deload';
 
+  // Sesja, o którą teraz chodzi, jako plakat na całą szerokość: dzisiejsza,
+  // zaległa do wpisania, a w dzień wolny — najbliższa. Pozostałe trzy jadą
+  // pod nią w szynie do przewijania.
+  const dzis = dzisiaj();
+  const nast = najblizszaSesja();
+  const heroKey = domyslnaSesja() || nast.key;
+  const mainOf = { A: 'bench', B: null, C: 'front' };
+  const daneSesji = k => {
+    if (k === 'D') {
+      const m = p.mobility, mDone = mobDone(w), mAll = mobItems().length;
+      return {
+        k: m.key, color: DAY_COLOR.D, title: m.title,
+        sub: mDone ? `${m.day} · ${mDone}/${mAll} pozycji` : `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
+        progress: { done: mDone, total: mAll }, href: '#/mobilnosc',
+      };
+    }
+    const d = p.days[k], lift = mainOf[k], kg = lift ? kgOf(lift, w) : null, pg = postepDnia(w, k);
+    return {
+      k, color: DAY_COLOR[k], title: d.title,
+      sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
+      progress: pg, href: '#/d/' + k,
+      right: kg != null ? { v: fmt(kg) + ' kg', u: lift === 'bench' ? 'wyciskanie' : 'front squat' } : null,
+    };
+  };
+  const badgeHero = heroKey === dzis ? 'Dziś'
+    : POZYCJA_DNIA[heroKey] <= pozycjaDzis() ? 'Do wpisania'
+    : nast.dzien;
+  body.append(tile({ ...daneSesji(heroKey), hero: true, badge: badgeHero }));
+
+  const rail = el('div', 'rail');
+  for (const k of ['A', 'B', 'C', 'D'].filter(x => x !== heroKey)) {
+    rail.append(tile({ ...daneSesji(k), rail: true, badge: k === dzis ? 'Dziś' : null }));
+  }
+  body.append(rail);
+
   const adj = adjustCard();
   if (adj) body.append(adj);
 
   const rek = rekalibracjaCard();
   if (rek) body.append(rek);
-
-  // W dzień bez sesji mówimy wprost, kiedy następna — inaczej ekran wygląda
-  // tak samo w poniedziałek i we wtorek.
-  const dzis = dzisiaj();
-  if (!dzis) {
-    const n = najblizszaSesja();
-    body.append(noteBox('Dziś wolne.', ` Najbliżej: ${n.dzien}, ${nazwaSesji(n.key)}.`));
-  }
 
   if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.', 'uwaga'));
   if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.', 'uwaga'));
@@ -278,7 +308,7 @@ function homeView() {
     s.append(el('div', 'sl', L.short));
     const v = el('div', 'sv');
     if (kg == null) { v.textContent = 'test'; v.style.fontSize = '20px'; }
-    else { v.textContent = fmt(kg); v.append(el('u', null, 'kg')); }
+    else { v.textContent = fmt(kg); v.dataset.cnt = kg; v.dataset.krok = 2.5; v.append(el('u', null, 'kg')); }
     s.append(v);
     let d = '—';
     if (kg != null && prev != null) {
@@ -291,34 +321,6 @@ function homeView() {
     stats.append(s);
   }
   body.append(stats);
-
-  const tiles = el('div', 'tiles');
-  const mainOf = { A: 'bench', B: null, C: 'front' };
-  for (const k of ['A', 'B', 'C']) {
-    const d = p.days[k];
-    const lift = mainOf[k];
-    const kg = lift ? kgOf(lift, w) : null;
-    const pg = postepDnia(w, k);
-    tiles.append(tile({
-      k, color: DAY_COLOR[k], title: d.title,
-      sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii zapisanych` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
-      badge: k === dzis ? 'DZIŚ' : null,
-      progress: pg,
-      right: kg != null ? { v: fmt(kg) + ' kg', u: lift === 'bench' ? 'wyciskanie' : 'front squat' } : null,
-      href: '#/d/' + k,
-    }));
-  }
-  const m = p.mobility;
-  const mDone = mobDone(w), mAll = mobItems().length;
-  tiles.append(tile({
-    k: m.key, color: DAY_COLOR.D, title: m.title,
-    sub: `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
-    badge: dzis === 'D' ? 'DZIŚ' : null,
-    progress: { done: mDone, total: mAll },
-    right: mDone ? { v: mDone + '/' + mAll, u: 'zrobione' } : null,
-    href: '#/mobilnosc',
-  }));
-  body.append(tiles);
 
   // Postęp, zasady i dziennik: trzy w rzędzie, mniejsze — to nie są sesje.
   const drobne = el('div', 'tiles drobne');
@@ -357,35 +359,40 @@ function miniBtn(label, fn) {
   return b;
 }
 
-function tile({ k, color, ghost, title, sub, right, href, badge, progress }) {
-  const b = el('button', 'tile' + (ghost ? ' drobny' : ''));
+// Pierścień postępu: obwód siedzi w --c, żeby CSS mógł go animować od zera.
+function ring(ile, r = 22) {
+  const C = 2 * Math.PI * r;
+  const box = el('div', 'kring' + (ile >= 1 ? ' pelny' : ''));
+  box.style.setProperty('--c', C.toFixed(1));
+  box.innerHTML =
+    `<svg viewBox="0 0 48 48"><circle class="kbg" cx="24" cy="24" r="${r}"/>` +
+    `<circle class="kfg" cx="24" cy="24" r="${r}" stroke-dasharray="${C.toFixed(1)}" ` +
+    `stroke-dashoffset="${(C * (1 - ile)).toFixed(1)}"/></svg>`;
+  box.append(el('div', 'kpr', Math.round(ile * 100) + '%'));
+  return box;
+}
+
+function tile({ k, color, ghost, title, sub, right, href, badge, progress, hero, rail }) {
+  const b = el('button', 'tile' + (ghost ? ' drobny' : hero ? ' hero-s' : rail ? ' rail-s' : ''));
   if (color) b.style.setProperty('--tc', color);
   if (badge) b.classList.add('dzis');
-  const kk = el('div', 'k' + (ghost ? ' ghost' : ''), k);
-  // Pasek na dolnej krawędzi plakatu pokazuje, ile z sesji jest już zapisane.
-  // Jedno spojrzenie na ekran główny mówi, co w tym tygodniu zostało do zrobienia.
-  if (progress && progress.total) {
-    const ile = Math.min(1, progress.done / progress.total);
-    b.style.setProperty('--pg', ile);
-    if (ile >= 1) b.classList.add('pelny');
-    b.append(el('div', 'tbar'));
-  }
-  b.append(kk);
-  const mid = el('div');
-  mid.style.minWidth = '0';
-  const tt = el('div', 'tt', title);
-  if (badge) tt.append(el('span', 'bdg', badge));
-  mid.append(tt);
+  b.append(el('div', 'k' + (ghost ? ' ghost' : ''), k));
+  const mid = el('div', 'tmid');
+  if (badge) mid.append(el('span', 'bdg', badge));
+  mid.append(el('div', 'tt', title));
   mid.append(el('div', 'ts', sub));
-  b.append(mid);
   if (right) {
     const r = el('div', 'tr');
     r.append(el('div', 'v', right.v));
     r.append(el('div', 'u', right.u));
-    b.append(r);
-  } else {
-    b.append(el('div', 'go', '›'));
+    mid.append(r);
   }
+  if (hero) mid.append(el('div', 'cta', progress && progress.done ? 'Wróć do sesji' : 'Otwórz sesję'));
+  b.append(mid);
+  // Pierścień mówi, ile z sesji jest już zapisane — jedno spojrzenie na ekran
+  // główny i wiadomo, co w tym tygodniu zostało do zrobienia.
+  if (progress && progress.total) b.append(ring(Math.min(1, progress.done / progress.total)));
+  else if (!hero && !rail) b.append(el('div', 'go', '›'));
   b.onclick = () => go(href);
   return b;
 }
@@ -483,6 +490,7 @@ function dayView(key, wArg) {
     fill.style.width = (done / total * 100) + '%';
     bar.append(fill); sp.append(bar);
     sp.append(el('span', 'proc', Math.round(done / total * 100) + '%'));
+    if (done >= total) sp.classList.add('komplet');
     wrapper.append(sp);
   }
 
@@ -552,6 +560,7 @@ function exerciseCard(it, key, w) {
     // na stojaku — czyli z wlasna poprawka, jesli ktos ja wprowadzil.
     const m = metric('Ciężar', fmt(pl.kg), 'mv kg', 'kg');
     const v = $('.mv', m);
+    v.dataset.cnt = pl.kg; v.dataset.krok = 2.5;
     v.classList.add('kgbtn');
     v.setAttribute('role', 'button');
     v.title = 'Pokaż talerze';
@@ -560,6 +569,7 @@ function exerciseCard(it, key, w) {
     metrics.append(m);
     odswiezKg = kg => {
       v.textContent = fmt(kg);
+      v.dataset.cnt = kg;
       v.append(el('u', null, 'kg'));
       platesRow.innerHTML = '';
       platesRow.append(...[...platesEl(kg).children]);
@@ -770,6 +780,7 @@ function calcView() {
   hero.style.setProperty('--sc', L.color);
   hero.append(el('div', 'hl', 'Przewidywany maks (E1RM)'));
   const hv = el('div', 'hv', fmt(Math.round(e * 2) / 2));
+  hv.dataset.cnt = Math.round(e * 2) / 2; hv.dataset.krok = 0.5;
   hv.append(el('u', null, 'kg'));
   hero.append(hv);
   const rir = 10 - calc.rpe;
@@ -938,6 +949,7 @@ function mobCard(it, w) {
     // nie skakała pod palcem przy odklikiwaniu.
     const nowe = mobJest(w, it.id);
     box.classList.toggle('zrobione', nowe);
+    if (nowe) blysk(tick);
     tick.textContent = nowe ? '✓' : '';
     tick.setAttribute('aria-label', nowe ? 'Cofnij' : 'Odhacz jako zrobione');
     odswiezPasekMob(w);
@@ -1872,13 +1884,13 @@ function setRows(it, day, w, pl, onKg) {
 
     tick.onclick = () => {
       const jest = r.classList.toggle('done');
-      if (jest) zapisz(); else logSet(w, day, it.n, i, null);
+      if (jest) { zapisz(); blysk(tick); } else logSet(w, day, it.n, i, null);
       odswiezPostep(day, w);
     };
     sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
     sl.onchange = () => {
       powt = +sl.value;
-      if (!r.classList.contains('done')) r.classList.add('done');
+      if (!r.classList.contains('done')) { r.classList.add('done'); blysk(tick); }
       zapisz();
       odswiezPostep(day, w);
     };
@@ -1903,6 +1915,35 @@ function odswiezPostep(day, w) {
   sp.querySelector('.ile').textContent = done + '/' + total + ' serii';
   sp.querySelector('.fill').style.width = (total ? done / total * 100 : 0) + '%';
   sp.querySelector('.proc').textContent = (total ? Math.round(done / total * 100) : 0) + '%';
+  const komplet = total > 0 && done >= total;
+  if (komplet && !sp.classList.contains('komplet')) blysk(sp, 1400);
+  sp.classList.toggle('komplet', komplet);
+}
+
+/* ---------- ruch ---------- */
+// Klasa na chwilę: CSS gra animację tylko na elemencie, który właśnie się zmienił,
+// a nie na wszystkim, co się przebudowało przy odświeżeniu z bazy.
+function blysk(n, ms = 700) {
+  n.classList.add('swiezo');
+  setTimeout(() => n.classList.remove('swiezo'), ms);
+}
+
+// Liczby wjeżdżają od zera przy wejściu w widok. Element ma data-cnt z wartością
+// docelową i data-krok z zaokrągleniem, tekst po liczbie (jednostka) zostaje.
+function odliczLiczby(root) {
+  if (typeof requestAnimationFrame !== 'function' || typeof performance === 'undefined') return;
+  root.querySelectorAll('[data-cnt]').forEach(n => {
+    const cel = +n.dataset.cnt, krok = +n.dataset.krok || 1;
+    const t = n.firstChild;
+    if (!isFinite(cel) || !t || t.nodeType !== 3) return;
+    const t0 = performance.now(), dur = 700;
+    const klatka = now => {
+      const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      t.nodeValue = fmt(Math.round(cel * e / krok) * krok);
+      if (p < 1) requestAnimationFrame(klatka); else t.nodeValue = fmt(cel);
+    };
+    requestAnimationFrame(klatka);
+  });
 }
 
 /* ---------- historia ---------- */
@@ -2371,13 +2412,14 @@ function render() {
 
   keepAwake(onDay || onMob);
   renderTimer();
+  if (v !== ostatniWidok) odliczLiczby(app);
   ostatniWidok = v;
 }
 
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=32')
+fetch('plan.json?v=33')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
