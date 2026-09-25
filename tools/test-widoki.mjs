@@ -125,6 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -335,6 +336,26 @@ console.log('Ciezar na sztandze');
   kartaBoju().querySelector('.kgwroc').click();
   test('Wroc do planu kasuje wlasny ciezar', A.plannedOf(bojA, W, 'A').kg === planKg
     && !(W + '|A|' + bojA.n in S.kgw));
+}
+
+/* ---------- trening: start i koniec ---------- */
+console.log('\nTrening: start i koniec');
+{
+  S.week = 4; S.view = '#/d/B'; S.treningi = {}; A.render();
+  test('przed startem jest przycisk Rozpocznij', app.textContent.includes('Rozpocznij trening'));
+  app.querySelector('.trn-start').click();
+  const t = A.trening(4, 'B');
+  test('start zapisuje godzine rozpoczecia', t && t.start && !t.end);
+  test('start trafia do localStorage', (magazyn.get('trening.treningi.v1') || '').includes('4|B'));
+  test('start jedzie do synchronizacji', 'treningi' in A.stanLokalny());
+  test('w trakcie widac Zakoncz', app.textContent.includes('Zakończ'));
+  t.start = new Date(Date.now() - 47 * 60000).toISOString();
+  A.zakonczTrening('B', 4);
+  test('koniec zapisuje godzine zakonczenia', !!A.trening(4, 'B').end);
+  test('czas treningu liczy sie z startu i konca', Math.abs(A.czasTreningu(A.trening(4, 'B')) - 47 * 60) < 5);
+  test('podsumowanie zna czas', A.statySesji('B', 4).czas === '47 min');
+  S.view = '#/d/B'; A.render();
+  test('po koncu widac czas zamiast przycisku', app.textContent.includes('Trening zakończony') && !app.textContent.includes('Rozpocznij trening'));
 }
 
 /* ---------- niedziela ---------- */

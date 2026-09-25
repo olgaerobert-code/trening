@@ -1,9 +1,9 @@
 /* Cache-first: po pierwszym wejściu aplikacja działa bez zasięgu.
    Zmiana CACHE unieważnia stary komplet plików. */
-const CACHE = 'plan12-v36';
+const CACHE = 'plan12-v37';
 const ASSETS = [
-  './', './index.html', './app.js?v=35', './progresja.js?v=35', './plan.json?v=35',
-  './fonts/Archivo.woff2?v=35',
+  './', './index.html', './app.js?v=36', './progresja.js?v=36', './plan.json?v=36',
+  './fonts/Archivo.woff2?v=36',
   './manifest.webmanifest', './icon-192.png', './icon-512.png',
 ];
 
@@ -41,6 +41,17 @@ self.addEventListener('fetch', e => {
         })
         .catch(() => hit);
       return hit || net;
+    })
+  );
+});
+
+// Tapnięcie w powiadomienie (np. „Koniec przerwy") wraca do otwartej aplikacji.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      const okno = list.find(c => 'focus' in c);
+      return okno ? okno.focus() : self.clients.openWindow('./');
     })
   );
 });

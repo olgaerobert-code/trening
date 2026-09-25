@@ -80,6 +80,18 @@ według ustawienia telefonu.
 - **Postęp**: rząd trzech liczb (tonaż cyklu, sesje, tygodnie z rzędu),
   kolumny tonażu tydzień po tygodniu i wykres ciężarów według zasad skilla
   dataviz — linie 2 px, kropki końcowe z obwódką, etykiety w kolorze tekstu
+- **Rozpocznij / Zakończ trening**: w sesji duży przycisk startu, potem
+  przyklejony pasek ze stoperem, tętnem i „Zakończ". Koniec zapisuje czas
+  (i średnie/maks. tętno) przy tej sesji, synchronizuje go z drugim
+  urządzeniem i pokazuje na karcie zaliczenia oraz na story. Start jest
+  opcjonalny — dziennik uzupełniany po fakcie działa jak wcześniej
+- **Zegarek** (ustawienia → Zegarek): koniec przerwy przychodzi jako
+  powiadomienie, które Huawei Health (i każda inna aplikacja opaski)
+  przekazuje na zegarek — wibracja na nadgarstku. Tętno na żywo przez Web
+  Bluetooth ze standardowej usługi Heart Rate, jeśli zegarek ją nadaje
+  (w Huawei: Ustawienia treningu → udostępnianie danych tętna, przy
+  włączonym treningu na zegarku). Bluetooth ze stron działa w Chrome na
+  Androidzie; w Operze może go nie być
 - **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
   wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
 - **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
