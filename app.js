@@ -2842,22 +2842,23 @@ function zegarekCard() {
   krok(IOS ? 4 : 3, 'Tętno i kalorie liczy zegarek',
     'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Strength training". ' + (stravaPolaczona()
       ? 'Po treningu najpierw zakończ go na zegarku, potem „Zakończ" w planie — tętno i kalorie przyjdą same ze Stravy.'
-      : 'Po „Zakończ" przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie — albo połącz Stravę niżej, a przyjdą same.')
+      : IOS ? 'Po treningu najpierw zakończ go na zegarku i otwórz na chwilę Huawei Health (synchronizacja do Zdrowia), potem „Zakończ" w planie — skrót z kroku 5 dopisze tętno i kalorie.'
+      : 'Po „Zakończ" przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie.')
       + (MA_BT() ? ' Na tym urządzeniu tętno może też płynąć na żywo przez Bluetooth: serce obok stopera.' : ''));
-  if (IOS && !stravaPolaczona() && state.skrot) {
-    const t5 = krok(5, 'Skrót: tętno ze Zdrowia jednym tapnięciem', 'Zamiast przepisywać liczby z zegarka. Raz złożony skrót uruchamia się sam po „Zakończ".', state.skrot);
+  if (IOS && !stravaPolaczona()) {
+    const t5 = krok(5, 'Skrót: tętno i kalorie ze Zdrowia same', 'Zamiast przepisywać liczby z zegarka. Raz złożony skrót uruchamia się sam po „Zakończ".', state.skrot);
     const inst = el('details', 'skrot');
     inst.append(el('summary', null, 'Jak złożyć skrót (5 minut)'));
     const ol = el('ol');
     [
-      'Huawei Health → Me (Ja) → Privacy management (Zarządzanie prywatnością) → Data sharing and authorization → Health: włącz tętno, energię aktywną i treningi. Nie ma tam? Sprawdź Me → Settings. Kontrola po stronie iPhone’a: Health (Zdrowie) → zdjęcie profilu → Apps (Aplikacje) → Huawei Health — wszystko włączone.',
-      `Skróty → + → nazwij skrót dokładnie: ${NAZWA_SKROTU}`,
-      'Dodaj „Jeżeli" (If): Dane wejściowe skrótu → ma dowolną wartość. W gałęzi Jeżeli dodaj „Dostosuj datę" (Adjust Date): Odejmij [Dane wejściowe skrótu] minut od Bieżąca data. W gałęzi W przeciwnym razie: „Dostosuj datę": Odejmij 90 minut od Bieżąca data. Wynik „Jeżeli" to Początek.',
-      '„Znajdź próbki zdrowotne" (Find Health Samples): Typ = Tętno, Data rozpoczęcia jest po Początek. Pod nim „Oblicz statystyki" (Calculate Statistics): Średnia, potem „Zaokrąglij liczbę". Zmienna: Średnie.',
-      'To samo jeszcze raz dla Tętna, ale statystyka Maksimum → zmienna Maks.',
-      '„Znajdź próbki zdrowotne": Typ = Energia aktywna, po Początek → „Oblicz statystyki": Suma → „Zaokrąglij liczbę" → zmienna Kcal.',
-      `„Otwórz URL" (Open URLs): ${ADRES_PLANU}?zegarek=1&avg=[Średnie]&max=[Maks]&kcal=[Kcal] — wstaw zmienne w nawiasy.`,
-      'Uruchom skrót raz ręcznie i zezwól na dostęp do Zdrowia. Potem włącz przełącznik poniżej.',
+      'Sprawdź, że Huawei zapisuje do Zdrowia: Health → Browse → Activity → Workouts — treningi ze źródłem Huawei Health.',
+      `Shortcuts → + → nazwa na górze: ${NAZWA_SKROTU} (dokładnie tak).`,
+      '„If": Shortcut Input → has any value. W środku „Adjust Date": Subtract · [Shortcut Input] · minutes · from Current Date. W „Otherwise": „Adjust Date": Subtract · 90 · minutes · from Current Date. Za „End If" dodaj „Set Variable": Start = If Result.',
+      '„Find Health Samples": Type = Heart Rate, filtr: Start Date · is after · Start. Potem „Calculate Statistics": Average → „Round Number" → „Set Variable": Avg.',
+      'Jeszcze raz „Find Health Samples" (Heart Rate, after Start) → „Calculate Statistics": Maximum → „Round Number" → „Set Variable": Max.',
+      '„Find Health Samples": Type = Active Energy, after Start → „Calculate Statistics": Sum → „Round Number" → „Set Variable": Kcal.',
+      `„Text": ${ADRES_PLANU}?zegarek=1&avg=[Avg]&max=[Max]&kcal=[Kcal] — zmienne wstawiasz z paska nad klawiaturą. Na końcu „Open URLs".`,
+      'Uruchom skrót raz ręcznie i pozwól mu czytać Zdrowie (Allow). Potem włącz „Uruchamiaj po Zakończ" niżej.',
     ].forEach(k => ol.append(el('li', null, k)));
     inst.append(ol);
     const kopiuj = miniBtn('Skopiuj adres do skrótu', async () => {
@@ -3013,6 +3014,14 @@ function wklejKodPolaczenia(kod) {
 function stravaCard() {
   const box = el('div', 'card');
   box.append(el('h3', null, 'Strava — tętno i kalorie'));
+  if (!stravaPolaczona() && IOS) {
+    const zw = el('details', 'skrot');
+    zw.append(el('summary', null, 'Alternatywa: przez Stravę (API wymaga subskrypcji Stravy)'));
+    zw.append(stravaFormularz());
+    box.append(zw);
+    return box;
+  }
+  if (!stravaPolaczona()) { box.append(stravaFormularz()); return box; }
   if (stravaPolaczona()) {
     const r = el('div', 'e1row');
     r.append(el('div', 'n', 'Połączono' + (strava.kto ? ': ' + strava.kto : '')));
@@ -3042,6 +3051,11 @@ function stravaCard() {
     return box;
   }
 
+  return box;
+}
+
+function stravaFormularz() {
+  const box = el('div');
   const ol = el('ol', 'stkroki');
   const li = (html) => { const l = el('li'); l.innerHTML = html; ol.append(l); };
   li('Huawei Health → Me → Privacy management → Data sharing and authorization → <b>Strava</b>: połączone. ✓');
@@ -3226,7 +3240,7 @@ function pokazZaliczenie(day, w, komunikat) {
         } catch (e) { st2.textContent = e.message; }
       };
       karta.append(st2, sk);
-    } else if (IOS && state.skrot) {
+    } else if (IOS) {
       const sk = el('button', 'btn zskrot', 'Pobierz tętno z aplikacji Zdrowie');
       sk.onclick = () => uruchomSkrot(day, w);
       karta.append(sk);
@@ -3404,7 +3418,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=40')
+fetch('plan.json?v=41')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
