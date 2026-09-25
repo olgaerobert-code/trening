@@ -2842,35 +2842,10 @@ function zegarekCard() {
   krok(IOS ? 4 : 3, 'Tętno i kalorie liczy zegarek',
     'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Strength training". ' + (stravaPolaczona()
       ? 'Po treningu najpierw zakończ go na zegarku, potem „Zakończ" w planie — tętno i kalorie przyjdą same ze Stravy.'
-      : IOS ? 'Po treningu najpierw zakończ go na zegarku i otwórz na chwilę Huawei Health (synchronizacja do Zdrowia), potem „Zakończ" w planie — skrót z kroku 5 dopisze tętno i kalorie.'
-      : 'Po „Zakończ" przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie.')
+      : state.skrot ? 'Po treningu zakończ go na zegarku, otwórz na chwilę Huawei Health, potem „Zakończ" w planie — skrót dopisze tętno i kalorie.'
+      : 'Po „Zakończ" karta treningu pokaże trzy pola: przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie. Trafią na kartę i na story.')
       + (MA_BT() ? ' Na tym urządzeniu tętno może też płynąć na żywo przez Bluetooth: serce obok stopera.' : ''));
-  if (IOS && !stravaPolaczona()) {
-    const t5 = krok(5, 'Skrót: tętno i kalorie ze Zdrowia same', 'Zamiast przepisywać liczby z zegarka. Raz złożony skrót uruchamia się sam po „Zakończ".', state.skrot);
-    const inst = el('details', 'skrot');
-    inst.append(el('summary', null, 'Jak złożyć skrót (5 minut)'));
-    const ol = el('ol');
-    [
-      'Sprawdź, że Huawei zapisuje do Zdrowia: Health → Browse → Activity → Workouts — treningi ze źródłem Huawei Health.',
-      `Shortcuts → + → nazwa na górze: ${NAZWA_SKROTU} (dokładnie tak).`,
-      '„If": Shortcut Input → has any value. W środku „Adjust Date": Subtract · [Shortcut Input] · minutes · from Current Date. W „Otherwise": „Adjust Date": Subtract · 90 · minutes · from Current Date. Za „End If" dodaj „Set Variable": Start = If Result.',
-      '„Find Health Samples": Type = Heart Rate, filtr: Start Date · is after · Start. Potem „Calculate Statistics": Average → „Round Number" → „Set Variable": Avg.',
-      'Jeszcze raz „Find Health Samples" (Heart Rate, after Start) → „Calculate Statistics": Maximum → „Round Number" → „Set Variable": Max.',
-      '„Find Health Samples": Type = Active Energy, after Start → „Calculate Statistics": Sum → „Round Number" → „Set Variable": Kcal.',
-      `„Text": ${ADRES_PLANU}?zegarek=1&avg=[Avg]&max=[Max]&kcal=[Kcal] — zmienne wstawiasz z paska nad klawiaturą. Na końcu „Open URLs".`,
-      'Uruchom skrót raz ręcznie i pozwól mu czytać Zdrowie (Allow). Potem włącz „Uruchamiaj po Zakończ" niżej.',
-    ].forEach(k => ol.append(el('li', null, k)));
-    inst.append(ol);
-    const kopiuj = miniBtn('Skopiuj adres do skrótu', async () => {
-      const a = `${ADRES_PLANU}?zegarek=1&avg=&max=&kcal=`;
-      try { await navigator.clipboard.writeText(a); kopiuj.textContent = 'Skopiowane ✓'; } catch { kopiuj.textContent = a; }
-    });
-    inst.append(kopiuj);
-    t5.append(inst);
-    const rz = el('div', 'kbtn');
-    rz.append(miniBtn(state.skrot ? 'Uruchamiam po „Zakończ" ✓' : 'Uruchamiaj po „Zakończ"', () => { state.skrot = !state.skrot; save(); render(); }));
-    t5.append(rz);
-  }
+
   return box;
 }
 
@@ -3011,17 +2986,48 @@ function wklejKodPolaczenia(kod) {
   zapiszStrava();
 }
 
+function skrotSekcja() {
+  {
+    const t5 = el('details', 'skrot');
+    t5.append(el('summary', null, 'Skrót iPhone’a: tętno i kalorie ze Zdrowia (trzeba go raz złożyć)'));
+    const inst = el('div');
+    const ol = el('ol');
+    [
+      'Sprawdź, że Huawei zapisuje do Zdrowia: Health → Browse → Activity → Workouts — treningi ze źródłem Huawei Health.',
+      `Shortcuts → + → nazwa na górze: ${NAZWA_SKROTU} (dokładnie tak).`,
+      '„If": Shortcut Input → has any value. W środku „Adjust Date": Subtract · [Shortcut Input] · minutes · from Current Date. W „Otherwise": „Adjust Date": Subtract · 90 · minutes · from Current Date. Za „End If" dodaj „Set Variable": Start = If Result.',
+      '„Find Health Samples": Type = Heart Rate, filtr: Start Date · is after · Start. Potem „Calculate Statistics": Average → „Round Number" → „Set Variable": Avg.',
+      'Jeszcze raz „Find Health Samples" (Heart Rate, after Start) → „Calculate Statistics": Maximum → „Round Number" → „Set Variable": Max.',
+      '„Find Health Samples": Type = Active Energy, after Start → „Calculate Statistics": Sum → „Round Number" → „Set Variable": Kcal.',
+      `„Text": ${ADRES_PLANU}?zegarek=1&avg=[Avg]&max=[Max]&kcal=[Kcal] — zmienne wstawiasz z paska nad klawiaturą. Na końcu „Open URLs".`,
+      'Uruchom skrót raz ręcznie i pozwól mu czytać Zdrowie (Allow). Potem włącz „Uruchamiaj po Zakończ" niżej.',
+    ].forEach(k => ol.append(el('li', null, k)));
+    inst.append(ol);
+    const kopiuj = miniBtn('Skopiuj adres do skrótu', async () => {
+      const a = `${ADRES_PLANU}?zegarek=1&avg=&max=&kcal=`;
+      try { await navigator.clipboard.writeText(a); kopiuj.textContent = 'Skopiowane ✓'; } catch { kopiuj.textContent = a; }
+    });
+    inst.append(kopiuj);
+    t5.append(inst);
+    const rz = el('div', 'kbtn');
+    rz.append(miniBtn(state.skrot ? 'Uruchamiam po „Zakończ" ✓' : 'Uruchamiaj po „Zakończ"', () => { state.skrot = !state.skrot; save(); render(); }));
+    t5.append(rz);
+    return t5;
+  }
+}
+
 function stravaCard() {
   const box = el('div', 'card');
-  box.append(el('h3', null, 'Strava — tętno i kalorie'));
-  if (!stravaPolaczona() && IOS) {
+  box.append(el('h3', null, stravaPolaczona() ? 'Strava — tętno i kalorie' : 'Tętno automatycznie — dla chętnych'));
+  if (!stravaPolaczona()) {
+    box.append(el('p', null, 'Nie jest potrzebne: trzy liczby z zegarka wpisujesz po „Zakończ". Jeśli kiedyś zechcesz, żeby przychodziły same, są dwie drogi — każda wymaga jednorazowej konfiguracji.'));
+    if (IOS) box.append(skrotSekcja());
     const zw = el('details', 'skrot');
-    zw.append(el('summary', null, 'Alternatywa: przez Stravę (API wymaga subskrypcji Stravy)'));
+    zw.append(el('summary', null, 'Strava (API wymaga subskrypcji Stravy)'));
     zw.append(stravaFormularz());
     box.append(zw);
     return box;
   }
-  if (!stravaPolaczona()) { box.append(stravaFormularz()); return box; }
   if (stravaPolaczona()) {
     const r = el('div', 'e1row');
     r.append(el('div', 'n', 'Połączono' + (strava.kto ? ': ' + strava.kto : '')));
@@ -3240,7 +3246,7 @@ function pokazZaliczenie(day, w, komunikat) {
         } catch (e) { st2.textContent = e.message; }
       };
       karta.append(st2, sk);
-    } else if (IOS) {
+    } else if (IOS && state.skrot) {
       const sk = el('button', 'btn zskrot', 'Pobierz tętno z aplikacji Zdrowie');
       sk.onclick = () => uruchomSkrot(day, w);
       karta.append(sk);
@@ -3418,7 +3424,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=41')
+fetch('plan.json?v=42')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
