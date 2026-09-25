@@ -11,6 +11,8 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Plan 12">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 /* Archivo (OFL, fonts/OFL.txt): przycięty do polskiej łaciny, oś szerokości
    75–100 i grubości 500–900. Zwężona, ciężka odmiana na liczby i tytuły —
@@ -18,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=36) format('woff2');
+  src:url(fonts/Archivo.woff2?v=37) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -556,6 +558,26 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .trn-link{font-size:13.5px;font-weight:600;color:var(--ink-2);padding:8px}
 .zstat{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13.5px;color:rgba(255,255,255,.85)}
 
+/* formularz z zegarka i kroki ustawień */
+.zzeg{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:8px;align-items:end;margin:0 0 16px;padding:12px;border-radius:18px;background:rgba(255,255,255,.07)}
+.zzt{grid-column:1 / -1;font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.zpole{display:flex;flex-direction:column;gap:4px;min-width:0}
+.zpole span{font-size:11.5px;color:rgba(255,255,255,.7)}
+.zpole input{width:100%;min-width:0;padding:10px 8px;border-radius:10px;border:0;background:rgba(255,255,255,.14);color:#fff;
+  font:800 19px/1 var(--disp);font-stretch:85%;text-align:center}
+.zpole input::placeholder{color:rgba(255,255,255,.4)}
+.zpole input:focus{outline:2px solid #fff;outline-offset:0}
+.zzok{padding:11px 14px;border-radius:10px;background:#fff;color:#0D0F12;font-weight:700;font-size:14px}
+.krok{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.krok:last-child{border-bottom:0}
+.kn{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--s2);font:800 13px/1 var(--disp)}
+.krok.ok .kn{background:var(--good);color:#fff}
+.kt{flex:1;min-width:0}
+.kt b{display:block;font-size:15px}
+.kt p{margin:3px 0 0!important;font-size:13.5px!important}
+.kbtn{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.note.ios{border-left-color:var(--ink)}
+
 /* ══ kalkulator 1RM ══ */
 .seg-ctl{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--s3);margin-bottom:14px}
 .seg-ctl button{flex:1;padding:9px 4px;border-radius:9px;font-size:13.5px;font-weight:600;text-align:center;color:var(--ink-2);transition:background .18s,color .18s}
@@ -627,7 +649,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=36"></script>
-<script src="app.js?v=36"></script>
+<script src="progresja.js?v=37"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>

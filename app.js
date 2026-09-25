@@ -256,6 +256,15 @@ function homeView() {
   const body = el('div', 'home ' + klasaWejscia());
   const deload = isDeload(w);
 
+  if (IOS && !JAKO_APKA() && !readJSON('trening.ios.baner', false)) {
+    const b = el('div', 'note ios');
+    b.append(el('b', null, 'Zainstaluj plan na iPhonie'));
+    b.append(document.createTextNode('Safari → Udostępnij → „Do ekranu początkowego". Plan otworzy się na pełnym ekranie, a koniec przerwy zawibruje na zegarku.'));
+    const r = el('div', 'kbtn');
+    r.append(miniBtn('Pokaż jak', () => go('#/ustawienia')), miniBtn('Później', () => { localStorage.setItem('trening.ios.baner', 'true'); render(); }));
+    b.append(r);
+    body.append(b);
+  }
   body.append(panelTygodnia(w));
 
   // Karta „Dziś": sesja, o którą teraz chodzi — dzisiejsza, zaległa do wpisania,
@@ -2549,6 +2558,17 @@ function settingsView() {
   return frag;
 }
 
+/* ---------- iPhone ---------- */
+// Na iOS każda przeglądarka to silnik Safari: bez Bluetooth ze stron, a
+// powiadomienia tylko dla strony dodanej do ekranu początkowego.
+const IOS = typeof navigator !== 'undefined' && (/iP(hone|ad|od)/.test(navigator.userAgent || '')
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+const JAKO_APKA = () => {
+  try { return !!(navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)); }
+  catch { return false; }
+};
+const MA_BT = () => typeof navigator !== 'undefined' && !!navigator.bluetooth;
+
 /* ---------- trening: start, koniec, stoper, tętno ---------- */
 // Klucz jak w dzienniku: "tydzien|dzien". Wartość: { start, end, hr: { sum, n, max } }.
 // Tylko to, co naprawdę się wydarzyło — dziennik uzupełniany po fakcie nie
@@ -2581,6 +2601,15 @@ function zakonczTrening(day, w) {
   rozlaczTetno();
   pokazZaliczenie(day, w);
 }
+// Liczby przepisane z podsumowania na zegarku. Puste pole = nie ruszamy.
+function zapiszZZegarka(day, w, { avg, max, kcal }) {
+  const t = trening(w, day) || (state.treningi[trnKey(w, day)] = { start: null, end: null });
+  const n = v => { const x = Math.round(+String(v).replace(',', '.')); return x > 0 ? x : null; };
+  if (n(avg)) t.hr = { avg: n(avg), max: n(max) || (t.hr && t.hr.max) || null, zZegarka: true };
+  else if (n(max) && t.hr) t.hr.max = n(max);
+  if (n(kcal)) t.kcal = n(kcal);
+  saveTreningi();
+}
 function cofnijStart(day, w) { delete state.treningi[trnKey(w, day)]; saveTreningi(); }
 
 // Pasek na górze sesji: przed startem duży przycisk, w trakcie stoper, tętno
@@ -2607,6 +2636,7 @@ function pasekTreningu(day, w) {
     box.append(lewa);
     const hr = el('button', 'trn-hr' + (tetno.hr ? ' on' : ''));
     hr.id = 'trn-hr';
+    if (!MA_BT()) hr.hidden = true;
     hr.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.3 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.6 0 5.9 3.6 4.4 7.2C19.5 16.4 12 21 12 21z"/></svg>';
     hr.append(el('b', null, tetno.hr ? String(tetno.hr) : '—'), el('span', null, tetno.hr ? 'bpm' : 'zegarek'));
     hr.onclick = () => { if (!tetno.dev) polaczTetno(day, w); };
@@ -2616,7 +2646,9 @@ function pasekTreningu(day, w) {
     box.append(stop);
     const info = el('div', 'trn-pod');
     info.id = 'trn-info';
-    info.textContent = tetno.info || (tetno.dev ? '' : 'Tapnij serce, żeby pobrać tętno z zegarka.');
+    info.textContent = tetno.info || (tetno.dev ? '' : MA_BT()
+      ? 'Tapnij serce, żeby pobrać tętno z zegarka.'
+      : 'Włącz na zegarku „Trening siłowy" — tętno i kalorie przepiszesz po „Zakończ".');
     box.append(info);
     return box;
   }
@@ -2624,9 +2656,9 @@ function pasekTreningu(day, w) {
   const txt = el('div', 'trn-l');
   txt.append(el('span', 'trn-et', 'Trening zakończony'), el('div', 'trn-czas', fmtMin(czasTreningu(t))));
   box.append(txt);
-  if (t.hr && t.hr.n) {
+  if (t.hr && (t.hr.n || t.hr.avg)) {
     const h = el('div', 'trn-hr stat');
-    h.append(el('b', null, String(Math.round(t.hr.sum / t.hr.n))), el('span', null, 'śr. bpm'));
+    h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, 'śr. bpm'));
     box.append(h);
   }
   const znowu = el('button', 'trn-link', 'Cofnij');
@@ -2721,24 +2753,47 @@ async function powiadomZegarek(tytul, tresc) {
 function zegarekCard() {
   const box = el('div', 'card');
   box.append(el('h3', null, 'Zegarek'));
-  const wiersz = el('div', 'e1row');
-  wiersz.append(el('div', 'n', 'Koniec przerwy na zegarku'));
-  const stan = typeof Notification === 'undefined' ? 'brak' : Notification.permission;
-  const btn = miniBtn(state.zegarek && stan === 'granted' ? 'Włączone' : 'Włącz', async () => {
-    if (typeof Notification === 'undefined') { info.textContent = 'Ta przeglądarka nie wysyła powiadomień ze stron.'; return; }
-    if (state.zegarek && Notification.permission === 'granted') { state.zegarek = false; save(); render(); return; }
-    const p = await Notification.requestPermission();
-    state.zegarek = p === 'granted'; save();
-    if (p === 'granted') powiadomZegarek('Powiadomienia działają', 'Tak zawibruje koniec przerwy.');
-    render();
-  });
-  wiersz.append(btn);
-  box.append(wiersz);
-  const info = el('p', null, stan === 'denied'
-    ? 'Powiadomienia są zablokowane dla tej strony. Odblokujesz je w ustawieniach przeglądarki (kłódka przy adresie → Uprawnienia).'
-    : 'Koniec przerwy przychodzi jako powiadomienie z telefonu. Żeby zawibrował zegarek, w aplikacji Huawei Health → Urządzenia → Twój zegarek → Powiadomienia włącz przeglądarkę, w której masz plan.');
-  box.append(info);
-  box.append(el('p', null, 'Tętno na żywo: na zegarku wejdź w Ustawienia → Ustawienia treningu i włącz udostępnianie danych tętna, uruchom na zegarku trening siłowy, a w sesji tapnij serce obok stopera. Wymaga Chrome na Androidzie — Opera może nie mieć Bluetooth dla stron.'));
+  const krok = (nr, tytul, tresc, stan) => {
+    const r = el('div', 'krok' + (stan === true ? ' ok' : ''));
+    r.append(el('span', 'kn', stan === true ? '✓' : String(nr)));
+    const t = el('div', 'kt');
+    t.append(el('b', null, tytul));
+    if (tresc) t.append(el('p', null, tresc));
+    r.append(t);
+    box.append(r);
+    return t;
+  };
+
+  if (IOS) {
+    krok(1, JAKO_APKA() ? 'Plan jest aplikacją na iPhonie' : 'Dodaj plan do ekranu początkowego',
+      JAKO_APKA() ? null : 'Otwórz tę stronę w Safari → przycisk Udostępnij (kwadrat ze strzałką) → „Do ekranu początkowego". Potem uruchamiaj plan z ikony — tylko tak iPhone pozwala stronie wysyłać powiadomienia. Dziennik zsynchronizuje się sam.',
+      JAKO_APKA());
+  }
+
+  const brak = typeof Notification === 'undefined';
+  const stan = brak ? 'brak' : Notification.permission;
+  const wlaczone = state.zegarek && stan === 'granted';
+  const t2 = krok(IOS ? 2 : 1, 'Koniec przerwy wibruje na zegarku',
+    brak ? (IOS ? 'Najpierw krok 1 — w Safari powiadomienia działają tylko z ikony na ekranie początkowym.' : 'Ta przeglądarka nie wysyła powiadomień ze stron.')
+      : stan === 'denied' ? 'Powiadomienia są zablokowane. ' + (IOS ? 'Włączysz je w Ustawieniach iPhone’a → Powiadomienia → Plan 12 tygodni.' : 'Odblokujesz je w ustawieniach strony w przeglądarce.')
+      : 'Aplikacja wyśle powiadomienie, kiedy timer przerwy dojdzie do zera, a Huawei Health przekaże je na zegarek.',
+    wlaczone);
+  if (!brak && stan !== 'denied') {
+    const rz = el('div', 'kbtn');
+    rz.append(miniBtn(wlaczone ? 'Wyłącz' : 'Włącz powiadomienia', async () => {
+      if (wlaczone) { state.zegarek = false; save(); render(); return; }
+      const p = await Notification.requestPermission();
+      state.zegarek = p === 'granted'; save(); render();
+    }));
+    if (wlaczone) rz.append(miniBtn('Wyślij próbne', () => powiadomZegarek('Koniec przerwy', 'Tak zawibruje zegarek po każdej przerwie.')));
+    t2.append(rz);
+  }
+  krok(IOS ? 3 : 2, 'Huawei Health przekazuje powiadomienia',
+    IOS ? 'Huawei Health → Urządzenia → Watch Fit 4 → Powiadomienia: włącz. W Ustawieniach iPhone’a → Powiadomienia → Plan 12 tygodni: zezwól i pokazuj na ekranie blokady.'
+        : 'Huawei Health → Urządzenia → zegarek → Powiadomienia: włącz przeglądarkę, w której masz plan.');
+  krok(IOS ? 4 : 3, 'Tętno i kalorie liczy zegarek',
+    'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Trening siłowy". Po „Zakończ" przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie — trafią na kartę i na story.'
+      + (MA_BT() ? ' Na tym urządzeniu tętno może też płynąć na żywo przez Bluetooth: serce obok stopera.' : ''));
   return box;
 }
 
@@ -2836,7 +2891,8 @@ function czasITetno(day, w) {
   const t = trening(w, day);
   const out = {};
   if (t && t.start && t.end) out.czas = fmtMin(czasTreningu(t));
-  if (t && t.hr && t.hr.n) { out.hrAvg = Math.round(t.hr.sum / t.hr.n); out.hrMax = t.hr.max; }
+  if (t && t.hr && (t.hr.n || t.hr.avg)) { out.hrAvg = t.hr.avg || Math.round(t.hr.sum / t.hr.n); out.hrMax = t.hr.max || null; }
+  if (t && t.kcal) out.kcal = t.kcal;
   return out;
 }
 
@@ -2858,11 +2914,33 @@ function pokazZaliczenie(day, w) {
   if (st.bigU) big.append(el('u', null, st.bigU));
   karta.append(big, el('div', 'zbl', st.bigL));
   karta.append(el('div', 'zgl', st.glowny));
-  if (st.czas || st.hrAvg) {
+  if (st.czas || st.hrAvg || st.kcal) {
     const zs = el('div', 'zstat');
     if (st.czas) zs.append(el('span', null, '⏱ ' + st.czas));
-    if (st.hrAvg) zs.append(el('span', null, `♥ śr. ${st.hrAvg} · max ${st.hrMax} bpm`));
+    if (st.hrAvg) zs.append(el('span', null, `♥ śr. ${st.hrAvg}${st.hrMax ? ' · max ' + st.hrMax : ''} bpm`));
+    if (st.kcal) zs.append(el('span', null, `🔥 ${st.kcal} kcal`));
     karta.append(zs);
+  }
+  // Tętna nie ma z Bluetooth (iPhone), więc prosimy o trzy liczby z ekranu
+  // podsumowania na zegarku. Wszystkie opcjonalne.
+  const tr = trening(w, day);
+  if (tr && tr.end && !(tr.hr && tr.hr.n)) {
+    const f = el('form', 'zzeg');
+    f.append(el('div', 'zzt', st.hrAvg ? 'Popraw dane z zegarka' : 'Dane z zegarka (opcjonalnie)'));
+    const pole = (id, lab, v) => {
+      const l = el('label', 'zpole');
+      const i = el('input'); i.id = 'zz-' + id; i.type = 'text'; i.setAttribute('inputmode', 'numeric'); i.placeholder = '—';
+      if (v) i.value = v;
+      l.append(el('span', null, lab), i);
+      f.append(l);
+      return i;
+    };
+    const a = pole('avg', 'śr. tętno', st.hrAvg), m = pole('max', 'maks.', st.hrMax), k = pole('kcal', 'kcal', st.kcal);
+    const ok = el('button', 'zzok', 'Zapisz');
+    ok.type = 'submit';
+    f.append(ok);
+    f.onsubmit = e => { e.preventDefault(); zapiszZZegarka(day, w, { avg: a.value, max: m.value, kcal: k.value }); pokazZaliczenie(day, w); };
+    karta.append(f);
   }
   const ringi = el('div', 'zring');
   ringi.innerHTML = pierscienieSvg(w, 96, 8, 3);
@@ -2928,7 +3006,10 @@ async function kartaStory(day, w) {
   g.fillStyle = 'rgba(255,255,255,.9)'; F(`600 44px ${S}`, false);
   const zawijaj = (t, x, y, max, lh) => { let l = ''; for (const s of t.split(' ')) { if (g.measureText(l + s).width > max && l) { g.fillText(l.trim(), x, y); y += lh; l = ''; } l += s + ' '; } g.fillText(l.trim(), x, y); return y; };
   let yg = zawijaj(st.glowny, 90, 1000, W - 180, 58);
-  if (st.hrAvg) { g.fillStyle = 'rgba(255,255,255,.7)'; F(`600 40px ${S}`, false); yg += 64; g.fillText(`♥ tętno śr. ${st.hrAvg} · max ${st.hrMax} bpm`, 90, yg); }
+  if (st.hrAvg || st.kcal) {
+    g.fillStyle = 'rgba(255,255,255,.7)'; F(`600 40px ${S}`, false); yg += 64;
+    g.fillText([st.hrAvg ? `♥ śr. ${st.hrAvg}${st.hrMax ? ' · max ' + st.hrMax : ''} bpm` : '', st.kcal ? `${st.kcal} kcal` : ''].filter(Boolean).join('   ·   '), 90, yg);
+  }
 
   // trzy liczby w rzędzie
   const kafle = [[st.serie || '—', 'serie'], st.czas ? [st.czas.replace(' min', '′'), 'czas'] : [`${w}/12`, 'tydzień cyklu'], [String(seriaTygodni(w)), 'tyg. z rzędu']];
@@ -3017,7 +3098,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=36')
+fetch('plan.json?v=37')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
