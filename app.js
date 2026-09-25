@@ -2846,7 +2846,7 @@ function zegarekCard() {
     inst.append(el('summary', null, 'Jak złożyć skrót (5 minut)'));
     const ol = el('ol');
     [
-      'Huawei Health → Ja → Ustawienia → Udostępnianie danych i autoryzacja → Zdrowie: włącz zapisywanie tętna, energii aktywnej i treningów.',
+      'Huawei Health → Me (Ja) → Privacy management (Zarządzanie prywatnością) → Data sharing and authorization → Health: włącz tętno, energię aktywną i treningi. Nie ma tam? Sprawdź Me → Settings. Kontrola po stronie iPhone’a: Health (Zdrowie) → zdjęcie profilu → Apps (Aplikacje) → Huawei Health — wszystko włączone.',
       `Skróty → + → nazwij skrót dokładnie: ${NAZWA_SKROTU}`,
       'Dodaj „Jeżeli" (If): Dane wejściowe skrótu → ma dowolną wartość. W gałęzi Jeżeli dodaj „Dostosuj datę" (Adjust Date): Odejmij [Dane wejściowe skrótu] minut od Bieżąca data. W gałęzi W przeciwnym razie: „Dostosuj datę": Odejmij 90 minut od Bieżąca data. Wynik „Jeżeli" to Początek.',
       '„Znajdź próbki zdrowotne" (Find Health Samples): Typ = Tętno, Data rozpoczęcia jest po Początek. Pod nim „Oblicz statystyki" (Calculate Statistics): Średnia, potem „Zaokrąglij liczbę". Zmienna: Średnie.',
@@ -3176,7 +3176,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=38')
+fetch('plan.json?v=39')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
