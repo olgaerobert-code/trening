@@ -18,7 +18,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=35) format('woff2');
+  src:url(fonts/Archivo.woff2?v=36) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -526,6 +526,36 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .zkarta .btn.ghost{background:transparent;color:rgba(255,255,255,.8);margin-top:4px}
 .zinfo{font-size:12.5px;color:rgba(255,255,255,.75);text-align:center;min-height:18px;margin:8px 0 2px}
 
+/* ══ trening: start, stoper, tętno, koniec ══ */
+.trn{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:12px;border-radius:var(--r);background:var(--s1);box-shadow:var(--shadow)}
+.trn-start{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:999px;
+  background:var(--ink);color:var(--on-ink);font:700 16px/1 var(--sans);transition:transform .15s}
+.trn-start:active{transform:scale(.97)}
+.trn-ico{width:0;height:0;border-left:11px solid currentColor;border-top:7px solid transparent;border-bottom:7px solid transparent}
+.trn-pod{flex-basis:100%;font-size:12.5px;color:var(--ink-3);text-align:center}
+.trn-pod:empty{display:none}
+.trn.live{position:sticky;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:20;color:#fff;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--tc) 70%,#000),color-mix(in srgb,var(--tc) 40%,#000));
+  box-shadow:0 12px 30px -12px color-mix(in srgb,var(--tc) 70%,transparent)}
+.trn.live .trn-pod{color:rgba(255,255,255,.75);text-align:left}
+.trn-l{flex:1;min-width:0}
+.trn-et{font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+.trn-kropka{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d4d;margin-right:6px;vertical-align:1px;animation:nagr 1.4s ease-in-out infinite}
+@keyframes nagr{50%{opacity:.25}}
+.trn-czas{font:900 34px/1 var(--disp);font-stretch:78%;margin-top:4px;font-variant-numeric:tabular-nums}
+.trn-hr{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.14);color:inherit}
+.trn-hr svg{opacity:.6}
+.trn-hr b{font:900 20px/1 var(--disp);font-stretch:80%;font-variant-numeric:tabular-nums}
+.trn-hr span{font-size:10.5px;opacity:.75}
+.trn-hr.on svg{opacity:1;color:#ff6b6b;animation:bicie 1s ease-in-out infinite}
+@keyframes bicie{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}}
+.trn-stop{padding:13px 18px;border-radius:999px;background:#fff;color:#0D0F12;font:700 15px/1 var(--sans)}
+.trn-stop:active{transform:scale(.95)}
+.trn.koniec .trn-czas{font-size:24px}
+.trn.koniec .trn-hr{background:var(--s2);color:var(--ink)}
+.trn-link{font-size:13.5px;font-weight:600;color:var(--ink-2);padding:8px}
+.zstat{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13.5px;color:rgba(255,255,255,.85)}
+
 /* ══ kalkulator 1RM ══ */
 .seg-ctl{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--s3);margin-bottom:14px}
 .seg-ctl button{flex:1;padding:9px 4px;border-radius:9px;font-size:13.5px;font-weight:600;text-align:center;color:var(--ink-2);transition:background .18s,color .18s}
@@ -597,7 +627,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=35"></script>
-<script src="app.js?v=35"></script>
+<script src="progresja.js?v=36"></script>
+<script src="app.js?v=36"></script>
 </body>
 </html>
