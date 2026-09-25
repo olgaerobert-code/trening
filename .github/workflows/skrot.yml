@@ -1,0 +1,33 @@
+# Podpisuje skrót iPhone'a „Plan 12 zegarek". iOS przyjmuje tylko podpisane
+# skróty, a podpisać umie wyłącznie macOS (`shortcuts sign`).
+name: Skrót iPhone'a
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [tools/skrot-zegarek.py, .github/workflows/skrot.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  podpis:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zbuduj niepodpisany plik
+        run: python3 tools/skrot-zegarek.py "$RUNNER_TEMP/niepodpisany.shortcut"
+      - name: Podpisz
+        run: |
+          sw_vers
+          shortcuts sign --mode anyone --input "$RUNNER_TEMP/niepodpisany.shortcut" --output "skrot/Plan 12 zegarek.shortcut"
+          ls -la skrot
+      - name: Zapisz w repozytorium
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "skrot/Plan 12 zegarek.shortcut"
+          git diff --cached --quiet && exit 0
+          git commit -m "Podpisany skrót iPhone'a (workflow)"
+          git push
