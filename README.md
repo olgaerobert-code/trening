@@ -91,6 +91,15 @@ według ustawienia telefonu.
     iPhone'a i pokazuje baner z instrukcją, dopóki plan nie działa z ikony
   - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
     przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
+  - **Strava** (Dziennik → Strava): Huawei Health wysyła trening do Stravy
+    z tętnem, a plan po „Zakończ" sam znajduje w API Stravy trening, który
+    zaczął się najbliżej startu sesji, i dopisuje średnie i maksymalne tętno
+    oraz kalorie. Pyta co minutę przez 20 minut (zegarek synchronizuje się
+    z opóźnieniem) i jeszcze raz przy każdym powrocie do aplikacji. Wymaga
+    własnej, darmowej aplikacji API na strava.com (Client ID + Secret).
+    Klucze i tokeny leżą tylko w pamięci urządzenia — nie idą do bazy,
+    synchronizacji ani kopii zapasowej. Gdy łączenie skończy się w Safari
+    zamiast w aplikacji z ikony, klucze przenosi „kod połączenia"
   - **skrót iPhone'a „Plan 12 zegarek"** czyta z aplikacji Zdrowie (tam
     zapisuje Huawei Health) średnie i maksymalne tętno oraz sumę energii
     aktywnej z okna treningu i otwiera plan z adresem
