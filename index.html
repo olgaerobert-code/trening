@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=37) format('woff2');
+  src:url(fonts/Archivo.woff2?v=38) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -578,6 +578,13 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .kbtn{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .note.ios{border-left-color:var(--ink)}
 
+.zkom{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:rgba(52,209,127,.18);color:#fff;font-size:13.5px;font-weight:600}
+.zkarta .btn.zskrot{background:rgba(255,255,255,.14);color:#fff;margin-bottom:10px}
+details.skrot{margin-top:10px;background:var(--s2);border-radius:12px;padding:10px 12px}
+details.skrot summary{cursor:pointer;font-weight:650;font-size:14px}
+details.skrot ol{margin:10px 0 10px;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.55}
+details.skrot li{margin-bottom:8px}
+
 /* ══ kalkulator 1RM ══ */
 .seg-ctl{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--s3);margin-bottom:14px}
 .seg-ctl button{flex:1;padding:9px 4px;border-radius:9px;font-size:13.5px;font-weight:600;text-align:center;color:var(--ink-2);transition:background .18s,color .18s}
@@ -649,7 +656,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=37"></script>
-<script src="app.js?v=37"></script>
+<script src="progresja.js?v=38"></script>
+<script src="app.js?v=38"></script>
 </body>
 </html>

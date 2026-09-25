@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, skrot: false,
 };
 
 /* ---------- Supabase ---------- */
@@ -100,12 +100,13 @@ function loadState() {
     if (typeof raw.sound === 'boolean') state.sound = raw.sound;
     if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
     if (typeof raw.zegarek === 'boolean') state.zegarek = raw.zegarek;
+    if (typeof raw.skrot === 'boolean') state.skrot = raw.skrot;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
 const save = () => {
-  localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek }));
+  localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, skrot: state.skrot }));
   if (typeof pushStan === 'function') pushStan();
 };
 
@@ -1916,7 +1917,12 @@ async function pullStan() {
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
     // Trening w toku na tym urządzeniu wygrywa — tętno i stoper żyją tutaj.
-    if (d.treningi && inny(d.treningi, state.treningi)) { state.treningi = { ...d.treningi, ...wToku() }; saveTreningi(true); zm = true; }
+    if (d.treningi && inny(d.treningi, state.treningi)) {
+      // Skrót odpalił się w Safari i dopisał tętno — pokazujemy je od razu tutaj.
+      const nowe = Object.entries(d.treningi).find(([k, t]) => t && (t.hr || t.kcal) && !(state.treningi[k] && (state.treningi[k].hr || state.treningi[k].kcal)));
+      state.treningi = { ...d.treningi, ...wToku() }; saveTreningi(true); zm = true;
+      if (nowe) { const [w, day] = nowe[0].split('|'); setTimeout(() => pokazZaliczenie(day, +w, 'Tętno i kalorie ze Zdrowia dotarły.'), 300); }
+    }
     // Na końcu, bo `kgw` i `mob` przyjechały już przestawione — zostaje sam dziennik.
     if (zastosujZdalnePrzeniesienia(d.moves)) zm = true;
     stanTs = row.ts;
@@ -2600,6 +2606,46 @@ function zakonczTrening(day, w) {
   saveTreningi();
   rozlaczTetno();
   pokazZaliczenie(day, w);
+  if (IOS && state.skrot && !(t.hr && t.hr.n)) setTimeout(() => uruchomSkrot(day, w), 600);
+}
+
+/* ---------- skrót iPhone'a: tętno i kalorie z aplikacji Zdrowie ----------
+   Huawei Health zapisuje tętno i energię w Zdrowiu, a strona nie ma do Zdrowia
+   dostępu. Skrót ma: plan podaje mu, ile minut trwał trening, skrót liczy
+   średnią, maksimum i sumę kalorii z tego okna i otwiera plan z liczbami
+   w adresie. Adres otwiera się w Safari — jeśli plan działa z ikony, liczby
+   dojadą do niego synchronizacją. */
+const NAZWA_SKROTU = 'Plan 12 zegarek';
+const ADRES_PLANU = 'https://olgaerobert-code.github.io/trening/';
+
+function uruchomSkrot(day, w) {
+  const t = trening(w, day);
+  const minuty = t && t.start ? Math.ceil(czasTreningu(t) / 60) + 2 : 90;
+  location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(NAZWA_SKROTU)
+    + '&input=text&text=' + encodeURIComponent(String(minuty));
+}
+
+// Najświeższy trening z ostatnich 12 godzin; bez niego — sesja, na której
+// aplikacja i tak by się otworzyła.
+function sesjaDoDanych() {
+  const teraz = Date.now();
+  let best = null;
+  for (const [k, t] of Object.entries(state.treningi)) {
+    const kiedy = new Date(t.end || t.start || 0).getTime();
+    if (!kiedy || teraz - kiedy > 12 * 3600e3) continue;
+    if (!best || kiedy > best.kiedy) { const [w, day] = k.split('|'); best = { w: +w, day, kiedy }; }
+  }
+  return best || { w: state.week, day: domyslnaSesja() || dzisiaj() || 'A' };
+}
+
+// Wejście z adresu ?zegarek=1&avg=…&max=…&kcal=… (wysyła je skrót).
+function przyjmijZZegarka(params) {
+  if (!params || params.get('zegarek') !== '1') return null;
+  const { w, day } = sesjaDoDanych();
+  const t = trening(w, day);
+  if (t && t.start && !t.end) t.end = new Date().toISOString();
+  zapiszZZegarka(day, w, { avg: params.get('avg') || '', max: params.get('max') || '', kcal: params.get('kcal') || '' });
+  return { w, day };
 }
 // Liczby przepisane z podsumowania na zegarku. Puste pole = nie ruszamy.
 function zapiszZZegarka(day, w, { avg, max, kcal }) {
@@ -2794,6 +2840,32 @@ function zegarekCard() {
   krok(IOS ? 4 : 3, 'Tętno i kalorie liczy zegarek',
     'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Trening siłowy". Po „Zakończ" przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie — trafią na kartę i na story.'
       + (MA_BT() ? ' Na tym urządzeniu tętno może też płynąć na żywo przez Bluetooth: serce obok stopera.' : ''));
+  if (IOS) {
+    const t5 = krok(5, 'Skrót: tętno ze Zdrowia jednym tapnięciem', 'Zamiast przepisywać liczby z zegarka. Raz złożony skrót uruchamia się sam po „Zakończ".', state.skrot);
+    const inst = el('details', 'skrot');
+    inst.append(el('summary', null, 'Jak złożyć skrót (5 minut)'));
+    const ol = el('ol');
+    [
+      'Huawei Health → Ja → Ustawienia → Udostępnianie danych i autoryzacja → Zdrowie: włącz zapisywanie tętna, energii aktywnej i treningów.',
+      `Skróty → + → nazwij skrót dokładnie: ${NAZWA_SKROTU}`,
+      'Dodaj „Jeżeli" (If): Dane wejściowe skrótu → ma dowolną wartość. W gałęzi Jeżeli dodaj „Dostosuj datę" (Adjust Date): Odejmij [Dane wejściowe skrótu] minut od Bieżąca data. W gałęzi W przeciwnym razie: „Dostosuj datę": Odejmij 90 minut od Bieżąca data. Wynik „Jeżeli" to Początek.',
+      '„Znajdź próbki zdrowotne" (Find Health Samples): Typ = Tętno, Data rozpoczęcia jest po Początek. Pod nim „Oblicz statystyki" (Calculate Statistics): Średnia, potem „Zaokrąglij liczbę". Zmienna: Średnie.',
+      'To samo jeszcze raz dla Tętna, ale statystyka Maksimum → zmienna Maks.',
+      '„Znajdź próbki zdrowotne": Typ = Energia aktywna, po Początek → „Oblicz statystyki": Suma → „Zaokrąglij liczbę" → zmienna Kcal.',
+      `„Otwórz URL" (Open URLs): ${ADRES_PLANU}?zegarek=1&avg=[Średnie]&max=[Maks]&kcal=[Kcal] — wstaw zmienne w nawiasy.`,
+      'Uruchom skrót raz ręcznie i zezwól na dostęp do Zdrowia. Potem włącz przełącznik poniżej.',
+    ].forEach(k => ol.append(el('li', null, k)));
+    inst.append(ol);
+    const kopiuj = miniBtn('Skopiuj adres do skrótu', async () => {
+      const a = `${ADRES_PLANU}?zegarek=1&avg=&max=&kcal=`;
+      try { await navigator.clipboard.writeText(a); kopiuj.textContent = 'Skopiowane ✓'; } catch { kopiuj.textContent = a; }
+    });
+    inst.append(kopiuj);
+    t5.append(inst);
+    const rz = el('div', 'kbtn');
+    rz.append(miniBtn(state.skrot ? 'Uruchamiam po „Zakończ" ✓' : 'Uruchamiaj po „Zakończ"', () => { state.skrot = !state.skrot; save(); render(); }));
+    t5.append(rz);
+  }
   return box;
 }
 
@@ -2896,7 +2968,7 @@ function czasITetno(day, w) {
   return out;
 }
 
-function pokazZaliczenie(day, w) {
+function pokazZaliczenie(day, w, komunikat) {
   if (!document.body || !document.body.appendChild) return;
   const stare = document.querySelector('.zal');
   if (stare && stare.remove) stare.remove();
@@ -2923,8 +2995,14 @@ function pokazZaliczenie(day, w) {
   }
   // Tętna nie ma z Bluetooth (iPhone), więc prosimy o trzy liczby z ekranu
   // podsumowania na zegarku. Wszystkie opcjonalne.
+  if (komunikat) karta.append(el('div', 'zkom', komunikat));
   const tr = trening(w, day);
   if (tr && tr.end && !(tr.hr && tr.hr.n)) {
+    if (IOS) {
+      const sk = el('button', 'btn zskrot', 'Pobierz tętno z aplikacji Zdrowie');
+      sk.onclick = () => uruchomSkrot(day, w);
+      karta.append(sk);
+    }
     const f = el('form', 'zzeg');
     f.append(el('div', 'zzt', st.hrAvg ? 'Popraw dane z zegarka' : 'Dane z zegarka (opcjonalnie)'));
     const pole = (id, lab, v) => {
@@ -3098,7 +3176,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=37')
+fetch('plan.json?v=38')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3117,7 +3195,20 @@ fetch('plan.json?v=37')
       history.replaceState(null, '', state.view);
     }
     render();
-    pullStan().then(() => { przeliczPlan(); render(); pullAll(); flushQueue(); });
+    const zAdresu = new URLSearchParams(location.search);
+    pullStan().then(() => {
+      przeliczPlan();
+      const dane = przyjmijZZegarka(zAdresu);
+      if (dane) {
+        history.replaceState(null, '', location.pathname + trasaDnia(dane.day) + '/' + dane.w);
+        state.view = trasaDnia(dane.day) + '/' + dane.w;
+      }
+      render();
+      if (dane) pokazZaliczenie(dane.day, dane.w, IOS && !JAKO_APKA()
+        ? 'Dane ze Zdrowia zapisane. Wróć do aplikacji Plan 12 — pojawią się tam po chwili.'
+        : 'Dane ze Zdrowia zapisane.');
+      pullAll(); flushQueue();
+    });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   })
   .catch(() => {
