@@ -85,13 +85,17 @@ według ustawienia telefonu.
   (i średnie/maks. tętno) przy tej sesji, synchronizuje go z drugim
   urządzeniem i pokazuje na karcie zaliczenia oraz na story. Start jest
   opcjonalny — dziennik uzupełniany po fakcie działa jak wcześniej
-- **Zegarek** (ustawienia → Zegarek): koniec przerwy przychodzi jako
-  powiadomienie, które Huawei Health (i każda inna aplikacja opaski)
-  przekazuje na zegarek — wibracja na nadgarstku. Tętno na żywo przez Web
-  Bluetooth ze standardowej usługi Heart Rate, jeśli zegarek ją nadaje
-  (w Huawei: Ustawienia treningu → udostępnianie danych tętna, przy
-  włączonym treningu na zegarku). Bluetooth ze stron działa w Chrome na
-  Androidzie; w Operze może go nie być
+- **Zegarek** (Dziennik → Zegarek), rozpisany krok po kroku:
+  - **iPhone**: plan trzeba dodać do ekranu początkowego z Safari — tylko
+    wtedy iOS pozwala stronie wysyłać powiadomienia. Aplikacja wykrywa
+    iPhone'a i pokazuje baner z instrukcją, dopóki plan nie działa z ikony
+  - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
+    przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
+  - tętno i kalorie liczy zegarek (ćwiczenie „Trening siłowy"); po „Zakończ"
+    trzy liczby z podsumowania na zegarku wpisuje się w karcie zaliczenia
+    i trafiają na story. Tętno na żywo przez Web Bluetooth działa tylko tam,
+    gdzie przeglądarka je ma (Chrome na Androidzie) — na iPhonie żadna
+    przeglądarka nie obsługuje Bluetooth ze stron
 - **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
   wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
 - **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie

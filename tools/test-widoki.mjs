@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -356,6 +356,13 @@ console.log('\nTrening: start i koniec');
   test('podsumowanie zna czas', A.statySesji('B', 4).czas === '47 min');
   S.view = '#/d/B'; A.render();
   test('po koncu widac czas zamiast przycisku', app.textContent.includes('Trening zakończony') && !app.textContent.includes('Rozpocznij trening'));
+  A.zapiszZZegarka('B', 4, { avg: '128', max: '161', kcal: '412' });
+  const st = A.statySesji('B', 4);
+  test('tetno i kalorie z zegarka trafiaja do podsumowania', st.hrAvg === 128 && st.hrMax === 161 && st.kcal === 412);
+  A.zapiszZZegarka('B', 4, { avg: '', max: '', kcal: '' });
+  test('puste pola nie kasuja wpisanych liczb', A.statySesji('B', 4).hrAvg === 128);
+  S.view = '#/ustawienia'; A.render();
+  test('ustawienia maja instrukcje zegarka', app.textContent.includes('Trening siłowy') && app.textContent.includes('Huawei Health'));
 }
 
 /* ---------- niedziela ---------- */
