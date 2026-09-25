@@ -91,6 +91,14 @@ według ustawienia telefonu.
     iPhone'a i pokazuje baner z instrukcją, dopóki plan nie działa z ikony
   - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
     przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
+  - **skrót iPhone'a „Plan 12 zegarek"** czyta z aplikacji Zdrowie (tam
+    zapisuje Huawei Health) średnie i maksymalne tętno oraz sumę energii
+    aktywnej z okna treningu i otwiera plan z adresem
+    `?zegarek=1&avg=…&max=…&kcal=…`. Plan uruchamia skrót sam po „Zakończ",
+    podając mu czas trwania w minutach. Adres otwiera się w Safari; jeśli
+    plan działa z ikony, liczby dojeżdżają do niego synchronizacją stanu
+    i karta treningu pokazuje się od razu. Przepis na skrót jest w
+    ustawieniach (krok 5)
   - tętno i kalorie liczy zegarek (ćwiczenie „Trening siłowy"); po „Zakończ"
     trzy liczby z podsumowania na zegarku wpisuje się w karcie zaliczenia
     i trafiają na story. Tętno na żywo przez Web Bluetooth działa tylko tam,

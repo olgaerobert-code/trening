@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka, przyjmijZZegarka,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -362,6 +362,13 @@ console.log('\nTrening: start i koniec');
   A.zapiszZZegarka('B', 4, { avg: '', max: '', kcal: '' });
   test('puste pola nie kasuja wpisanych liczb', A.statySesji('B', 4).hrAvg === 128);
   S.view = '#/ustawienia'; A.render();
+  // Skrót z aplikacji Zdrowie: dane dopisują się do trwającego treningu i go kończą.
+  S.treningi = {};
+  A.rozpocznijTrening('C', 4);
+  const cel = A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=131&max=170&kcal=388'));
+  test('skrot trafia w trwajacy trening', cel && cel.day === 'C' && cel.w === 4);
+  test('skrot konczy trening i zapisuje liczby', !!A.trening(4, 'C').end && A.statySesji('C', 4).hrAvg === 131 && A.statySesji('C', 4).kcal === 388);
+  test('adres bez zegarek=1 nic nie robi', A.przyjmijZZegarka(new URLSearchParams('avg=1')) === null);
   test('ustawienia maja instrukcje zegarka', app.textContent.includes('Trening siłowy') && app.textContent.includes('Huawei Health'));
 }
 
