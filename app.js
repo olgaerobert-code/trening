@@ -2646,17 +2646,20 @@ function przyjmijZZegarka(params) {
   const { w, day } = sesjaDoDanych();
   const t = trening(w, day);
   if (t && t.start && !t.end) t.end = new Date().toISOString();
-  zapiszZZegarka(day, w, { avg: params.get('avg') || '', max: params.get('max') || '', kcal: params.get('kcal') || '' });
-  return { w, day };
+  const cos = zapiszZZegarka(day, w, { avg: params.get('avg') || '', max: params.get('max') || '', kcal: params.get('kcal') || '' });
+  return { w, day, pusto: !cos };
 }
 // Liczby przepisane z podsumowania na zegarku. Puste pole = nie ruszamy.
 function zapiszZZegarka(day, w, { avg, max, kcal }) {
-  const t = trening(w, day) || (state.treningi[trnKey(w, day)] = { start: null, end: null });
   const n = v => { const x = Math.round(+String(v).replace(',', '.')); return x > 0 ? x : null; };
+  // Pusta paczka (Zdrowie nic nie zwróciło) nie zakłada wpisu treningu.
+  if (!n(avg) && !n(max) && !n(kcal)) return false;
+  const t = trening(w, day) || (state.treningi[trnKey(w, day)] = { start: null, end: new Date().toISOString() });
   if (n(avg)) t.hr = { avg: n(avg), max: n(max) || (t.hr && t.hr.max) || null, zZegarka: true };
   else if (n(max) && t.hr) t.hr.max = n(max);
   if (n(kcal)) t.kcal = n(kcal);
   saveTreningi();
+  return true;
 }
 function cofnijStart(day, w) { delete state.treningi[trnKey(w, day)]; saveTreningi(); }
 
@@ -2665,7 +2668,8 @@ function cofnijStart(day, w) { delete state.treningi[trnKey(w, day)]; saveTrenin
 function pasekTreningu(day, w) {
   const box = el('div', 'trn');
   box.style.setProperty('--tc', DAY_HEX[day]);
-  const t = trening(w, day);
+  const t0 = trening(w, day);
+  const t = t0 && (t0.start || t0.end) ? t0 : null;
   if (!t) {
     const b = el('button', 'trn-start');
     b.append(el('span', 'trn-ico'), el('span', null, 'Rozpocznij trening'));
@@ -3424,7 +3428,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=42')
+fetch('plan.json?v=43')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3467,9 +3471,11 @@ fetch('plan.json?v=42')
         state.view = trasaDnia(dane.day) + '/' + dane.w;
       }
       render();
-      if (dane) pokazZaliczenie(dane.day, dane.w, IOS && !JAKO_APKA()
-        ? 'Dane ze Zdrowia zapisane. Wróć do aplikacji Plan 12 — pojawią się tam po chwili.'
-        : 'Dane ze Zdrowia zapisane.');
+      if (dane) pokazZaliczenie(dane.day, dane.w, dane.pusto
+        ? 'Skrót zadziałał, ale Zdrowie nie oddało tętna z tego okresu. Sprawdź dostęp: Settings → Health → Data Access & Devices → Shortcuts → Heart Rate.'
+        : IOS && !JAKO_APKA()
+          ? 'Tętno ze Zdrowia zapisane. Wróć do aplikacji Plan 12 — pojawi się tam po chwili.'
+          : 'Tętno ze Zdrowia zapisane.');
       pullAll(); flushQueue();
       dociagnijZeStravy();
     });
