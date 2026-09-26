@@ -105,8 +105,9 @@ function loadState() {
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
+const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, skrot: state.skrot }));
 const save = () => {
-  localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, skrot: state.skrot }));
+  zapiszLokalnie();
   if (typeof pushStan === 'function') pushStan();
 };
 
@@ -1882,7 +1883,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, skrot: state.skrot });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1923,10 +1924,12 @@ async function pullStan() {
       state.treningi = { ...d.treningi, ...wToku() }; saveTreningi(true); zm = true;
       if (nowe) { const [w, day] = nowe[0].split('|'); setTimeout(() => pokazZaliczenie(day, +w, 'Tętno i kalorie ze Zdrowia dotarły.'), 300); }
     }
+    // Skrót zainstalowany raz wystarcza na wszystkich kopiach planu (Safari, ikona).
+    if (d.skrot === true && !state.skrot) { state.skrot = true; zm = true; }
     // Na końcu, bo `kgw` i `mob` przyjechały już przestawione — zostaje sam dziennik.
     if (zastosujZdalnePrzeniesienia(d.moves)) zm = true;
     stanTs = row.ts;
-    if (zm) { localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound })); return true; }
+    if (zm) { zapiszLokalnie(); return true; }
   } catch { /* jak wyżej */ }
   return false;
 }
@@ -1941,7 +1944,7 @@ async function odswiez() {
   if (zmienionyStan) renderJesliSpokojnie();
 }
 setInterval(odswiez, 10000);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { odswiez(); if (typeof dociagnijZeStravy === 'function') dociagnijZeStravy(); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { odswiez(); if (typeof dociagnijZeStravy === 'function') dociagnijZeStravy(); if (typeof autoTetno === 'function') setTimeout(autoTetno, 2500); } });
 
 function setSync(s) {
   state.sync = s;
@@ -2625,8 +2628,38 @@ function uruchomSkrot(day, w) {
   // odejmuje minuty od bieżącej godziny, a bywa uruchamiany chwilę po końcu.
   const t = trening(w, day);
   const minuty = t && t.start ? Math.ceil((Date.now() - new Date(t.start).getTime()) / 60000) + 2 : 90;
+  if (t) { t.hrProby = (t.hrProby || 0) + 1; t.hrOst = new Date().toISOString(); saveTreningi(); }
   location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(NAZWA_SKROTU)
     + '&input=text&text=' + encodeURIComponent(String(minuty));
+}
+
+/* Tętno samo: gdy aplikacja z ikony wraca na ekran, a świeży trening nie ma
+   jeszcze tętna, odpala skrót sama. Huawei wysyła dane do Zdrowia z
+   opóźnieniem, więc próbuje do trzech razy, co najmniej 10 minut odstępu,
+   najdłużej 12 godzin po treningu. W Safari (tam skrót odsyła wyniki) nie
+   odpala niczego — inaczej skrót i strona odbijałyby się w kółko. */
+let autoTetnoOst = 0;
+function kandydatNaTetno(teraz = Date.now()) {
+  let best = null;
+  for (const [k, t] of Object.entries(state.treningi)) {
+    if (!t || !t.end || (t.hr && (t.hr.n || t.hr.avg))) continue;
+    const koniec = new Date(t.end).getTime();
+    if (teraz - koniec > 12 * 3600e3) continue;
+    const proby = t.hrProby || 0;
+    if (proby >= 3) continue;
+    const odOst = teraz - new Date(t.hrOst || t.end).getTime();
+    if (odOst < (proby ? 10 : 2) * 60000) continue;
+    if (!best || koniec > best.koniec) { const [w, day] = k.split('|'); best = { w: +w, day, koniec }; }
+  }
+  return best;
+}
+function autoTetno() {
+  if (!IOS || !state.skrot || !JAKO_APKA() || stravaPolaczona()) return;
+  if (Date.now() - autoTetnoOst < 60000) return;
+  const k = kandydatNaTetno();
+  if (!k) return;
+  autoTetnoOst = Date.now();
+  setTimeout(() => uruchomSkrot(k.day, k.w), 1200);
 }
 
 // Najświeższy trening z ostatnich 12 godzin; bez niego — sesja, na której
@@ -2645,6 +2678,8 @@ function sesjaDoDanych() {
 // Wejście z adresu ?zegarek=1&avg=…&max=…&kcal=… (wysyła je skrót).
 function przyjmijZZegarka(params) {
   if (!params || params.get('zegarek') !== '1') return null;
+  // Skoro skrót odesłał dane, jest zainstalowany — włączamy go wszędzie.
+  if (!state.skrot) { state.skrot = true; save(); }
   const { w, day } = sesjaDoDanych();
   const t = trening(w, day);
   if (t && t.start && !t.end) t.end = new Date().toISOString();
@@ -3430,7 +3465,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=44')
+fetch('plan.json?v=45')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3480,6 +3515,7 @@ fetch('plan.json?v=44')
           : 'Tętno ze Zdrowia zapisane.');
       pullAll(); flushQueue();
       dociagnijZeStravy();
+      if (!zAdresu.get('zegarek')) autoTetno();
     });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   })
