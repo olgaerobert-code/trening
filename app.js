@@ -2621,8 +2621,10 @@ const NAZWA_SKROTU = 'Plan 12 zegarek';
 const ADRES_PLANU = 'https://olgaerobert-code.github.io/trening/';
 
 function uruchomSkrot(day, w) {
+  // Okno liczone od startu treningu do TERAZ, a nie długość treningu — skrót
+  // odejmuje minuty od bieżącej godziny, a bywa uruchamiany chwilę po końcu.
   const t = trening(w, day);
-  const minuty = t && t.start ? Math.ceil(czasTreningu(t) / 60) + 2 : 90;
+  const minuty = t && t.start ? Math.ceil((Date.now() - new Date(t.start).getTime()) / 60000) + 2 : 90;
   location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(NAZWA_SKROTU)
     + '&input=text&text=' + encodeURIComponent(String(minuty));
 }
@@ -3428,7 +3430,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=43')
+fetch('plan.json?v=44')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
