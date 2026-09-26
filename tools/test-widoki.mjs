@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka, przyjmijZZegarka,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka, przyjmijZZegarka, kandydatNaTetno,
   dopasujAktywnosc, pobierzZeStravy, przyjmijStrave, stravaPolaczona, wklejKodPolaczenia, kodPolaczenia,
   setStrava: s => { strava = s; }, getStrava: () => strava,
 };`, sandbox);
@@ -373,6 +373,21 @@ console.log('\nTrening: start i koniec');
   S.treningi = {};
   const pusty = A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=&max='));
   test('pusta paczka ze Zdrowia nie zaklada treningu', pusty.pusto && Object.keys(S.treningi).length === 0);
+  test('odpowiedz skrotu wlacza skrot na stale', S.skrot === true && 'skrot' in A.stanLokalny());
+  {
+    const teraz = Date.now(), iso = m => new Date(teraz - m * 60000).toISOString();
+    S.treningi = { '8|C': { start: iso(40), end: iso(5) } };
+    test('swiezy trening bez tetna jest kandydatem', A.kandydatNaTetno(teraz)?.day === 'C');
+    S.treningi['8|C'].hrProby = 1; S.treningi['8|C'].hrOst = iso(3);
+    test('kolejna proba dopiero po 10 minutach', A.kandydatNaTetno(teraz) === null);
+    S.treningi['8|C'].hrOst = iso(12);
+    test('po 10 minutach probuje znowu', A.kandydatNaTetno(teraz)?.day === 'C');
+    S.treningi['8|C'].hrProby = 3;
+    test('po trzech probach przestaje', A.kandydatNaTetno(teraz) === null);
+    S.treningi['8|C'] = { start: iso(40), end: iso(5), hr: { avg: 120 } };
+    test('trening z tetnem nie jest kandydatem', A.kandydatNaTetno(teraz) === null);
+    S.treningi = {};
+  }
   test('adres bez zegarek=1 nic nie robi', A.przyjmijZZegarka(new URLSearchParams('avg=1')) === null);
   test('ustawienia maja instrukcje zegarka', app.textContent.includes('Strength training') && app.textContent.includes('Huawei Health'));
   test('ustawienia maja karte Stravy', app.textContent.includes('Połącz ze Stravą'));
