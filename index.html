@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=45) format('woff2');
+  src:url(fonts/Archivo.woff2?v=46) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -605,6 +605,11 @@ details.skrot .keyinput{margin:10px 0}
   animation:zalWjazd .45s var(--spring)}
 .toast.zle{background:var(--warn)}
 
+.trn-hr.pobierz{background:var(--ink);color:var(--on-ink);cursor:pointer}
+.trn-hr.pobierz svg{opacity:1;color:#ff6b6b}
+.trn-hr.pobierz b{font-size:15px}
+.trn.ost{cursor:pointer;margin-top:4px}
+
 /* ══ kalkulator 1RM ══ */
 .seg-ctl{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--s3);margin-bottom:14px}
 .seg-ctl button{flex:1;padding:9px 4px;border-radius:9px;font-size:13.5px;font-weight:600;text-align:center;color:var(--ink-2);transition:background .18s,color .18s}
@@ -676,7 +681,7 @@ details.skrot .keyinput{margin:10px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=45"></script>
-<script src="app.js?v=45"></script>
+<script src="progresja.js?v=46"></script>
+<script src="app.js?v=46"></script>
 </body>
 </html>
