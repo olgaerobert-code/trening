@@ -373,6 +373,11 @@ console.log('\nTrening: start i koniec');
   S.treningi = {};
   const pusty = A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=&max='));
   test('pusta paczka ze Zdrowia nie zaklada treningu', pusty.pusto && Object.keys(S.treningi).length === 0);
+  S.treningi = { '4|C': { start: new Date(Date.now() - 50 * 60000).toISOString(), end: new Date(Date.now() - 10 * 60000).toISOString() } };
+  A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=' + encodeURIComponent('112.6 count/min') + '&max=150,0'));
+  test('liczby z jednostka i przecinkiem sa przyjmowane', A.statySesji('C', 4).hrAvg === 113 && A.statySesji('C', 4).hrMax === 150);
+  S.view = '#/'; A.render();
+  test('ekran Dzis pokazuje ostatni trening z tetnem', app.textContent.includes('Ostatni trening') && app.textContent.includes('113'));
   test('odpowiedz skrotu wlacza skrot na stale', S.skrot === true && 'skrot' in A.stanLokalny());
   {
     const teraz = Date.now(), iso = m => new Date(teraz - m * 60000).toISOString();
@@ -389,6 +394,7 @@ console.log('\nTrening: start i koniec');
     S.treningi = {};
   }
   test('adres bez zegarek=1 nic nie robi', A.przyjmijZZegarka(new URLSearchParams('avg=1')) === null);
+  S.view = '#/ustawienia'; A.render();
   test('ustawienia maja instrukcje zegarka', app.textContent.includes('Strength training') && app.textContent.includes('Huawei Health'));
   test('ustawienia maja karte Stravy', app.textContent.includes('Połącz ze Stravą'));
 }

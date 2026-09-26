@@ -280,6 +280,9 @@ function homeView() {
     : 'Następny · ' + nast.dzien;
   body.append(kartaDzis(heroKey, w, etykieta));
 
+  const ostatni = kartaOstatniego();
+  if (ostatni) body.append(ostatni);
+
   const adj = adjustCard();
   if (adj) body.append(adj);
   const rek = rekalibracjaCard();
@@ -2614,6 +2617,44 @@ function zakonczTrening(day, w) {
   else if (IOS && state.skrot && !(t.hr && t.hr.n)) setTimeout(() => uruchomSkrot(day, w), 600);
 }
 
+// Przycisk „♥ Pobierz tętno" z informacją, ile razy już próbowano.
+function przyciskTetna(day, w, t) {
+  const b = el('button', 'trn-hr pobierz');
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.3 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.6 0 5.9 3.6 4.4 7.2C19.5 16.4 12 21 12 21z"/></svg>';
+  b.append(el('b', null, 'Pobierz'), el('span', null, t && t.hrProby ? `próba ${t.hrProby}` : 'tętno'));
+  b.onclick = e => {
+    e.stopPropagation();
+    if (IOS) uruchomSkrot(day, w); else pokazZaliczenie(day, w);
+  };
+  return b;
+}
+
+// Na ekranie Dziś: ostatni trening z czasem i tętnem — albo przyciskiem, gdy go brak.
+function kartaOstatniego() {
+  const teraz = Date.now();
+  const ost = Object.entries(state.treningi)
+    .filter(([, t]) => t && t.end && teraz - new Date(t.end).getTime() < 36 * 3600e3)
+    .sort((a, b) => new Date(b[1].end) - new Date(a[1].end))[0];
+  if (!ost) return null;
+  const [k, t] = ost, [w, day] = k.split('|');
+  const box = el('div', 'trn koniec ost');
+  box.style.setProperty('--tc', DAY_HEX[day]);
+  const txt = el('div', 'trn-l');
+  const kiedy = new Date(t.end);
+  txt.append(el('span', 'trn-et', `Ostatni trening · ${nazwaSesji(day)} · ${kiedy.getHours()}:${String(kiedy.getMinutes()).padStart(2, '0')}`),
+    el('div', 'trn-czas', t.start ? fmtMin(czasTreningu(t)) : '—'));
+  box.append(txt);
+  if (t.hr && (t.hr.n || t.hr.avg)) {
+    const h = el('div', 'trn-hr stat');
+    h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, t.hr.max ? `śr. · max ${t.hr.max}` : 'śr. bpm'));
+    box.append(h);
+  } else {
+    box.append(przyciskTetna(day, +w, t));
+  }
+  box.onclick = () => go(trasaDnia(day) + '/' + w);
+  return box;
+}
+
 /* ---------- skrót iPhone'a: tętno i kalorie z aplikacji Zdrowie ----------
    Huawei Health zapisuje tętno i energię w Zdrowiu, a strona nie ma do Zdrowia
    dostępu. Skrót ma: plan podaje mu, ile minut trwał trening, skrót liczy
@@ -2683,12 +2724,14 @@ function przyjmijZZegarka(params) {
   const { w, day } = sesjaDoDanych();
   const t = trening(w, day);
   if (t && t.start && !t.end) t.end = new Date().toISOString();
-  const cos = zapiszZZegarka(day, w, { avg: params.get('avg') || '', max: params.get('max') || '', kcal: params.get('kcal') || '' });
-  return { w, day, pusto: !cos };
+  const surowe = { avg: params.get('avg') || '', max: params.get('max') || '', kcal: params.get('kcal') || '' };
+  const cos = zapiszZZegarka(day, w, surowe);
+  return { w, day, pusto: !cos, surowe };
 }
 // Liczby przepisane z podsumowania na zegarku. Puste pole = nie ruszamy.
 function zapiszZZegarka(day, w, { avg, max, kcal }) {
-  const n = v => { const x = Math.round(+String(v).replace(',', '.')); return x > 0 ? x : null; };
+  // Skrót potrafi odesłać liczbę z jednostką („112 count/min") albo z przecinkiem.
+  const n = v => { const m = String(v == null ? '' : v).replace(',', '.').match(/\d+(\.\d+)?/); const x = m ? Math.round(+m[0]) : 0; return x > 0 ? x : null; };
   // Pusta paczka (Zdrowie nic nie zwróciło) nie zakłada wpisu treningu.
   if (!n(avg) && !n(max) && !n(kcal)) return false;
   const t = trening(w, day) || (state.treningi[trnKey(w, day)] = { start: null, end: new Date().toISOString() });
@@ -2749,6 +2792,8 @@ function pasekTreningu(day, w) {
     const h = el('div', 'trn-hr stat');
     h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, 'śr. bpm'));
     box.append(h);
+  } else {
+    box.append(przyciskTetna(day, w, t));
   }
   const znowu = el('button', 'trn-link', 'Cofnij');
   znowu.onclick = () => { t.end = null; saveTreningi(); render(); };
@@ -3465,7 +3510,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=45')
+fetch('plan.json?v=46')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3509,7 +3554,7 @@ fetch('plan.json?v=45')
       }
       render();
       if (dane) pokazZaliczenie(dane.day, dane.w, dane.pusto
-        ? 'Skrót zadziałał, ale Zdrowie nie oddało tętna z tego okresu. Sprawdź dostęp: Settings → Health → Data Access & Devices → Shortcuts → Heart Rate.'
+        ? `Skrót przysłał: avg="${dane.surowe.avg}", max="${dane.surowe.max}" — bez tętna. Zdrowie nie miało pomiarów z czasu treningu albo Huawei jeszcze ich nie wysłał. Spróbuję ponownie za 10 minut.`
         : IOS && !JAKO_APKA()
           ? 'Tętno ze Zdrowia zapisane. Wróć do aplikacji Plan 12 — pojawi się tam po chwili.'
           : 'Tętno ze Zdrowia zapisane.');
