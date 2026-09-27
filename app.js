@@ -1305,7 +1305,7 @@ function postepView() {
   };
   kpi.append(kaf('Tonaż cyklu', Math.round(tonCykl), 'kg', `tyg. 1–${state.week}`, true),
     kaf('Sesje', sesje, null, `z ${state.week * 3}`),
-    kaf('Z rzędu', seriaTygodni(), null, 'tyg. z kompletem'));
+    kaf('Z rzędu', seriaTygodni(), 'tyg.', 'z kompletem'));
   body.append(kpi);
 
   const tonCard = el('div', 'card');
@@ -1330,7 +1330,7 @@ function postepView() {
 
     // Werdykty: wiersz na tydzień, kolumna na bój.
     const wrap = el('div', 'scroll'); wrap.style.margin = '0'; wrap.style.padding = '0';
-    const t = el('table');
+    const t = el('table', 'werdykty');
     t.innerHTML = '<thead><tr><th>Tydz.</th>' + LIFTS.map(L => '<th>' + esc(L.short) + '</th>').join('') + '</tr></thead><tbody>' +
       blok.weeks.filter(x => x <= state.week).map(x => {
         const dl = isDeload(x);
@@ -3150,7 +3150,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=53')
+fetch('plan.json?v=54')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
