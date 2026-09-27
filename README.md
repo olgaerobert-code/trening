@@ -45,7 +45,8 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   z czasem. Każda z 20 pozycji ma **wejście krok po kroku**, częsty błąd, zdanie
   o tym, co daje pod sztangą, i **film z instruktażem w samej karcie** —
   widać go podczas przewijania, a odtwarza się po tapnięciu (YouTube bez
-  ciasteczek). Do tapnięcia ładuje się tylko okładka. „Zmień film” pod ramką
+  ciasteczek). Do tapnięcia ładuje się tylko okładka. Ikona ⤢ w rogu powiększa
+  film na cały ekran (w pionie obraca go w poziom). „Zmień film” pod ramką
   pozwala wkleić inny link; plan zapamiętuje go przy pozycji i synchronizuje
   z drugim urządzeniem
 - **Dziś** — aplikacja startuje na **najświeższej sesji tygodnia, która nie jest

@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=52) format('woff2');
+  src:url(fonts/Archivo.woff2?v=53) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -582,6 +582,18 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .filmplay::after{content:'';position:absolute;left:26px;top:13px;border-left:16px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
 .filmramka.okladka:active .filmplay{transform:scale(.94)}
 .filmzmien{display:block;margin:8px 0 0 auto;font-size:12.5px;font-weight:600;color:var(--ink-3)}
+.filmekran{position:relative}
+.filmpow{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+  background:rgba(0,0,0,.55);color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.filmpow:active{transform:scale(.92)}
+.filmpelny{position:fixed;inset:0;z-index:80;background:#000;animation:zalTlo .2s ease}
+.pelnyramka{position:absolute;left:50%;top:50%;width:100vw;height:100vh;height:100dvh;transform:translate(-50%,-50%)}
+.pelnyramka iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@media (orientation:portrait){
+  .pelnyramka{width:100vh;width:100dvh;height:100vw;transform:translate(-50%,-50%) rotate(90deg)}
+}
+.pelnyx{position:absolute;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));width:40px;height:40px;border-radius:50%;
+  background:rgba(255,255,255,.18);color:#fff;font-size:17px;font-weight:700;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .filmdol{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:var(--ink-3)}
 .filmdol .link{flex:none}
 .filmkroki{margin:0 0 12px;padding-left:20px;font-size:14px;color:var(--ink-2);line-height:1.55}
@@ -666,7 +678,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=52"></script>
-<script src="app.js?v=52"></script>
+<script src="progresja.js?v=53"></script>
+<script src="app.js?v=53"></script>
 </body>
 </html>

@@ -378,6 +378,7 @@ test('link shorts', A.idFilmu('https://youtube.com/shorts/abcDEF12345') === 'abc
 test('smiec to nie film', A.idFilmu('kot krowa') === null);
 S.filmy = {}; S.view = '#/mobilnosc'; A.render();
 test('kazda pozycja ma okladke filmu z planu', app.querySelectorAll('.okladka').length === 20);
+  test('kazdy film mozna powiekszyc', app.querySelectorAll('.filmpow').length === 20);
 test('zapisany film jedzie do synchronizacji', A.zapiszFilm('y3', 'https://youtu.be/abcDEF12345') && S.filmy.y3 === 'abcDEF12345' && 'filmy' in A.stanLokalny());
 kafelki[0].querySelector('.tick').click();
 test('odklikniecie zapisuje sie w stanie', Object.keys(S.mob[4] || {}).length === 1);

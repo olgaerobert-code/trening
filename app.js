@@ -2981,37 +2981,69 @@ async function udostepnij(day, w) {
 /* Film w samej karcie: okładka z przyciskiem ▶, a po tapnięciu odtwarzacz w tym
    samym miejscu. Do pierwszego tapnięcia ładuje się tylko obrazek — dwadzieścia
    odtwarzaczy naraz zamuliłoby przewijanie. */
+const adresFilmu = vid => `https://www.youtube-nocookie.com/embed/${vid}?playsinline=1&rel=0&modestbranding=1&autoplay=1`;
+function odtwarzacz(vid, nazwa) {
+  const f = document.createElement('iframe');
+  f.src = adresFilmu(vid);
+  f.title = 'Film: ' + nazwa;
+  f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
+  f.setAttribute('allowfullscreen', '');
+  return f;
+}
+
 function filmWKarcie(it) {
   const vid = filmPozycji(it);
   const box = el('div', 'filmwkarcie');
-  const ramka = el('button', 'filmramka okladka');
-  ramka.setAttribute('aria-label', 'Odtwórz film: ' + it.name);
-  const img = el('img');
-  img.src = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
-  img.alt = '';
-  img.loading = 'lazy';
-  img.onerror = () => img.remove(); // bez sieci zostaje czarna ramka z ▶, nie ikonka błędu
-  ramka.append(img, el('span', 'filmplay'));
-  ramka.onclick = () => {
-    const f = document.createElement('iframe');
-    f.src = `https://www.youtube-nocookie.com/embed/${vid}?playsinline=1&rel=0&modestbranding=1&autoplay=1`;
-    f.title = 'Film: ' + it.name;
-    f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
-    f.setAttribute('allowfullscreen', '');
-    const gra = el('div', 'filmramka');
-    gra.append(f);
-    ramka.replaceWith(gra);
+  const okladka = () => {
+    const ramka = el('button', 'filmramka okladka');
+    ramka.setAttribute('aria-label', 'Odtwórz film: ' + it.name);
+    const img = el('img');
+    img.src = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+    img.alt = '';
+    img.loading = 'lazy';
+    img.onerror = () => img.remove(); // bez sieci zostaje czarna ramka z ▶, nie ikonka błędu
+    ramka.append(img, el('span', 'filmplay'));
+    ramka.onclick = () => {
+      const gra = el('div', 'filmramka');
+      gra.append(odtwarzacz(vid, it.name));
+      ramka.replaceWith(gra);
+    };
+    return ramka;
   };
+  const ekran = el('div', 'filmekran');
+  ekran.append(okladka());
+  const pow = el('button', 'filmpow');
+  pow.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
+  pow.setAttribute('aria-label', 'Powiększ film: ' + it.name);
+  // Film grający w karcie zatrzymujemy — inaczej dwa odtwarzacze grałyby naraz.
+  pow.onclick = () => { ekran.replaceChildren(okladka(), pow); filmNaCalyEkran(vid, it.name); };
+  ekran.append(pow);
   const zmien = el('button', 'filmzmien', 'Zmień film');
   zmien.onclick = () => pokazFilm(it);
-  box.append(ramka, zmien);
+  box.append(ekran, zmien);
   return box;
 }
 
-/* ---------- filmy w aplikacji ----------
-   Film gra w okienku nad planem (odtwarzacz YouTube bez ciasteczek), więc nie
-   trzeba wychodzić z aplikacji. Który film — wybiera użytkownik: raz wkleja
-   link, plan zapamiętuje go per pozycja i synchronizuje z drugim urządzeniem. */
+/* Powiększenie: czarny ekran z filmem. Trzymany pionowo telefon dostaje film
+   obrócony w poziom, więc wypełnia cały ekran nawet z blokadą obrotu. */
+function filmNaCalyEkran(vid, nazwa) {
+  if (!document.body || !document.body.appendChild) return;
+  const tlo = el('div', 'filmpelny');
+  const ramka = el('div', 'pelnyramka');
+  const x = el('button', 'pelnyx', '✕');
+  x.setAttribute('aria-label', 'Zamknij film');
+  const zamknij = () => { tlo.remove(); document.removeEventListener('keydown', esc); };
+  const esc = e => { if (e.key === 'Escape') zamknij(); };
+  x.onclick = zamknij;
+  document.addEventListener('keydown', esc);
+  ramka.append(odtwarzacz(vid, nazwa), x);
+  tlo.append(ramka);
+  document.body.appendChild(tlo);
+}
+
+/* ---------- wybór filmu ----------
+   Okienko do wklejenia innego linku z YouTube. Plan zapamiętuje go per pozycja
+   i synchronizuje z drugim urządzeniem. */
 function idFilmu(tekst) {
   const t = String(tekst || '').trim();
   if (/^[\w-]{11}$/.test(t)) return t;
@@ -3118,7 +3150,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=52')
+fetch('plan.json?v=53')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3142,7 +3174,13 @@ fetch('plan.json?v=52')
       render();
       pullAll(); flushQueue();
     });
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(reg => {
+        // Aplikacja z ekranu początkowego potrafi wisieć w tle całymi dniami —
+        // przy każdym powrocie pytamy, czy nie ma nowszej wersji.
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+      }).catch(() => {});
+    }
   })
   .catch(() => {
     $('#app').innerHTML = '<div class="note"><b>Nie udało się wczytać plan.json.</b> Otwórz stronę przez serwer (nie z pliku), np. <code>python -m http.server 8080</code>.</div>';
