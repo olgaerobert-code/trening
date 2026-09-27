@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {},
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {}, autoPrzerwa: true,
 };
 
 /* ---------- Supabase ---------- */
@@ -100,11 +100,12 @@ function loadState() {
     if (typeof raw.sound === 'boolean') state.sound = raw.sound;
     if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
     if (typeof raw.zegarek === 'boolean') state.zegarek = raw.zegarek;
+    if (typeof raw.autoPrzerwa === 'boolean') state.autoPrzerwa = raw.autoPrzerwa;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek }));
+const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, autoPrzerwa: state.autoPrzerwa }));
 const save = () => {
   zapiszLokalnie();
   if (typeof pushStan === 'function') pushStan();
@@ -288,10 +289,17 @@ function homeView() {
   const ostatni = kartaOstatniego();
   if (ostatni) body.append(ostatni);
 
-  const adj = adjustCard();
-  if (adj) body.append(adj);
-  const rek = rekalibracjaCard();
-  if (rek) body.append(rek);
+  // Zmiany ciężarów: jeden zwinięty pasek z tym, co się zmieniło, a karty
+  // z przyciskami „Cofnij" dopiero po rozwinięciu.
+  const zmiany = [adjustCard(), rekalibracjaCard()].filter(Boolean);
+  if (zmiany.length) {
+    const d = el('details', 'zmiany');
+    const sm = el('summary');
+    sm.append(el('span', 'zmk'), el('span', 'zmt', zmiany.length === 1 ? 'Zmiana ciężarów' : zmiany.length + ' zmiany ciężarów'),
+      el('span', 'zmo', zmiany.map(z => ($('b', z) || {}).textContent || '').join(' · ')));
+    d.append(sm, ...zmiany);
+    body.append(d);
+  }
   if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.', 'uwaga'));
   if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.', 'uwaga'));
 
@@ -301,8 +309,17 @@ function homeView() {
   for (const k of ['A', 'B', 'C', 'D'].filter(x => x !== heroKey)) lista.append(tile(daneSesji(k, w)));
   body.append(lista);
 
+  body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
+  frag.append(body);
+  return frag;
+}
+
+// Ciężary tygodnia i maksy — liczby do sprawdzenia i poprawienia, nie do
+// oglądania przy każdym otwarciu. Mieszkają w Postępie, nie na ekranie Dziś.
+function ciezaryIMaksy(body) {
+  const w = state.week;
   // Ciężary robocze tygodnia — trzy liczby w jednym rzędzie, z różnicą do poprzedniego.
-  body.append(el('h2', 'sekcja', 'Na sztandze w tym tygodniu'));
+  body.append(el('h2', 'sekcja', 'Na sztandze w tygodniu ' + w));
   const stats = el('div', 'stats');
   for (const L of LIFTS) {
     const kg = kgOf(L.key, w);
@@ -348,9 +365,6 @@ function homeView() {
   box.append(pod);
   body.append(box);
 
-  body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
-  frag.append(body);
-  return frag;
 }
 
 const MAIN_OF = { A: 'bench', B: null, C: 'front' };
@@ -437,6 +451,13 @@ function kartaDzis(k, w, etykieta) {
       ? `${mobWidoczne().length} pozycji · bez obciążenia`
       : `${d.items.length} ćwiczeń · bez sztangi, bez obciążenia osiowego`));
     b.append(presk);
+  }
+
+  // Niedziela: w tle okładka filmu pozycji, od której zaczynasz.
+  if (k === 'D') {
+    const pierwsza = mobWidoczne().find(i => !mobJest(w, i.id)) || mobWidoczne()[0];
+    const vid = pierwsza && filmPozycji(pierwsza);
+    if (vid) { b.classList.add('zdjecie'); b.style.setProperty('--img', `url(${miniaturka(vid)})`); }
   }
 
   const pg = dane.progress;
@@ -671,6 +692,8 @@ function exerciseCard(it, key, w) {
   if (platesRow) box.append(platesRow);
 
   if (pl.sets) box.append(setRows(it, key, w, pl, odswiezKg));
+  h.onclick = () => { if (box.classList.contains('zwiniety')) box.classList.toggle('otwarty'); };
+  if (pl.sets && logGet(w, key, it.n).filter(Boolean).length >= pl.sets) zwinKarte(box, it, key, w, true);
 
   const hist = ostatnieWykonanie(it, key, w);
   if (hist) {
@@ -698,6 +721,26 @@ function exerciseCard(it, key, w) {
     box.append(more, note);
   }
   return box;
+}
+
+// Karta skończonego ćwiczenia: sam nagłówek z tym, co zrobione. Tapnięcie
+// w nagłówek rozwija ją z powrotem, gdyby trzeba było coś poprawić.
+function zwinKarte(box, it, day, w, odRazu) {
+  if (!box || box.classList.contains('zwiniety')) return;
+  const opis = opisWykonania(logGet(w, day, it.n)) || resolve(it.scheme, w);
+  const h = $('.exhead', box);
+  const stare = $('.exsum', box);
+  if (stare) stare.remove();
+  $('.exname', h).append(el('div', 'exsum', '✓ ' + opis));
+  box.classList.remove('otwarty');
+  box.classList.add('zwiniety');
+  if (!odRazu) blysk(box, 600);
+}
+function rozwinKarte(box) {
+  if (!box) return;
+  box.classList.remove('zwiniety', 'otwarty');
+  const s = $('.exsum', box);
+  if (s) s.remove();
 }
 
 function metric(label, value, cls, unit) {
@@ -1001,7 +1044,20 @@ function mobilityView(wArg) {
   sw.append(przycisk(`Pełna · ~${m.minutes} min`, false), przycisk(`Krótka · ~${m.shortMinutes} min`, true));
   body.append(sw);
 
-  body.append(noteBox('Po co to jest:', ' ' + m.intro));
+  const prow = el('button', 'prowstart');
+  const nastepna = widoczne.find(i => !mobJest(w, i.id));
+  prow.append(el('span', 'pico'), el('span', 'pt', done && nastepna ? 'Prowadź dalej' : 'Prowadź mnie'),
+    el('span', 'ps', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z filmem i minutnikiem') : 'wszystko odhaczone — przejdź jeszcze raz'));
+  prow.onclick = () => prowadzJoge(w);
+  body.append(prow);
+
+  // Wstęp na dwie linie — cały po rozwinięciu. Czytasz go raz, a przewijasz co tydzień.
+  const wstep = noteBox('Po co to jest:', ' ' + m.intro, 'zwiniety');
+  const wiecej = el('button', 'wiecej', 'więcej ▾');
+  wiecej.onclick = () => { const z = wstep.classList.toggle('zwiniety'); wiecej.textContent = z ? 'więcej ▾' : 'mniej ▴'; };
+  const wstepBox = el('div', 'wstep');
+  wstepBox.append(wstep, wiecej);
+  body.append(wstepBox);
 
   const list = el('div', klasaWejscia());
   for (const blok of m.blocks) {
@@ -1307,6 +1363,7 @@ function postepView() {
     kaf('Sesje', sesje, null, `z ${state.week * 3}`),
     kaf('Z rzędu', seriaTygodni(), 'tyg.', 'z kompletem'));
   body.append(kpi);
+  ciezaryIMaksy(body);
 
   const tonCard = el('div', 'card');
   tonCard.append(el('h3', null, 'Tonaż tydzień po tygodniu'));
@@ -2036,6 +2093,14 @@ function setRows(it, day, w, pl, onKg) {
     box.append(kgBox);
   }
 
+  // Komplet serii zwija kartę do jednego wiersza — następne ćwiczenie wskakuje
+  // pod palec. Chwila zwłoki, żeby zielony ptaszek zdążył mignąć.
+  const zwinJesliKomplet = () => {
+    const karta = box.closest && box.closest('.ex');
+    if (!karta || rows().filter(Boolean).length < pl.sets) return;
+    setTimeout(() => zwinKarte(karta, it, day, w), 650);
+  };
+
   for (let i = 0; i < pl.sets; i++) {
     const zapis = rows()[i] || null;
     const r = el('div', 'setrow' + (zapis ? ' done' : ''));
@@ -2054,15 +2119,18 @@ function setRows(it, day, w, pl, onKg) {
 
     tick.onclick = () => {
       const jest = r.classList.toggle('done');
-      if (jest) { zapisz(); blysk(tick); } else logSet(w, day, it.n, i, null);
+      if (jest) { zapisz(); blysk(tick); } else { logSet(w, day, it.n, i, null); rozwinKarte(box.closest && box.closest('.ex')); }
       odswiezPostep(day, w);
+      if (jest) { przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
     sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
     sl.onchange = () => {
       powt = +sl.value;
-      if (!r.classList.contains('done')) { r.classList.add('done'); blysk(tick); }
+      const nowa = !r.classList.contains('done');
+      if (nowa) { r.classList.add('done'); blysk(tick); }
       zapisz();
       odswiezPostep(day, w);
+      if (nowa) { przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
 
     r.append(el('span', 'snum', String(i + 1)), sl, val, tick);
@@ -2269,8 +2337,34 @@ function cancelBeeps() {
   voices = [];
 }
 
+/* ---------- przerwa po odhaczonej serii ----------
+   Czas przerwy stoi w opisie ćwiczenia („Przerwy 3 min (od bloku 3: 4 min)",
+   „Przerwa 90 s"). W superserii pierwsze ćwiczenie pary nie ma przerwy —
+   od razu idzie drugie, a przerwa („90 s po parze") przychodzi po nim. */
+const naSekundy = (n, j) => +n * (j === 'min' ? 60 : 1);
+function przerwaPo(it, day, w) {
+  if (it.superset && it.superset.endsWith('1')) return 0;
+  const note = it.note || '';
+  if (it.superset) {
+    const para = state.plan.days[day].items.find(x => x.superset === it.superset[0] + '1');
+    const m = para && (para.note || '').match(/(\d+)\s*(s|min) po parze/);
+    return m ? naSekundy(m[1], m[2]) : 60;
+  }
+  const blok3 = note.match(/od bloku 3:\s*(\d+)\s*(s|min)/);
+  if (blok3 && w >= BLOKI[2].weeks[0]) return naSekundy(blok3[1], blok3[2]);
+  const m = note.match(/Przerw[ay]\s+(\d+)\s*(s|min)/);
+  return m ? naSekundy(m[1], m[2]) : 60;
+}
+function przerwaPoSerii(it, day, w) {
+  if (!state.autoPrzerwa) return;
+  const s = przerwaPo(it, day, w);
+  // Ostatnia seria całej sesji nie potrzebuje przerwy — potrzebuje oklasków.
+  const { done, total } = postepDnia(w, day);
+  if (s > 0 && done < total) startTimer(s);
+}
+
 /* ---------- timer przerwy ---------- */
-let tLeft = 0, tTotal = 0, tId = null, tFired = false;
+let tLeft = 0, tTotal = 0, tId = null, tFired = false, tEnd = 0;
 const R = 24, CIRC = 2 * Math.PI * R;
 
 // Dolny pasek ma dwie role. Na ekranach przeglądowych to zakładki; w trakcie
@@ -2346,9 +2440,12 @@ function startTimer(s) {
   clearInterval(tId);
   cancelBeeps();
   tLeft = s; tTotal = s; tFired = false;
+  // Liczymy od godziny końca, nie odejmujemy sekund: iPhone dławi liczniki
+  // w tle i odliczanie „minus jeden co tick" rozjeżdżało się z zegarem.
+  tEnd = Date.now() + s * 1000;
   scheduleBeeps(s);
   tId = setInterval(() => {
-    tLeft--;
+    tLeft = Math.max(0, Math.ceil((tEnd - Date.now()) / 1000));
     if (tLeft <= 0) {
       clearInterval(tId); tId = null; tLeft = 0; tFired = true;
       voices = [];
@@ -2526,6 +2623,15 @@ function settingsView() {
   };
   par.append(go2, info);
   body.append(par);
+
+  const tr = el('div', 'card');
+  tr.append(el('h3', null, 'W trakcie sesji'));
+  const trow = el('div', 'e1row');
+  trow.append(el('div', 'n', 'Przerwa rusza po ✓'));
+  trow.append(miniBtn(state.autoPrzerwa ? 'Włączone' : 'Wyłączone', () => { state.autoPrzerwa = !state.autoPrzerwa; save(); render(); }));
+  tr.append(trow);
+  tr.append(el('p', null, 'Po odhaczeniu serii timer odlicza przerwę z opisu ćwiczenia: 3 min przy bojach, 90 s albo 60 s przy dodatkowych, w superserii dopiero po drugim ćwiczeniu pary. Ostatnia seria sesji nie włącza przerwy.'));
+  body.append(tr);
 
   const pref = el('div', 'card');
   pref.append(el('h3', null, 'Otwieranie'));
@@ -2991,25 +3097,29 @@ function odtwarzacz(vid, nazwa) {
   return f;
 }
 
+const miniaturka = vid => `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+// Okładka z ▶, która po tapnięciu zamienia się w odtwarzacz w tym samym miejscu.
+function okladkaFilmu(vid, nazwa) {
+  const ramka = el('button', 'filmramka okladka');
+  ramka.setAttribute('aria-label', 'Odtwórz film: ' + nazwa);
+  const img = el('img');
+  img.src = miniaturka(vid);
+  img.alt = '';
+  img.loading = 'lazy';
+  img.onerror = () => img.remove(); // bez sieci zostaje czarna ramka z ▶, nie ikonka błędu
+  ramka.append(img, el('span', 'filmplay'));
+  ramka.onclick = () => {
+    const gra = el('div', 'filmramka');
+    gra.append(odtwarzacz(vid, nazwa));
+    ramka.replaceWith(gra);
+  };
+  return ramka;
+}
+
 function filmWKarcie(it) {
   const vid = filmPozycji(it);
   const box = el('div', 'filmwkarcie');
-  const okladka = () => {
-    const ramka = el('button', 'filmramka okladka');
-    ramka.setAttribute('aria-label', 'Odtwórz film: ' + it.name);
-    const img = el('img');
-    img.src = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
-    img.alt = '';
-    img.loading = 'lazy';
-    img.onerror = () => img.remove(); // bez sieci zostaje czarna ramka z ▶, nie ikonka błędu
-    ramka.append(img, el('span', 'filmplay'));
-    ramka.onclick = () => {
-      const gra = el('div', 'filmramka');
-      gra.append(odtwarzacz(vid, it.name));
-      ramka.replaceWith(gra);
-    };
-    return ramka;
-  };
+  const okladka = () => okladkaFilmu(vid, it.name);
   const ekran = el('div', 'filmekran');
   ekran.append(okladka());
   const pow = el('button', 'filmpow');
@@ -3038,6 +3148,118 @@ function filmNaCalyEkran(vid, nazwa) {
   document.addEventListener('keydown', esc);
   ramka.append(odtwarzacz(vid, nazwa), x);
   tlo.append(ramka);
+  document.body.appendChild(tlo);
+}
+
+/* ---------- joga: tryb prowadzenia ----------
+   Jedna pozycja na cały ekran: film, dawka, minutnik i kroki. „Zrobione"
+   odhacza pozycję i przechodzi do następnej — bez przewijania listy z matą
+   pod plecami. Minutnik to ten sam timer co przerwy, więc piknie i zawibruje. */
+function prowadzJoge(w) {
+  if (!document.body || !document.body.appendChild) return;
+  const lista = mobWidoczne();
+  if (!lista.length) return;
+  let i = Math.max(0, lista.findIndex(x => !mobJest(w, x.id)));
+  const t0 = trening(w, 'D');
+  if (!t0) rozpocznijTrening('D', w);            // stoper rusza razem z pierwszą pozycją
+  keepAwake(true);
+
+  const tlo = el('div', 'prow');
+  tlo.style.setProperty('--dc', DAY_COLOR.D);
+  let tik = null;
+  const zamknij = () => {
+    clearInterval(tik);
+    if (tId) stopTimer();
+    tlo.remove();
+    document.removeEventListener('keydown', klaw);
+    render();
+    // Cała joga przerobiona: stoper staje, a karta zaliczenia pokazuje czas.
+    if (sesjaKompletna('D', w)) {
+      const t = trening(w, 'D');
+      setTimeout(() => (t && t.start && !t.end ? zakonczTrening('D', w) : pokazZaliczenie('D', w)), 300);
+    }
+  };
+  const klaw = e => { if (e.key === 'Escape') zamknij(); if (e.key === 'ArrowRight') dalej(); if (e.key === 'ArrowLeft') wstecz(); };
+  document.addEventListener('keydown', klaw);
+  const blokPozycji = it => state.plan.mobility.blocks.find(b => b.items.some(x => x.id === it.id));
+
+  const rysuj = () => {
+    clearInterval(tik);
+    if (tId) stopTimer();
+    const it = lista[i];
+    tlo.replaceChildren();
+    const gora = el('div', 'prgora');
+    const kreski = el('div', 'prkreski');
+    lista.forEach((x, j) => kreski.append(el('i', (mobJest(w, x.id) ? 'z' : '') + (j === i ? ' teraz' : ''))));
+    const x = el('button', 'prx', '✕');
+    x.setAttribute('aria-label', 'Zamknij tryb prowadzenia');
+    x.onclick = zamknij;
+    gora.append(el('span', 'prnr', `${i + 1}/${lista.length}`), kreski, x);
+    tlo.append(gora);
+
+    const tresc = el('div', 'prtresc');
+    const b = blokPozycji(it);
+    if (b) tresc.append(el('div', 'preye', b.name));
+    tresc.append(el('h2', 'prname', it.name));
+    tresc.append(el('div', 'prdawka', it.dose));
+    const vid = filmPozycji(it);
+    if (vid) tresc.append(okladkaFilmu(vid, it.name));
+
+    if (it.sec) {
+      const min = el('button', 'prmin');
+      const fmtS = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+      const napis = el('b', null, fmtS(it.sec));
+      const pod = el('span', null, 'Start minutnika');
+      min.append(napis, pod);
+      const odswiez = () => {
+        if (tId) { napis.textContent = fmtS(tLeft); pod.textContent = 'Stop'; min.classList.add('leci'); min.style.setProperty('--p', 1 - tLeft / tTotal); }
+        else if (tFired) { napis.textContent = '0:00'; pod.textContent = 'Czas! Tapnij „Zrobione"'; min.classList.remove('leci'); min.classList.add('koniec'); clearInterval(tik); }
+      };
+      min.onclick = () => {
+        if (tId) { stopTimer(); clearInterval(tik); napis.textContent = fmtS(it.sec); pod.textContent = 'Start minutnika'; min.classList.remove('leci'); return; }
+        min.classList.remove('koniec');
+        startTimer(it.sec); odswiez();
+        tik = setInterval(odswiez, 250);
+      };
+      tresc.append(min);
+    }
+
+    if (it.steps && it.steps.length) {
+      const ol = el('ol', 'kroki');
+      it.steps.forEach(k => ol.append(el('li', null, k)));
+      tresc.append(ol);
+    }
+    if (it.blad) {
+      const bl = el('div', 'blad');
+      bl.append(el('span', null, 'Częsty błąd'), el('p', null, it.blad));
+      tresc.append(bl);
+    }
+    tlo.append(tresc);
+
+    const dol = el('div', 'prdol');
+    const nast = lista[i + 1];
+    dol.append(el('div', 'prnast', nast ? 'Dalej: ' + nast.name : 'To ostatnia pozycja'));
+    const przyc = el('div', 'prprzyc');
+    const wst = el('button', 'prwstecz', '‹');
+    wst.setAttribute('aria-label', 'Poprzednia pozycja');
+    wst.disabled = i === 0;
+    wst.onclick = wstecz;
+    const ok = el('button', 'prok', mobJest(w, it.id) ? (nast ? 'Dalej →' : 'Zakończ') : (nast ? 'Zrobione → dalej' : 'Zrobione — koniec'));
+    ok.onclick = dalej;
+    przyc.append(wst, ok);
+    dol.append(przyc);
+    tlo.append(dol);
+    tresc.scrollTop = 0;
+  };
+  const dalej = () => {
+    const it = lista[i];
+    if (!mobJest(w, it.id)) mobToggle(w, it.id);
+    if (navigator.vibrate) navigator.vibrate(30);
+    if (i < lista.length - 1) { i++; rysuj(); } else zamknij();
+  };
+  const wstecz = () => { if (i > 0) { i--; rysuj(); } };
+
+  rysuj();
   document.body.appendChild(tlo);
 }
 
@@ -3150,7 +3372,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=54')
+fetch('plan.json?v=55')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

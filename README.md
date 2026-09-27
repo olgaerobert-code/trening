@@ -88,6 +88,20 @@ według ustawienia telefonu.
 - **Postęp**: rząd trzech liczb (tonaż cyklu, sesje, tygodnie z rzędu),
   kolumny tonażu tydzień po tygodniu i wykres ciężarów według zasad skilla
   dataviz — linie 2 px, kropki końcowe z obwódką, etykiety w kolorze tekstu
+- **Przerwa po ✓**: odhaczenie serii samo włącza timer przerwy z czasem z opisu
+  ćwiczenia (3 min przy bojach, od bloku 3 4 min przy wyciskaniu, 90/60 s przy
+  dodatkowych; w superserii dopiero po drugim ćwiczeniu pary). Ostatnia seria
+  sesji przerwy nie włącza. Wyłącznik: Dziennik → W trakcie sesji. Timer liczy
+  od godziny końca, więc nie rozjeżdża się, gdy telefon schowa aplikację w tle
+- **Skończone ćwiczenie zwija się** do jednego wiersza z ✓ i tym, co zrobione
+  („4 × 6 @ 112,5 kg"); tapnięcie w nagłówek rozwija je z powrotem
+- **Ekran Dziś** to tylko pierścienie tygodnia, karta dzisiejszej sesji i lista
+  tygodnia. Korekty i podwyżki ciężarów siedzą w jednym zwiniętym pasku, a ciężary
+  tygodnia i edycja maksów (E1RM) przeszły do Postępu
+- **Joga — tryb prowadzenia** („Prowadź mnie"): jedna pozycja na cały ekran z filmem,
+  dawką, minutnikiem i krokami; „Zrobione → dalej" odhacza i przechodzi do następnej.
+  Startuje od pierwszej nieodhaczonej pozycji i włącza stoper treningu, a po ostatniej
+  pozycji go zatrzymuje. W niedzielę karta Dziś ma w tle okładkę filmu pierwszej pozycji
 - **Rozpocznij / Zakończ trening**: w sesji duży przycisk startu, potem
   przyklejony pasek ze stoperem i „Zakończ". Koniec zapisuje czas
   przy tej sesji, synchronizuje go z drugim
