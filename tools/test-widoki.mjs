@@ -444,12 +444,13 @@ console.log('\nStrava');
 console.log('\nNiedziela');
 S.view = '#/mobilnosc'; S.week = 4; A.render();
 const kafelki = app.querySelectorAll('.ex.mob');
-test('pelna wersja: 22 pozycje', kafelki.length === 22, 'jest: ' + kafelki.length);
+test('pelna wersja: 20 pozycji', kafelki.length === 20, 'jest: ' + kafelki.length);
+test('kazda pozycja ma film', app.querySelectorAll('.film').length === 20);
 kafelki[0].querySelector('.tick').click();
 test('odklikniecie zapisuje sie w stanie', Object.keys(S.mob[4] || {}).length === 1);
 test('i trafia do localStorage', magazyn.get('trening.mob.v1').includes('y1'));
 S.mobShort = true; A.render();
-test('krotka wersja: 8 pozycji', app.querySelectorAll('.ex.mob').length === 8);
+test('krotka wersja: 9 pozycji', app.querySelectorAll('.ex.mob').length === 9);
 S.mobShort = false;
 
 // Instrukcja pozycji. Bez niej niedziela jest lista nazw po sanskrycku.
