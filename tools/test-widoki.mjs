@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka, idFilmu, zapiszFilm,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -379,6 +379,11 @@ S.view = '#/mobilnosc'; S.week = 4; A.render();
 const kafelki = app.querySelectorAll('.ex.mob');
 test('pelna wersja: 20 pozycji', kafelki.length === 20, 'jest: ' + kafelki.length);
 test('kazda pozycja ma film', app.querySelectorAll('.film').length === 20);
+test('link youtu.be', A.idFilmu('https://youtu.be/abcDEF12345?si=x') === 'abcDEF12345');
+test('link watch?v=', A.idFilmu('https://www.youtube.com/watch?v=abcDEF12345&t=3') === 'abcDEF12345');
+test('link shorts', A.idFilmu('https://youtube.com/shorts/abcDEF12345') === 'abcDEF12345');
+test('smiec to nie film', A.idFilmu('kot krowa') === null);
+test('zapisany film jedzie do synchronizacji', A.zapiszFilm('y3', 'https://youtu.be/abcDEF12345') && S.filmy.y3 === 'abcDEF12345' && 'filmy' in A.stanLokalny());
 kafelki[0].querySelector('.tick').click();
 test('odklikniecie zapisuje sie w stanie', Object.keys(S.mob[4] || {}).length === 1);
 test('i trafia do localStorage', magazyn.get('trening.mob.v1').includes('y1'));

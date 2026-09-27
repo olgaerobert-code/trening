@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {},
 };
 
 /* ---------- Supabase ---------- */
@@ -131,6 +131,9 @@ const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
 const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); pushStan(); };
 // Start i koniec treningu (plus tętno, jeśli zegarek je nadaje) — per tydzień i dzień.
+// Filmy do pozycji jogi wybrane przez użytkownika: { y3: 'dQw4w9WgXcQ' }.
+const LS_FILMY = 'trening.filmy.v1';
+const saveFilmy = () => { localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); pushStan(); };
 const saveTreningi = (bezSync) => { localStorage.setItem(LS_TRN, JSON.stringify(state.treningi)); if (!bezSync) pushStan(); };
 
 function loadStores() {
@@ -142,6 +145,7 @@ function loadStores() {
   state.mob = readJSON(LS_MOB, {});
   state.rekal = readJSON(LS_REK, {});
   state.treningi = readJSON(LS_TRN, {});
+  state.filmy = readJSON(LS_FILMY, {});
   state.queue = readJSON(LS_Q, []);
   state.key = localStorage.getItem(LS_KEY) || KOD_WSPOLNY;
   localStorage.setItem(LS_KEY, state.key);
@@ -1060,11 +1064,9 @@ function mobCard(it, w) {
   // Film instruktażowy: wyszukiwanie na YouTube po nazwie pozycji. Wyszukiwanie,
   // a nie jeden link, bo pojedyncze filmy znikają, a wyniki zostają.
   if (it.film) {
-    const f = el('a', 'film', '▶ Film');
-    f.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(it.film);
-    f.target = '_blank';
-    f.rel = 'noopener';
+    const f = el('button', 'film' + (state.filmy[it.id] ? '' : ' nowy'), state.filmy[it.id] ? '▶ Film' : '▶ Dodaj film');
     f.setAttribute('aria-label', 'Film instruktażowy: ' + it.name);
+    f.onclick = () => pokazFilm(it);
     metrics.append(f);
   }
   box.append(metrics);
@@ -1895,7 +1897,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1930,6 +1932,7 @@ async function pullStan() {
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
     // Trening w toku na tym urządzeniu wygrywa — tętno i stoper żyją tutaj.
+    if (d.filmy && inny(d.filmy, state.filmy)) { state.filmy = { ...state.filmy, ...d.filmy }; localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); zm = true; }
     if (d.treningi && inny(d.treningi, state.treningi)) {
       // Skrót odpalił się w Safari i dopisał tętno — pokazujemy je od razu tutaj.
       const nowe = Object.entries(d.treningi).find(([k, t]) => t && (t.hr || t.kcal) && !(state.treningi[k] && (state.treningi[k].hr || state.treningi[k].kcal)));
@@ -2541,7 +2544,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -2566,6 +2569,7 @@ function settingsView() {
       if (d.rekal) { state.rekal = d.rekal; saveRekal(); }
       if (Array.isArray(d.moves)) { state.moves = d.moves; saveMoves(); }
       if (d.treningi) { state.treningi = d.treningi; saveTreningi(); }
+      if (d.filmy) { state.filmy = d.filmy; saveFilmy(); }
       render();
     } catch { alert('Nie udało się odczytać pliku.'); }
   };
@@ -3047,6 +3051,86 @@ async function udostepnij(day, w) {
   return 'Zapisane w pobranych — dodaj je do story z galerii.';
 }
 
+/* ---------- filmy w aplikacji ----------
+   Film gra w okienku nad planem (odtwarzacz YouTube bez ciasteczek), więc nie
+   trzeba wychodzić z aplikacji. Który film — wybiera użytkownik: raz wkleja
+   link, plan zapamiętuje go per pozycja i synchronizuje z drugim urządzeniem. */
+function idFilmu(tekst) {
+  const t = String(tekst || '').trim();
+  if (/^[\w-]{11}$/.test(t)) return t;
+  const m = t.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function zapiszFilm(idPoz, tekst) {
+  const id = idFilmu(tekst);
+  if (!id) return false;
+  state.filmy[idPoz] = id;
+  saveFilmy();
+  return true;
+}
+
+function pokazFilm(it) {
+  if (!document.body || !document.body.appendChild) return;
+  const stare = document.querySelector('.filmokno');
+  if (stare && stare.remove) stare.remove();
+  const tlo = el('div', 'filmokno');
+  const okno = el('div', 'filmkarta');
+  const gora = el('div', 'filmgora');
+  gora.append(el('b', null, it.name));
+  const x = el('button', 'filmx', '✕');
+  x.setAttribute('aria-label', 'Zamknij film');
+  const zamknij = () => { tlo.remove(); render(); };
+  x.onclick = zamknij;
+  gora.append(x);
+  okno.append(gora);
+
+  const vid = state.filmy[it.id];
+  if (vid) {
+    const ramka = el('div', 'filmramka');
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${vid}?playsinline=1&rel=0&modestbranding=1&autoplay=1`;
+    f.title = 'Film: ' + it.name;
+    f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
+    f.setAttribute('allowfullscreen', '');
+    ramka.append(f);
+    okno.append(ramka);
+    const zmien = el('button', 'link', 'Zmień film');
+    zmien.onclick = () => { delete state.filmy[it.id]; saveFilmy(); pokazFilm(it); };
+    const dol = el('div', 'filmdol');
+    dol.append(el('span', null, 'Jeśli film się nie ładuje, autor zablokował odtwarzanie poza YouTube — wybierz inny.'), zmien);
+    okno.append(dol);
+  } else {
+    const ol = el('ol', 'filmkroki');
+    const li1 = el('li');
+    const szukaj = el('a', null, 'Znajdź film na YouTube');
+    szukaj.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(it.film);
+    szukaj.target = '_blank'; szukaj.rel = 'noopener';
+    li1.append(szukaj, document.createTextNode(' — wybierz jeden, najlepiej krótki.'));
+    ol.append(li1, el('li', null, 'Pod filmem: Udostępnij → Kopiuj link.'), el('li', null, 'Wróć tutaj i wklej link poniżej.'));
+    okno.append(ol);
+    const pole = el('input', 'keyinput filmlink');
+    pole.id = 'film-' + it.id; pole.type = 'url'; pole.placeholder = 'https://youtu.be/…';
+    const info = el('p', 'filminfo', '');
+    const zapisz = el('button', 'btn primary', 'Zapisz i odtwórz');
+    zapisz.onclick = () => {
+      if (zapiszFilm(it.id, pole.value)) pokazFilm(it);
+      else info.textContent = 'To nie wygląda na link do filmu z YouTube.';
+    };
+    const wklej = el('button', 'btn ghost', 'Wklej ze schowka');
+    wklej.onclick = async () => {
+      try {
+        const t = await navigator.clipboard.readText();
+        pole.value = t;
+        if (zapiszFilm(it.id, t)) pokazFilm(it); else info.textContent = 'W schowku nie ma linku do filmu z YouTube.';
+      } catch { info.textContent = 'Nie mam dostępu do schowka — przytrzymaj pole i wybierz Wklej.'; }
+    };
+    okno.append(pole, info, zapisz, wklej);
+  }
+  tlo.append(okno);
+  tlo.onclick = e => { if (e.target === tlo) zamknij(); };
+  document.body.appendChild(tlo);
+}
+
 /* ---------- router ---------- */
 function go(hash) { location.hash = hash; window.scrollTo({ top: 0 }); }
 
@@ -3091,7 +3175,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=48')
+fetch('plan.json?v=49')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
