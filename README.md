@@ -85,8 +85,8 @@ według ustawienia telefonu.
   kolumny tonażu tydzień po tygodniu i wykres ciężarów według zasad skilla
   dataviz — linie 2 px, kropki końcowe z obwódką, etykiety w kolorze tekstu
 - **Rozpocznij / Zakończ trening**: w sesji duży przycisk startu, potem
-  przyklejony pasek ze stoperem, tętnem i „Zakończ". Koniec zapisuje czas
-  (i średnie/maks. tętno) przy tej sesji, synchronizuje go z drugim
+  przyklejony pasek ze stoperem i „Zakończ". Koniec zapisuje czas
+  (i średnie/maks. tętno wpisane z zegarka) przy tej sesji, synchronizuje go z drugim
   urządzeniem i pokazuje na karcie zaliczenia oraz na story. Start jest
   opcjonalny — dziennik uzupełniany po fakcie działa jak wcześniej
 - **Zegarek** (Dziennik → Zegarek), rozpisany krok po kroku:
@@ -95,28 +95,11 @@ według ustawienia telefonu.
     iPhone'a i pokazuje baner z instrukcją, dopóki plan nie działa z ikony
   - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
     przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
-  - **Strava** (Dziennik → Strava): Huawei Health wysyła trening do Stravy
-    z tętnem, a plan po „Zakończ" sam znajduje w API Stravy trening, który
-    zaczął się najbliżej startu sesji, i dopisuje średnie i maksymalne tętno
-    oraz kalorie. Pyta co minutę przez 20 minut (zegarek synchronizuje się
-    z opóźnieniem) i jeszcze raz przy każdym powrocie do aplikacji. Wymaga
-    własnej, darmowej aplikacji API na strava.com (Client ID + Secret).
-    Klucze i tokeny leżą tylko w pamięci urządzenia — nie idą do bazy,
-    synchronizacji ani kopii zapasowej. Gdy łączenie skończy się w Safari
-    zamiast w aplikacji z ikony, klucze przenosi „kod połączenia"
-  - **skrót iPhone'a „Plan 12 zegarek"** czyta z aplikacji Zdrowie (tam
-    zapisuje Huawei Health) średnie i maksymalne tętno oraz sumę energii
-    aktywnej z okna treningu i otwiera plan z adresem
-    `?zegarek=1&avg=…&max=…&kcal=…`. Plan uruchamia skrót sam po „Zakończ",
-    podając mu czas trwania w minutach. Adres otwiera się w Safari; jeśli
-    plan działa z ikony, liczby dojeżdżają do niego synchronizacją stanu
-    i karta treningu pokazuje się od razu. Przepis na skrót jest w
-    ustawieniach (krok 5)
-  - tętno i kalorie liczy zegarek (ćwiczenie „Trening siłowy"); po „Zakończ"
-    trzy liczby z podsumowania na zegarku wpisuje się w karcie zaliczenia
-    i trafiają na story. Tętno na żywo przez Web Bluetooth działa tylko tam,
-    gdzie przeglądarka je ma (Chrome na Androidzie) — na iPhonie żadna
-    przeglądarka nie obsługuje Bluetooth ze stron
+  - tętno i kalorie liczy zegarek (ćwiczenie „Strength training"); po „Zakończ"
+    trzy liczby z podsumowania na zegarku wpisuje się w karcie treningu
+    i trafiają na kartę „Ostatni trening" na ekranie Dziś i na story.
+    Automatycznego pobierania tętna nie ma: iPhone nie daje stronom dostępu
+    ani do aplikacji Zdrowie, ani do Bluetooth
 - **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
   wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
 - **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
