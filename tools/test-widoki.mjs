@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka, idFilmu, zapiszFilm,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -356,20 +356,13 @@ console.log('\nTrening: start i koniec');
   test('podsumowanie zna czas', A.statySesji('B', 4).czas === '47 min');
   S.view = '#/d/B'; A.render();
   test('po koncu widac czas zamiast przycisku', app.textContent.includes('Trening zakończony') && !app.textContent.includes('Rozpocznij trening'));
-  A.zapiszZZegarka('B', 4, { avg: '128', max: '161', kcal: '412' });
   const st = A.statySesji('B', 4);
-  test('tetno i kalorie z zegarka trafiaja do podsumowania', st.hrAvg === 128 && st.hrMax === 161 && st.kcal === 412);
-  A.zapiszZZegarka('B', 4, { avg: '', max: '', kcal: '' });
-  test('puste pola nie kasuja wpisanych liczb', A.statySesji('B', 4).hrAvg === 128);
-  S.view = '#/ustawienia'; A.render();
-  S.treningi = { '4|C': { start: new Date(Date.now() - 50 * 60000).toISOString(), end: new Date(Date.now() - 10 * 60000).toISOString() } };
-  A.zapiszZZegarka('C', 4, { avg: '112.6 count/min', max: '150,0', kcal: '' });
-  test('liczby z jednostka i przecinkiem sa przyjmowane', A.statySesji('C', 4).hrAvg === 113 && A.statySesji('C', 4).hrMax === 150);
+  test('podsumowanie bez tetna i kalorii', !('hrAvg' in st) && !('kcal' in st));
   S.view = '#/'; A.render();
-  test('ekran Dzis pokazuje ostatni trening z tetnem', app.textContent.includes('Ostatni trening') && app.textContent.includes('113'));
+  test('ekran Dzis pokazuje ostatni trening bez tetna', app.textContent.includes('Ostatni trening') && !app.textContent.includes('tętno') && !app.textContent.includes('bpm'));
   S.treningi = {};
   S.view = '#/ustawienia'; A.render();
-  test('ustawienia maja instrukcje zegarka', app.textContent.includes('Strength training') && app.textContent.includes('Huawei Health'));
+  test('ustawienia maja instrukcje zegarka bez tetna', app.textContent.includes('Huawei Health') && !app.textContent.includes('Tętno'));
   test('bez Stravy i skrotu w ustawieniach', !app.textContent.includes('Strava') && !app.textContent.includes('Skrót iPhone'));
 }
 

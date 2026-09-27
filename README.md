@@ -89,7 +89,7 @@ według ustawienia telefonu.
   dataviz — linie 2 px, kropki końcowe z obwódką, etykiety w kolorze tekstu
 - **Rozpocznij / Zakończ trening**: w sesji duży przycisk startu, potem
   przyklejony pasek ze stoperem i „Zakończ". Koniec zapisuje czas
-  (i średnie/maks. tętno wpisane z zegarka) przy tej sesji, synchronizuje go z drugim
+  przy tej sesji, synchronizuje go z drugim
   urządzeniem i pokazuje na karcie zaliczenia oraz na story. Start jest
   opcjonalny — dziennik uzupełniany po fakcie działa jak wcześniej
 - **Zegarek** (Dziennik → Zegarek), rozpisany krok po kroku:
@@ -98,11 +98,6 @@ według ustawienia telefonu.
     iPhone'a i pokazuje baner z instrukcją, dopóki plan nie działa z ikony
   - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
     przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
-  - tętno i kalorie liczy zegarek (ćwiczenie „Strength training"); po „Zakończ"
-    trzy liczby z podsumowania na zegarku wpisuje się w karcie treningu
-    i trafiają na kartę „Ostatni trening" na ekranie Dziś i na story.
-    Automatycznego pobierania tętna nie ma: iPhone nie daje stronom dostępu
-    ani do aplikacji Zdrowie, ani do Bluetooth
 - **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
   wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
 - **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
