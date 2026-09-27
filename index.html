@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=50) format('woff2');
+  src:url(fonts/Archivo.woff2?v=51) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -594,6 +594,14 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .filmx{width:36px;height:36px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-size:15px;flex:none}
 .filmramka{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
 .filmramka iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.filmwkarcie{margin-top:12px}
+.filmramka.okladka{display:block;padding:0;cursor:pointer}
+.filmramka.okladka img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.filmplay{position:absolute;left:50%;top:50%;width:64px;height:44px;margin:-22px 0 0 -32px;border-radius:12px;background:#FF0033;
+  box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.filmplay::after{content:'';position:absolute;left:26px;top:13px;border-left:16px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
+.filmramka.okladka:active .filmplay{transform:scale(.94)}
+.filmzmien{display:block;margin:8px 0 0 auto;font-size:12.5px;font-weight:600;color:var(--ink-3)}
 .filmdol{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:12px;color:var(--ink-3)}
 .filmdol .link{flex:none}
 .filmkroki{margin:0 0 12px;padding-left:20px;font-size:14px;color:var(--ink-2);line-height:1.55}
@@ -678,7 +686,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=50"></script>
-<script src="app.js?v=50"></script>
+<script src="progresja.js?v=51"></script>
+<script src="app.js?v=51"></script>
 </body>
 </html>

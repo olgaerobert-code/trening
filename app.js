@@ -1063,13 +1063,14 @@ function mobCard(it, w) {
   }
   // Film instruktażowy: wyszukiwanie na YouTube po nazwie pozycji. Wyszukiwanie,
   // a nie jeden link, bo pojedyncze filmy znikają, a wyniki zostają.
-  if (it.film) {
-    const f = el('button', 'film' + (filmPozycji(it) ? '' : ' nowy'), filmPozycji(it) ? '▶ Film' : '▶ Dodaj film');
-    f.setAttribute('aria-label', 'Film instruktażowy: ' + it.name);
+  if (it.film && !filmPozycji(it)) {
+    const f = el('button', 'film nowy', '▶ Dodaj film');
+    f.setAttribute('aria-label', 'Dodaj film instruktażowy: ' + it.name);
     f.onclick = () => pokazFilm(it);
     metrics.append(f);
   }
   box.append(metrics);
+  if (filmPozycji(it)) box.append(filmWKarcie(it));
 
   // Instrukcja pozycji. Wcześniej pod „Jak to zrobić" siedziała sama wskazówka
   // dla kogoś, kto pozycję już zna — a to jest niedziela, nie egzamin z jogi.
@@ -3051,6 +3052,36 @@ async function udostepnij(day, w) {
   return 'Zapisane w pobranych — dodaj je do story z galerii.';
 }
 
+/* Film w samej karcie: okładka z przyciskiem ▶, a po tapnięciu odtwarzacz w tym
+   samym miejscu. Do pierwszego tapnięcia ładuje się tylko obrazek — dwadzieścia
+   odtwarzaczy naraz zamuliłoby przewijanie. */
+function filmWKarcie(it) {
+  const vid = filmPozycji(it);
+  const box = el('div', 'filmwkarcie');
+  const ramka = el('button', 'filmramka okladka');
+  ramka.setAttribute('aria-label', 'Odtwórz film: ' + it.name);
+  const img = el('img');
+  img.src = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.onerror = () => img.remove(); // bez sieci zostaje czarna ramka z ▶, nie ikonka błędu
+  ramka.append(img, el('span', 'filmplay'));
+  ramka.onclick = () => {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${vid}?playsinline=1&rel=0&modestbranding=1&autoplay=1`;
+    f.title = 'Film: ' + it.name;
+    f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
+    f.setAttribute('allowfullscreen', '');
+    const gra = el('div', 'filmramka');
+    gra.append(f);
+    ramka.replaceWith(gra);
+  };
+  const zmien = el('button', 'filmzmien', 'Zmień film');
+  zmien.onclick = () => pokazFilm(it);
+  box.append(ramka, zmien);
+  return box;
+}
+
 /* ---------- filmy w aplikacji ----------
    Film gra w okienku nad planem (odtwarzacz YouTube bez ciasteczek), więc nie
    trzeba wychodzić z aplikacji. Który film — wybiera użytkownik: raz wkleja
@@ -3087,48 +3118,31 @@ function pokazFilm(it) {
   gora.append(x);
   okno.append(gora);
 
-  const vid = filmPozycji(it);
-  if (vid) {
-    const ramka = el('div', 'filmramka');
-    const f = document.createElement('iframe');
-    f.src = `https://www.youtube-nocookie.com/embed/${vid}?playsinline=1&rel=0&modestbranding=1&autoplay=1`;
-    f.title = 'Film: ' + it.name;
-    f.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture; fullscreen');
-    f.setAttribute('allowfullscreen', '');
-    ramka.append(f);
-    okno.append(ramka);
-    const zmien = el('button', 'link', 'Zmień film');
-    zmien.onclick = () => { state.filmy[it.id] = null; saveFilmy(); pokazFilm(it); };
-    const dol = el('div', 'filmdol');
-    dol.append(el('span', null, 'Jeśli film się nie ładuje, autor zablokował odtwarzanie poza YouTube — wybierz inny.'), zmien);
-    okno.append(dol);
-  } else {
-    const ol = el('ol', 'filmkroki');
-    const li1 = el('li');
-    const szukaj = el('a', null, 'Znajdź film na YouTube');
-    szukaj.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(it.film);
-    szukaj.target = '_blank'; szukaj.rel = 'noopener';
-    li1.append(szukaj, document.createTextNode(' — wybierz jeden, najlepiej krótki.'));
-    ol.append(li1, el('li', null, 'Pod filmem: Udostępnij → Kopiuj link.'), el('li', null, 'Wróć tutaj i wklej link poniżej.'));
-    okno.append(ol);
-    const pole = el('input', 'keyinput filmlink');
-    pole.id = 'film-' + it.id; pole.type = 'url'; pole.placeholder = 'https://youtu.be/…';
-    const info = el('p', 'filminfo', '');
-    const zapisz = el('button', 'btn primary', 'Zapisz i odtwórz');
-    zapisz.onclick = () => {
-      if (zapiszFilm(it.id, pole.value)) pokazFilm(it);
-      else info.textContent = 'To nie wygląda na link do filmu z YouTube.';
-    };
-    const wklej = el('button', 'btn ghost', 'Wklej ze schowka');
-    wklej.onclick = async () => {
-      try {
-        const t = await navigator.clipboard.readText();
-        pole.value = t;
-        if (zapiszFilm(it.id, t)) pokazFilm(it); else info.textContent = 'W schowku nie ma linku do filmu z YouTube.';
-      } catch { info.textContent = 'Nie mam dostępu do schowka — przytrzymaj pole i wybierz Wklej.'; }
-    };
-    okno.append(pole, info, zapisz, wklej);
-  }
+  const ol = el('ol', 'filmkroki');
+  const li1 = el('li');
+  const szukaj = el('a', null, 'Znajdź film na YouTube');
+  szukaj.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(it.film);
+  szukaj.target = '_blank'; szukaj.rel = 'noopener';
+  li1.append(szukaj, document.createTextNode(' — wybierz jeden, najlepiej krótki.'));
+  ol.append(li1, el('li', null, 'Pod filmem: Udostępnij → Kopiuj link.'), el('li', null, 'Wróć tutaj i wklej link poniżej.'));
+  okno.append(ol);
+  const pole = el('input', 'keyinput filmlink');
+  pole.id = 'film-' + it.id; pole.type = 'url'; pole.placeholder = 'https://youtu.be/…';
+  const info = el('p', 'filminfo', '');
+  const zapisz = el('button', 'btn primary', 'Zapisz film');
+  zapisz.onclick = () => {
+    if (zapiszFilm(it.id, pole.value)) zamknij();
+    else info.textContent = 'To nie wygląda na link do filmu z YouTube.';
+  };
+  const wklej = el('button', 'btn ghost', 'Wklej ze schowka');
+  wklej.onclick = async () => {
+    try {
+      const t = await navigator.clipboard.readText();
+      pole.value = t;
+      if (zapiszFilm(it.id, t)) zamknij(); else info.textContent = 'W schowku nie ma linku do filmu z YouTube.';
+    } catch { info.textContent = 'Nie mam dostępu do schowka — przytrzymaj pole i wybierz Wklej.'; }
+  };
+  okno.append(pole, info, zapisz, wklej);
   tlo.append(okno);
   tlo.onclick = e => { if (e.target === tlo) zamknij(); };
   document.body.appendChild(tlo);
@@ -3178,7 +3192,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=50')
+fetch('plan.json?v=51')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
