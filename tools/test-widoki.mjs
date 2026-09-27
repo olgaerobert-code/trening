@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -254,8 +254,9 @@ const kafle = app.querySelectorAll('.tile');
 test('karta dzis i trzy pozostale sesje', kafle.length === 4, 'jest: ' + kafle.length);
 test('zakladki Postep, Zasady i Dziennik w dolnym pasku', ['Postęp', 'Zasady', 'Dziennik'].every(t => timer.textContent.includes(t)));
 test('nie ma juz osobnego kafla 1RM', !app.textContent.includes('Kalkulator 1RM'));
-test('kalkulator dostepny z karty E1RM', app.textContent.includes('Przelicz z serii'));
+test('ekran Dzis bez maksow i ciezarow tygodnia', !app.textContent.includes('Maksy (E1RM)') && !app.textContent.includes('Na sztandze'));
 S.view = '#/postep'; A.render();
+test('kalkulator dostepny z karty E1RM w Postepie', app.textContent.includes('Przelicz z serii') && app.textContent.includes('Maksy (E1RM)'));
 test('Postep ma wykres, bloki i tabele',
   app.querySelectorAll('.chart').length + app.querySelectorAll('svg').length > 0
   && app.textContent.includes('Blok 1') && app.textContent.includes('Tabele tygodni'));
@@ -639,6 +640,35 @@ console.log('Ciezar po przeniesieniu');
   for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === NA) delete S.kgw[k];
   test('pusty tydzien dalej bierze ciezar z planu', A.plannedOf(it, NA, 'C').kg === planNa);
   S.moves = [];
+}
+
+{
+  console.log('\nPrzerwa po serii');
+  const it = (d, n) => S.plan.days[d].items.find(x => x.n === n);
+  test('wyciskanie: 3 min', A.przerwaPo(it('A', 2), 'A', 5) === 180);
+  test('wyciskanie od bloku 3: 4 min', A.przerwaPo(it('A', 2), 'A', 9) === 240);
+  test('podciaganie: 2 min', A.przerwaPo(it('A', 3), 'A', 5) === 120);
+  test('pierwsze w superserii: bez przerwy', A.przerwaPo(it('B', 6), 'B', 5) === 0);
+  test('drugie w superserii: 90 s po parze', A.przerwaPo(it('B', 7), 'B', 5) === 90);
+  test('front squat: 3 min', A.przerwaPo(it('C', 1), 'C', 5) === 180);
+  test('bez opisu: 60 s', A.przerwaPo(it('A', 7), 'A', 5) === 60);
+
+  console.log('\nZwiniete karty');
+  const W = 3;
+  const a2 = it('A', 2), pl = A.plannedOf(a2, W, 'A');
+  for (let i = 0; i < pl.sets; i++) A.logSet(W, 'A', 2, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  S.view = '#/d/A/' + W; A.render();
+  const karta = app.querySelectorAll('.ex').find(k => k.textContent.includes(a2.name));
+  test('komplet serii zwija karte', karta.className.includes('zwiniety'));
+  test('zwinieta karta mowi, co zrobione', karta.querySelector('.exsum').textContent.startsWith('✓'));
+  const inna = app.querySelectorAll('.ex').find(k => k.textContent.includes(it('A', 7).name));
+  test('niezrobione cwiczenie zostaje rozwiniete', !inna.className.includes('zwiniety'));
+
+  console.log('\nJoga: tryb prowadzenia');
+  S.view = '#/mobilnosc'; A.render();
+  test('przycisk trybu prowadzenia', !!app.querySelector('.prowstart'));
+  const ws = app.querySelector('.wstep');
+  test('wstep zwiniety do dwoch linii', !!ws && ws.children[0].className.includes('zwiniety'));
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));

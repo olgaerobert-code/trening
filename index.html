@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=54) format('woff2');
+  src:url(fonts/Archivo.woff2?v=55) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -676,12 +676,100 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .tbtn.on{background:var(--ink);color:var(--on-ink)}
 .tbtn.snd{flex:0 0 44px;display:grid;place-items:center;padding:10px 0;color:var(--ink-2)}
 .tbtn.snd.off{color:var(--ink-3)}
+
+/* ══ karty ćwiczeń: równy układ liczb ══ */
+.ex:not(.mob) .metrics{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:10px 20px}
+.ex:not(.mob) .metrics .m:nth-child(3){text-align:right}
+
+/* ══ skończone ćwiczenie zwinięte do jednego wiersza ══ */
+.ex.zwiniety .exhead{cursor:pointer;align-items:center}
+.ex.zwiniety:not(.otwarty){padding-top:12px;padding-bottom:12px}
+.ex.zwiniety:not(.otwarty)>:not(.exhead){display:none}
+.ex.zwiniety:not(.otwarty) .chips{display:none}
+.ex.zwiniety .exn{font-size:0;min-width:24px;width:24px;height:24px;padding:0;border-radius:50%;background:var(--good);display:grid;place-items:center}
+.ex.zwiniety .exn::after{content:'✓';font:800 13px/1 var(--sans);color:#fff}
+.ex.zwiniety .exname{font-size:15px}
+.ex.zwiniety .exhead::after{content:'';flex:none;width:8px;height:8px;margin:0 4px 0 6px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
+.ex.zwiniety.otwarty .exhead::after{transform:rotate(-135deg) translateY(-2px)}
+.exsum{font:600 13px/1.3 var(--sans);color:var(--good);margin-top:3px;font-variant-numeric:tabular-nums}
+.ex.zwiniety.swiezo{animation:zwin .5s var(--ease)}
+@keyframes zwin{from{transform:scale(.97);opacity:.6}}
+
+/* ══ zmiany ciężarów: jeden zwinięty pasek na ekranie Dziś ══ */
+.zmiany{background:var(--s1);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.zmiany summary{list-style:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:13px 16px;cursor:pointer}
+.zmiany summary::-webkit-details-marker{display:none}
+.zmk{grid-row:1 / 3;width:32px;height:32px;border-radius:50%;background:var(--good-bg);position:relative}
+.zmk::before{content:'';position:absolute;left:11px;top:9px;width:8px;height:8px;border-left:2.4px solid var(--good);border-top:2.4px solid var(--good);transform:rotate(45deg)}
+.zmk::after{content:'';position:absolute;left:14.5px;top:11px;width:2.4px;height:12px;background:var(--good);border-radius:1px}
+.zmt{font-weight:700;font-size:15px;color:var(--ink)}
+.zmo{grid-column:2;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zmiany summary::after{content:'';grid-column:3;grid-row:1 / 3;width:8px;height:8px;margin-right:4px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg) translateY(-3px);transition:transform .2s}
+.zmiany[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+.zmiany .note{box-shadow:none;margin:0;border-radius:0;border-top:1px solid var(--line)}
+
+/* ══ joga: wstęp na dwie linie ══ */
+.wstep{margin-bottom:12px}
+.wstep .note{margin-bottom:0}
+.wstep .note.zwiniety{max-height:92px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 45%,transparent);mask-image:linear-gradient(#000 45%,transparent)}
+.wiecej{display:block;margin:6px 0 0 auto;padding:4px 2px;font-size:13px;font-weight:650;color:var(--ink-2)}
+
+/* ══ joga: wejście w tryb prowadzenia ══ */
+.prowstart{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;align-items:center;width:100%;text-align:left;
+  padding:16px 18px;margin:0 0 12px;border-radius:var(--r-l);color:#fff;
+  background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--dc) 80%,#fff) 0%,transparent 50%),
+    linear-gradient(135deg,color-mix(in srgb,var(--dc) 75%,#000),color-mix(in srgb,var(--dc) 42%,#000));
+  box-shadow:0 14px 30px -16px color-mix(in srgb,var(--dc) 75%,transparent);transition:transform .15s}
+.prowstart:active{transform:scale(.98)}
+.pico{grid-row:1 / 3;width:46px;height:46px;border-radius:50%;background:#fff;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.pico::after{content:'';position:absolute;left:18px;top:14px;border-left:14px solid color-mix(in srgb,var(--dc) 70%,#000);border-top:9px solid transparent;border-bottom:9px solid transparent}
+.pt{font:800 19px/1.1 var(--disp);font-stretch:90%}
+.ps{font-size:13px;color:rgba(255,255,255,.82);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ══ niedziela na karcie Dziś: okładka filmu w tle ══ */
+.tile.hero-s.zdjecie,.tile.hero-s.zdjecie:active{background:
+    linear-gradient(100deg,color-mix(in srgb,var(--tc) 42%,#000) 28%,color-mix(in srgb,color-mix(in srgb,var(--tc) 42%,#000) 35%,transparent) 100%),
+    var(--img) center / auto 134% no-repeat,
+    color-mix(in srgb,var(--tc) 40%,#000)}
+.tile.hero-s.zdjecie::after{display:none}
+
+/* ══ joga: tryb prowadzenia ══ */
+.prow{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;background:var(--bg);animation:prowWjazd .35s var(--ease)}
+@keyframes prowWjazd{from{transform:translateY(24px);opacity:0}}
+.prgora{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;max-width:600px;width:100%;margin:0 auto}
+.prnr{font:800 14px/1 var(--disp);font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:38px}
+.prkreski{flex:1;display:flex;gap:3px}
+.prkreski i{flex:1;height:4px;border-radius:2px;background:var(--s3);transition:background .3s}
+.prkreski i.z{background:var(--dc)}
+.prkreski i.teraz{background:var(--ink)}
+.prx{width:36px;height:36px;border-radius:50%;background:var(--s1);box-shadow:var(--shadow);color:var(--ink);font-weight:700;flex:none;display:grid;place-items:center}
+.prtresc{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px 20px;max-width:600px;width:100%;margin:0 auto;animation:prowPoz .3s var(--ease)}
+@keyframes prowPoz{from{opacity:0;transform:translateX(14px)}}
+.preye{font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:var(--dc)}
+.prname{font:900 30px/1.05 var(--disp);font-stretch:84%;letter-spacing:-.01em;margin:8px 0 6px;color:var(--ink);text-wrap:balance}
+.prdawka{font-size:16px;font-weight:600;color:var(--ink-2);margin-bottom:14px}
+.prtresc .filmramka{margin-bottom:14px}
+.prmin{display:flex;flex-direction:column;align-items:center;width:100%;padding:16px;border-radius:var(--r);background:var(--s1);box-shadow:var(--shadow);color:var(--ink);margin-bottom:16px;--p:0}
+.prmin b{font:900 54px/1 var(--disp);font-stretch:78%;font-variant-numeric:tabular-nums}
+.prmin span{font-size:13px;color:var(--ink-3);margin-top:6px;font-weight:600}
+.prmin.leci{background:linear-gradient(90deg,color-mix(in srgb,var(--dc) 22%,var(--s1)) calc(var(--p) * 100%),var(--s1) 0)}
+.prmin.koniec{background:var(--good-bg)}
+.prmin.koniec span{color:var(--good)}
+.prtresc .kroki{font-size:15px;color:var(--ink-2);line-height:1.45}
+.prdol{border-top:1px solid var(--line);background:var(--s1);padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 12px)}
+.prdol>*{max-width:568px;margin-left:auto;margin-right:auto}
+.prnast{font-size:12.5px;color:var(--ink-3);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prprzyc{display:flex;gap:10px}
+.prwstecz{width:54px;height:54px;border-radius:50%;background:var(--s2);border:1.5px solid var(--line);color:var(--ink);font-size:28px;font-weight:600;flex:none;display:grid;place-items:center;padding-bottom:3px}
+.prwstecz:disabled{opacity:.35}
+.prok{flex:1;height:54px;border-radius:999px;background:var(--ink);color:var(--on-ink);font:700 16px/1 var(--sans);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.prok:active,.prwstecz:active{transform:scale(.96)}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=54"></script>
-<script src="app.js?v=54"></script>
+<script src="progresja.js?v=55"></script>
+<script src="app.js?v=55"></script>
 </body>
 </html>
