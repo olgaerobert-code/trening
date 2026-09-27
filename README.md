@@ -36,11 +36,15 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   dwa razy na cykl, więc nie zajmuje kafla
 - **Timer przerwy** — pierścień odliczający, 60 / 90 / 120 / 180 s, sygnał dźwiękowy
   (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
-- **Niedziela — joga** — praktyka pod boje w sześciu blokach (~44 min): sekwencja
-  stojąca, balans, biodra i pozycja przednia. Wersja krótka ~20 min, odklikiwanie
-  liczone per tydzień, minutnik przy pozycjach z czasem. Każda z 22 pozycji ma pod
-  „Jak to zrobić" **wejście krok po kroku**, częsty błąd i zdanie o tym, co daje pod
-  sztangą — praktyka nie zakłada, że znasz nazwy z sanskrytu
+- **Niedziela — joga** pod ruchomość odcinka lędźwiowego oraz kolana, biodra
+  i kostki pracujące bez skrętu i bez końcowych zakresów (~44 min, sześć bloków:
+  oddech i miednica, kręgosłup w ruchu, stopy i kostki, biodra i kolana,
+  stabilizacja, tył nogi i wyciszenie). Pozycje ze skrętem w kolanie (lotos,
+  pełny gołąb, siad między piętami) są usunięte, kolana zawsze na kocu. Wersja
+  krótka ~20 min, odklikiwanie liczone per tydzień, minutnik przy pozycjach
+  z czasem. Każda z 20 pozycji ma **wejście krok po kroku**, częsty błąd, zdanie
+  o tym, co daje pod sztangą, i przycisk **▶ Film** — wyszukiwanie instruktażu
+  na YouTube po nazwie pozycji (wyszukiwanie, bo pojedyncze filmy znikają)
 - **Dziś** — aplikacja startuje na **najświeższej sesji tygodnia, która nie jest
   jeszcze zapisana w całości**: dziennik uzupełnia się po treningu, często dopiero
   następnego dnia, więc w sobotę otwiera piątkowy dzień C, a nie ekran główny.

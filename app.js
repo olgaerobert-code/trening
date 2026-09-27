@@ -1058,6 +1058,16 @@ function mobCard(it, w) {
     b.onclick = () => startTimer(it.sec);
     metrics.append(b);
   }
+  // Film instruktażowy: wyszukiwanie na YouTube po nazwie pozycji. Wyszukiwanie,
+  // a nie jeden link, bo pojedyncze filmy znikają, a wyniki zostają.
+  if (it.film) {
+    const f = el('a', 'film', '▶ Film');
+    f.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(it.film);
+    f.target = '_blank';
+    f.rel = 'noopener';
+    f.setAttribute('aria-label', 'Film instruktażowy: ' + it.name);
+    metrics.append(f);
+  }
   box.append(metrics);
 
   // Instrukcja pozycji. Wcześniej pod „Jak to zrobić" siedziała sama wskazówka
@@ -3510,7 +3520,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=46')
+fetch('plan.json?v=47')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
