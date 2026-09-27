@@ -43,8 +43,10 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   pełny gołąb, siad między piętami) są usunięte, kolana zawsze na kocu. Wersja
   krótka ~20 min, odklikiwanie liczone per tydzień, minutnik przy pozycjach
   z czasem. Każda z 20 pozycji ma **wejście krok po kroku**, częsty błąd, zdanie
-  o tym, co daje pod sztangą, i przycisk **▶ Film** — wyszukiwanie instruktażu
-  na YouTube po nazwie pozycji (wyszukiwanie, bo pojedyncze filmy znikają)
+  o tym, co daje pod sztangą, i przycisk **▶ Film**. Film gra w okienku wewnątrz
+  planu (odtwarzacz YouTube bez ciasteczek). Za pierwszym razem wybierasz go sama:
+  przycisk otwiera wyszukiwanie na YouTube, wklejasz link, a plan zapamiętuje
+  film przy pozycji i synchronizuje go z drugim urządzeniem
 - **Dziś** — aplikacja startuje na **najświeższej sesji tygodnia, która nie jest
   jeszcze zapisana w całości**: dziennik uzupełnia się po treningu, często dopiero
   następnego dnia, więc w sobotę otwiera piątkowy dzień C, a nie ekran główny.
