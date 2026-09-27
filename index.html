@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=51) format('woff2');
+  src:url(fonts/Archivo.woff2?v=52) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -528,7 +528,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .zkarta .btn.ghost{background:transparent;color:rgba(255,255,255,.8);margin-top:4px}
 .zinfo{font-size:12.5px;color:rgba(255,255,255,.75);text-align:center;min-height:18px;margin:8px 0 2px}
 
-/* ══ trening: start, stoper, tętno, koniec ══ */
+/* ══ trening: start, stoper, koniec ══ */
 .trn{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:12px;border-radius:var(--r);background:var(--s1);box-shadow:var(--shadow)}
 .trn-start{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:16px;border-radius:999px;
   background:var(--ink);color:var(--on-ink);font:700 16px/1 var(--sans);transition:transform .15s}
@@ -545,27 +545,13 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .trn-kropka{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d4d;margin-right:6px;vertical-align:1px;animation:nagr 1.4s ease-in-out infinite}
 @keyframes nagr{50%{opacity:.25}}
 .trn-czas{font:900 34px/1 var(--disp);font-stretch:78%;margin-top:4px;font-variant-numeric:tabular-nums}
-.trn-hr{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.14);color:inherit}
-.trn-hr svg{opacity:.6}
-.trn-hr b{font:900 20px/1 var(--disp);font-stretch:80%;font-variant-numeric:tabular-nums}
-.trn-hr span{font-size:10.5px;opacity:.75}
 .trn-stop{padding:13px 18px;border-radius:999px;background:#fff;color:#0D0F12;font:700 15px/1 var(--sans)}
 .trn-stop:active{transform:scale(.95)}
 .trn.koniec .trn-czas{font-size:24px}
-.trn.koniec .trn-hr{background:var(--s2);color:var(--ink)}
 .trn-link{font-size:13.5px;font-weight:600;color:var(--ink-2);padding:8px}
 .zstat{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13.5px;color:rgba(255,255,255,.85)}
 
-/* formularz z zegarka i kroki ustawień */
-.zzeg{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:8px;align-items:end;margin:0 0 16px;padding:12px;border-radius:18px;background:rgba(255,255,255,.07)}
-.zzt{grid-column:1 / -1;font:700 11px/1 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.72)}
-.zpole{display:flex;flex-direction:column;gap:4px;min-width:0}
-.zpole span{font-size:11.5px;color:rgba(255,255,255,.7)}
-.zpole input{width:100%;min-width:0;padding:10px 8px;border-radius:10px;border:0;background:rgba(255,255,255,.14);color:#fff;
-  font:800 19px/1 var(--disp);font-stretch:85%;text-align:center}
-.zpole input::placeholder{color:rgba(255,255,255,.4)}
-.zpole input:focus{outline:2px solid #fff;outline-offset:0}
-.zzok{padding:11px 14px;border-radius:10px;background:#fff;color:#0D0F12;font-weight:700;font-size:14px}
+/* kroki ustawień */
 .krok{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .krok:last-child{border-bottom:0}
 .kn{width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--s2);font:800 13px/1 var(--disp)}
@@ -576,12 +562,6 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .kbtn{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .note.ios{border-left-color:var(--ink)}
 
-.zkom{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:rgba(52,209,127,.18);color:#fff;font-size:13.5px;font-weight:600}
-
-
-.trn-hr.pobierz{background:var(--ink);color:var(--on-ink);cursor:pointer}
-.trn-hr.pobierz svg{opacity:1;color:#ff6b6b}
-.trn-hr.pobierz b{font-size:15px}
 .trn.ost{cursor:pointer;margin-top:4px}
 
 .film{padding:9px 14px;border-radius:999px;background:#FF0033;color:#fff;font-size:13.5px;font-weight:700;text-decoration:none;white-space:nowrap}
@@ -686,7 +666,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=51"></script>
-<script src="app.js?v=51"></script>
+<script src="progresja.js?v=52"></script>
+<script src="app.js?v=52"></script>
 </body>
 </html>

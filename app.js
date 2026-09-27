@@ -130,10 +130,10 @@ const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
 const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
 const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); pushStan(); };
-// Start i koniec treningu (plus tętno, jeśli zegarek je nadaje) — per tydzień i dzień.
 // Filmy do pozycji jogi wybrane przez użytkownika: { y3: 'dQw4w9WgXcQ' }.
 const LS_FILMY = 'trening.filmy.v1';
 const saveFilmy = () => { localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); pushStan(); };
+// Start i koniec treningu — per tydzień i dzień.
 const saveTreningi = (bezSync) => { localStorage.setItem(LS_TRN, JSON.stringify(state.treningi)); if (!bezSync) pushStan(); };
 
 function loadStores() {
@@ -145,6 +145,8 @@ function loadStores() {
   state.mob = readJSON(LS_MOB, {});
   state.rekal = readJSON(LS_REK, {});
   state.treningi = readJSON(LS_TRN, {});
+  // Tętna i kalorii już nie zbieramy — stare liczby znikają przy pierwszym starcie.
+  for (const t of Object.values(state.treningi)) if (t) { delete t.hr; delete t.kcal; }
   state.filmy = readJSON(LS_FILMY, {});
   state.queue = readJSON(LS_Q, []);
   state.key = localStorage.getItem(LS_KEY) || KOD_WSPOLNY;
@@ -1932,13 +1934,10 @@ async function pullStan() {
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
-    // Trening w toku na tym urządzeniu wygrywa — tętno i stoper żyją tutaj.
     if (d.filmy && inny(d.filmy, state.filmy)) { state.filmy = { ...state.filmy, ...d.filmy }; localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); zm = true; }
+    // Trening w toku na tym urządzeniu wygrywa — stoper żyje tutaj.
     if (d.treningi && inny(d.treningi, state.treningi)) {
-      // Skrót odpalił się w Safari i dopisał tętno — pokazujemy je od razu tutaj.
-      const nowe = Object.entries(d.treningi).find(([k, t]) => t && (t.hr || t.kcal) && !(state.treningi[k] && (state.treningi[k].hr || state.treningi[k].kcal)));
       state.treningi = { ...d.treningi, ...wToku() }; saveTreningi(true); zm = true;
-      if (nowe) { const [w, day] = nowe[0].split('|'); setTimeout(() => pokazZaliczenie(day, +w, 'Tętno i kalorie ze Zdrowia dotarły.'), 300); }
     }
     // Na końcu, bo `kgw` i `mob` przyjechały już przestawione — zostaje sam dziennik.
     if (zastosujZdalnePrzeniesienia(d.moves)) zm = true;
@@ -2592,8 +2591,8 @@ const JAKO_APKA = () => {
   catch { return false; }
 };
 
-/* ---------- trening: start, koniec, stoper, tętno ---------- */
-// Klucz jak w dzienniku: "tydzien|dzien". Wartość: { start, end, hr: { sum, n, max } }.
+/* ---------- trening: start, koniec, stoper ---------- */
+// Klucz jak w dzienniku: "tydzien|dzien". Wartość: { start, end }.
 // Tylko to, co naprawdę się wydarzyło — dziennik uzupełniany po fakcie nie
 // udaje, że trening trwał od pierwszego odhaczenia.
 const trnKey = (w, day) => w + '|' + day;
@@ -2624,16 +2623,7 @@ function zakonczTrening(day, w) {
   pokazZaliczenie(day, w);
 }
 
-// Przycisk „♥ Wpisz tętno": otwiera kartę treningu z polami na liczby z zegarka.
-function przyciskTetna(day, w) {
-  const b = el('button', 'trn-hr pobierz');
-  b.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.3 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.6 0 5.9 3.6 4.4 7.2C19.5 16.4 12 21 12 21z"/></svg>';
-  b.append(el('b', null, 'Wpisz'), el('span', null, 'tętno'));
-  b.onclick = e => { e.stopPropagation(); pokazZaliczenie(day, w); };
-  return b;
-}
-
-// Na ekranie Dziś: ostatni trening z czasem i tętnem — albo przyciskiem, gdy go brak.
+// Na ekranie Dziś: ostatni trening z czasem.
 function kartaOstatniego() {
   const teraz = Date.now();
   const ost = Object.entries(state.treningi)
@@ -2648,33 +2638,13 @@ function kartaOstatniego() {
   txt.append(el('span', 'trn-et', `Ostatni trening · ${nazwaSesji(day)} · ${kiedy.getHours()}:${String(kiedy.getMinutes()).padStart(2, '0')}`),
     el('div', 'trn-czas', t.start ? fmtMin(czasTreningu(t)) : '—'));
   box.append(txt);
-  if (t.hr && (t.hr.n || t.hr.avg)) {
-    const h = el('div', 'trn-hr stat');
-    h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, t.hr.max ? `śr. · max ${t.hr.max}` : 'śr. bpm'));
-    box.append(h);
-  } else {
-    box.append(przyciskTetna(day, +w));
-  }
   box.onclick = () => go(trasaDnia(day) + '/' + w);
   return box;
 }
 
-// Liczby przepisane z podsumowania na zegarku. Puste pole = nie ruszamy.
-function zapiszZZegarka(day, w, { avg, max, kcal }) {
-  // Skrót potrafi odesłać liczbę z jednostką („112 count/min") albo z przecinkiem.
-  const n = v => { const m = String(v == null ? '' : v).replace(',', '.').match(/\d+(\.\d+)?/); const x = m ? Math.round(+m[0]) : 0; return x > 0 ? x : null; };
-  // Pusta paczka (Zdrowie nic nie zwróciło) nie zakłada wpisu treningu.
-  if (!n(avg) && !n(max) && !n(kcal)) return false;
-  const t = trening(w, day) || (state.treningi[trnKey(w, day)] = { start: null, end: new Date().toISOString() });
-  if (n(avg)) t.hr = { avg: n(avg), max: n(max) || (t.hr && t.hr.max) || null, zZegarka: true };
-  else if (n(max) && t.hr) t.hr.max = n(max);
-  if (n(kcal)) t.kcal = n(kcal);
-  saveTreningi();
-  return true;
-}
 function cofnijStart(day, w) { delete state.treningi[trnKey(w, day)]; saveTreningi(); }
 
-// Pasek na górze sesji: przed startem duży przycisk, w trakcie stoper, tętno
+// Pasek na górze sesji: przed startem duży przycisk, w trakcie stoper
 // i „Zakończ", po końcu — podsumowanie czasu.
 function pasekTreningu(day, w) {
   const box = el('div', 'trn');
@@ -2700,23 +2670,12 @@ function pasekTreningu(day, w) {
     const stop = el('button', 'trn-stop', 'Zakończ');
     stop.onclick = () => zakonczTrening(day, w);
     box.append(stop);
-    const info = el('div', 'trn-pod');
-    info.id = 'trn-info';
-    info.textContent = 'Włącz na zegarku „Strength training" — tętno i kalorie przepiszesz po „Zakończ".';
-    box.append(info);
     return box;
   }
   box.classList.add('koniec');
   const txt = el('div', 'trn-l');
   txt.append(el('span', 'trn-et', 'Trening zakończony'), el('div', 'trn-czas', fmtMin(czasTreningu(t))));
   box.append(txt);
-  if (t.hr && (t.hr.n || t.hr.avg)) {
-    const h = el('div', 'trn-hr stat');
-    h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, 'śr. bpm'));
-    box.append(h);
-  } else {
-    box.append(przyciskTetna(day, w));
-  }
   const znowu = el('button', 'trn-link', 'Cofnij');
   znowu.onclick = () => { t.end = null; saveTreningi(); render(); };
   znowu.setAttribute('aria-label', 'Wznów trening');
@@ -2789,8 +2748,6 @@ function zegarekCard() {
   krok(IOS ? 3 : 2, 'Huawei Health przekazuje powiadomienia',
     IOS ? 'Huawei Health → Urządzenia → Watch Fit 4 → Powiadomienia: włącz. W Ustawieniach iPhone’a → Powiadomienia → Plan 12 tygodni: zezwól i pokazuj na ekranie blokady.'
         : 'Huawei Health → Urządzenia → zegarek → Powiadomienia: włącz przeglądarkę, w której masz plan.');
-  krok(IOS ? 4 : 3, 'Tętno i kalorie liczy zegarek',
-    'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Strength training". Po „Zakończ" karta treningu pokaże trzy pola: przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie. Trafią na kartę i na story.');
 
   return box;
 }
@@ -2873,7 +2830,7 @@ function panelTygodnia(w) {
 function statySesji(day, w) {
   if (day === 'D') {
     const pg = postepSesji('D', w);
-    return { big: `${pg.done}/${pg.total}`, bigU: '', bigL: 'pozycji jogi', serie: null, glowny: `~${state.plan.mobility.minutes} min mobilności`, ...czasITetno(day, w) };
+    return { big: `${pg.done}/${pg.total}`, bigU: '', bigL: 'pozycji jogi', serie: null, glowny: `~${state.plan.mobility.minutes} min mobilności`, ...czasSesji(day, w) };
   }
   const t = tonazDnia(w, day), pg = postepDnia(w, day);
   let glowny = `${state.plan.days[day].items.length} ćwiczeń`;
@@ -2883,18 +2840,14 @@ function statySesji(day, w) {
     const rows = logGet(w, day, it.n);
     glowny = LIFTS.find(x => x.key === lift).full + ' · ' + (opisWykonania(rows) || resolve(it.scheme, w));
   }
-  return { big: t.ton ? fmtTys(t.ton) : String(pg.done), bigU: t.ton ? 'kg' : '', bigL: t.ton ? 'tonaż sesji' : 'serii', serie: `${pg.done}/${pg.total}`, glowny, ...czasITetno(day, w) };
+  return { big: t.ton ? fmtTys(t.ton) : String(pg.done), bigU: t.ton ? 'kg' : '', bigL: t.ton ? 'tonaż sesji' : 'serii', serie: `${pg.done}/${pg.total}`, glowny, ...czasSesji(day, w) };
 }
-function czasITetno(day, w) {
+function czasSesji(day, w) {
   const t = trening(w, day);
-  const out = {};
-  if (t && t.start && t.end) out.czas = fmtMin(czasTreningu(t));
-  if (t && t.hr && (t.hr.n || t.hr.avg)) { out.hrAvg = t.hr.avg || Math.round(t.hr.sum / t.hr.n); out.hrMax = t.hr.max || null; }
-  if (t && t.kcal) out.kcal = t.kcal;
-  return out;
+  return t && t.start && t.end ? { czas: fmtMin(czasTreningu(t)) } : {};
 }
 
-function pokazZaliczenie(day, w, komunikat) {
+function pokazZaliczenie(day, w) {
   if (!document.body || !document.body.appendChild) return;
   const stare = document.querySelector('.zal');
   if (stare && stare.remove) stare.remove();
@@ -2912,33 +2865,10 @@ function pokazZaliczenie(day, w, komunikat) {
   if (st.bigU) big.append(el('u', null, st.bigU));
   karta.append(big, el('div', 'zbl', st.bigL));
   karta.append(el('div', 'zgl', st.glowny));
-  if (st.czas || st.hrAvg || st.kcal) {
+  if (st.czas) {
     const zs = el('div', 'zstat');
-    if (st.czas) zs.append(el('span', null, '⏱ ' + st.czas));
-    if (st.hrAvg) zs.append(el('span', null, `♥ śr. ${st.hrAvg}${st.hrMax ? ' · max ' + st.hrMax : ''} bpm`));
-    if (st.kcal) zs.append(el('span', null, `🔥 ${st.kcal} kcal`));
+    zs.append(el('span', null, '⏱ ' + st.czas));
     karta.append(zs);
-  }
-  // Tętno i kalorie z ekranu podsumowania na zegarku — wszystkie pola opcjonalne.
-  if (komunikat) karta.append(el('div', 'zkom', komunikat));
-  const tr = trening(w, day);
-  if (tr && tr.end) {
-    const f = el('form', 'zzeg');
-    f.append(el('div', 'zzt', st.hrAvg ? 'Popraw dane z zegarka' : 'Dane z zegarka (opcjonalnie)'));
-    const pole = (id, lab, v) => {
-      const l = el('label', 'zpole');
-      const i = el('input'); i.id = 'zz-' + id; i.type = 'text'; i.setAttribute('inputmode', 'numeric'); i.placeholder = '—';
-      if (v) i.value = v;
-      l.append(el('span', null, lab), i);
-      f.append(l);
-      return i;
-    };
-    const a = pole('avg', 'śr. tętno', st.hrAvg), m = pole('max', 'maks.', st.hrMax), k = pole('kcal', 'kcal', st.kcal);
-    const ok = el('button', 'zzok', 'Zapisz');
-    ok.type = 'submit';
-    f.append(ok);
-    f.onsubmit = e => { e.preventDefault(); zapiszZZegarka(day, w, { avg: a.value, max: m.value, kcal: k.value }); pokazZaliczenie(day, w); };
-    karta.append(f);
   }
   const ringi = el('div', 'zring');
   ringi.innerHTML = pierscienieSvg(w, 96, 8, 3);
@@ -3004,10 +2934,6 @@ async function kartaStory(day, w) {
   g.fillStyle = 'rgba(255,255,255,.9)'; F(`600 44px ${S}`, false);
   const zawijaj = (t, x, y, max, lh) => { let l = ''; for (const s of t.split(' ')) { if (g.measureText(l + s).width > max && l) { g.fillText(l.trim(), x, y); y += lh; l = ''; } l += s + ' '; } g.fillText(l.trim(), x, y); return y; };
   let yg = zawijaj(st.glowny, 90, 1000, W - 180, 58);
-  if (st.hrAvg || st.kcal) {
-    g.fillStyle = 'rgba(255,255,255,.7)'; F(`600 40px ${S}`, false); yg += 64;
-    g.fillText([st.hrAvg ? `♥ śr. ${st.hrAvg}${st.hrMax ? ' · max ' + st.hrMax : ''} bpm` : '', st.kcal ? `${st.kcal} kcal` : ''].filter(Boolean).join('   ·   '), 90, yg);
-  }
 
   // trzy liczby w rzędzie
   const kafle = [[st.serie || '—', 'serie'], st.czas ? [st.czas.replace(' min', '′'), 'czas'] : [`${w}/12`, 'tydzień cyklu'], [String(seriaTygodni(w)), 'tyg. z rzędu']];
@@ -3192,7 +3118,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=51')
+fetch('plan.json?v=52')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
