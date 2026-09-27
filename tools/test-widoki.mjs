@@ -109,7 +109,7 @@ const sandbox = {
   fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planJson) }),
   URL: { createObjectURL: () => 'blob:x', revokeObjectURL() {} },
   Date, Math, JSON, String, Number, Object, Array, Promise, Error, isNaN, parseFloat, parseInt,
-  URLSearchParams, btoa, atob, escape, unescape, encodeURIComponent, decodeURIComponent,
+  URLSearchParams, encodeURIComponent, decodeURIComponent,
 };
 sandbox.window.location = sandbox.location;
 vm.createContext(sandbox);
@@ -125,9 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka, przyjmijZZegarka, kandydatNaTetno,
-  dopasujAktywnosc, pobierzZeStravy, przyjmijStrave, stravaPolaczona, wklejKodPolaczenia, kodPolaczenia,
-  setStrava: s => { strava = s; }, getStrava: () => strava,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, zapiszZZegarka,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -364,80 +362,15 @@ console.log('\nTrening: start i koniec');
   A.zapiszZZegarka('B', 4, { avg: '', max: '', kcal: '' });
   test('puste pola nie kasuja wpisanych liczb', A.statySesji('B', 4).hrAvg === 128);
   S.view = '#/ustawienia'; A.render();
-  // Skrót z aplikacji Zdrowie: dane dopisują się do trwającego treningu i go kończą.
-  S.treningi = {};
-  A.rozpocznijTrening('C', 4);
-  const cel = A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=131&max=170&kcal=388'));
-  test('skrot trafia w trwajacy trening', cel && cel.day === 'C' && cel.w === 4);
-  test('skrot konczy trening i zapisuje liczby', !!A.trening(4, 'C').end && A.statySesji('C', 4).hrAvg === 131 && A.statySesji('C', 4).kcal === 388);
-  S.treningi = {};
-  const pusty = A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=&max='));
-  test('pusta paczka ze Zdrowia nie zaklada treningu', pusty.pusto && Object.keys(S.treningi).length === 0);
   S.treningi = { '4|C': { start: new Date(Date.now() - 50 * 60000).toISOString(), end: new Date(Date.now() - 10 * 60000).toISOString() } };
-  A.przyjmijZZegarka(new URLSearchParams('zegarek=1&avg=' + encodeURIComponent('112.6 count/min') + '&max=150,0'));
+  A.zapiszZZegarka('C', 4, { avg: '112.6 count/min', max: '150,0', kcal: '' });
   test('liczby z jednostka i przecinkiem sa przyjmowane', A.statySesji('C', 4).hrAvg === 113 && A.statySesji('C', 4).hrMax === 150);
   S.view = '#/'; A.render();
   test('ekran Dzis pokazuje ostatni trening z tetnem', app.textContent.includes('Ostatni trening') && app.textContent.includes('113'));
-  test('odpowiedz skrotu wlacza skrot na stale', S.skrot === true && 'skrot' in A.stanLokalny());
-  {
-    const teraz = Date.now(), iso = m => new Date(teraz - m * 60000).toISOString();
-    S.treningi = { '8|C': { start: iso(40), end: iso(5) } };
-    test('swiezy trening bez tetna jest kandydatem', A.kandydatNaTetno(teraz)?.day === 'C');
-    S.treningi['8|C'].hrProby = 1; S.treningi['8|C'].hrOst = iso(3);
-    test('kolejna proba dopiero po 10 minutach', A.kandydatNaTetno(teraz) === null);
-    S.treningi['8|C'].hrOst = iso(12);
-    test('po 10 minutach probuje znowu', A.kandydatNaTetno(teraz)?.day === 'C');
-    S.treningi['8|C'].hrProby = 3;
-    test('po trzech probach przestaje', A.kandydatNaTetno(teraz) === null);
-    S.treningi['8|C'] = { start: iso(40), end: iso(5), hr: { avg: 120 } };
-    test('trening z tetnem nie jest kandydatem', A.kandydatNaTetno(teraz) === null);
-    S.treningi = {};
-  }
-  test('adres bez zegarek=1 nic nie robi', A.przyjmijZZegarka(new URLSearchParams('avg=1')) === null);
+  S.treningi = {};
   S.view = '#/ustawienia'; A.render();
   test('ustawienia maja instrukcje zegarka', app.textContent.includes('Strength training') && app.textContent.includes('Huawei Health'));
-  test('ustawienia maja karte Stravy', app.textContent.includes('Połącz ze Stravą'));
-}
-
-/* ---------- Strava (API podstawione, zero sieci) ---------- */
-console.log('\nStrava');
-{
-  const start = new Date('2026-09-25T17:00:00Z');
-  const t = { start: start.toISOString(), end: new Date(start.getTime() + 55 * 60000).toISOString() };
-  const akt = (id, minuty, hr) => ({ id, name: 'Akt ' + id, start_date: new Date(start.getTime() + minuty * 60000).toISOString(), has_heartrate: hr, average_heartrate: hr ? 128.4 : null, max_heartrate: hr ? 165 : null });
-  test('dopasowanie bierze trening najblizej startu', A.dopasujAktywnosc([akt(1, -300, true), akt(2, 3, true), akt(3, 40, true)], t).id === 2);
-  test('z tetnem wygrywa z bez tetna', A.dopasujAktywnosc([akt(1, 1, false), akt(2, 12, true)], t).id === 2);
-  test('trening sprzed kilku godzin nie pasuje', A.dopasujAktywnosc([akt(1, -300, true)], t) === null);
-
-  const zapytania = [];
-  const staryFetch = sandbox.fetch;
-  sandbox.fetch = async (url, opts = {}) => {
-    zapytania.push({ url, opts });
-    const json = d => ({ ok: true, status: 200, json: async () => d });
-    if (url.endsWith('/oauth/token')) return json({ access_token: 'AT', refresh_token: 'RT', expires_at: Math.floor(Date.now() / 1000) + 3600, athlete: { firstname: 'Ola' } });
-    if (url.includes('/athlete/activities')) return json([akt(7, 2, true)]);
-    if (url.includes('/activities/7')) return json({ id: 7, calories: 402.6 });
-    return json({});
-  };
-  A.setStrava({ clientId: '123', clientSecret: 'x'.repeat(40) });
-  const r = await A.przyjmijStrave(new URLSearchParams('state=plan12&code=abc&scope=read,activity:read_all'));
-  test('kod ze Stravy wymienia sie na tokeny', r && r.ok && A.stravaPolaczona() && A.getStrava().kto === 'Ola');
-  test('wymiana idzie formularzem, nie JSON-em', zapytania[0].opts.headers['Content-Type'] === 'application/x-www-form-urlencoded');
-  test('bez zgody na treningi nie laczymy', (await A.przyjmijStrave(new URLSearchParams('state=plan12&code=abc&scope=read'))).blad);
-
-  S.treningi = { '5|A': { ...t } };
-  const w = await A.pobierzZeStravy('A', 5);
-  const st = A.statySesji('A', 5);
-  test('tetno i kalorie ze Stravy trafiaja do sesji', w.stan === 'ok' && st.hrAvg === 128 && st.hrMax === 165 && st.kcal === 403);
-  test('zapytanie niesie token', zapytania.some(z => z.opts.headers && z.opts.headers.Authorization === 'Bearer AT'));
-  test('klucze Stravy nie jada do synchronizacji', !JSON.stringify(A.stanLokalny()).includes('x'.repeat(40)));
-
-  const kod = A.kodPolaczenia();
-  A.setStrava({});
-  A.wklejKodPolaczenia(kod);
-  test('kod polaczenia przenosi klucze', A.stravaPolaczona());
-  A.setStrava({});
-  sandbox.fetch = staryFetch;
+  test('bez Stravy i skrotu w ustawieniach', !app.textContent.includes('Strava') && !app.textContent.includes('Skrót iPhone'));
 }
 
 /* ---------- niedziela ---------- */

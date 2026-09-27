@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, skrot: false,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false,
 };
 
 /* ---------- Supabase ---------- */
@@ -100,12 +100,11 @@ function loadState() {
     if (typeof raw.sound === 'boolean') state.sound = raw.sound;
     if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
     if (typeof raw.zegarek === 'boolean') state.zegarek = raw.zegarek;
-    if (typeof raw.skrot === 'boolean') state.skrot = raw.skrot;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, skrot: state.skrot }));
+const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek }));
 const save = () => {
   zapiszLokalnie();
   if (typeof pushStan === 'function') pushStan();
@@ -1896,7 +1895,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, skrot: state.skrot });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1937,8 +1936,6 @@ async function pullStan() {
       state.treningi = { ...d.treningi, ...wToku() }; saveTreningi(true); zm = true;
       if (nowe) { const [w, day] = nowe[0].split('|'); setTimeout(() => pokazZaliczenie(day, +w, 'Tętno i kalorie ze Zdrowia dotarły.'), 300); }
     }
-    // Skrót zainstalowany raz wystarcza na wszystkich kopiach planu (Safari, ikona).
-    if (d.skrot === true && !state.skrot) { state.skrot = true; zm = true; }
     // Na końcu, bo `kgw` i `mob` przyjechały już przestawione — zostaje sam dziennik.
     if (zastosujZdalnePrzeniesienia(d.moves)) zm = true;
     stanTs = row.ts;
@@ -1957,7 +1954,7 @@ async function odswiez() {
   if (zmienionyStan) renderJesliSpokojnie();
 }
 setInterval(odswiez, 10000);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { odswiez(); if (typeof dociagnijZeStravy === 'function') dociagnijZeStravy(); if (typeof autoTetno === 'function') setTimeout(autoTetno, 2500); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { odswiez();  } });
 
 function setSync(s) {
   state.sync = s;
@@ -2537,7 +2534,6 @@ function settingsView() {
   body.append(pref);
 
   body.append(zegarekCard());
-  body.append(stravaCard());
   body.append(przeniesCard());
 
   const kop = el('div', 'card');
@@ -2590,7 +2586,6 @@ const JAKO_APKA = () => {
   try { return !!(navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)); }
   catch { return false; }
 };
-const MA_BT = () => typeof navigator !== 'undefined' && !!navigator.bluetooth;
 
 /* ---------- trening: start, koniec, stoper, tętno ---------- */
 // Klucz jak w dzienniku: "tydzien|dzien". Wartość: { start, end, hr: { sum, n, max } }.
@@ -2621,21 +2616,15 @@ function zakonczTrening(day, w) {
   if (!t) return;
   t.end = new Date().toISOString();
   saveTreningi();
-  rozlaczTetno();
   pokazZaliczenie(day, w);
-  if (stravaPolaczona()) czekajNaStrave(day, w);
-  else if (IOS && state.skrot && !(t.hr && t.hr.n)) setTimeout(() => uruchomSkrot(day, w), 600);
 }
 
-// Przycisk „♥ Pobierz tętno" z informacją, ile razy już próbowano.
-function przyciskTetna(day, w, t) {
+// Przycisk „♥ Wpisz tętno": otwiera kartę treningu z polami na liczby z zegarka.
+function przyciskTetna(day, w) {
   const b = el('button', 'trn-hr pobierz');
   b.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.3 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.6 0 5.9 3.6 4.4 7.2C19.5 16.4 12 21 12 21z"/></svg>';
-  b.append(el('b', null, 'Pobierz'), el('span', null, t && t.hrProby ? `próba ${t.hrProby}` : 'tętno'));
-  b.onclick = e => {
-    e.stopPropagation();
-    if (IOS) uruchomSkrot(day, w); else pokazZaliczenie(day, w);
-  };
+  b.append(el('b', null, 'Wpisz'), el('span', null, 'tętno'));
+  b.onclick = e => { e.stopPropagation(); pokazZaliczenie(day, w); };
   return b;
 }
 
@@ -2659,85 +2648,12 @@ function kartaOstatniego() {
     h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, t.hr.max ? `śr. · max ${t.hr.max}` : 'śr. bpm'));
     box.append(h);
   } else {
-    box.append(przyciskTetna(day, +w, t));
+    box.append(przyciskTetna(day, +w));
   }
   box.onclick = () => go(trasaDnia(day) + '/' + w);
   return box;
 }
 
-/* ---------- skrót iPhone'a: tętno i kalorie z aplikacji Zdrowie ----------
-   Huawei Health zapisuje tętno i energię w Zdrowiu, a strona nie ma do Zdrowia
-   dostępu. Skrót ma: plan podaje mu, ile minut trwał trening, skrót liczy
-   średnią, maksimum i sumę kalorii z tego okna i otwiera plan z liczbami
-   w adresie. Adres otwiera się w Safari — jeśli plan działa z ikony, liczby
-   dojadą do niego synchronizacją. */
-const NAZWA_SKROTU = 'Plan 12 zegarek';
-const ADRES_PLANU = 'https://olgaerobert-code.github.io/trening/';
-
-function uruchomSkrot(day, w) {
-  // Okno liczone od startu treningu do TERAZ, a nie długość treningu — skrót
-  // odejmuje minuty od bieżącej godziny, a bywa uruchamiany chwilę po końcu.
-  const t = trening(w, day);
-  const minuty = t && t.start ? Math.ceil((Date.now() - new Date(t.start).getTime()) / 60000) + 2 : 90;
-  if (t) { t.hrProby = (t.hrProby || 0) + 1; t.hrOst = new Date().toISOString(); saveTreningi(); }
-  location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(NAZWA_SKROTU)
-    + '&input=text&text=' + encodeURIComponent(String(minuty));
-}
-
-/* Tętno samo: gdy aplikacja z ikony wraca na ekran, a świeży trening nie ma
-   jeszcze tętna, odpala skrót sama. Huawei wysyła dane do Zdrowia z
-   opóźnieniem, więc próbuje do trzech razy, co najmniej 10 minut odstępu,
-   najdłużej 12 godzin po treningu. W Safari (tam skrót odsyła wyniki) nie
-   odpala niczego — inaczej skrót i strona odbijałyby się w kółko. */
-let autoTetnoOst = 0;
-function kandydatNaTetno(teraz = Date.now()) {
-  let best = null;
-  for (const [k, t] of Object.entries(state.treningi)) {
-    if (!t || !t.end || (t.hr && (t.hr.n || t.hr.avg))) continue;
-    const koniec = new Date(t.end).getTime();
-    if (teraz - koniec > 12 * 3600e3) continue;
-    const proby = t.hrProby || 0;
-    if (proby >= 3) continue;
-    const odOst = teraz - new Date(t.hrOst || t.end).getTime();
-    if (odOst < (proby ? 10 : 2) * 60000) continue;
-    if (!best || koniec > best.koniec) { const [w, day] = k.split('|'); best = { w: +w, day, koniec }; }
-  }
-  return best;
-}
-function autoTetno() {
-  if (!IOS || !state.skrot || !JAKO_APKA() || stravaPolaczona()) return;
-  if (Date.now() - autoTetnoOst < 60000) return;
-  const k = kandydatNaTetno();
-  if (!k) return;
-  autoTetnoOst = Date.now();
-  setTimeout(() => uruchomSkrot(k.day, k.w), 1200);
-}
-
-// Najświeższy trening z ostatnich 12 godzin; bez niego — sesja, na której
-// aplikacja i tak by się otworzyła.
-function sesjaDoDanych() {
-  const teraz = Date.now();
-  let best = null;
-  for (const [k, t] of Object.entries(state.treningi)) {
-    const kiedy = new Date(t.end || t.start || 0).getTime();
-    if (!kiedy || teraz - kiedy > 12 * 3600e3) continue;
-    if (!best || kiedy > best.kiedy) { const [w, day] = k.split('|'); best = { w: +w, day, kiedy }; }
-  }
-  return best || { w: state.week, day: domyslnaSesja() || dzisiaj() || 'A' };
-}
-
-// Wejście z adresu ?zegarek=1&avg=…&max=…&kcal=… (wysyła je skrót).
-function przyjmijZZegarka(params) {
-  if (!params || params.get('zegarek') !== '1') return null;
-  // Skoro skrót odesłał dane, jest zainstalowany — włączamy go wszędzie.
-  if (!state.skrot) { state.skrot = true; save(); }
-  const { w, day } = sesjaDoDanych();
-  const t = trening(w, day);
-  if (t && t.start && !t.end) t.end = new Date().toISOString();
-  const surowe = { avg: params.get('avg') || '', max: params.get('max') || '', kcal: params.get('kcal') || '' };
-  const cos = zapiszZZegarka(day, w, surowe);
-  return { w, day, pusto: !cos, surowe };
-}
 // Liczby przepisane z podsumowania na zegarku. Puste pole = nie ruszamy.
 function zapiszZZegarka(day, w, { avg, max, kcal }) {
   // Skrót potrafi odesłać liczbę z jednostką („112 count/min") albo z przecinkiem.
@@ -2776,21 +2692,12 @@ function pasekTreningu(day, w) {
     zeg.id = 'trn-czas';
     lewa.append(zeg);
     box.append(lewa);
-    const hr = el('button', 'trn-hr' + (tetno.hr ? ' on' : ''));
-    hr.id = 'trn-hr';
-    if (!MA_BT()) hr.hidden = true;
-    hr.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.3 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.6 0 5.9 3.6 4.4 7.2C19.5 16.4 12 21 12 21z"/></svg>';
-    hr.append(el('b', null, tetno.hr ? String(tetno.hr) : '—'), el('span', null, tetno.hr ? 'bpm' : 'zegarek'));
-    hr.onclick = () => { if (!tetno.dev) polaczTetno(day, w); };
-    box.append(hr);
     const stop = el('button', 'trn-stop', 'Zakończ');
     stop.onclick = () => zakonczTrening(day, w);
     box.append(stop);
     const info = el('div', 'trn-pod');
     info.id = 'trn-info';
-    info.textContent = tetno.info || (tetno.dev ? '' : MA_BT()
-      ? 'Tapnij serce, żeby pobrać tętno z zegarka.'
-      : 'Włącz na zegarku „Trening siłowy" — tętno i kalorie przepiszesz po „Zakończ".');
+    info.textContent = 'Włącz na zegarku „Strength training" — tętno i kalorie przepiszesz po „Zakończ".';
     box.append(info);
     return box;
   }
@@ -2803,7 +2710,7 @@ function pasekTreningu(day, w) {
     h.append(el('b', null, String(t.hr.avg || Math.round(t.hr.sum / t.hr.n))), el('span', null, 'śr. bpm'));
     box.append(h);
   } else {
-    box.append(przyciskTetna(day, w, t));
+    box.append(przyciskTetna(day, w));
   }
   const znowu = el('button', 'trn-link', 'Cofnij');
   znowu.onclick = () => { t.end = null; saveTreningi(); render(); };
@@ -2822,64 +2729,6 @@ setInterval(() => {
   const t = trening(w, day);
   if (t && !t.end) n.textContent = fmtCzas(czasTreningu(t));
 }, 1000);
-
-/* Tętno z zegarka przez Web Bluetooth — standardowa usługa Heart Rate (0x180D).
-   Zegarek musi ją nadawać: w Huawei to „Udostępnianie danych tętna" w
-   ustawieniach treningu na zegarku, i działa, gdy na zegarku trwa trening. */
-const tetno = { dev: null, hr: null, info: '' };
-function pokazTetno() {
-  const b = document.getElementById('trn-hr');
-  if (b) {
-    b.classList.toggle('on', !!tetno.hr);
-    const [v, u] = [b.querySelector('b'), b.querySelector('span')];
-    if (v) v.textContent = tetno.hr ? String(tetno.hr) : '—';
-    if (u) u.textContent = tetno.hr ? 'bpm' : 'zegarek';
-  }
-  const i = document.getElementById('trn-info');
-  if (i) i.textContent = tetno.info;
-}
-async function polaczTetno(day, w) {
-  if (!navigator.bluetooth) {
-    tetno.info = 'Ta przeglądarka nie obsługuje Bluetooth ze stron. Otwórz plan w Chrome na Androidzie.';
-    return pokazTetno();
-  }
-  try {
-    tetno.info = 'Wybierz zegarek z listy…'; pokazTetno();
-    const dev = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] });
-    tetno.info = 'Łączę z ' + (dev.name || 'zegarkiem') + '…'; pokazTetno();
-    const srv = await dev.gatt.connect();
-    const ch = await (await srv.getPrimaryService('heart_rate')).getCharacteristic('heart_rate_measurement');
-    await ch.startNotifications();
-    tetno.dev = dev;
-    tetno.info = 'Tętno z: ' + (dev.name || 'zegarek');
-    ch.addEventListener('characteristicvaluechanged', e => {
-      const v = e.target.value, flagi = v.getUint8(0);
-      const hr = flagi & 1 ? v.getUint16(1, true) : v.getUint8(1);
-      if (!hr) return;
-      tetno.hr = hr;
-      const t = trening(w, day);
-      if (t && !t.end) {
-        const h = t.hr || (t.hr = { sum: 0, n: 0, max: 0 });
-        h.sum += hr; h.n++; h.max = Math.max(h.max, hr);
-        if (h.n % 15 === 0) saveTreningi(true);
-      }
-      pokazTetno();
-    });
-    dev.addEventListener('gattserverdisconnected', () => {
-      tetno.dev = null; tetno.hr = null; tetno.info = 'Zegarek się rozłączył. Tapnij serce, żeby połączyć ponownie.'; pokazTetno();
-    });
-    pokazTetno();
-  } catch (e) {
-    tetno.info = e && e.name === 'NotFoundError'
-      ? 'Nie wybrano zegarka. Włącz na nim trening i udostępnianie tętna, potem spróbuj jeszcze raz.'
-      : 'Nie udało się połączyć: ' + ((e && e.message) || 'nieznany błąd') + '.';
-    pokazTetno();
-  }
-}
-function rozlaczTetno() {
-  try { if (tetno.dev && tetno.dev.gatt.connected) tetno.dev.gatt.disconnect(); } catch { /* już rozłączony */ }
-  tetno.dev = null; tetno.hr = null; tetno.info = '';
-}
 
 /* Koniec przerwy jako powiadomienie. Aplikacja Huawei Health przekazuje
    powiadomienia z telefonu na zegarek, więc przerwa kończy się wibracją na
@@ -2936,266 +2785,8 @@ function zegarekCard() {
     IOS ? 'Huawei Health → Urządzenia → Watch Fit 4 → Powiadomienia: włącz. W Ustawieniach iPhone’a → Powiadomienia → Plan 12 tygodni: zezwól i pokazuj na ekranie blokady.'
         : 'Huawei Health → Urządzenia → zegarek → Powiadomienia: włącz przeglądarkę, w której masz plan.');
   krok(IOS ? 4 : 3, 'Tętno i kalorie liczy zegarek',
-    'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Strength training". ' + (stravaPolaczona()
-      ? 'Po treningu najpierw zakończ go na zegarku, potem „Zakończ" w planie — tętno i kalorie przyjdą same ze Stravy.'
-      : state.skrot ? 'Po treningu zakończ go na zegarku, otwórz na chwilę Huawei Health, potem „Zakończ" w planie — skrót dopisze tętno i kalorie.'
-      : 'Po „Zakończ" karta treningu pokaże trzy pola: przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie. Trafią na kartę i na story.')
-      + (MA_BT() ? ' Na tym urządzeniu tętno może też płynąć na żywo przez Bluetooth: serce obok stopera.' : ''));
+    'Razem z „Rozpocznij trening" włącz na zegarku ćwiczenie „Strength training". Po „Zakończ" karta treningu pokaże trzy pola: przepisz z podsumowania na zegarku średnie tętno, maksymalne i kalorie. Trafią na kartę i na story.');
 
-  return box;
-}
-
-/* ---------- Strava: tętno i kalorie z treningu na zegarku ----------
-   Huawei Health wysyła treningi do Stravy razem z tętnem, a Strava ma otwarte
-   API. Plan czyta z niego jedną rzecz: trening, który zaczął się w czasie
-   sesji. Klucze (Client ID, Client Secret, tokeny) leżą WYŁĄCZNIE w pamięci
-   tego urządzenia — nie idą do bazy, do synchronizacji ani do kopii
-   zapasowej. Kod aplikacji jest publiczny, więc sekretu nie ma w nim wcale. */
-const LS_STRAVA = 'trening.strava.v1';
-const STRAVA_API = 'https://www.strava.com';
-let strava = readJSON(LS_STRAVA, {});
-const zapiszStrava = () => { try { localStorage.setItem(LS_STRAVA, JSON.stringify(strava)); } catch { /* bez pamięci nie zapamiętamy */ } };
-const stravaPolaczona = () => !!(strava.refresh && strava.clientId && strava.clientSecret);
-const adresPowrotu = () => (location.origin && location.origin !== 'null' ? location.origin + location.pathname : ADRES_PLANU);
-
-function polaczStrave() {
-  location.href = STRAVA_API + '/oauth/authorize?' + new URLSearchParams({
-    client_id: strava.clientId, response_type: 'code', redirect_uri: adresPowrotu(),
-    approval_prompt: 'auto', scope: 'activity:read_all', state: 'plan12',
-  }).toString();
-}
-
-// Formularz (nie JSON) — to prosty request, bez zapytania wstępnego CORS.
-async function stravaTokenZ(body) {
-  const r = await fetch(STRAVA_API + '/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: strava.clientId, client_secret: strava.clientSecret, ...body }).toString(),
-  });
-  if (!r.ok) throw new Error(r.status === 400 || r.status === 401 ? 'Strava odrzuciła klucze — sprawdź Client ID i Client Secret.' : 'Strava odpowiedziała błędem ' + r.status + '.');
-  const d = await r.json();
-  strava.access = d.access_token;
-  strava.refresh = d.refresh_token || strava.refresh;
-  strava.expires = d.expires_at;
-  if (d.athlete) strava.kto = [d.athlete.firstname, d.athlete.lastname].filter(Boolean).join(' ');
-  zapiszStrava();
-  return strava.access;
-}
-async function stravaToken() {
-  if (strava.access && strava.expires && strava.expires * 1000 > Date.now() + 60000) return strava.access;
-  return stravaTokenZ({ grant_type: 'refresh_token', refresh_token: strava.refresh });
-}
-async function stravaGet(sciezka) {
-  const r = await fetch(STRAVA_API + '/api/v3' + sciezka, { headers: { Authorization: 'Bearer ' + await stravaToken() } });
-  if (r.status === 401) { strava.access = null; zapiszStrava(); throw new Error('Strava wylogowała plan — połącz ponownie w ustawieniach.'); }
-  if (!r.ok) throw new Error('Strava odpowiedziała błędem ' + r.status + '.');
-  return r.json();
-}
-
-// Powrót ze Stravy: ?code=…&scope=…&state=plan12 (albo ?error=access_denied).
-async function przyjmijStrave(params) {
-  if (params.get('state') !== 'plan12') return null;
-  if (params.get('error')) return { blad: 'Nie zezwolono na dostęp do Stravy.' };
-  if (!(params.get('scope') || '').includes('activity:read')) return { blad: 'Strava nie dała dostępu do treningów — przy łączeniu zostaw zaznaczone „View data about your activities".' };
-  try { await stravaTokenZ({ code: params.get('code'), grant_type: 'authorization_code' }); return { ok: true }; }
-  catch (e) { return { blad: e.message }; }
-}
-
-/* Który trening ze Stravy należy do sesji: ten, który zaczął się najbliżej
-   startu sesji (godzina w jedną i drugą stronę), a bez startu — najbliżej
-   jej końca. Z tętnem wygrywa z tym bez. */
-function dopasujAktywnosc(lista, t) {
-  const ref = new Date(t.start || t.end).getTime();
-  const kandydaci = (lista || [])
-    .map(a => ({ a, d: Math.abs(new Date(a.start_date).getTime() - ref) }))
-    .filter(x => x.d <= (t.start ? 60 : 180) * 60000)
-    .sort((x, y) => (y.a.has_heartrate ? 1 : 0) - (x.a.has_heartrate ? 1 : 0) || x.d - y.d);
-  return kandydaci.length ? kandydaci[0].a : null;
-}
-
-async function pobierzZeStravy(day, w) {
-  const t = trening(w, day);
-  if (!t || !stravaPolaczona()) return { stan: 'brak' };
-  const ref = new Date(t.start || t.end).getTime();
-  const lista = await stravaGet('/athlete/activities?per_page=15&after=' + Math.floor(ref / 1000 - 3 * 3600));
-  const a = dopasujAktywnosc(lista, t);
-  if (!a) return { stan: 'czekam' };
-  let kcal = null;
-  try { const pelna = await stravaGet('/activities/' + a.id); kcal = pelna.calories || null; } catch { /* bez kalorii też dobrze */ }
-  zapiszZZegarka(day, w, {
-    avg: a.average_heartrate ? Math.round(a.average_heartrate) : '',
-    max: a.max_heartrate ? Math.round(a.max_heartrate) : '',
-    kcal: kcal ? Math.round(kcal) : '',
-  });
-  t.strava = a.id;
-  saveTreningi();
-  return { stan: a.has_heartrate ? 'ok' : 'bez-tetna', nazwa: a.name };
-}
-
-/* Po „Zakończ" trening trafia do Stravy dopiero, gdy zegarek zsynchronizuje
-   się z telefonem — czasem po minucie, czasem po kilku. Pytamy co minutę
-   przez 20 minut, dopóki aplikacja jest otwarta. */
-const czekanieStrava = {};
-function czekajNaStrave(day, w, proby = 20) {
-  const k = trnKey(w, day);
-  if (czekanieStrava[k] || !stravaPolaczona()) return;
-  const status = tekst => { const n = document.getElementById('zstrava'); if (n) n.textContent = tekst; };
-  let ile = 0;
-  const krok = async () => {
-    ile++;
-    try {
-      const r = await pobierzZeStravy(day, w);
-      if (r.stan === 'ok' || r.stan === 'bez-tetna') {
-        delete czekanieStrava[k];
-        pokazZaliczenie(day, w, r.stan === 'ok' ? 'Tętno i kalorie ze Stravy dopisane.' : 'Trening w Stravie nie ma tętna — dopisane kalorie.');
-        return;
-      }
-      status('Czekam, aż trening z zegarka dotrze do Stravy… Otwórz Huawei Health, żeby zegarek się zsynchronizował.');
-    } catch (e) {
-      status(e.message || 'Nie udało się połączyć ze Stravą.');
-    }
-    if (ile < proby) czekanieStrava[k] = setTimeout(krok, 60000);
-    else { delete czekanieStrava[k]; status('Nie znalazłam treningu w Stravie. Spróbuj przyciskiem niżej, kiedy się pojawi.'); }
-  };
-  czekanieStrava[k] = setTimeout(krok, 1500);
-}
-
-// Po powrocie do aplikacji: zakończone dziś treningi bez tętna — jedno pytanie.
-function dociagnijZeStravy() {
-  if (!stravaPolaczona()) return;
-  const teraz = Date.now();
-  for (const [k, t] of Object.entries(state.treningi)) {
-    if (!t || !t.end || (t.hr && (t.hr.n || t.hr.avg)) || t.strava) continue;
-    if (teraz - new Date(t.end).getTime() > 12 * 3600e3) continue;
-    const [w, day] = k.split('|');
-    czekajNaStrave(day, +w, 1);
-  }
-}
-
-// Kod połączenia: gdy łączenie skończyło się w Safari, a plan działa z ikony,
-// przenosimy klucze ręcznie — to dwie osobne pamięci na iPhonie.
-const kodPolaczenia = () => btoa(unescape(encodeURIComponent(JSON.stringify({ i: strava.clientId, s: strava.clientSecret, r: strava.refresh, k: strava.kto }))));
-function wklejKodPolaczenia(kod) {
-  const d = JSON.parse(decodeURIComponent(escape(atob(String(kod).trim()))));
-  if (!d.i || !d.s || !d.r) throw new Error('To nie jest kod połączenia.');
-  strava = { clientId: d.i, clientSecret: d.s, refresh: d.r, kto: d.k };
-  zapiszStrava();
-}
-
-function skrotSekcja() {
-  {
-    const t5 = el('details', 'skrot');
-    t5.append(el('summary', null, 'Skrót iPhone’a: tętno i kalorie ze Zdrowia (trzeba go raz złożyć)'));
-    const inst = el('div');
-    const ol = el('ol');
-    [
-      'Sprawdź, że Huawei zapisuje do Zdrowia: Health → Browse → Activity → Workouts — treningi ze źródłem Huawei Health.',
-      `Shortcuts → + → nazwa na górze: ${NAZWA_SKROTU} (dokładnie tak).`,
-      '„If": Shortcut Input → has any value. W środku „Adjust Date": Subtract · [Shortcut Input] · minutes · from Current Date. W „Otherwise": „Adjust Date": Subtract · 90 · minutes · from Current Date. Za „End If" dodaj „Set Variable": Start = If Result.',
-      '„Find Health Samples": Type = Heart Rate, filtr: Start Date · is after · Start. Potem „Calculate Statistics": Average → „Round Number" → „Set Variable": Avg.',
-      'Jeszcze raz „Find Health Samples" (Heart Rate, after Start) → „Calculate Statistics": Maximum → „Round Number" → „Set Variable": Max.',
-      '„Find Health Samples": Type = Active Energy, after Start → „Calculate Statistics": Sum → „Round Number" → „Set Variable": Kcal.',
-      `„Text": ${ADRES_PLANU}?zegarek=1&avg=[Avg]&max=[Max]&kcal=[Kcal] — zmienne wstawiasz z paska nad klawiaturą. Na końcu „Open URLs".`,
-      'Uruchom skrót raz ręcznie i pozwól mu czytać Zdrowie (Allow). Potem włącz „Uruchamiaj po Zakończ" niżej.',
-    ].forEach(k => ol.append(el('li', null, k)));
-    inst.append(ol);
-    const kopiuj = miniBtn('Skopiuj adres do skrótu', async () => {
-      const a = `${ADRES_PLANU}?zegarek=1&avg=&max=&kcal=`;
-      try { await navigator.clipboard.writeText(a); kopiuj.textContent = 'Skopiowane ✓'; } catch { kopiuj.textContent = a; }
-    });
-    inst.append(kopiuj);
-    t5.append(inst);
-    const rz = el('div', 'kbtn');
-    rz.append(miniBtn(state.skrot ? 'Uruchamiam po „Zakończ" ✓' : 'Uruchamiaj po „Zakończ"', () => { state.skrot = !state.skrot; save(); render(); }));
-    t5.append(rz);
-    return t5;
-  }
-}
-
-function stravaCard() {
-  const box = el('div', 'card');
-  box.append(el('h3', null, stravaPolaczona() ? 'Strava — tętno i kalorie' : 'Tętno automatycznie — dla chętnych'));
-  if (!stravaPolaczona()) {
-    box.append(el('p', null, 'Nie jest potrzebne: trzy liczby z zegarka wpisujesz po „Zakończ". Jeśli kiedyś zechcesz, żeby przychodziły same, są dwie drogi — każda wymaga jednorazowej konfiguracji.'));
-    if (IOS) box.append(skrotSekcja());
-    const zw = el('details', 'skrot');
-    zw.append(el('summary', null, 'Strava (API wymaga subskrypcji Stravy)'));
-    zw.append(stravaFormularz());
-    box.append(zw);
-    return box;
-  }
-  if (stravaPolaczona()) {
-    const r = el('div', 'e1row');
-    r.append(el('div', 'n', 'Połączono' + (strava.kto ? ': ' + strava.kto : '')));
-    r.append(el('div', 'syncst ok', 'działa'));
-    box.append(r);
-    box.append(el('p', null, 'Po „Zakończ" plan sam znajdzie w Stravie trening z zegarka i dopisze średnie i maksymalne tętno oraz kalorie. Trening na zegarku zakończ przed „Zakończ" w planie.'));
-    const rz = el('div', 'kbtn');
-    const info = el('p', 'stinfo', '');
-    rz.append(miniBtn('Pobierz dla ostatniego treningu', async () => {
-      const ost = Object.entries(state.treningi).filter(([, t]) => t && t.end).sort((a, b) => new Date(b[1].end) - new Date(a[1].end))[0];
-      if (!ost) { info.textContent = 'Nie ma jeszcze zakończonego treningu.'; return; }
-      const [w, day] = ost[0].split('|');
-      info.textContent = 'Szukam w Stravie…';
-      try {
-        const x = await pobierzZeStravy(day, +w);
-        info.textContent = x.stan === 'ok' ? `Dopisane z: ${x.nazwa}.` : x.stan === 'bez-tetna' ? `Znaleziony „${x.nazwa}", ale bez tętna.` : 'W Stravie nie ma jeszcze tego treningu.';
-      } catch (e) { info.textContent = e.message; }
-    }));
-    if (IOS && !JAKO_APKA()) {
-      rz.append(miniBtn('Skopiuj kod połączenia', async () => {
-        try { await navigator.clipboard.writeText(kodPolaczenia()); info.textContent = 'Skopiowane. Wklej go w aplikacji Plan 12 (ikona na ekranie) → Dziennik → Strava.'; }
-        catch { info.textContent = kodPolaczenia(); }
-      }));
-    }
-    rz.append(miniBtn('Rozłącz', () => { strava = {}; zapiszStrava(); render(); }));
-    box.append(rz, info);
-    return box;
-  }
-
-  return box;
-}
-
-function stravaFormularz() {
-  const box = el('div');
-  const ol = el('ol', 'stkroki');
-  const li = (html) => { const l = el('li'); l.innerHTML = html; ol.append(l); };
-  li('Huawei Health → Me → Privacy management → Data sharing and authorization → <b>Strava</b>: połączone. ✓');
-  li('Otwórz <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener">strava.com/settings/api</a> (zaloguj się w przeglądarce) i utwórz aplikację:<br>'
-    + '<b>Application Name</b>: Plan 12 · <b>Category</b>: Training · <b>Website</b>: <code>' + esc(ADRES_PLANU) + '</code> · '
-    + '<b>Authorization Callback Domain</b>: <code>' + esc(ADRES_PLANU.split('/')[2]) + '</code>. Jeśli poprosi o ikonę, wgraj dowolny obrazek.');
-  li('Z tej strony przepisz <b>Client ID</b> i <b>Client Secret</b> (przycisk „show") tutaj:');
-  box.append(ol);
-  const pola = el('div', 'stpola');
-  const pole = (id, lab, v, typ) => {
-    const l = el('label', 'stpole');
-    const i = el('input'); i.id = id; i.type = typ || 'text'; i.value = v || ''; i.autocomplete = 'off'; i.spellcheck = false;
-    l.append(el('span', null, lab), i); pola.append(l); return i;
-  };
-  const id = pole('strava-id', 'Client ID', strava.clientId, 'text');
-  id.setAttribute('inputmode', 'numeric');
-  const sec = pole('strava-secret', 'Client Secret', strava.clientSecret, 'password');
-  box.append(pola);
-  const info = el('p', 'stinfo', '');
-  const b = el('button', 'btn primary', 'Połącz ze Stravą');
-  b.onclick = () => {
-    const ci = id.value.trim(), cs = sec.value.trim();
-    if (!/^\d+$/.test(ci) || cs.length < 20) { info.textContent = 'Client ID to same cyfry, a Client Secret ma około 40 znaków.'; return; }
-    strava = { clientId: ci, clientSecret: cs };
-    zapiszStrava();
-    polaczStrave();
-  };
-  box.append(b, info);
-  box.append(el('p', 'stnota', 'Klucze zostają tylko na tym telefonie — nie trafiają do bazy, synchronizacji ani kopii zapasowej.'));
-
-  const kod = el('details', 'skrot');
-  kod.append(el('summary', null, 'Mam kod połączenia z Safari'));
-  const ta = el('input'); ta.id = 'strava-kod'; ta.type = 'text'; ta.placeholder = 'wklej kod'; ta.className = 'keyinput';
-  const wk = miniBtn('Wklej i połącz', () => {
-    try { wklejKodPolaczenia(ta.value); render(); } catch (e) { info.textContent = e.message; }
-  });
-  kod.append(ta, wk);
-  box.append(kod);
   return box;
 }
 
@@ -3323,30 +2914,10 @@ function pokazZaliczenie(day, w, komunikat) {
     if (st.kcal) zs.append(el('span', null, `🔥 ${st.kcal} kcal`));
     karta.append(zs);
   }
-  // Tętna nie ma z Bluetooth (iPhone), więc prosimy o trzy liczby z ekranu
-  // podsumowania na zegarku. Wszystkie opcjonalne.
+  // Tętno i kalorie z ekranu podsumowania na zegarku — wszystkie pola opcjonalne.
   if (komunikat) karta.append(el('div', 'zkom', komunikat));
   const tr = trening(w, day);
-  if (tr && tr.end && !(tr.hr && tr.hr.n)) {
-    if (stravaPolaczona()) {
-      const st2 = el('div', 'zkom szary');
-      st2.id = 'zstrava';
-      st2.textContent = czekanieStrava[trnKey(w, day)] ? 'Szukam treningu w Stravie…' : 'Tętno i kalorie pobiorę ze Stravy.';
-      const sk = el('button', 'btn zskrot', 'Pobierz ze Stravy teraz');
-      sk.onclick = async () => {
-        st2.textContent = 'Szukam w Stravie…';
-        try {
-          const r = await pobierzZeStravy(day, w);
-          if (r.stan === 'ok' || r.stan === 'bez-tetna') pokazZaliczenie(day, w, r.stan === 'ok' ? 'Tętno i kalorie ze Stravy dopisane.' : 'Trening w Stravie nie ma tętna — dopisane kalorie.');
-          else st2.textContent = 'Jeszcze go tam nie ma. Otwórz Huawei Health, poczekaj minutę i spróbuj znowu.';
-        } catch (e) { st2.textContent = e.message; }
-      };
-      karta.append(st2, sk);
-    } else if (IOS && state.skrot) {
-      const sk = el('button', 'btn zskrot', 'Pobierz tętno z aplikacji Zdrowie');
-      sk.onclick = () => uruchomSkrot(day, w);
-      karta.append(sk);
-    }
+  if (tr && tr.end) {
     const f = el('form', 'zzeg');
     f.append(el('div', 'zzt', st.hrAvg ? 'Popraw dane z zegarka' : 'Dane z zegarka (opcjonalnie)'));
     const pole = (id, lab, v) => {
@@ -3520,7 +3091,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=47')
+fetch('plan.json?v=48')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3539,38 +3110,10 @@ fetch('plan.json?v=47')
       history.replaceState(null, '', state.view);
     }
     render();
-    const zAdresu = new URLSearchParams(location.search);
-    const zeStravy = zAdresu.get('state') === 'plan12';
-    if (zeStravy) {
-      history.replaceState(null, '', location.pathname + '#/ustawienia');
-      state.view = '#/ustawienia';
-      przyjmijStrave(zAdresu).then(r => {
-        render();
-        const n = document.createElement('div');
-        n.className = 'toast' + (r && r.blad ? ' zle' : '');
-        n.textContent = r && r.blad ? r.blad : IOS && !JAKO_APKA()
-          ? 'Strava połączona w Safari. Jeśli plan masz na ekranie początkowym: Skopiuj kod połączenia i wklej go tam.'
-          : 'Strava połączona. Tętno i kalorie będą przychodzić same.';
-        document.body.appendChild(n);
-        setTimeout(() => n.remove(), 9000);
-      });
-    }
     pullStan().then(() => {
       przeliczPlan();
-      const dane = przyjmijZZegarka(zAdresu);
-      if (dane) {
-        history.replaceState(null, '', location.pathname + trasaDnia(dane.day) + '/' + dane.w);
-        state.view = trasaDnia(dane.day) + '/' + dane.w;
-      }
       render();
-      if (dane) pokazZaliczenie(dane.day, dane.w, dane.pusto
-        ? `Skrót przysłał: avg="${dane.surowe.avg}", max="${dane.surowe.max}" — bez tętna. Zdrowie nie miało pomiarów z czasu treningu albo Huawei jeszcze ich nie wysłał. Spróbuję ponownie za 10 minut.`
-        : IOS && !JAKO_APKA()
-          ? 'Tętno ze Zdrowia zapisane. Wróć do aplikacji Plan 12 — pojawi się tam po chwili.'
-          : 'Tętno ze Zdrowia zapisane.');
       pullAll(); flushQueue();
-      dociagnijZeStravy();
-      if (!zAdresu.get('zegarek')) autoTetno();
     });
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   })

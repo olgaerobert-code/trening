@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=47) format('woff2');
+  src:url(fonts/Archivo.woff2?v=48) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -549,8 +549,6 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .trn-hr svg{opacity:.6}
 .trn-hr b{font:900 20px/1 var(--disp);font-stretch:80%;font-variant-numeric:tabular-nums}
 .trn-hr span{font-size:10.5px;opacity:.75}
-.trn-hr.on svg{opacity:1;color:#ff6b6b;animation:bicie 1s ease-in-out infinite}
-@keyframes bicie{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}}
 .trn-stop{padding:13px 18px;border-radius:999px;background:#fff;color:#0D0F12;font:700 15px/1 var(--sans)}
 .trn-stop:active{transform:scale(.95)}
 .trn.koniec .trn-czas{font-size:24px}
@@ -579,31 +577,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .note.ios{border-left-color:var(--ink)}
 
 .zkom{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:rgba(52,209,127,.18);color:#fff;font-size:13.5px;font-weight:600}
-.zkarta .btn.zskrot{background:rgba(255,255,255,.14);color:#fff;margin-bottom:10px}
-details.skrot{margin-top:10px;background:var(--s2);border-radius:12px;padding:10px 12px}
-details.skrot summary{cursor:pointer;font-weight:650;font-size:14px}
-details.skrot ol{margin:10px 0 10px;padding-left:20px;font-size:13.5px;color:var(--ink-2);line-height:1.55}
-details.skrot li{margin-bottom:8px}
 
-/* Strava */
-.stkroki{margin:0 0 12px;padding-left:20px;font-size:14px;color:var(--ink-2);line-height:1.55}
-.stkroki li{margin-bottom:10px}
-.stkroki a{color:var(--ink);font-weight:650}
-.stkroki code{font:600 12.5px var(--mono);background:var(--s2);padding:1px 5px;border-radius:5px;color:var(--ink);word-break:break-all}
-.stpola{display:grid;gap:10px;margin-bottom:12px}
-.stpole{display:flex;flex-direction:column;gap:4px}
-.stpole span{font-size:12.5px;font-weight:650;color:var(--ink-3)}
-.stpole input{width:100%;padding:13px 14px;border-radius:var(--r-s);border:1.5px solid transparent;background:var(--s2);color:var(--ink);font:600 16px var(--mono)}
-.stpole input:focus{outline:none;border-color:var(--ink)}
-.stinfo{margin:10px 0 0!important;font-size:13.5px!important;color:var(--ink)!important;font-weight:600}
-.stinfo:empty{display:none}
-.stnota{font-size:12.5px!important;color:var(--ink-3)!important;margin-top:10px!important}
-details.skrot .keyinput{margin:10px 0}
-.zkom.szary{background:rgba(255,255,255,.1);font-weight:500}
-.toast{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));z-index:70;max-width:560px;margin:0 auto;
-  padding:14px 16px;border-radius:16px;background:var(--good);color:#fff;font-weight:650;font-size:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);
-  animation:zalWjazd .45s var(--spring)}
-.toast.zle{background:var(--warn)}
 
 .trn-hr.pobierz{background:var(--ink);color:var(--on-ink);cursor:pointer}
 .trn-hr.pobierz svg{opacity:1;color:#ff6b6b}
@@ -687,7 +661,7 @@ details.skrot .keyinput{margin:10px 0}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=47"></script>
-<script src="app.js?v=47"></script>
+<script src="progresja.js?v=48"></script>
+<script src="app.js?v=48"></script>
 </body>
 </html>
