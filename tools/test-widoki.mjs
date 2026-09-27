@@ -383,6 +383,8 @@ test('link youtu.be', A.idFilmu('https://youtu.be/abcDEF12345?si=x') === 'abcDEF
 test('link watch?v=', A.idFilmu('https://www.youtube.com/watch?v=abcDEF12345&t=3') === 'abcDEF12345');
 test('link shorts', A.idFilmu('https://youtube.com/shorts/abcDEF12345') === 'abcDEF12345');
 test('smiec to nie film', A.idFilmu('kot krowa') === null);
+S.filmy = {}; S.view = '#/mobilnosc'; A.render();
+test('kazda pozycja ma film z planu', app.querySelectorAll('.film').filter(b => b.textContent === '▶ Film').length === 20);
 test('zapisany film jedzie do synchronizacji', A.zapiszFilm('y3', 'https://youtu.be/abcDEF12345') && S.filmy.y3 === 'abcDEF12345' && 'filmy' in A.stanLokalny());
 kafelki[0].querySelector('.tick').click();
 test('odklikniecie zapisuje sie w stanie', Object.keys(S.mob[4] || {}).length === 1);

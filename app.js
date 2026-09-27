@@ -1064,7 +1064,7 @@ function mobCard(it, w) {
   // Film instruktażowy: wyszukiwanie na YouTube po nazwie pozycji. Wyszukiwanie,
   // a nie jeden link, bo pojedyncze filmy znikają, a wyniki zostają.
   if (it.film) {
-    const f = el('button', 'film' + (state.filmy[it.id] ? '' : ' nowy'), state.filmy[it.id] ? '▶ Film' : '▶ Dodaj film');
+    const f = el('button', 'film' + (filmPozycji(it) ? '' : ' nowy'), filmPozycji(it) ? '▶ Film' : '▶ Dodaj film');
     f.setAttribute('aria-label', 'Film instruktażowy: ' + it.name);
     f.onclick = () => pokazFilm(it);
     metrics.append(f);
@@ -3061,6 +3061,9 @@ function idFilmu(tekst) {
   const m = t.match(/(?:youtu\.be\/|[?&]v=|\/shorts\/|\/embed\/|\/live\/)([\w-]{11})/);
   return m ? m[1] : null;
 }
+// Film pozycji: własny wybór użytkownika, a bez niego ten z planu (pole yt).
+// null w state.filmy znaczy „nie chcę filmu z planu, pokaż wybór".
+const filmPozycji = it => (it.id in state.filmy ? state.filmy[it.id] : it.yt) || null;
 function zapiszFilm(idPoz, tekst) {
   const id = idFilmu(tekst);
   if (!id) return false;
@@ -3084,7 +3087,7 @@ function pokazFilm(it) {
   gora.append(x);
   okno.append(gora);
 
-  const vid = state.filmy[it.id];
+  const vid = filmPozycji(it);
   if (vid) {
     const ramka = el('div', 'filmramka');
     const f = document.createElement('iframe');
@@ -3095,7 +3098,7 @@ function pokazFilm(it) {
     ramka.append(f);
     okno.append(ramka);
     const zmien = el('button', 'link', 'Zmień film');
-    zmien.onclick = () => { delete state.filmy[it.id]; saveFilmy(); pokazFilm(it); };
+    zmien.onclick = () => { state.filmy[it.id] = null; saveFilmy(); pokazFilm(it); };
     const dol = el('div', 'filmdol');
     dol.append(el('span', null, 'Jeśli film się nie ładuje, autor zablokował odtwarzanie poza YouTube — wybierz inny.'), zmien);
     okno.append(dol);
@@ -3175,7 +3178,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=49')
+fetch('plan.json?v=50')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
