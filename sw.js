@@ -1,9 +1,9 @@
 /* Cache-first: po pierwszym wejściu aplikacja działa bez zasięgu.
    Zmiana CACHE unieważnia stary komplet plików. */
-const CACHE = 'plan12-v53';
+const CACHE = 'plan12-v54';
 const ASSETS = [
-  './', './index.html', './app.js?v=52', './progresja.js?v=52', './plan.json?v=52',
-  './fonts/Archivo.woff2?v=52',
+  './', './index.html', './app.js?v=53', './progresja.js?v=53', './plan.json?v=53',
+  './fonts/Archivo.woff2?v=53',
   './manifest.webmanifest', './icon-192.png', './icon-512.png',
 ];
 
@@ -26,7 +26,10 @@ self.addEventListener('fetch', e => {
   // aplikacja otwarta z zakładki nie wstałaby bez zasięgu.
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).catch(() => caches.match('./index.html') || caches.match('./'))
+      // no-store: bez tego iPhone brał stronę z pamięci przeglądarki (do 10 min)
+      // i ładował starą wersję aplikacji mimo nowej na serwerze.
+      fetch(e.request.url, { cache: 'no-store', credentials: 'same-origin' })
+        .catch(() => caches.match('./index.html').then(r => r || caches.match('./')))
     );
     return;
   }
