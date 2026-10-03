@@ -102,7 +102,9 @@ według ustawienia telefonu.
   dawką, minutnikiem i krokami; „Zrobione → dalej" odhacza i przechodzi do następnej.
   Startuje od pierwszej nieodhaczonej pozycji i włącza stoper treningu, a po ostatniej
   pozycji go zatrzymuje. W niedzielę karta Dziś ma w tle okładkę filmu pierwszej pozycji
-- **Rozpocznij / Zakończ trening**: w sesji duży przycisk startu, potem
+- **Rozpocznij / Zakończ trening**: trening startuje przyciskiem albo sam przy
+  pierwszej odhaczonej serii (pozycji jogi) w bieżącym tygodniu, gdy sesja była
+  pusta; „Anuluj start" usuwa stoper, serie zostają. W sesji duży przycisk startu, potem
   przyklejony pasek ze stoperem i „Zakończ". Koniec zapisuje czas
   przy tej sesji, synchronizuje go z drugim
   urządzeniem i pokazuje na karcie zaliczenia oraz na story. Start jest

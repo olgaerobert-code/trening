@@ -1099,7 +1099,7 @@ function mobCard(it, w) {
     // nie skakała pod palcem przy odklikiwaniu.
     const nowe = mobJest(w, it.id);
     box.classList.toggle('zrobione', nowe);
-    if (nowe) blysk(tick);
+    if (nowe) { blysk(tick); startPrzyPierwszejSerii('D', w); }
     if (nowe && sesjaKompletna('D', w)) setTimeout(() => pokazZaliczenie('D', w), 450);
     tick.textContent = nowe ? '✓' : '';
     tick.setAttribute('aria-label', nowe ? 'Cofnij' : 'Odhacz jako zrobione');
@@ -2121,7 +2121,7 @@ function setRows(it, day, w, pl, onKg) {
       const jest = r.classList.toggle('done');
       if (jest) { zapisz(); blysk(tick); } else { logSet(w, day, it.n, i, null); rozwinKarte(box.closest && box.closest('.ex')); }
       odswiezPostep(day, w);
-      if (jest) { przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
+      if (jest) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
     sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
     sl.onchange = () => {
@@ -2130,7 +2130,7 @@ function setRows(it, day, w, pl, onKg) {
       if (nowa) { r.classList.add('done'); blysk(tick); }
       zapisz();
       odswiezPostep(day, w);
-      if (nowa) { przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
+      if (nowa) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
 
     r.append(el('span', 'snum', String(i + 1)), sl, val, tick);
@@ -2750,6 +2750,19 @@ function kartaOstatniego() {
 
 function cofnijStart(day, w) { delete state.treningi[trnKey(w, day)]; saveTreningi(); }
 
+// Trening startuje sam przy pierwszej odhaczonej serii (albo pozycji jogi) —
+// tylko w bieżącym tygodniu i tylko gdy sesja była jeszcze pusta. Dopisywanie
+// pojedynczych serii do napoczętej sesji niczego nie startuje, a start włączony
+// przez pomyłkę (np. przy uzupełnianiu dziennika po fakcie) cofa „Anuluj".
+function startPrzyPierwszejSerii(day, w) {
+  if (trening(w, day) || w !== state.week) return;
+  const zrobione = day === 'D' ? mobDone(w) : postepDnia(w, day).done;
+  if (zrobione !== 1) return;
+  rozpocznijTrening(day, w);
+  const pasek = $('.trn:not(.ost)');
+  if (pasek) pasek.replaceWith(pasekTreningu(day, w));
+}
+
 // Pasek na górze sesji: przed startem duży przycisk, w trakcie stoper
 // i „Zakończ", po końcu — podsumowanie czasu.
 function pasekTreningu(day, w) {
@@ -2762,7 +2775,9 @@ function pasekTreningu(day, w) {
     b.append(el('span', 'trn-ico'), el('span', null, 'Rozpocznij trening'));
     b.onclick = () => { rozpocznijTrening(day, w); render(); };
     box.append(b);
-    box.append(el('div', 'trn-pod', 'Stoper ruszy teraz. Dziennik uzupełniany później nie potrzebuje startu.'));
+    box.append(el('div', 'trn-pod', day === 'D'
+      ? 'Albo stoper ruszy sam przy pierwszej odhaczonej pozycji.'
+      : 'Albo stoper ruszy sam przy pierwszej odhaczonej serii.'));
     return box;
   }
   if (!t.end) {
@@ -2776,6 +2791,10 @@ function pasekTreningu(day, w) {
     const stop = el('button', 'trn-stop', 'Zakończ');
     stop.onclick = () => zakonczTrening(day, w);
     box.append(stop);
+    const anuluj = el('button', 'trn-anuluj', 'Anuluj start');
+    anuluj.setAttribute('aria-label', 'Anuluj start treningu — stoper znika, serie zostają');
+    anuluj.onclick = () => { cofnijStart(day, w); render(); };
+    box.append(anuluj);
     return box;
   }
   box.classList.add('koniec');
@@ -3372,7 +3391,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=55')
+fetch('plan.json?v=56')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
