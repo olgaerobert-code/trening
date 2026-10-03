@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -669,6 +669,24 @@ console.log('Ciezar po przeniesieniu');
   test('przycisk trybu prowadzenia', !!app.querySelector('.prowstart'));
   const ws = app.querySelector('.wstep');
   test('wstep zwiniety do dwoch linii', !!ws && ws.children[0].className.includes('zwiniety'));
+}
+
+{
+  console.log('\nStart przy pierwszej serii');
+  S.treningi = {}; S.week = 6;
+  const it = S.plan.days.A.items[0], pl = A.plannedOf(it, 6, 'A');
+  A.logSet(6, 'A', it.n, 0, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  A.startPrzyPierwszejSerii('A', 6);
+  test('pierwsza seria startuje trening', !!(A.trening(6, 'A') && A.trening(6, 'A').start));
+  A.cofnijStart('A', 6);
+  A.logSet(6, 'A', it.n, 1, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  A.startPrzyPierwszejSerii('A', 6);
+  test('kolejna seria w napoczetej sesji nie startuje', !A.trening(6, 'A'));
+  const b = S.plan.days.B.items[0], pb = A.plannedOf(b, 2, 'B');
+  A.logSet(2, 'B', b.n, 0, { r: pb.target, kg: pb.kg, pr: pb.target, pk: pb.planKg });
+  A.startPrzyPierwszejSerii('B', 2);
+  test('dziennik z dawnego tygodnia nie startuje', !A.trening(2, 'B'));
+  S.treningi = {}; S.week = 5;
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));
