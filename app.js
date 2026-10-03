@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {}, autoPrzerwa: true,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {},
 };
 
 /* ---------- Supabase ---------- */
@@ -133,6 +133,11 @@ const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob));
 const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); pushStan(); };
 // Filmy do pozycji jogi wybrane przez użytkownika: { y3: 'dQw4w9WgXcQ' }.
 const LS_FILMY = 'trening.filmy.v1';
+// Chwila odhaczenia każdej serii, w sekundach: { "5|A|2": [1759..., 1759..., …] }.
+// Osobno od dziennika, bo jego `ts` zmienia się przy każdej poprawce suwaka,
+// a tu ma zostać moment, w którym seria naprawdę się skończyła.
+const LS_CZASY = 'trening.czasy.v1';
+const saveCzasy = () => { localStorage.setItem(LS_CZASY, JSON.stringify(state.czasy)); pushStan(); };
 const saveFilmy = () => { localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); pushStan(); };
 // Start i koniec treningu — per tydzień i dzień.
 const saveTreningi = (bezSync) => { localStorage.setItem(LS_TRN, JSON.stringify(state.treningi)); if (!bezSync) pushStan(); };
@@ -149,6 +154,7 @@ function loadStores() {
   // Tętna i kalorii już nie zbieramy — stare liczby znikają przy pierwszym starcie.
   for (const t of Object.values(state.treningi)) if (t) { delete t.hr; delete t.kcal; }
   state.filmy = readJSON(LS_FILMY, {});
+  state.czasy = readJSON(LS_CZASY, {});
   state.queue = readJSON(LS_Q, []);
   state.key = localStorage.getItem(LS_KEY) || KOD_WSPOLNY;
   localStorage.setItem(LS_KEY, state.key);
@@ -312,6 +318,31 @@ function homeView() {
   body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
   frag.append(body);
   return frag;
+}
+
+// Przerwy w ostatnich sesjach: czy odpoczynek trzyma plan, tydzień po tygodniu.
+function historiaPrzerw() {
+  const wiersze = [];
+  for (let w = 12; w >= 1 && wiersze.length < 8; w--) {
+    for (const day of ['C', 'B', 'A']) {
+      const an = analizaSesji(day, w);
+      if (an && wiersze.length < 8) wiersze.push({ w, day, an });
+    }
+  }
+  if (!wiersze.length) return null;
+  const card = el('div', 'card');
+  card.append(el('h3', null, 'Przerwy między seriami'));
+  const t = el('table', 'tprzerw');
+  t.innerHTML = '<thead><tr><th>Sesja</th><th>Śr. przerwa</th><th>Plan</th><th>Ocena</th></tr></thead><tbody>' +
+    wiersze.map(({ w, day, an }) => {
+      const o = an.proc < 80 ? 'krotko' : an.proc > 140 ? 'dlugo' : 'ok';
+      return `<tr><td>Tydz. ${w} · ${day}</td><td>${fmtMS(an.sr)}</td><td>${fmtMS(an.srPlan)}</td><td><span class="pp ${o}">${an.proc}%</span></td></tr>`;
+    }).join('') + '</tbody>';
+  const wrap = el('div', 'scroll'); wrap.style.margin = '0'; wrap.style.padding = '0';
+  wrap.append(t);
+  card.append(wrap);
+  card.append(el('p', null, 'Przerwa = odstęp między odhaczeniami serii minus szacowany czas samej serii. Liczą się serie odhaczane na bieżąco — dopisane po fakcie (kilka sekund odstępu) i przerwy dłuższe niż 15 minut są pomijane. Za krótko: poniżej 75% planu, za długo: ponad półtora raza.'));
+  return card;
 }
 
 // Ciężary tygodnia i maksy — liczby do sprawdzenia i poprawienia, nie do
@@ -727,7 +758,9 @@ function exerciseCard(it, key, w) {
 // w nagłówek rozwija ją z powrotem, gdyby trzeba było coś poprawić.
 function zwinKarte(box, it, day, w, odRazu) {
   if (!box || box.classList.contains('zwiniety')) return;
-  const opis = opisWykonania(logGet(w, day, it.n)) || resolve(it.scheme, w);
+  let opis = opisWykonania(logGet(w, day, it.n)) || resolve(it.scheme, w);
+  const prz = przerwyCwiczenia(it, day, w);
+  if (prz) opis += ` · przerwy ~${fmtMS(prz.sr)}${prz.ocena === 'ok' ? '' : ' (' + SLOWO_PRZERWY[prz.ocena] + ')'}`;
   const h = $('.exhead', box);
   const stare = $('.exsum', box);
   if (stare) stare.remove();
@@ -843,10 +876,39 @@ function podsumowanieSesji(day, w) {
   grid.append(kafel('Tonaż', Math.round(teraz.ton).toLocaleString('pl-PL') + ' kg', dopisek));
   box.append(grid);
   box.append(el('p', null, 'Tonaż liczy tylko ćwiczenia z ciężarem w kilogramach — guma i masa ciała do niego nie wchodzą.'));
+  const an = analizaSesji(day, w);
+  if (an) box.append(kartaPrzerw(an));
   const pochwal = el('button', 'btn primary', 'Karta na story');
   pochwal.style.marginTop = '12px';
   pochwal.onclick = () => pokazZaliczenie(day, w);
   box.append(pochwal);
+  return box;
+}
+
+// Podsumowanie przerw sesji: średnia vs plan, rozkład ocen i ćwiczenia,
+// które najbardziej odjechały od planu.
+function kartaPrzerw(an) {
+  const box = el('div', 'przsesja');
+  const gora = el('div', 'przg');
+  const v = el('div', 'przv');
+  v.append(el('b', null, fmtMS(an.sr)), el('span', null, 'śr. przerwa · plan ' + fmtMS(an.srPlan)));
+  const werdykt = an.proc < 80 ? ['krotko', 'Odpoczywasz krócej niż plan'] : an.proc > 140 ? ['dlugo', 'Odpoczywasz dłużej niż plan'] : ['ok', 'Przerwy trzymają plan'];
+  gora.append(v, el('span', 'pp ' + werdykt[0], an.proc + '% planu'));
+  box.append(gora);
+  // Pasek rozkładu: ile przerw za krótkich, w normie i za długich.
+  const pas = el('div', 'przpas');
+  for (const o of ['krotko', 'ok', 'dlugo']) if (an[o]) { const s = el('i', o); s.style.flex = an[o]; pas.append(s); }
+  box.append(pas);
+  const leg = el('div', 'przleg');
+  leg.append(el('span', 'krotko', `${an.krotko} za krótko`), el('span', 'ok', `${an.ok} w normie`), el('span', 'dlugo', `${an.dlugo} za długo`));
+  box.append(leg);
+  box.append(el('p', 'przwer', werdykt[1] + (an.do > an.od ? ` · od pierwszej do ostatniej serii ${fmtMin(an.do - an.od)}` : '') + '.'));
+  const odstaja = an.cw.filter(c => c.ocena !== 'ok').sort((a, b) => Math.abs(b.sr / b.plan - 1) - Math.abs(a.sr / a.plan - 1)).slice(0, 3);
+  for (const c of odstaja) {
+    const r = el('div', 'przcw');
+    r.append(el('span', null, c.it.name), el('b', 'pp ' + c.ocena, `${fmtMS(c.sr)} / ${fmtMS(c.plan)}`));
+    box.append(r);
+  }
   return box;
 }
 
@@ -1047,7 +1109,7 @@ function mobilityView(wArg) {
   const prow = el('button', 'prowstart');
   const nastepna = widoczne.find(i => !mobJest(w, i.id));
   prow.append(el('span', 'pico'), el('span', 'pt', done && nastepna ? 'Prowadź dalej' : 'Prowadź mnie'),
-    el('span', 'ps', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z filmem i minutnikiem') : 'wszystko odhaczone — przejdź jeszcze raz'));
+    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z filmem i minutnikiem') : 'wszystko odhaczone — przejdź jeszcze raz'));
   prow.onclick = () => prowadzJoge(w);
   body.append(prow);
 
@@ -1363,6 +1425,8 @@ function postepView() {
     kaf('Sesje', sesje, null, `z ${state.week * 3}`),
     kaf('Z rzędu', seriaTygodni(), 'tyg.', 'z kompletem'));
   body.append(kpi);
+  const hp = historiaPrzerw();
+  if (hp) body.append(hp);
   ciezaryIMaksy(body);
 
   const tonCard = el('div', 'card');
@@ -1804,6 +1868,13 @@ function przeniesTydzien(from, to, opcje = {}) {
   if (state.mob[from]) { state.mob[to] = state.mob[from]; delete state.mob[from]; }
   saveMob();
 
+  for (const k of kluczeTygodnia(state.czasy, from)) {
+    const [, day, n] = k.split('|');
+    state.czasy[logKey(to, day, n)] = state.czasy[k];
+    delete state.czasy[k];
+  }
+  saveCzasy();
+
   state.moves.push({ id: opcje.id || ts + '|' + from + '>' + to, from, to, ts });
   // Lista jedzie w każdej paczce stanu, więc trzymamy sam ogon.
   if (state.moves.length > 20) state.moves = state.moves.slice(-20);
@@ -1957,7 +2028,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -1991,6 +2062,13 @@ async function pullStan() {
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
+    // Czasy serii: każde urządzenie dopisuje swoje, a przy tej samej serii
+    // wygrywa to, co jest tutaj — tu ją odhaczono.
+    if (d.czasy && inny(d.czasy, state.czasy)) {
+      const razem = { ...d.czasy };
+      for (const [k, v] of Object.entries(state.czasy)) razem[k] = (d.czasy[k] || []).map((x, i) => v[i] || x).concat(v.slice((d.czasy[k] || []).length));
+      if (inny(razem, state.czasy)) { state.czasy = razem; localStorage.setItem(LS_CZASY, JSON.stringify(state.czasy)); zm = true; }
+    }
     if (d.filmy && inny(d.filmy, state.filmy)) { state.filmy = { ...state.filmy, ...d.filmy }; localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); zm = true; }
     // Trening w toku na tym urządzeniu wygrywa — stoper żyje tutaj.
     if (d.treningi && inny(d.treningi, state.treningi)) {
@@ -2101,6 +2179,15 @@ function setRows(it, day, w, pl, onKg) {
     setTimeout(() => zwinKarte(karta, it, day, w), 650);
   };
 
+  // Pasek przerw pod seriami: ile naprawdę trwał odpoczynek między seriami.
+  const odswiezPrzerwy = () => {
+    const stary = box.querySelector && box.querySelector('.przerwy');
+    const nowy = paskPrzerw(it, day, w);
+    if (stary && nowy) stary.replaceWith(nowy);
+    else if (stary) stary.remove();
+    else if (nowy) box.append(nowy);
+  };
+
   for (let i = 0; i < pl.sets; i++) {
     const zapis = rows()[i] || null;
     const r = el('div', 'setrow' + (zapis ? ' done' : ''));
@@ -2119,7 +2206,8 @@ function setRows(it, day, w, pl, onKg) {
 
     tick.onclick = () => {
       const jest = r.classList.toggle('done');
-      if (jest) { zapisz(); blysk(tick); } else { logSet(w, day, it.n, i, null); rozwinKarte(box.closest && box.closest('.ex')); }
+      if (jest) { zapisz(); zapiszCzasSerii(w, day, it.n, i); blysk(tick); } else { logSet(w, day, it.n, i, null); usunCzasSerii(w, day, it.n, i); rozwinKarte(box.closest && box.closest('.ex')); }
+      odswiezPrzerwy();
       odswiezPostep(day, w);
       if (jest) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
@@ -2127,8 +2215,9 @@ function setRows(it, day, w, pl, onKg) {
     sl.onchange = () => {
       powt = +sl.value;
       const nowa = !r.classList.contains('done');
-      if (nowa) { r.classList.add('done'); blysk(tick); }
+      if (nowa) { r.classList.add('done'); blysk(tick); zapiszCzasSerii(w, day, it.n, i); }
       zapisz();
+      if (nowa) odswiezPrzerwy();
       odswiezPostep(day, w);
       if (nowa) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
@@ -2136,6 +2225,8 @@ function setRows(it, day, w, pl, onKg) {
     r.append(el('span', 'snum', String(i + 1)), sl, val, tick);
     box.append(r);
   }
+  const przerwy = paskPrzerw(it, day, w);
+  if (przerwy) box.append(przerwy);
   box.dataset.ex = id;
   return box;
 }
@@ -2335,6 +2426,104 @@ function scheduleBeeps(seconds) {
 function cancelBeeps() {
   voices.forEach(o => { try { o.stop(); } catch { /* już się skończył */ } });
   voices = [];
+}
+
+/* ---------- czasy serii i analiza przerw ----------
+   Jedno tapnięcie na serię mówi, KIEDY się skończyła — nie ile trwała. Odstęp
+   między dwiema kolejnymi seriami to przerwa plus sama seria, więc czas serii
+   szacujemy (ok. 3 s na powtórzenie, ćwiczenia na czas — ich czas, obie strony
+   razem) i odejmujemy. Wynik porównujemy z przerwą z planu. */
+const terazS = () => Math.round(Date.now() / 1000);
+function zapiszCzasSerii(w, day, n, i) {
+  const k = logKey(w, day, n);
+  const t = (state.czasy[k] || []).slice();
+  while (t.length <= i) t.push(null);
+  t[i] = terazS();
+  state.czasy[k] = t;
+  saveCzasy();
+}
+function usunCzasSerii(w, day, n, i) {
+  const k = logKey(w, day, n);
+  const t = (state.czasy[k] || []).slice();
+  if (t[i] == null) return;
+  t[i] = null;
+  while (t.length && t[t.length - 1] == null) t.pop();
+  if (t.length) state.czasy[k] = t; else delete state.czasy[k];
+  saveCzasy();
+}
+// Szacowany czas jednej serii w sekundach.
+function czasSerii(it, w, day) {
+  const pl = plannedOf(it, w, day);
+  const sch = String(resolve(it.scheme, w) || '');
+  const strony = /\/\s*(stronę|nogę)/.test(sch) ? 2 : 1;
+  const tempo = /tempo 3-0-1/.test(String(resolve(it.load, w) || '')) ? 4 : 3;
+  const jedna = pl.unit === 's' ? pl.target : pl.unit === 'm' ? Math.round(pl.target / 1.2) : pl.target * tempo;
+  return Math.max(10, jedna * strony);
+}
+// Przerwa z planu i czas pracy w jednym „obrocie": w superserii obrót to obie
+// serie pary, a przerwa przychodzi raz, po drugiej.
+function obrotPlanu(it, day, w) {
+  if (!it.superset) return { plan: przerwaPo(it, day, w), praca: czasSerii(it, w, day) };
+  const para = state.plan.days[day].items.filter(x => x.superset && x.superset[0] === it.superset[0]);
+  const druga = para.find(x => x.superset.endsWith('2')) || it;
+  return { plan: przerwaPo(druga, day, w), praca: para.reduce((a, x) => a + czasSerii(x, w, day), 0) };
+}
+const MIN_ODSTEP = 20, MAX_ODSTEP = 15 * 60;   // krócej = dopisywanie po fakcie, dłużej = coś przerwało trening
+function ocenaPrzerwy(rest, plan) {
+  if (rest < plan * 0.75) return 'krotko';
+  if (rest > plan * 1.5 && rest - plan >= 45) return 'dlugo';
+  return 'ok';
+}
+function przerwyCwiczenia(it, day, w) {
+  const t = (state.czasy[logKey(w, day, it.n)] || []).filter(x => x != null).sort((a, b) => a - b);
+  if (t.length < 2) return null;
+  const { plan, praca } = obrotPlanu(it, day, w);
+  if (!plan) return null;
+  const lista = [];
+  for (let i = 1; i < t.length; i++) {
+    const d = t[i] - t[i - 1];
+    if (d < MIN_ODSTEP || d > MAX_ODSTEP) continue;
+    const rest = Math.max(0, d - praca);
+    lista.push({ rest, ocena: ocenaPrzerwy(rest, plan) });
+  }
+  if (!lista.length) return null;
+  const sr = Math.round(lista.reduce((a, x) => a + x.rest, 0) / lista.length);
+  return { plan, lista, sr, ocena: ocenaPrzerwy(sr, plan) };
+}
+function analizaSesji(day, w) {
+  if (day === 'D') return null;
+  const cw = [];
+  for (const it of state.plan.days[day].items) {
+    const p = przerwyCwiczenia(it, day, w);
+    if (p) cw.push({ it, ...p });
+  }
+  const wszystkie = cw.flatMap(c => c.lista.map(x => ({ ...x, plan: c.plan })));
+  if (!wszystkie.length) return null;
+  const ile = o => wszystkie.filter(x => x.ocena === o).length;
+  const sr = Math.round(wszystkie.reduce((a, x) => a + x.rest, 0) / wszystkie.length);
+  const srPlan = Math.round(wszystkie.reduce((a, x) => a + x.plan, 0) / wszystkie.length);
+  // Czas pracy: od pierwszej do ostatniej odhaczonej serii sesji.
+  const t = state.plan.days[day].items.flatMap(it => (state.czasy[logKey(w, day, it.n)] || []).filter(x => x != null));
+  return { cw, n: wszystkie.length, sr, srPlan, krotko: ile('krotko'), ok: ile('ok'), dlugo: ile('dlugo'),
+    proc: Math.round(sr / srPlan * 100), od: Math.min(...t), do: Math.max(...t) };
+}
+const fmtMS = s => Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0');
+const SLOWO_PRZERWY = { krotko: 'za krótko', ok: 'w normie', dlugo: 'za długo' };
+
+// Wiersz pod seriami ćwiczenia: każda przerwa jako pastylka w kolorze oceny.
+function paskPrzerw(it, day, w) {
+  const p = przerwyCwiczenia(it, day, w);
+  if (!p) return null;
+  const box = el('div', 'przerwy');
+  box.append(el('span', 'prl', 'Przerwy'));
+  const rz = el('div', 'prp');
+  p.lista.forEach(x => {
+    const c = el('span', 'pp ' + x.ocena, fmtMS(x.rest));
+    c.title = SLOWO_PRZERWY[x.ocena];
+    rz.append(c);
+  });
+  box.append(rz, el('span', 'prplan', 'plan ' + fmtMS(p.plan)));
+  return box;
 }
 
 /* ---------- przerwa po odhaczonej serii ----------
@@ -2650,7 +2839,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -2990,9 +3179,11 @@ function pokazZaliczenie(day, w) {
   if (st.bigU) big.append(el('u', null, st.bigU));
   karta.append(big, el('div', 'zbl', st.bigL));
   karta.append(el('div', 'zgl', st.glowny));
-  if (st.czas) {
+  const an = analizaSesji(day, w);
+  if (st.czas || an) {
     const zs = el('div', 'zstat');
-    zs.append(el('span', null, '⏱ ' + st.czas));
+    if (st.czas) zs.append(el('span', null, '⏱ ' + st.czas));
+    if (an) zs.append(el('span', null, `⏸ przerwy śr. ${fmtMS(an.sr)} (${an.proc}% planu)`));
     karta.append(zs);
   }
   const ringi = el('div', 'zring');
@@ -3391,7 +3582,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=56')
+fetch('plan.json?v=57')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

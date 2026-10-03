@@ -93,6 +93,15 @@ według ustawienia telefonu.
   dodatkowych; w superserii dopiero po drugim ćwiczeniu pary). Ostatnia seria
   sesji przerwy nie włącza. Wyłącznik: Dziennik → W trakcie sesji. Timer liczy
   od godziny końca, więc nie rozjeżdża się, gdy telefon schowa aplikację w tle
+- **Przerwy między seriami**: chwila odhaczenia każdej serii jest zapisywana
+  (osobno od dziennika, synchronizowana z drugim urządzeniem). Przerwa = odstęp
+  między odhaczeniami minus szacowany czas serii (~3 s na powtórzenie, ćwiczenia na
+  czas — ich czas, obie strony razem; w superserii obrót to cała para). Ocena wobec
+  planu: za krótko < 75%, za długo > 150% (i co najmniej 45 s ponad plan). Widać ją
+  w karcie ćwiczenia (pastylka przy każdej przerwie), w zwiniętej karcie, w
+  podsumowaniu sesji (średnia, rozkład, ćwiczenia odstające), na karcie zaliczenia
+  i w Postępie (8 ostatnich sesji). Odstępy krótsze niż 20 s (dziennik dopisywany
+  po fakcie) i dłuższe niż 15 min są pomijane
 - **Skończone ćwiczenie zwija się** do jednego wiersza z ✓ i tym, co zrobione
   („4 × 6 @ 112,5 kg"); tapnięcie w nagłówek rozwija je z powrotem
 - **Ekran Dziś** to tylko pierścienie tygodnia, karta dzisiejszej sesji i lista

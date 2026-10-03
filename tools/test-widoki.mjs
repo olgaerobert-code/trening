@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -687,6 +687,31 @@ console.log('Ciezar po przeniesieniu');
   A.startPrzyPierwszejSerii('B', 2);
   test('dziennik z dawnego tygodnia nie startuje', !A.trening(2, 'B'));
   S.treningi = {}; S.week = 5;
+}
+
+{
+  console.log('\nPrzerwy miedzy seriami');
+  const it = S.plan.days.A.items.find(x => x.n === 2);       // wyciskanie, plan 3:00, 4 x 6
+  test('szacowany czas serii 6 powt. = 18 s', A.czasSerii(it, 5, 'A') === 18);
+  const T = 1759000000;
+  S.czasy = { '5|A|2': [T, T + 198, T + 298, T + 598] };    // przerwy: 180, 82, 282
+  const p = A.przerwyCwiczenia(it, 'A', 5);
+  test('trzy przerwy policzone', p && p.lista.length === 3);
+  test('3:00 przy planie 3:00 = w normie', p.lista[0].rest === 180 && p.lista[0].ocena === 'ok');
+  test('1:22 przy planie 3:00 = za krotko', p.lista[1].ocena === 'krotko');
+  test('4:42 przy planie 3:00 = za dlugo', p.lista[2].ocena === 'dlugo');
+  S.czasy = { '5|A|2': [T, T + 3, T + 6, T + 9] };
+  test('dziennik dopisany po fakcie nie daje przerw', A.przerwyCwiczenia(it, 'A', 5) === null);
+  const b7 = S.plan.days.B.items.find(x => x.superset === 'A2');
+  S.czasy = { '5|B|7': [T, T + 200] };
+  const ps = A.przerwyCwiczenia(b7, 'B', 5);
+  test('superseria: plan 90 s po parze', ps && ps.plan === 90);
+  S.czasy = { '5|A|2': [T, T + 198, T + 396] };
+  const an = A.analizaSesji('A', 5);
+  test('analiza sesji: srednia i procent planu', an && an.sr === 180 && an.proc === 100 && an.ok === 2);
+  S.view = '#/postep'; A.render();
+  test('Postep pokazuje historie przerw', app.textContent.includes('Przerwy między seriami'));
+  S.czasy = {};
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));
