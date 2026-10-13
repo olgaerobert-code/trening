@@ -754,8 +754,13 @@ console.log('Ciezar po przeniesieniu');
   test('cykl 1 w archiwum z calym dziennikiem', arch[1] && Object.keys(arch[1].log).length === serieC1 && arch[1].week === 11);
   test('osobny klucz synchronizacji cyklu', B2.kluczSync() === S2.key + '-C2');
   test('joga domyslnie krotka', S2.mobShort === true);
-  const { domyslnieKrotka, ...jogaC2 } = S2.plan.mobility;
-  test('joga taka sama jak w cyklu 1', JSON.stringify(jogaC2) === JSON.stringify(planJson.mobility));
+  const poz2 = S2.plan.mobility.blocks.flatMap(b => b.items);
+  const nazwy1 = new Set(planJson.mobility.blocks.flatMap(b => b.items).map(i => i.name));
+  test('nowa joga: 20 pozycji, zadna z cyklu 1', poz2.length === 20 && poz2.every(i => !nazwy1.has(i.name)));
+  test('nowa joga: krotka wersja 8-10 pozycji', poz2.filter(i => i.core).length >= 8 && poz2.filter(i => i.core).length <= 10);
+  test('nowa joga: kazda pozycja ma kroki, blad, opis i wyszukiwanie filmu', poz2.every(i => i.steps.length >= 4 && i.blad && i.note && i.film));
+  test('nowa joga: unikalne identyfikatory, inne niz w cyklu 1', new Set(poz2.map(i => i.id)).size === 20 && poz2.every(i => /^z\d+$/.test(i.id)));
+  test('nowa joga: bloki sumuja sie do pelnej wersji', S2.plan.mobility.blocks.reduce((a, b) => a + b.minutes, 0) === S2.plan.mobility.minutes);
 
   for (let w = 1; w <= 12; w++) {
     for (const d of ['A', 'B', 'C']) for (const it of S2.plan.days[d].items) {

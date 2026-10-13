@@ -165,8 +165,10 @@ rules = [
     'Jeśli nie — powtarzasz ten sam tydzień z tym samym ciężarem. To nie jest opóźnienie planu.']},
 ]
 
-mob = dict(stary['mobility'])
-mob['domyslnieKrotka'] = True
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+from joga2 import JOGA
+mob = JOGA
 
 plan = {
   'cykl': 2,
