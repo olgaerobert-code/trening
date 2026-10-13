@@ -3725,7 +3725,7 @@ const archiwum = () => readJSON(LS_ARCH, {});
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=60`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=61`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3741,7 +3741,7 @@ async function raportArchiwum(n) {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=60')
+fetch('plan.json?v=61')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

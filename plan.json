@@ -790,431 +790,388 @@
   "day": "Niedziela",
   "minutes": 44,
   "shortMinutes": 20,
-  "intro": "Praktyka ułożona pod ruchomość odcinka lędźwiowego oraz pod kolana, biodra i kostki, które mają pracować bez skrętu i bez końcowych zakresów. Kolejność idzie od leżenia do podporu i z powrotem: najpierw ruch bez obciążenia, potem zakres, na końcu stabilizacja i wyciszenie. Każda pozycja ma wejście krok po kroku, częsty błąd, zdanie o tym, po co jest pod sztangą, i film z instruktażem w karcie. Przydadzą się pasek albo ręcznik, klocek albo gruba książka i złożony koc pod kolana.",
+  "domyslnieKrotka": true,
+  "intro": "Praktyka oparta na pozycjach statycznych: wchodzisz, ustawiasz się i trzymasz, oddychając. Równowaga uczy kostki i biodra trzymać kolano w osi, wojownicy budują siłę bioder w szerokim rozkroku, pozycje na brzuchu budzą plecy i łopatki po siedzeniu, a na końcu biodra i tył uda puszczają z podparciem. Kolano zawsze nad stopą, bez rotacji w kolanie i bez końcowych zakresów. Przydadzą się dwa klocki, pasek, złożony koc, krzesło i kawałek ściany.",
+  "rules": [
+   "Trzymasz pozycję, nie wytrzymujesz jej. Jeśli oddech się rwie, wyjdź wcześniej — 20 równych sekund jest warte więcej niż 45 z zaciśniętymi zębami.",
+   "Żadnych końcowych zakresów. Zatrzymujesz się tam, gdzie oddech zostaje równy.",
+   "Kolano zawsze prowadzone nad stopą, a gdy na nim klęczysz — zawsze na kocu. Pozycje z rotacją w kolanie (lotos, pełny gołąb, siad między piętami) zostały z tej praktyki usunięte.",
+   "Jeśli coś w pozycji kłuje albo promieniuje w nogę, wyjdź z niej i przejdź do następnej. Rozciąganie ma ciągnąć, nie kłuć.",
+   "Równowagi rób przy ścianie albo krześle, dopóki nie trzymasz ich spokojnie. Podpórka to nie oszustwo, tylko ustawienie.",
+   "Krótka wersja (~20 min) to pozycje oznaczone kropką: po jednej albo dwie z każdego bloku.",
+   "Po ciężkim piątku zrób bloki 1, 5 i 6. Reszta poczeka do następnej niedzieli."
+  ],
   "blocks": [
    {
     "n": 1,
-    "name": "Oddech i miednica",
-    "minutes": 5,
-    "why": "Najpierw ruch lędźwi bez obciążenia — w leżeniu kręgosłup nie musi niczego trzymać.",
+    "name": "Ustawienie",
+    "minutes": 4,
+    "why": "Zanim cokolwiek przytrzymasz, sprawdzasz, gdzie stoisz. Ściana pokazuje postawę lepiej niż lustro.",
     "items": [
      {
-      "id": "y1",
-      "name": "Oddech przeponowy leżąc, kolana ugięte",
-      "dose": "3 min",
-      "sec": 180,
+      "id": "z1",
+      "name": "Góra przy ścianie (Tadasana)",
+      "dose": "1 min",
+      "sec": 60,
       "core": true,
       "steps": [
-       "Połóż się na plecach, stopy na podłodze na szerokość bioder, kolana skierowane w sufit.",
-       "Jedną dłoń połóż na mostku, drugą na brzuchu tuż nad pępkiem.",
-       "Wdychaj nosem przez 4 sekundy tak, żeby unosiła się dolna dłoń, a żebra rozchodziły na boki. Górna dłoń prawie się nie rusza.",
-       "Wydychaj ustami przez 6 sekund, jak przy studzeniu gorącej herbaty. Pod koniec wydechu brzuch lekko się wciąga.",
-       "Odcinek lędźwiowy leży naturalnie — nie dociskasz go do podłogi i nie wyginasz w łuk.",
-       "Powtarzaj do końca minutnika."
+       "Stań plecami do ściany, pięty 5 cm od niej, stopy na szerokość bioder.",
+       "Pośladki, łopatki i tył głowy dotykają ściany. Broda lekko cofnięta, jakby ktoś ciągnął cię za czubek głowy w górę.",
+       "Między lędźwiami a ścianą mieści się płasko dłoń — nie pięść. Jeśli pięść, delikatnie podwiń miednicę.",
+       "Rozłóż ciężar na piętę, podstawę dużego i małego palca. Kolana miękkie, nie zablokowane.",
+       "Oddychaj spokojnie w boki żeber przez minutę, nie tracąc żadnego punktu kontaktu."
       ],
-      "blad": "Wdech do klatki z unoszeniem barków. Pracują wtedy mięśnie szyi zamiast przepony, a dół pleców zostaje napięty.",
-      "note": "Oddech 360° to ten sam, którym budujesz ciśnienie w brzuchu przed zejściem w front squacie.",
-      "film": "diaphragmatic breathing lying down tutorial",
-      "yt": "Gr2BFzaAF0o"
+      "blad": "Unoszenie brody, żeby dotknąć głową ściany. Głowa ma się cofnąć, nie zadrzeć.",
+      "note": "Ustawienie z tej pozycji to to samo ustawienie, które chcesz mieć pod sztangą: żebra nad miednicą, głowa nad barkami.",
+      "film": "tadasana against wall posture"
      },
      {
-      "id": "y2",
-      "name": "Przechylanie miednicy leżąc",
-      "dose": "10 powtórzeń",
+      "id": "z2",
+      "name": "Wznos rąk przy ścianie (Urdhva Hastasana)",
+      "dose": "5 oddechów",
       "sec": null,
-      "core": true,
+      "core": false,
       "steps": [
-       "Zostań w tej samej pozycji: plecy na macie, kolana ugięte, stopy płasko.",
-       "Z wydechem przechyl miednicę tak, żeby lędźwie delikatnie dotknęły maty, a kość ogonowa lekko uniosła się w stronę kolan.",
-       "Z wdechem odwróć ruch: miednica przechyla się w drugą stronę, pod lędźwiami robi się mały tunel.",
-       "Ruch jest mały, kilka centymetrów. Pośladki cały czas zostają na macie.",
-       "Zrób 10 spokojnych powtórzeń w rytmie oddechu, bez szarpnięć na końcach."
+       "Zostań w ustawieniu z poprzedniej pozycji, plecami przy ścianie.",
+       "Z wdechem unieś proste ręce przodem w górę, kciuki prowadzą.",
+       "Zatrzymaj ręce tam, gdzie lędźwie wciąż dotykają ściany tak samo jak na początku — to twój zakres.",
+       "Wytrzymaj 5 spokojnych oddechów, z każdym wydechem lekko wydłużając się w górę."
       ],
-      "blad": "Wypychanie ruchu nogami i odrywanie pośladków. Pracują wtedy uda, a odcinek lędźwiowy dalej stoi w miejscu.",
-      "note": "Uczy czuć ustawienie miednicy, które potem trzymasz neutralnie pod sztangą w ciągu i w przysiadzie.",
-      "film": "supine pelvic tilt exercise tutorial",
-      "yt": "Xquihgh1EAg"
+      "blad": "Sięganie rękami do ściany kosztem wygięcia lędźwi. Ręce zatrzymujesz wcześniej, plecy się nie zmieniają.",
+      "note": "Pokazuje, ile zakresu nad głową masz naprawdę z barków, a ile pożyczasz z lędźwi.",
+      "film": "urdhva hastasana wall shoulder flexion"
      }
     ]
    },
    {
     "n": 2,
-    "name": "Kręgosłup w ruchu",
+    "name": "Równowaga",
     "minutes": 7,
-    "why": "Zgięcie i wyprost odcinka lędźwiowego w podporze — ruch, którego sztywne plecy potrzebują najbardziej.",
+    "why": "Stanie na jednej nodze uczy kostkę i biodro trzymać kolano w osi — po cichu, bez ciężaru.",
     "items": [
      {
-      "id": "y3",
-      "name": "Kot–krowa (Marjaryasana–Bitilasana)",
-      "dose": "10 cykli",
-      "sec": null,
+      "id": "z3",
+      "name": "Drzewo (Vrksasana)",
+      "dose": "30 s / stronę",
+      "sec": 30,
       "core": true,
       "steps": [
-       "Stań na czworakach: dłonie pod barkami, kolana pod biodrami. Pod kolana podłóż złożony koc.",
-       "Z wdechem opuść brzuch, unieś mostek i kość ogonową — plecy robią łagodną dolinę (krowa).",
-       "Z wydechem zaokrąglij plecy od kości ogonowej w górę, wciśnij dłonie w matę i odepchnij podłogę (kot).",
-       "Ruch zaczynaj od miednicy, a nie od głowy. Głowa idzie na końcu.",
-       "Jeden oddech to jedna faza. Zrób 10 pełnych cykli."
+       "Stań na lewej nodze, wzrok w jeden punkt przed sobą.",
+       "Prawą stopę oprzyj o wewnętrzną stronę lewej łydki albo uda — nigdy o kolano.",
+       "Dociśnij stopę do nogi, a nogę do stopy. Miednica zostaje pozioma, prawe kolano otwiera się w bok bez przekręcania bioder.",
+       "Dłonie złożone przed mostkiem albo uniesione nad głowę. Trzymaj 30 s, zmień stronę."
       ],
-      "blad": "Ruch tylko w górnej części pleców i zapadanie się w barkach. Lędźwie zostają nieruchome, a to je chcesz rozruszać.",
-      "note": "Przywraca czucie zgięcia i wyprostu w lędźwiach, żeby w ciągu umieć znaleźć neutralne plecy pomiędzy nimi.",
-      "film": "cat cow pose tutorial",
-      "yt": "vuyUwtHl694"
+      "blad": "Stopa oparta o bok kolana. Kolano nie ma pracować na boki — stopa idzie nad albo pod nie.",
+      "note": "Stopa podporowa, kostka i pośladek średni trzymają kolano w osi. Ta sama robota co w przysiadzie bułgarskim.",
+      "film": "tree pose tutorial beginners"
      },
      {
-      "id": "y4",
-      "name": "Nitka (thread the needle)",
-      "dose": "5 oddechów / stronę",
-      "sec": null,
-      "core": false,
+      "id": "z4",
+      "name": "Wojownik III z dłońmi na krześle (Virabhadrasana III)",
+      "dose": "20 s / stronę",
+      "sec": 20,
+      "core": true,
       "steps": [
-       "Zacznij na czworakach, koc pod kolanami.",
-       "Z wydechem przełóż prawą rękę pod lewą, wierzchem dłoni po macie, aż prawy bark i skroń oprą się o podłogę.",
-       "Biodra zostają nad kolanami — nie siadasz na piętach.",
-       "Lewą dłoń zostaw na macie albo wyciągnij ją nad głowę, jeśli chcesz mocniejszego skrętu.",
-       "Oddychaj 5 razy w bok żeber, potem wróć i zmień stronę."
+       "Stań przodem do krzesła albo ściany, dłonie na oparciu na wysokości bioder.",
+       "Przenieś ciężar na lewą nogę, kolano lekko ugięte.",
+       "Odsuwaj prawą nogę w tył i w górę, aż tułów i noga utworzą jedną linię równoległą do podłogi.",
+       "Palce tylnej stopy patrzą w podłogę — biodro nie otwiera się w bok. Trzymaj 20 s, zmień stronę."
       ],
-      "blad": "Przesuwanie bioder w bok. Skręt ucieka wtedy w lędźwie zamiast w odcinek piersiowy.",
-      "note": "Rotacja z odcinka piersiowego odciąża lędźwie, które przy braku rotacji wyżej biorą ją na siebie.",
-      "film": "thread the needle pose tutorial",
-      "yt": "M8-bBGOilms"
+      "blad": "Otwieranie biodra tylnej nogi i obracanie miednicy w bok. Obie kości biodrowe patrzą w podłogę.",
+      "note": "To martwy ciąg jednonóż bez ciężaru, zatrzymany w połowie — stabilizacja biodra i kostki w czystej postaci.",
+      "film": "warrior 3 with chair support"
      },
      {
-      "id": "y5",
-      "name": "Dziecko na szerokich kolanach, z podparciem (Balasana)",
-      "dose": "8 oddechów",
-      "sec": 60,
+      "id": "z5",
+      "name": "Krzesło przy ścianie (Utkatasana)",
+      "dose": "2 × 30 s",
+      "sec": 30,
       "core": false,
       "steps": [
-       "Z czworaków rozstaw kolana szeroko, duże palce stóp zetknij ze sobą.",
-       "Między pięty a pośladki wsuń zwinięty koc albo poduszkę, jeśli kolana nie lubią pełnego zgięcia.",
-       "Przesuń biodra do tyłu i połóż tułów między udami, czoło na macie albo na klocku.",
-       "Ręce wyciągnij przed siebie albo połóż wzdłuż ciała.",
-       "Oddychaj w dół pleców — przy każdym wdechu okolica lędźwi rozszerza się na boki."
+       "Stań plecami przy ścianie, stopy ok. 30 cm od niej, na szerokość bioder.",
+       "Zsuń się po ścianie, aż kolana będą zgięte pod kątem ok. 60–70°, nie głębiej.",
+       "Kolana nad drugim palcem stopy, ciężar na piętach. Ręce przodem przed siebie albo w górę.",
+       "Trzymaj 30 s, wyjdź po ścianie w górę, odpocznij chwilę i powtórz."
       ],
-      "blad": "Dociskanie bioder do pięt na siłę przy mocno zgiętych kolanach. Lepiej podnieść podparcie, niż dociskać.",
-      "note": "Bierne zgięcie lędźwi z oddechem — rozluźnia to, co przed chwilą było w ruchu w kot–krowie.",
-      "film": "wide knee child's pose with bolster",
-      "yt": "ALnALQ_FXjk"
+      "blad": "Kolana uciekające do środka. Dociśnij zewnętrzne krawędzie stóp i rozepchnij kolana lekko na zewnątrz.",
+      "note": "Izometria czworogłowego w płytkim zakresie — kuzyn przysiadu hiszpańskiego, tylko w jodze.",
+      "film": "wall sit chair pose"
      }
     ]
    },
    {
     "n": 3,
-    "name": "Stopy i kostki",
-    "minutes": 6,
-    "why": "Zgięcie grzbietowe stopy decyduje, czy kolano ma gdzie iść w przysiadzie. Sztywna kostka przerzuca pracę na kolano i lędźwie.",
+    "name": "Wojownicy i stanie",
+    "minutes": 10,
+    "why": "Długie trzymanie w szerokim rozkroku buduje siłę bioder i ud w zakresie, którego na siłowni prawie nie ma.",
     "items": [
      {
-      "id": "y6",
-      "name": "Kołysanie kostki w półklęku",
-      "dose": "10 / nogę",
-      "sec": null,
+      "id": "z6",
+      "name": "Wojownik II (Virabhadrasana II)",
+      "dose": "30 s / stronę",
+      "sec": 30,
       "core": true,
       "steps": [
-       "Uklęknij na lewym kolanie (koc pod kolanem), prawa stopa płasko z przodu.",
-       "Dłonie oprzyj na prawym kolanie albo na ścianie przed sobą.",
-       "Z wydechem przesuń prawe kolano do przodu nad drugi–trzeci palec stopy. Pięta cały czas przyklejona do podłogi.",
-       "Zatrzymaj się na 2 sekundy tuż przed miejscem, w którym pięta chce się oderwać, i wróć.",
-       "10 powtórzeń, potem zmiana nogi."
+       "Rozstaw stopy szeroko, ok. 1,2 m. Prawa stopa w bok, lewa lekko do środka.",
+       "Ugnij prawe kolano, aż będzie nad kostką — nie dalej. Kolano celuje w drugi palec stopy.",
+       "Ręce rozłożone na wysokości barków, wzrok nad prawą dłonią. Tułów pionowo nad miednicą.",
+       "Wciśnij zewnętrzną krawędź tylnej stopy w matę. Trzymaj 30 s, zmień stronę."
       ],
-      "blad": "Kolano uciekające do środka i pięta odrywająca się od maty. Ruch robi wtedy stopa, a nie staw skokowy.",
-      "note": "Więcej zgięcia w kostce to kolano, które może iść do przodu w front squacie bez przechylania tułowia.",
-      "film": "half kneeling ankle dorsiflexion mobility",
-      "yt": "1uk2j8TyHvk"
+      "blad": "Kolano wysuwa się przed stopę albo zapada do środka. Lepiej płycej, ale w osi.",
+      "note": "Pośladek średni i rotatory biodra trzymają kolano w linii przez pół minuty — dokładnie to, czego kolano potrzebuje.",
+      "film": "warrior 2 alignment tutorial"
      },
      {
-      "id": "y7",
-      "name": "Pies z głową w dół — pedałowanie (Adho Mukha Svanasana)",
-      "dose": "10 oddechów",
-      "sec": 60,
+      "id": "z7",
+      "name": "Rozszerzony kąt boczny (Utthita Parsvakonasana)",
+      "dose": "30 s / stronę",
+      "sec": 30,
       "core": false,
       "steps": [
-       "Z czworaków podwiń palce stóp i z wydechem unieś biodra w górę i w tył.",
-       "Kolana zostaw ugięte — długie plecy są ważniejsze niż proste nogi.",
-       "Dłonie na szerokość barków, palce szeroko, dociskasz podstawy palców wskazujących.",
-       "Na zmianę uginaj jedno kolano i opuszczaj drugą piętę w stronę podłogi, powoli, jak przy pedałowaniu.",
-       "10 równych oddechów, potem zejdź na kolana."
+       "Wejdź do wojownika II na prawą stronę.",
+       "Połóż prawe przedramię na prawym udzie, lewą rękę wyciągnij nad uchem w przedłużeniu boku.",
+       "Od zewnętrznej krawędzi lewej stopy do palców lewej dłoni ma być jedna długa linia.",
+       "Klatka otwiera się do sufitu, prawe kolano zostaje nad kostką. Trzymaj 30 s, zmień stronę."
       ],
-      "blad": "Prostowanie nóg za wszelką cenę. Plecy się wtedy zaokrąglają i ciągnie dół pleców zamiast łydek.",
-      "note": "Łydki i ścięgna Achillesa to drugi hamulec zgięcia w kostce, zaraz po samym stawie.",
-      "film": "downward dog pedaling feet tutorial",
-      "yt": "tZtlAceyqoA"
+      "blad": "Opadanie całym ciężarem na przedramię. Udo to podpórka, nie leżak — bok tułowia pracuje.",
+      "note": "Wydłuża boczną taśmę od kostki do dłoni, którą przy biurku trzymasz skróconą przez cały dzień.",
+      "film": "extended side angle pose forearm"
      },
      {
-      "id": "y8",
-      "name": "Wolne wspięcia na palce",
-      "dose": "2 × 10",
-      "sec": null,
+      "id": "z8",
+      "name": "Trójkąt z klockiem (Trikonasana)",
+      "dose": "30 s / stronę",
+      "sec": 30,
       "core": false,
       "steps": [
-       "Stań przodem do ściany, palce dłoni lekko na ścianie, stopy na szerokość bioder.",
-       "Wznieś się na palce w jedną sekundę, ciężar nad dużym i drugim palcem.",
-       "Opuszczaj pięty powoli, przez 3 sekundy.",
-       "Kolana proste, ale nie zablokowane. Kostki nie uciekają na boki.",
-       "10 powtórzeń, krótka przerwa i druga seria."
+       "Stopy jak w wojowniku II, ale obie nogi proste z miękkimi kolanami — bez przeprostu.",
+       "Przesuń biodra w lewo, a tułów wydłuż w prawo, nad prawą nogę.",
+       "Prawa dłoń na klocku przy goleni, lewa ręka w górę nad barkiem.",
+       "Obie strony tułowia długie — prawy bok nie zapada się. Trzymaj 30 s, zmień stronę."
       ],
-      "blad": "Wspinanie się na zewnętrzną krawędź stopy. Kostka się wtedy przechyla i ruch traci kontrolę.",
-      "note": "Siła łydki w końcowym zakresie trzyma kostkę stabilnie przy zejściu i wstawaniu z przysiadu.",
-      "film": "slow eccentric calf raise tutorial",
-      "yt": "d2GgSoHvIXo"
+      "blad": "Sięganie dłonią do podłogi kosztem zaokrąglenia pleców. Klocek jest po to, żeby tego nie robić.",
+      "note": "Tył uda i przywodziciele pracują w rozciągnięciu, a tułów uczy się zostać długi przy pochyleniu.",
+      "film": "triangle pose with block"
+     },
+     {
+      "id": "z9",
+      "name": "Bogini (Utkata Konasana)",
+      "dose": "2 × 30 s",
+      "sec": 30,
+      "core": false,
+      "steps": [
+       "Stopy szeroko, palce skierowane lekko na zewnątrz.",
+       "Zejdź w dół, aż kolana będą nad kostkami, kierując je w tę samą stronę co palce stóp.",
+       "Tułów pionowo, kość ogonowa w dół, łokcie zgięte pod kątem prostym na wysokości barków.",
+       "Trzymaj 30 s, wyprostuj nogi, odpocznij chwilę i powtórz."
+      ],
+      "blad": "Kolana uciekające do środka, w stronę dużych palców. Prowadź je nad małymi palcami.",
+      "note": "Pośladki i przywodziciele pracują razem w szerokiej pozycji — biodro dostaje siłę w zakresie odwiedzenia.",
+      "film": "goddess pose alignment"
+     },
+     {
+      "id": "z10",
+      "name": "Półksiężyc przy ścianie (Ardha Chandrasana)",
+      "dose": "20 s / stronę",
+      "sec": 20,
+      "core": false,
+      "steps": [
+       "Stań bokiem do ściany, plecami blisko niej, klocek przed prawą stopą.",
+       "Przenieś ciężar na prawą nogę, prawa dłoń schodzi na klocek ok. 30 cm przed stopą.",
+       "Lewą nogę unieś do poziomu, plecami opierając się lekko o ścianę.",
+       "Lewa ręka w górę, biodra ułożone jedno nad drugim. Trzymaj 20 s, zmień stronę."
+      ],
+      "blad": "Blokowanie kolana nogi podporowej w przeproście. Kolano proste, ale miękkie.",
+      "note": "Najtrudniejsza równowaga dnia: pośladek średni nogi podporowej trzyma całe ciało bokiem do ziemi.",
+      "film": "half moon pose wall support"
      }
     ]
    },
    {
     "n": 4,
-    "name": "Biodra i kolana",
-    "minutes": 10,
-    "why": "Biodro, które się rusza, zabiera pracę kolanom i lędźwiom. Tu budujesz zakres bez skrętu w kolanie.",
+    "name": "Plecy i postawa",
+    "minutes": 8,
+    "why": "Pozycje na brzuchu i w podporze budzą mięśnie, które przy biurku śpią: prostowniki grzbietu, łopatki, mięśnie głębokie.",
     "items": [
      {
-      "id": "y9",
-      "name": "Niski wykrok z kolanem na kocu (Anjaneyasana)",
-      "dose": "6 oddechów / stronę",
+      "id": "z11",
+      "name": "Szarańcza, wersja pierwsza (Salabhasana)",
+      "dose": "3 × 5 oddechów",
       "sec": null,
       "core": true,
       "steps": [
-       "Z klęku postaw prawą stopę daleko z przodu, lewe kolano na złożonym kocu.",
-       "Prawe kolano ustaw nad kostką albo trochę za nią — nie wychodzi przed palce.",
-       "Podwiń lekko kość ogonową i napnij lewy pośladek. To ten ruch rozciąga przód lewego biodra, a nie wyginanie pleców.",
-       "Dłonie na przednim udzie albo na klockach po bokach stopy.",
-       "Z każdym wydechem przesuwaj biodra minimalnie do przodu, pośladek dalej napięty.",
-       "6 oddechów i zmiana strony."
+       "Połóż się na brzuchu, czoło na macie, ręce wzdłuż ciała dłońmi do podłogi.",
+       "Nogi zostają na macie, napnij lekko pośladki.",
+       "Z wdechem unieś klatkę, głowę i ręce kilka centymetrów nad matę. Łopatki ściągnij do siebie i w dół.",
+       "Wzrok w podłogę przed matą, kark długi. Trzymaj 5 oddechów, opuść się, powtórz 3 razy."
       ],
-      "blad": "Wygięcie dołu pleców w łuk zamiast otwarcia biodra. Czujesz wtedy ciągnięcie w lędźwiach, a nie z przodu uda.",
-      "note": "Luźniejsze zginacze biodra przestają ciągnąć miednicę do przodu i wyginać lędźwie, kiedy stoisz pod sztangą.",
-      "film": "low lunge anjaneyasana knee padded tutorial",
-      "yt": "oNNVpM8sJvc"
+      "blad": "Zadzieranie głowy i wysokie unoszenie. Tu liczy się praca między łopatkami, nie wysokość.",
+      "note": "Prostowniki grzbietu i dolny czworoboczny w tej samej robocie co w Y-T-W — trzymają plecy wyprostowane przy siedzeniu.",
+      "film": "locust pose salabhasana beginner"
      },
      {
-      "id": "y10",
-      "name": "Biodra 90/90 z przejściem",
-      "dose": "6 przejść",
-      "sec": null,
+      "id": "z12",
+      "name": "Sfinks (Salamba Bhujangasana)",
+      "dose": "6 oddechów",
+      "sec": 45,
       "core": false,
       "steps": [
-       "Usiądź na macie, obie nogi ugięte pod kątem prostym: prawa przed tobą, lewa z boku.",
-       "Dłonie oprzyj za sobą, plecy długie.",
-       "Z wydechem przenieś oba kolana na drugą stronę jak wycieraczki. Stopy zostają na podłodze.",
-       "Ruch prowadzą biodra, stopy są osią. Kolan nie ciągniesz ani nie dociskasz.",
-       "W każdej pozycji jeden oddech i dalej. 6 przejść."
+       "Leżąc na brzuchu, oprzyj przedramiona o matę, łokcie pod barkami albo trochę przed nimi.",
+       "Wciśnij przedramiona w matę i odsuń barki od uszu.",
+       "Nogi i miednica leżą luźno, pośladki nie są zaciśnięte.",
+       "Oddychaj spokojnie 6 razy. Jeśli ciągnie w lędźwiach, przesuń łokcie dalej przed siebie."
       ],
-      "blad": "Dociskanie kolana do podłogi rękami. Biodro nie ma wtedy zakresu, a kolano dostaje skręt.",
-      "note": "Rotacja w biodrze — gdy jej brakuje, skręt przenosi się na kolano.",
-      "film": "90 90 hip switch mobility tutorial",
-      "yt": "qq_Z7sAmVrA"
+      "blad": "Wiszenie na barkach z uszami przy ramionach. Barki w dół, mostek do przodu.",
+      "note": "Łagodny wyprost, który oddaje plecom to, co zabiera im wielogodzinne siedzenie w zgięciu.",
+      "film": "sphinx pose tutorial"
      },
      {
-      "id": "y11",
-      "name": "Most z pauzą (Setu Bandha)",
-      "dose": "8 × 3 oddechy",
-      "sec": null,
+      "id": "z13",
+      "name": "Deska na przedramionach (Phalakasana)",
+      "dose": "3 × 20 s",
+      "sec": 20,
       "core": true,
       "steps": [
-       "Połóż się na plecach, stopy na szerokość bioder, pięty mniej więcej dłoń od pośladków.",
-       "Z wydechem przechyl miednicę jak w bloku 1 i unoś biodra kręg po kręgu.",
-       "Zatrzymaj się, gdy barki, biodra i kolana tworzą prostą linię — nie wyżej.",
-       "Wypchnij kolana lekko na zewnątrz, nad środek stóp, i napnij pośladki.",
-       "3 oddechy na górze, zejście kręg po kręgu. 8 powtórzeń."
+       "Przedramiona na macie, łokcie pod barkami, stopy na szerokość bioder.",
+       "Unieś biodra do jednej linii z barkami i piętami.",
+       "Podwiń lekko miednicę, żebra w dół, pośladki napięte. Wypchnij podłogę przedramionami.",
+       "Trzymaj 20 s, opuść kolana, odpocznij chwilę i powtórz 3 razy."
       ],
-      "blad": "Unoszenie bioder za wysoko z wygięciem lędźwi. Pracuje wtedy dół pleców zamiast pośladków.",
-      "note": "Silne pośladki przejmują wyprost bioder w ciągu, żeby nie robiły go lędźwie.",
-      "film": "glute bridge with hold tutorial",
-      "yt": "cmkMMjo0fRo"
+      "blad": "Zapadające się biodra albo wypięty w górę tyłek. Gdy linia się psuje, kończysz serię.",
+      "note": "Mięśnie głębokie brzucha w czystej izometrii — trzymają tułów sztywny tak, jak przy front squacie.",
+      "film": "forearm plank proper form"
      },
      {
-      "id": "y12",
-      "name": "Przysiad z podparciem (Malasana na klocku)",
-      "dose": "8 oddechów",
-      "sec": 60,
+      "id": "z14",
+      "name": "Stół odwrócony na ugiętych kolanach (Ardha Purvottanasana)",
+      "dose": "3 × 5 oddechów",
+      "sec": null,
       "core": false,
       "steps": [
-       "Stań szerzej niż biodra, palce stóp lekko na zewnątrz.",
-       "Połóż za sobą klocek albo grubą książkę i zejdź w dół, siadając na nim.",
-       "Kolana idą w tym samym kierunku co palce stóp — nie zapadają się do środka.",
-       "Jeśli pięty się odrywają, podłóż pod nie zrolowany koc.",
-       "Dłonie złóż przed mostkiem, łokcie delikatnie rozpychają kolana, mostek do przodu.",
-       "8 oddechów. Wstajesz, opierając dłonie na udach."
+       "Usiądź, stopy płasko na macie, kolana zgięte. Dłonie za biodrami, palce w stronę stóp.",
+       "Z wdechem wypchnij biodra w górę, aż tułów i uda utworzą stół.",
+       "Kolana nad kostkami, głowa w przedłużeniu tułowia albo lekko odchylona, jeśli kark pozwala.",
+       "Trzymaj 5 oddechów, usiądź, powtórz 3 razy."
       ],
-      "blad": "Zwisanie w dole z zaokrąglonymi plecami i kolanami do środka. Zamiast tego wyższe podparcie.",
-      "note": "Dół przysiadu z podparciem: kolana, biodra i kostki uczą się tej pozycji bez ciężaru na plecach.",
-      "film": "supported malasana yoga squat on block",
-      "yt": "Ywvjtsr-cIc"
+      "blad": "Kolana uciekające na boki i opadające biodra. Ściśnij lekko klocek między kolanami.",
+      "note": "Otwiera przód barków i klatkę — odwrotność zgarbionej pozycji przy klawiaturze — a pośladki trzymają biodra w górze.",
+      "film": "reverse tabletop pose"
      }
     ]
    },
    {
     "n": 5,
-    "name": "Stabilizacja",
-    "minutes": 7,
-    "why": "Lędźwie przestają się usztywniać, kiedy mięśnie głębokie trzymają je same. Tu uczysz je tego w podporze i w leżeniu.",
+    "name": "Biodra",
+    "minutes": 8,
+    "why": "Biodra otwierane z podparciem: zakres przychodzi z czasu w pozycji, nie z dociskania.",
     "items": [
      {
-      "id": "y13",
-      "name": "Ptak–pies (bird dog)",
-      "dose": "6 / stronę",
-      "sec": null,
+      "id": "z15",
+      "name": "Jaszczurka z kolanem na kocu (Utthan Pristhasana)",
+      "dose": "45 s / stronę",
+      "sec": 45,
       "core": true,
       "steps": [
-       "Czworaki, koc pod kolanami, plecy neutralne.",
-       "Napnij lekko brzuch, jak przed kaszlnięciem.",
-       "Z wydechem wyciągnij prawą rękę w przód i lewą nogę w tył, na wysokość tułowia.",
-       "3 oddechy w tej pozycji. Miednica pozioma, jakby na krzyżu stała szklanka wody.",
-       "Wróć powoli i zmień stronę. 6 razy na stronę."
+       "Z niskiego wykroku postaw prawą stopę szerzej, na zewnątrz prawej dłoni. Lewe kolano na złożonym kocu.",
+       "Dłonie na podłodze albo na klockach po wewnętrznej stronie prawej stopy.",
+       "Prawe kolano nad kostką, celuje w palce — nie pozwól mu opaść do środka ani wyjść za stopę.",
+       "Biodra opadają w dół i lekko w przód. Trzymaj 45 s, oddychając w biodro, zmień stronę."
       ],
-      "blad": "Unoszenie nogi wyżej niż tułów. Lędźwie się wtedy wyginają, a miednica przechyla na bok.",
-      "note": "Neutralne plecy przy ruchu kończyn — to samo robisz, gdy sztanga idzie w górę.",
-      "film": "bird dog exercise proper form",
-      "yt": "ufCbCMlJLAs"
+      "blad": "Kolano przedniej nogi wychodzi daleko za palce. Przesuń stopę do przodu, aż kolano wróci nad kostkę.",
+      "note": "Przód biodra tylnej nogi i przywodziciele przedniej — dwa miejsca, które siedzenie skraca jednocześnie.",
+      "film": "lizard pose with blocks"
      },
      {
-      "id": "y14",
-      "name": "Martwy robak (dead bug)",
-      "dose": "2 × 8 / stronę",
-      "sec": null,
+      "id": "z16",
+      "name": "Leżący motyl z podpartymi kolanami (Supta Baddha Konasana)",
+      "dose": "2 min",
+      "sec": 120,
       "core": false,
       "steps": [
-       "Połóż się na plecach, ręce wyciągnięte w sufit, kolana nad biodrami zgięte pod kątem prostym.",
-       "Dolne żebra ściągnij w dół, lędźwie spokojnie przy macie.",
-       "Z wydechem opuść prawą rękę za głowę i lewą nogę w stronę podłogi.",
-       "Opuszczaj tylko tak nisko, jak lędźwie zostają przy macie.",
-       "Z wdechem wróć i zmień stronę. 8 na stronę, dwie serie."
+       "Połóż się na plecach, złącz stopy, kolana opadają na boki.",
+       "Pod każde kolano wsuń klocek albo zwinięty koc — kolana mają leżeć podparte, nie wisieć.",
+       "Dłonie na brzuchu, oddychaj spokojnie.",
+       "Zostań 2 minuty. Jeśli ciągnie w pachwinach, podnieś podpórki wyżej."
       ],
-      "blad": "Lędźwie odrywające się od maty przy opuszczaniu nogi. Skróć zakres albo mocniej ugnij kolano.",
-      "note": "Stabilny tułów przy ruchu bioder przenosi się wprost na utrzymanie pozycji w dole przysiadu.",
-      "film": "dead bug exercise tutorial beginner",
-      "yt": "GbSC02oU3To"
+      "blad": "Pozycja bez podpórek, z kolanami wiszącymi w powietrzu. Wtedy ciągną więzadła, a nie mięśnie.",
+      "note": "Przywodziciele puszczają biernie, bez żadnego obciążenia kolan — zakres przychodzi sam z oddechem.",
+      "film": "supported reclined bound angle"
      },
      {
-      "id": "y15",
-      "name": "Deska bokiem z kolan (Vasisthasana, wersja łatwiejsza)",
-      "dose": "5 oddechów / stronę",
-      "sec": 30,
+      "id": "z17",
+      "name": "Most podparty na klocku (Setu Bandha z podparciem)",
+      "dose": "1 min",
+      "sec": 60,
       "core": false,
       "steps": [
-       "Połóż się na prawym boku, łokieć pod barkiem, kolana ugięte do tyłu.",
-       "Z wydechem unieś biodra, aż od kolan do głowy powstanie prosta linia.",
-       "Górna ręka na biodrze albo w stronę sufitu.",
-       "5 oddechów bez opadania biodrem.",
-       "Zejdź i zmień stronę."
+       "Leżąc na plecach ze stopami płasko, unieś biodra.",
+       "Wsuń klocek pod kość krzyżową (płaski fragment nad pośladkami), na najniższej albo średniej wysokości.",
+       "Opuść się na klocek i rozluźnij pośladki. Ręce wzdłuż ciała.",
+       "Zostań minutę. Żeby wyjść: unieś biodra, wyjmij klocek, zejdź kręg po kręgu."
       ],
-      "blad": "Biodra cofające się do tyłu. Z boku ciało robi wtedy literę V zamiast prostej linii.",
-      "note": "Boczne mięśnie tułowia trzymają miednicę poziomo w dniu B i przy każdym kroku z ciężarem.",
-      "film": "modified side plank from knees tutorial",
-      "yt": "CofbfhHCWCY"
+      "blad": "Klocek pod lędźwiami zamiast pod kością krzyżową. Przesuń go niżej, aż lędźwie odpoczną.",
+      "note": "Przód bioder otwiera się biernie, a lędźwie wiszą rozluźnione — ulga po dniu przy biurku.",
+      "film": "supported bridge pose block"
      }
     ]
    },
    {
     "n": 6,
-    "name": "Tył nogi i wyciszenie",
-    "minutes": 9,
-    "why": "Rozciąganie na leżąco, z podpartymi plecami — tył uda i pośladki puszczają bez ciągnięcia lędźwi.",
+    "name": "Wyciszenie",
+    "minutes": 7,
+    "why": "Ostatnie pozycje bez wysiłku: tył uda, barki i oddech w plecy.",
     "items": [
      {
-      "id": "y16",
-      "name": "Leżący chwyt z paskiem (Supta Padangusthasana)",
-      "dose": "8 oddechów / stronę",
-      "sec": null,
-      "core": false,
-      "steps": [
-       "Połóż się na plecach, pasek albo ręcznik załóż na śródstopie prawej stopy.",
-       "Lewą nogę zegnij, stopa na podłodze — to chroni lędźwie.",
-       "Unieś prawą nogę, trzymając pasek oburącz. Kolano może być lekko ugięte.",
-       "Zatrzymaj się na pierwszym wyraźnym rozciągnięciu z tyłu uda.",
-       "8 oddechów. Z każdym wydechem noga może zbliżyć się odrobinę.",
-       "Zmiana nogi."
-      ],
-      "blad": "Odrywanie miednicy od podłogi, żeby noga poszła wyżej. Rozciąganie ucieka wtedy z uda w plecy.",
-      "note": "Tył uda, który ma zakres, nie ciągnie miednicy w dół w zawiasie biodrowym przy ciągu.",
-      "film": "supine hamstring stretch with strap",
-      "yt": "Il1L75v6gq0"
-     },
-     {
-      "id": "y17",
-      "name": "Czwórka leżąc (zamiast gołębia)",
-      "dose": "8 oddechów / stronę",
-      "sec": 45,
+      "id": "z18",
+      "name": "Tył uda przy framudze drzwi",
+      "dose": "60 s / nogę",
+      "sec": 60,
       "core": true,
       "steps": [
-       "Leżąc na plecach, postaw stopy na podłodze.",
-       "Prawą kostkę połóż na lewym udzie tuż nad kolanem. Prawą stopę zegnij, palce do siebie — to chroni kolano.",
-       "Unieś lewą nogę i spleć dłonie za lewym udem.",
-       "Przyciągaj udo do siebie, aż poczujesz rozciąganie w prawym pośladku.",
-       "Głowa i barki zostają na macie. 8 oddechów, zmiana strony."
+       "Połóż się na plecach w drzwiach: jedna noga leży przez próg na podłodze, druga oparta o framugę.",
+       "Przysuwaj się bliżej framugi, aż poczujesz łagodne rozciąganie z tyłu uda uniesionej nogi.",
+       "Kolano uniesionej nogi lekko ugięte, lędźwie leżą na podłodze, noga na podłodze prosta.",
+       "Zostań minutę, oddychając spokojnie, potem zmień nogę."
       ],
-      "blad": "Stopa bez zgięcia i kolano pchane w dół. Skręt idzie wtedy w kolano zamiast w biodro.",
-      "note": "Rotacja zewnętrzna biodra bez obciążania kolana — łagodniejsza wersja gołębia.",
-      "film": "supine figure four stretch tutorial",
-      "yt": "THeoEsh_Trw"
+      "blad": "Przysuwanie się tak blisko, że miednica odrywa się od podłogi. Ma ciągnąć tył uda, nie lędźwie.",
+      "note": "Rozciąganie tyłu uda z plecami podpartymi przez podłogę — bez żadnego zgięcia w lędźwiach.",
+      "film": "doorway hamstring stretch"
      },
      {
-      "id": "y18",
-      "name": "Skręt leżąc z kolanami razem",
-      "dose": "8 oddechów / stronę",
+      "id": "z19",
+      "name": "Szczenię z czołem na klocku (Uttana Shishosana)",
+      "dose": "6 oddechów",
       "sec": 45,
       "core": false,
       "steps": [
-       "Leżąc na plecach, unieś zgięte nogi, kolana nad biodrami.",
-       "Rozłóż ręce w bok na wysokości barków.",
-       "Z wydechem opuść oba kolana w prawo tak nisko, jak barki zostają na macie. Pod kolana możesz podłożyć klocek.",
-       "Głowę obróć w lewo, jeśli szyi to odpowiada.",
-       "8 oddechów, wróć przez środek i zmień stronę."
+       "Klęk podparty, kolana na kocu pod biodrami.",
+       "Wędruj dłońmi do przodu, biodra zostają nad kolanami.",
+       "Opuść czoło na klocek, ręce wyciągnięte, łokcie nad matą.",
+       "Oddychaj w górną część pleców przez 6 oddechów."
       ],
-      "blad": "Kładzenie kolan na siłę na podłodze z odrywaniem barku. Skręt ma być łagodny, nie końcowy.",
-      "note": "Łagodna rotacja lędźwi na koniec zdejmuje napięcie po tygodniu ze sztangą.",
-      "film": "supine spinal twist knees together",
-      "yt": "mNdJti7ZwKI"
+      "blad": "Biodra uciekające na pięty. Wtedy to już pozycja dziecka — biodra nad kolanami.",
+      "note": "Otwiera barki i klatkę w wyproście nad głową — przeciwieństwo pochylenia nad biurkiem.",
+      "film": "puppy pose uttana shishosana"
      },
      {
-      "id": "y19",
-      "name": "Nogi na ścianie (Viparita Karani)",
-      "dose": "3 min",
-      "sec": 180,
+      "id": "z20",
+      "name": "Krokodyl — odpoczynek na brzuchu (Makarasana)",
+      "dose": "2 min",
+      "sec": 120,
       "core": true,
       "steps": [
-       "Usiądź bokiem przy ścianie, biodro dotyka ściany.",
-       "Połóż się na plecach, obracając się tak, żeby nogi oparły się o ścianę.",
-       "Pośladki mogą być kilka centymetrów od ściany — nie musisz ich dosuwać.",
-       "Pod miednicę możesz wsunąć złożony koc dla wygody lędźwi.",
-       "Ręce luźno po bokach, oczy zamknięte, oddech jak w bloku 1."
+       "Połóż się na brzuchu, stopy rozstawione, pięty opadają na boki.",
+       "Złóż przedramiona jedno na drugim i oprzyj na nich czoło.",
+       "Oddychaj brzuchem w podłogę — poczujesz, jak lędźwie lekko unoszą się z wdechem i opadają z wydechem.",
+       "Zostań 2 minuty. Wstań powoli przez klęk."
       ],
-      "blad": "Pośladki dosunięte do ściany przy sztywnym tyle uda. Lędźwie się wtedy zaokrąglają — odsuń się.",
-      "note": "Odpoczynek dla nóg po tygodniu przysiadów i ciągów.",
-      "film": "legs up the wall pose tutorial",
-      "yt": "do_1LisFah0"
-     },
-     {
-      "id": "y20",
-      "name": "Savasana z wałkiem pod kolanami",
-      "dose": "3 min",
-      "sec": 180,
-      "core": false,
-      "steps": [
-       "Połóż się na plecach, pod kolana wsuń zwinięty koc albo poduszkę.",
-       "Stopy rozluźnione, rozchodzą się na boki.",
-       "Ręce kilkanaście centymetrów od tułowia, dłonie w górę.",
-       "Przestań kontrolować oddech — niech płynie sam.",
-       "Po 3 minutach przewróć się na bok i wstań przez bok."
-      ],
-      "blad": "Leżenie z prostymi nogami przy napiętym dole pleców. Wałek pod kolanami pozwala lędźwiom się rozluźnić.",
-      "note": "Wyciszenie przed poniedziałkiem. Wstawanie przez bok oszczędza lędźwie.",
-      "film": "savasana with bolster under knees",
-      "yt": "noE5HYLOX-U"
+      "blad": "Wstrzymywanie oddechu albo oddychanie górą klatki. Oddech ma wędrować w dół pleców.",
+      "note": "Oddech w tył tułowia rozluźnia lędźwie od środka i kończy praktykę spokojniej niż leżenie na plecach.",
+      "film": "makarasana crocodile pose"
      }
     ]
    }
-  ],
-  "rules": [
-   "Liczysz oddechami, nie sekundami. Minutnik jest tylko dla pozycji, w których łatwo stracić rachubę.",
-   "Żadnych końcowych zakresów. Zatrzymujesz się tam, gdzie oddech zostaje równy — zakres, który utrzymasz pod sztangą, jest wart więcej niż ten, który pokażesz raz.",
-   "Kolano zawsze prowadzone nad stopą, a gdy na nim klęczysz — zawsze na kocu. Pozycje ze skrętem w kolanie (lotos, pełny gołąb, siad między piętami) zostały z tej praktyki usunięte.",
-   "Jeśli coś w pozycji kłuje albo promieniuje w nogę, wyjdź z niej i przejdź do następnej. Rozciąganie ma ciągnąć, nie kłuć.",
-   "Rozciąganie statyczne robisz TYLKO w tym dniu. Przed serią roboczą nigdy — obniża siłę na kilkadziesiąt minut.",
-   "Krótka wersja (~20 min) to pozycje oznaczone kropką: po jednej albo dwie z każdego bloku.",
-   "Po ciężkim piątku zrób bloki 1, 2 i 6. Reszta poczeka do następnej niedzieli."
-  ],
-  "domyslnieKrotka": true
+  ]
  },
  "deloadTekst": "Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar. Mobilność i oddech bez zmian.",
  "tydzien12Tekst": "Bez testu maksa. Dół: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Zanotuj zejście ze stopnia i plank kopenhaski."
