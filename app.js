@@ -737,15 +737,6 @@ function exerciseCard(it, key, w) {
   box.append(metrics);
   if (platesRow) box.append(platesRow);
 
-  if (it.film) {
-    if (filmPozycji(it)) box.append(filmWKarcie(it));
-    else {
-      const f = el('button', 'film nowy filmsila', '▶ Dodaj film');
-      f.setAttribute('aria-label', 'Dodaj film instruktażowy: ' + it.name);
-      f.onclick = () => pokazFilm(it);
-      box.append(f);
-    }
-  }
   if (pl.sets) box.append(setRows(it, key, w, pl, odswiezKg));
   h.onclick = () => { if (box.classList.contains('zwiniety')) box.classList.toggle('otwarty'); };
   if (pl.sets && logGet(w, key, it.n).filter(Boolean).length >= pl.sets) zwinKarte(box, it, key, w, true);
@@ -3734,7 +3725,7 @@ const archiwum = () => readJSON(LS_ARCH, {});
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=59`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=60`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3750,7 +3741,7 @@ async function raportArchiwum(n) {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=59')
+fetch('plan.json?v=60')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

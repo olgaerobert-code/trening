@@ -105,7 +105,7 @@ według ustawienia telefonu.
 - **Cykl 2 — kolana, biodra, postawa** (plan.json, generator `tools/cykl2.py`): 3 dni
   (pn A góra i postawa, śr B kolana, kostki i mięśnie głębokie bez sztangi, pt C front
   squat i martwy ciąg z podłogi) + joga w niedzielę, domyślnie krótka. Na każde ćwiczenie
-  pchające co najmniej dwa ciągnące. Każde ćwiczenie ma opis i przycisk filmu; przy
+  pchające co najmniej dwa ciągnące. Każde ćwiczenie ma opis (filmy tylko w jodze); przy
   hantlach i maszynie jest suwak ciężaru z wartością startową (`kgStart`). Sufit RPE 7
   na dole, bez testu maksa — tydzień 12 to sprawdzian
 - **Przejście między cyklami**: plan z wyższym `cykl` zamyka poprzedni — dziennik idzie do
