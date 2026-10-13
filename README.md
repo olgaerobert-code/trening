@@ -102,6 +102,17 @@ według ustawienia telefonu.
   podsumowaniu sesji (średnia, rozkład, ćwiczenia odstające), na karcie zaliczenia
   i w Postępie (8 ostatnich sesji). Odstępy krótsze niż 20 s (dziennik dopisywany
   po fakcie) i dłuższe niż 15 min są pomijane
+- **Cykl 2 — kolana, biodra, postawa** (plan.json, generator `tools/cykl2.py`): 3 dni
+  (pn A góra i postawa, śr B kolana, kostki i mięśnie głębokie bez sztangi, pt C front
+  squat i martwy ciąg z podłogi) + joga w niedzielę, domyślnie krótka. Na każde ćwiczenie
+  pchające co najmniej dwa ciągnące. Każde ćwiczenie ma opis i przycisk filmu; przy
+  hantlach i maszynie jest suwak ciężaru z wartością startową (`kgStart`). Sufit RPE 7
+  na dole, bez testu maksa — tydzień 12 to sprawdzian
+- **Przejście między cyklami**: plan z wyższym `cykl` zamyka poprzedni — dziennik idzie do
+  archiwum na urządzeniu (Dziennik → Archiwum, z raportem do skopiowania), nowy cykl
+  startuje od tygodnia 1 z maksami z planu. W bazie każdy cykl ma osobny klucz
+  (kod planu + `-C2`), żeby tygodnie nowego cyklu nie mieszały się ze starymi.
+  Plan cyklu 1 zostaje w `plan-cykl1.json` i na nim działają testy logiki
 - **Raport cyklu** (Dziennik → Raport cyklu → „Kopiuj raport cyklu"): cały dziennik
   jako zwykły tekst — każda seria z ciężarem, oceny tygodni, korekty, rekalibracje,
   czasy sesji, przerwy i joga — do wklejenia w rozmowę i analizy cyklu. Bez kodu planu
