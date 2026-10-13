@@ -255,8 +255,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Wałek pod łopatkami, dłonie podtrzymują głowę, pośladki na podłodze. Z wydechem odchyl się nad wałkiem, z wdechem wróć. Przesuń wałek o kilka centymetrów i powtórz. Ruch w odcinku piersiowym, nie w lędźwiach — żebra trzymaj w dole.",
-     "noCut": false,
-     "film": "thoracic extension foam roller"
+     "noCut": false
     },
     {
      "n": 2,
@@ -273,8 +272,7 @@
       "ref": "upper.rpe"
      },
      "note": "Bój główny. Przerwy 2 min. Łopatki ściągnięte i wbite w ławkę, stopy płasko, umiarkowany mostek. Sztanga schodzi na dolną część mostka, łokcie ok. 45° od tułowia. Sufit RPE pilnuje zapasu — tu nie szukasz maksa.",
-     "noCut": true,
-     "film": "wyciskanie leżąc technika"
+     "noCut": true
     },
     {
      "n": 3,
@@ -285,8 +283,7 @@
      "load": "wejście z ławki, 4 s w dół",
      "rpe": 8,
      "note": "Przerwy 2 min. Wejdź z ławki do pozycji brodą nad drążkiem, łopatki ściągnięte w dół. Opuszczaj się 4 s do pełnego zwisu. Gdy 4 × 5 idzie swobodnie, dorzuć 1–2 pełne podciągnięcia na początku każdej serii.",
-     "noCut": false,
-     "film": "negative pull ups technique"
+     "noCut": false
     },
     {
      "n": 4,
@@ -298,7 +295,6 @@
      "rpe": 7,
      "note": "Przerwa 90 s. Kolano i dłoń na ławce, plecy płasko. Ciągnij hantel do biodra, nie do barku — łokieć blisko tułowia, łopatka zjeżdża w dół i do kręgosłupa. 1 s pauzy na górze, bez skrętu tułowia.",
      "noCut": false,
-     "film": "one arm dumbbell row technique",
      "kgStart": 20
     },
     {
@@ -311,7 +307,6 @@
      "rpe": 7,
      "note": "Przerwa 90 s. Tylna stopa na ławce, przednia na tyle daleko, żeby kolano w dole było nad stopą lub lekko przed nią. Kolano prowadzisz w linii drugiego palca stopy, 3 s w dół. Tułów lekko pochylony obciąża pośladek, pionowy — udo.",
      "noCut": true,
-     "film": "bulgarian split squat technique",
      "kgStart": 12
     },
     {
@@ -324,7 +319,6 @@
      "rpe": 7,
      "note": "Przerwa 60 s. Ciężki hantel w jednej ręce, druga ręka swobodnie. Barki na jednym poziomie, tułów pionowo — nie przechylaj się w żadną stronę. Krótkie, spokojne kroki. Pracują mięśnie skośne i biodro po przeciwnej stronie.",
      "noCut": false,
-     "film": "suitcase carry technique",
      "kgStart": 24
     },
     {
@@ -336,8 +330,7 @@
      "load": "bez ciężaru albo 1–2 kg",
      "rpe": 6,
      "note": "SUPERSERIA z bird dogiem — 60 s po parze. Leżysz przodem na ławce ustawionej na ok. 30°. Ramiona unosisz kciukami w górę w kształt litery Y, potem T, potem W (łokcie zgięte, ściągnij łopatki). 2 s pauzy na górze każdej litery. Szyja przedłuża kręgosłup.",
-     "noCut": false,
-     "film": "YTW raises incline bench"
+     "noCut": false
     },
     {
      "n": 8,
@@ -348,8 +341,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Klęk podparty, dłonie pod barkami, kolana pod biodrami. Z wydechem wyprostuj przeciwną rękę i nogę do poziomu, 3 s pauzy, wróć bez opierania. Miednica nie przechyla się na bok — wyobraź sobie szklankę wody na lędźwiach.",
-     "noCut": false,
-     "film": "bird dog exercise technique"
+     "noCut": false
     }
    ]
   },
@@ -368,8 +360,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Stopa ok. 10 cm od ściany, pięta cały czas na podłodze. Wypchnij kolano do ściany w linii drugiego palca, 2 s, wróć. Gdy dotykasz ściany swobodnie, odsuń stopę o 1 cm.",
-     "noCut": false,
-     "film": "knee to wall ankle mobility"
+     "noCut": false
     },
     {
      "n": 2,
@@ -381,7 +372,6 @@
      "rpe": 6,
      "note": "Przerwa 60 s. Guma za kolanami przyczepiona do stałego punktu, hantel trzymany przy klatce. Zejdź do ok. 60–70° zgięcia w kolanie, piszczele pionowo, tułów pionowo, i trzymaj. Trudniej = cięższy hantel, nie głębiej.",
      "noCut": true,
-     "film": "spanish squat isometric",
      "kgStart": 8
     },
     {
@@ -393,8 +383,7 @@
      "load": "masa ciała → hantel",
      "rpe": 7,
      "note": "Przerwa 60 s. Stoisz jedną nogą na stopniu 15–20 cm. Druga noga schodzi powoli przed stopień i tylko dotyka piętą podłogi — 3 s w dół. Kolano nogi na stopniu w linii drugiego palca, miednica pozioma. Wracasz siłą nogi na stopniu.",
-     "noCut": false,
-     "film": "eccentric step down knee"
+     "noCut": false
     },
     {
      "n": 4,
@@ -406,7 +395,6 @@
      "rpe": 7,
      "note": "Przerwa 60 s. Łopatki na ławce, hantel na biodrze nogi pracującej. Wypchnij biodra w górę, aż tułów i udo będą w linii, 2 s pauzy. Żebra w dole — ruch z bioder, nie z wyginania lędźwi.",
      "noCut": false,
-     "film": "single leg hip thrust technique",
      "kgStart": 10
     },
     {
@@ -418,8 +406,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Przerwa 60 s. Bokiem na przedramieniu, kolano górnej nogi na ławce, dolna noga swobodnie. Unieś biodra do linii prostej i trzymaj. Pracują przywodziciele górnej nogi i boczna taśma tułowia. Wydłużenie: stopa zamiast kolana na ławce.",
-     "noCut": false,
-     "film": "copenhagen plank short lever"
+     "noCut": false
     },
     {
      "n": 6,
@@ -430,8 +417,7 @@
      "load": "coraz grubsza guma",
      "rpe": 6,
      "note": "Przerwa 60 s. Mała guma nad kolanami albo przy kostkach, półprzysiad, stopy na szerokość bioder. Krok w bok bez opadania kolan do środka i bez kołysania tułowiem. Pracuje pośladek średni, który trzyma kolano w osi.",
-     "noCut": false,
-     "film": "lateral band walk technique"
+     "noCut": false
     },
     {
      "n": 7,
@@ -443,7 +429,6 @@
      "rpe": 7,
      "note": "SUPERSERIA z wspięciami — 90 s po parze. Pełny zakres: palce wysoko do góry, 1 s pauzy, 3 s w dół. Gdy 3 × 15 wchodzi czysto, dokładasz najmniejszy skok na maszynie. Ustaw raz suwakiem ciężar, którego używasz — aplikacja go zapamięta.",
      "noCut": false,
-     "film": "tibialis raise machine",
      "kgStart": 10
     },
     {
@@ -455,8 +440,7 @@
      "load": "masa ciała → hantel",
      "rpe": 7,
      "note": "Przednia część stopy na stopniu, kolano ugięte ok. 20–30° przez cały ruch — tak pracuje płaszczkowaty, który stabilizuje kostkę. Pełny zakres, 1 s na górze, 3 s w dół.",
-     "noCut": false,
-     "film": "bent knee calf raise soleus"
+     "noCut": false
     },
     {
      "n": 9,
@@ -467,8 +451,7 @@
      "load": "coraz grubsza guma",
      "rpe": 6,
      "note": "Przerwa 45 s. Siedzisz, guma wokół przedniej części stopy, zaczepiona po wewnętrznej stronie. Odwiedź stopę na zewnątrz, ruch tylko w kostce — kolano i udo nieruchomo.",
-     "noCut": false,
-     "film": "ankle eversion resistance band"
+     "noCut": false
     },
     {
      "n": 10,
@@ -479,8 +462,7 @@
      "load": "coraz grubsza guma",
      "rpe": 7,
      "note": "Przerwa 45 s. Guma przyczepiona bokiem na wysokości klatki. Stań bokiem, dłonie przy mostku, wypchnij ręce przed siebie i trzymaj 2 s. Guma ciągnie w bok, ty nie dajesz się obrócić — to są mięśnie głębokie w pracy.",
-     "noCut": false,
-     "film": "pallof press technique"
+     "noCut": false
     },
     {
      "n": 11,
@@ -491,8 +473,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Półklęk, pod tylnym kolanem złożony koc, przednia stopa płasko, oba kolana zgięte pod kątem prostym. Napnij pośladek tylnej nogi i podwiń miednicę — rozciąganie czujesz z przodu biodra bez przesuwania się do przodu. Łagodnie, bez sprężynowania. Dobre też codziennie po pracy przy biurku.",
-     "noCut": false,
-     "film": "half kneeling hip flexor stretch"
+     "noCut": false
     }
    ]
   },
@@ -511,8 +492,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Leżysz na plecach, stopy na ścianie, biodra i kolana zgięte pod kątem prostym. Lekko dociśnij pięty, aż poczujesz tył uda. Wdech nosem w boki żeber, długi wydech ustami — żebra schodzą w dół, lędźwie miękko do podłogi. Ustawia miednicę przed przysiadem.",
-     "noCut": false,
-     "film": "90 90 breathing wall"
+     "noCut": false
     },
     {
      "n": 2,
@@ -529,8 +509,7 @@
       "ref": "lower.rpe"
      },
      "note": "Bój główny. Przerwy 3 min. Sztanga na przednich naramiennych, łokcie wysoko. Głębokość: tak nisko, jak plecy zostają neutralne, a kolana idą w linii stóp. Tułów pionowo przez cały ruch.",
-     "noCut": true,
-     "film": "front squat technique"
+     "noCut": true
     },
     {
      "n": 3,
@@ -547,8 +526,7 @@
       "ref": "lower.rpe"
      },
      "note": "Bój główny. Przerwy 3 min. Teraz z podłogi. Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.",
-     "noCut": true,
-     "film": "conventional deadlift technique"
+     "noCut": true
     },
     {
      "n": 4,
@@ -560,7 +538,6 @@
      "rpe": 7,
      "note": "Przerwa 90 s. Hantel w ręce po stronie nogi wolnej. Biodro cofa się, tułów i wolna noga tworzą jedną linię jak dźwignia, kolano nogi podporowej lekko ugięte. Miednica równo — nie otwieraj biodra w bok. Stabilizacja biodra, kolana i kostki naraz.",
      "noCut": false,
-     "film": "single leg romanian deadlift dumbbell",
      "kgStart": 12
     },
     {
@@ -572,8 +549,7 @@
      "load": "coraz grubsza guma",
      "rpe": 7,
      "note": "SUPERSERIA z face pullem — 60 s po parze. Siad prosty, guma wokół stóp, plecy pionowo. Ciągnij łokcie w tył przy tułowiu, ściągnij łopatki, 1 s pauzy. Nie odchylaj się — pracują plecy, nie lędźwie.",
-     "noCut": false,
-     "film": "seated resistance band row"
+     "noCut": false
     },
     {
      "n": 6,
@@ -584,8 +560,7 @@
      "load": "coraz grubsza guma",
      "rpe": 6,
      "note": "Guma na wysokości twarzy. Ciągnij do czoła, rozkładając dłonie na boki, łokcie wysoko, kciuki do tyłu. 1 s pauzy z łopatkami ściągniętymi. Prostuje barki po dniu przy biurku.",
-     "noCut": false,
-     "film": "face pull resistance band"
+     "noCut": false
     },
     {
      "n": 7,
@@ -596,8 +571,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Przerwa 45 s. Na plecach, ręce w górę, biodra i kolana zgięte 90°. Lędźwie przyklejone do podłogi przez cały czas. Z wydechem opuszczasz przeciwną rękę i nogę do podłogi, wracasz. Gdy lędźwie się odklejają — mniejszy zakres.",
-     "noCut": false,
-     "film": "dead bug exercise technique"
+     "noCut": false
     },
     {
      "n": 8,
@@ -608,8 +582,7 @@
      "load": "masa ciała",
      "rpe": "—",
      "note": "Leżysz bokiem, kolana zgięte 90° i dociśnięte do podłogi (możesz przytrzymać je dolną ręką). Górna ręka zatacza łuk nad tobą na drugą stronę, wzrok za dłonią, wydech w końcowej pozycji. Kolana zostają razem — ruch tylko w odcinku piersiowym.",
-     "noCut": false,
-     "film": "open book thoracic rotation"
+     "noCut": false
     }
    ]
   }

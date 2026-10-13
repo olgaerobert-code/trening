@@ -754,6 +754,8 @@ console.log('Ciezar po przeniesieniu');
   test('cykl 1 w archiwum z calym dziennikiem', arch[1] && Object.keys(arch[1].log).length === serieC1 && arch[1].week === 11);
   test('osobny klucz synchronizacji cyklu', B2.kluczSync() === S2.key + '-C2');
   test('joga domyslnie krotka', S2.mobShort === true);
+  const { domyslnieKrotka, ...jogaC2 } = S2.plan.mobility;
+  test('joga taka sama jak w cyklu 1', JSON.stringify(jogaC2) === JSON.stringify(planJson.mobility));
 
   for (let w = 1; w <= 12; w++) {
     for (const d of ['A', 'B', 'C']) for (const it of S2.plan.days[d].items) {
@@ -771,7 +773,7 @@ console.log('Ciezar po przeniesieniu');
     const its = S2.plan.days[d].items;
     for (const it of its.filter(x => x.superset && x.superset.endsWith('2')))
       test(`${d}: superseria ${it.superset} ma pare i przerwe po parze`, its.some(x => x.superset === it.superset[0] + '1') && B2.przerwaPo(it, d, 1) >= 60);
-    test(`${d}: kazde cwiczenie ma opis i film`, its.every(x => x.note && x.film && x.id));
+    test(`${d}: kazde cwiczenie ma opis, bez filmow`, its.every(x => x.note && x.id && !x.film));
   }
   const tib = S2.plan.days.B.items.find(x => /piszczelowy/.test(x.name));
   test('maszyna na piszczelowy ma ciezar startowy', B2.plannedOf(tib, 1, 'B').kg === 10);
@@ -785,7 +787,7 @@ console.log('Ciezar po przeniesieniu');
   }
   S2.view = '#/d/B'; B2.render();
   test('suwak ciezaru przy hantlach i maszynie', app.querySelectorAll('.kgslider').length >= 3);
-  test('przyciski filmow w dniu silowym', app.querySelectorAll('.filmsila').length > 0);
+  test('dzien silowy bez przyciskow filmow', app.querySelectorAll('.film').length === 0);
   S2.view = '#/ustawienia'; B2.render();
   test('archiwum cyklu 1 w Dzienniku', app.textContent.includes('Archiwum · cykl 1') && app.textContent.includes('Kopiuj raport cyklu 1'));
   const pa = S2.plan.days.A.items.find(x => x.n === 2), ppa = B2.plannedOf(pa, 1, 'A');
