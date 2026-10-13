@@ -2865,6 +2865,7 @@ function settingsView() {
       if (Array.isArray(d.moves)) { state.moves = d.moves; saveMoves(); }
       if (d.treningi) { state.treningi = d.treningi; saveTreningi(); }
       if (d.filmy) { state.filmy = d.filmy; saveFilmy(); }
+      if (d.czasy) { state.czasy = d.czasy; saveCzasy(); }
       render();
     } catch { alert('Nie udało się odczytać pliku.'); }
   };
@@ -2872,8 +2873,77 @@ function settingsView() {
   kop.append(exp, impLabel);
   body.append(kop);
 
+  const rap = el('div', 'card');
+  rap.append(el('h3', null, 'Raport cyklu'));
+  rap.append(el('p', null, 'Cały dziennik jako zwykły tekst: tydzień po tygodniu, każda seria z ciężarem, oceny, korekty, frekwencja i przerwy. Do wklejenia w rozmowę, np. z Claude, żeby przeanalizować cykl. Bez kodu planu.'));
+  const kopiujRap = el('button', 'btn primary', 'Kopiuj raport cyklu');
+  const rapInfo = el('p', 'filminfo', '');
+  kopiujRap.onclick = async () => {
+    const tekst = raportCyklu();
+    try {
+      await navigator.clipboard.writeText(tekst);
+      rapInfo.textContent = `Skopiowane (${Math.round(tekst.length / 1000)} tys. znaków). Wklej w rozmowie.`;
+    } catch {
+      // Bez dostępu do schowka: tekst w polu, zaznaczony — zostaje „Kopiuj" z menu.
+      const pole = el('textarea', 'raportpole');
+      pole.value = tekst; pole.readOnly = true;
+      rapInfo.replaceWith(pole);
+      pole.focus(); pole.select();
+    }
+  };
+  rap.append(kopiujRap, rapInfo);
+  body.append(rap);
+
   frag.append(body);
   return frag;
+}
+
+/* ---------- raport cyklu (tekst do analizy) ---------- */
+function raportCyklu() {
+  const p = state.plan, L = [];
+  const kg = v => (v == null ? '' : fmt(v));
+  const liftNazwa = k => (LIFTS.find(x => x.key === k) || {}).short || k;
+  L.push(`RAPORT CYKLU — ${p.title} · ${p.schedule}`);
+  L.push(`Wygenerowano: ${new Date().toLocaleDateString('pl-PL')} · bieżący tydzień w aplikacji: ${state.week}`);
+  L.push(`E1RM teraz: ${LIFTS.map(x => `${x.short} ${kg(state.e1rm[x.key])} kg`).join(', ')} · start z planu: ${LIFTS.map(x => `${x.short} ${kg(p.e1rm[x.key])} kg`).join(', ')}`);
+  const adj = Object.entries(state.adjust || {}).filter(([, a]) => a && a.week && a.pct);
+  if (adj.length) L.push('Korekty z dwóch tygodni: ' + adj.map(([k, a]) => `${liftNazwa(k)} tydz. ${a.week} ${a.pct > 0 ? '+' : ''}${fmt(a.pct * 100)}% (${kg(a.before)} → ${kg(a.after)})`).join('; '));
+  const rek = Object.entries(state.rekal || {});
+  if (rek.length) L.push('Rekalibracje dołu: ' + rek.map(([t, r]) => `po tyg. ${t - 1}: ` + (r.pominieta ? 'pominięta' : REKAL_BOJE.filter(k => r[k]).map(k => `${liftNazwa(k)} ${kg(r[k].before)} → ${kg(r[k].after)}`).join(', '))).join('; '));
+  L.push('Zapis serii: powtórzenia@kg (bez @ = bez ciężaru w kg); „—" = seria nieodhaczona. Ocena tygodnia: czysto / z zapasem / niedowóz.');
+  for (let w = 1; w <= 12; w++) {
+    const dni = ['A', 'B', 'C'].filter(d => postepDnia(w, d).done);
+    const mob = mobDone(w);
+    if (!dni.length && !mob) continue;
+    L.push('');
+    L.push(`== Tydzień ${w}${isDeload(w) ? ' (deload)' : ''} ==`);
+    const oceny = LIFTS.map(x => `${x.short}: ${SLOWNIK_OCEN[judgeWeek(x.key, w)] || '—'}`).join(' · ');
+    if (!isDeload(w)) L.push('Ocena: ' + oceny);
+    for (const d of dni) {
+      const pg = postepDnia(w, d);
+      const t = trening(w, d);
+      const an = analizaSesji(d, w);
+      const extra = [`${pg.done}/${pg.total} serii`];
+      if (t && t.start && t.end) extra.push('czas ' + fmtMin(czasTreningu(t)));
+      if (an) extra.push(`przerwy śr. ${fmtMS(an.sr)} (plan ${fmtMS(an.srPlan)})`);
+      L.push(`${d} ${tytulDnia(p.days[d].title)} — ${extra.join(', ')}`);
+      for (const it of p.days[d].items) {
+        const pl = plannedOf(it, w, d);
+        const rows = logGet(w, d, it.n);
+        if (!rows.some(Boolean)) { L.push(`  ${it.n}. ${it.name}: pominięte`); continue; }
+        const rpe = resolve(it.rpe, w);
+        const planTxt = `${resolve(it.scheme, w)}${pl.planKg != null ? ' @ ' + kg(pl.planKg) + ' kg' : ''}${rpe != null && rpe !== '—' ? ', RPE ' + fmt(rpe) : ''}`;
+        const serie = [];
+        for (let i = 0; i < Math.max(pl.sets, rows.length); i++) {
+          const r = rows[i];
+          serie.push(r ? `${r.r}${r.kg != null ? '@' + kg(r.kg) : ''}` : '—');
+        }
+        L.push(`  ${it.n}. ${it.name} [plan ${planTxt}]: ${serie.join(' ')}`);
+      }
+    }
+    if (mob) L.push(`D Joga — ${mob}/${mobItems().length} pozycji`);
+  }
+  return L.join('\n');
 }
 
 /* ---------- iPhone ---------- */
@@ -3582,7 +3652,7 @@ function render() {
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
 /* ---------- start ---------- */
-fetch('plan.json?v=57')
+fetch('plan.json?v=58')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

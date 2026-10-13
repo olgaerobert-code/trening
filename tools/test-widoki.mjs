@@ -125,7 +125,7 @@ vm.runInContext(`globalThis.API = {
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
-  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii,
+  rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
 const A = sandbox.API;
 await new Promise(r => setTimeout(r, 20));          // niech boot z fetch() dojdzie do konca
@@ -712,6 +712,18 @@ console.log('Ciezar po przeniesieniu');
   S.view = '#/postep'; A.render();
   test('Postep pokazuje historie przerw', app.textContent.includes('Przerwy między seriami'));
   S.czasy = {};
+}
+
+{
+  console.log('\nRaport cyklu');
+  const it = S.plan.days.A.items.find(x => x.n === 2), pl = A.plannedOf(it, 3, 'A');
+  A.logSet(3, 'A', 2, 0, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  const r = A.raportCyklu();
+  test('raport ma naglowek i E1RM', r.startsWith('RAPORT CYKLU') && r.includes('E1RM teraz'));
+  test('raport ma serie z ciezarem', r.includes('Wyciskanie leżąc [plan') && r.includes('@'));
+  test('raport bez kodu planu', !r.includes(S.key));
+  S.view = '#/ustawienia'; A.render();
+  test('przycisk raportu w Dzienniku', app.textContent.includes('Kopiuj raport cyklu'));
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));

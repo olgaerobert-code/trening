@@ -102,6 +102,9 @@ według ustawienia telefonu.
   podsumowaniu sesji (średnia, rozkład, ćwiczenia odstające), na karcie zaliczenia
   i w Postępie (8 ostatnich sesji). Odstępy krótsze niż 20 s (dziennik dopisywany
   po fakcie) i dłuższe niż 15 min są pomijane
+- **Raport cyklu** (Dziennik → Raport cyklu → „Kopiuj raport cyklu"): cały dziennik
+  jako zwykły tekst — każda seria z ciężarem, oceny tygodni, korekty, rekalibracje,
+  czasy sesji, przerwy i joga — do wklejenia w rozmowę i analizy cyklu. Bez kodu planu
 - **Skończone ćwiczenie zwija się** do jednego wiersza z ✓ i tym, co zrobione
   („4 × 6 @ 112,5 kg"); tapnięcie w nagłówek rozwija je z powrotem
 - **Ekran Dziś** to tylko pierścienie tygodnia, karta dzisiejszej sesji i lista
