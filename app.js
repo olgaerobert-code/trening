@@ -17,6 +17,10 @@ const SB_KEY = 'sb_publishable_RYMFMP8_vAaRy6vfgUFhjQ_qqhkOdr8';
 // niczego przepisywać. Świadomy wybór — kto zajrzy w źródło, może czytać i pisać.
 // Własny kod w ustawieniach zamyka dziennik dla siebie.
 const KOD_WSPOLNY = 'H4TQ-9MRW-2XKD';
+// Każdy cykl ma w bazie osobny dziennik: ten sam kod planu z dopiskiem cyklu.
+// Bez tego tygodnie 1–12 nowego cyklu zlałyby się z zapisanymi tygodniami 1–12
+// poprzedniego, bo baza rozróżnia serie tylko po tygodniu, dniu i numerze.
+const kluczSync = () => (state.plan && state.plan.cykl > 1 ? state.key + '-C' + state.plan.cykl : state.key);
 const calc = { lift: 'bench', kg: 100, reps: 5, rpe: 8 };
 
 const LIFTS = [
@@ -221,7 +225,17 @@ function setCount(scheme) {
   const m = String(scheme || '').match(/^\s*(\d+)\s*[×x]/);
   return m ? Math.min(+m[1], 6) : 0;
 }
-const isMainLift = name => ['Wyciskanie leżąc', 'Podciąganie', 'Front squat', 'Martwy ciąg z podwyższenia'].includes(name);
+// Bój główny poznajemy po tym, skąd bierze ciężar (bench.kg, front.kg, dl.kg),
+// a nie po nazwie — nazwy zmieniają się między cyklami.
+const REF_BOJU = { bench: 'bench.kg', front: 'front.kg', dl: 'dl.kg' };
+const isMainItem = it => !!(it && it.load && it.load.ref && (/\.kg$/.test(it.load.ref) || it.load.ref === 'upper.pullup'));
+function pozycjaBoju(lift) {
+  for (const day of ['A', 'B', 'C']) {
+    const it = (state.plan.days[day] || { items: [] }).items.find(x => x.load && x.load.ref === REF_BOJU[lift]);
+    if (it) return { day, it };
+  }
+  return null;
+}
 
 /* ---------- nagłówek tygodnia ---------- */
 // Duży tytuł jak w aplikacji na telefon: data, numer tygodnia, miejsce w cyklu.
@@ -240,7 +254,8 @@ function weekBar() {
   kierunekTygodnia = '';
   const doTestu = 12 - w;
   const blok = isDeload(w) ? 'Deload' : 'Blok ' + (BLOKI.find(b => b.weeks.includes(w)) || {}).n;
-  row.append(el('div', 'wsub', w === 12 ? `${blok} · tydzień testów` : `${blok} · ${doTestu} ${odmiana(doTestu, 'tydzień', 'tygodnie', 'tygodni')} do testu`));
+  const cel = state.plan.cykl > 1 ? ['tydzień sprawdzianu', 'do sprawdzianu'] : ['tydzień testów', 'do testu'];
+  row.append(el('div', 'wsub', w === 12 ? `${blok} · ${cel[0]}` : `${blok} · ${doTestu} ${odmiana(doTestu, 'tydzień', 'tygodnie', 'tygodni')} ${cel[1]}`));
   bar.append(row);
 
   const strip = el('div', 'wstrip');
@@ -306,8 +321,8 @@ function homeView() {
     d.append(sm, ...zmiany);
     body.append(d);
   }
-  if (deload) body.append(noteBox('Tydzień 7 — deload.', 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.', 'uwaga'));
-  if (w === 12) body.append(noteBox('Tydzień 12 — testy.', 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.', 'uwaga'));
+  if (deload) body.append(noteBox('Tydzień 7 — lżejszy.', p.deloadTekst || 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół. Ćwiczenia dodatkowe po 2 serie, superserie w dniu B pomijasz.', 'uwaga'));
+  if (w === 12) body.append(noteBox('Tydzień 12 — sprawdzian.', p.tydzien12Tekst || 'Góra: test 1RM w wyciskaniu, asekuracja albo ograniczniki obowiązkowo. Dół: test kontrolny na ciężarze z tygodnia 3, stop przy 15 powtórzeniach albo RPE 8.', 'uwaga'));
 
   // Pozostałe sesje tygodnia: jedna lista, nie cztery osobne karty.
   body.append(el('h2', 'sekcja', 'Ten tydzień'));
@@ -460,7 +475,7 @@ function kartaDzis(k, w, etykieta) {
 
   const lift = MAIN_OF[k];
   if (lift) {
-    const it = state.plan.days[k].items.find(x => x.name === MAIN[lift].name);
+    const it = (pozycjaBoju(lift) || {}).it;
     const pl = it ? plannedOf(it, w, k) : null;
     const kg = pl && pl.kg != null ? pl.kg : kgOf(lift, w);
     const presk = el('div', 'presk');
@@ -676,7 +691,7 @@ function dayView(key, wArg) {
 
 function exerciseCard(it, key, w) {
   const box = el('div', 'ex');
-  if (isMainLift(it.name)) box.classList.add('main');
+  if (isMainItem(it)) box.classList.add('main');
 
   const h = el('div', 'exhead');
   h.append(el('div', 'exn', String(it.n).padStart(2, '0')));
@@ -722,6 +737,15 @@ function exerciseCard(it, key, w) {
   box.append(metrics);
   if (platesRow) box.append(platesRow);
 
+  if (it.film) {
+    if (filmPozycji(it)) box.append(filmWKarcie(it));
+    else {
+      const f = el('button', 'film nowy filmsila', '▶ Dodaj film');
+      f.setAttribute('aria-label', 'Dodaj film instruktażowy: ' + it.name);
+      f.onclick = () => pokazFilm(it);
+      box.append(f);
+    }
+  }
   if (pl.sets) box.append(setRows(it, key, w, pl, odswiezKg));
   h.onclick = () => { if (box.classList.contains('zwiniety')) box.classList.toggle('otwarty'); };
   if (pl.sets && logGet(w, key, it.n).filter(Boolean).length >= pl.sets) zwinKarte(box, it, key, w, true);
@@ -928,7 +952,7 @@ function warmupAcc(key, wArg) {
     if (s.note) { const n = el('p', null, s.note); n.style.color = 'var(--ink-3)'; n.style.fontSize = '12.5px'; b.append(n); }
   });
 
-  const names = { bench: 'Wyciskanie', front: 'Front squat', dl: 'Ciąg z podwyższenia' };
+  const names = { bench: 'Wyciskanie', front: 'Front squat', dl: LIFTS[2].full };
   const mkTable = (headRow, rows) => {
     const wrap = el('div', 'scroll'); wrap.style.margin = '12px 0 0'; wrap.style.padding = '0';
     const t = el('table');
@@ -1753,7 +1777,8 @@ function plannedOf(it, w, day) {
   const acc = state.acc[accKey(it)];
   // Przy ćwiczeniu dodatkowym ciężaru nie ma w planie — bierzemy własne ustawienie,
   // a jak go nie ma, to ostatni zapisany, żeby nie przepisywać go co tydzień.
-  const wlasny = acc != null ? acc : (day ? lastKgOf(it, w, day) : null);
+  const ostatni = day ? lastKgOf(it, w, day) : null;
+  const wlasny = acc != null ? acc : ostatni != null ? ostatni : (it.kgStart != null ? it.kgStart : null);
   // Przy boju ciężar JEST w planie, ale suwak może go nadpisać: sztanga stoi
   // w piwnicy, a nie w arkuszu. Nadpisanie trzyma się jednego tygodnia, bo plan
   // co tydzień podaje inną liczbę i przenoszenie odchyłki na zawsze byłoby kłamstwem.
@@ -1973,7 +1998,7 @@ async function flushQueue() {
   flushing = true;
   const batch = state.queue.slice(0, 200);
   try {
-    await rpc('log_push', { p_key: state.key, p_rows: batch });
+    await rpc('log_push', { p_key: kluczSync(), p_rows: batch });
     state.queue = state.queue.slice(batch.length);
     saveQueue();
     setSync(state.queue.length ? 'wait' : 'ok');
@@ -2015,7 +2040,7 @@ function scalZdalneWiersze(rows) {
 async function pullAll() {
   if (!navigator.onLine) return setSync('off');
   try {
-    const rows = await rpc('log_pull', { p_key: state.key });
+    const rows = await rpc('log_pull', { p_key: kluczSync() });
     const changed = scalZdalneWiersze(rows);
     setSync(state.queue.length ? 'wait' : 'ok');
     if (changed) { saveLog(); renderJesliSpokojnie(); }
@@ -2038,7 +2063,7 @@ function pushStan() {
       // Serwer zwraca znacznik, ktory naprawde stoi w bazie — bierzemy go u siebie.
       // Bez tego urzadzenie zapamietaloby czas, ktorego nigdy nie zapisano,
       // i przestaloby przyjmowac zmiany z drugiego urzadzenia.
-      stanTs = await rpc('stan_push', { p_key: state.key, p_dane: stanLokalny() });
+      stanTs = await rpc('stan_push', { p_key: kluczSync(), p_dane: stanLokalny() });
     } catch { /* brak tabeli albo sieci — stan zostaje lokalny */ }
   }, 700);
 }
@@ -2046,7 +2071,7 @@ function pushStan() {
 async function pullStan() {
   if (!navigator.onLine) return false;
   try {
-    const r = await rpc('stan_pull', { p_key: state.key });
+    const r = await rpc('stan_pull', { p_key: kluczSync() });
     const row = r && r[0];
     if (!row) return false;
     if (stanTs && new Date(row.ts) <= new Date(stanTs)) return false;
@@ -2129,7 +2154,7 @@ function setRows(it, day, w, pl, onKg) {
     const kgBox = el('div', 'kgslider');
     const lab = el('div', 'kglab');
     const val = el('b', null, fmt(kgTeraz));
-    lab.append(el('span', null, 'Ciężar na sztandze'), val, el('i', null, 'kg'));
+    lab.append(el('span', null, pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar (hantel, maszyna)'), val, el('i', null, 'kg'));
     const sl = el('input', 'suwak');
     sl.type = 'range'; sl.min = min; sl.max = max; sl.step = 2.5; sl.value = kgTeraz;
     sl.setAttribute('aria-label', 'Ciężar w kilogramach');
@@ -2300,7 +2325,6 @@ function tonazDnia(w, day) {
 
 /* ---------- korekta z dwóch tygodni ---------- */
 // Boj glowny dnia: z ktorego cwiczenia liczymy korekte dla ktorego E1RM.
-const MAIN = { bench: { day: 'A', name: 'Wyciskanie leżąc' }, front: { day: 'C', name: 'Front squat' }, dl: { day: 'C', name: 'Martwy ciąg z podwyższenia' } };
 
 const isDeload = w => w >= 1 && w <= 12 && String(lowerRow(w).block).toLowerCase() === 'deload';
 
@@ -2318,9 +2342,9 @@ function judgeWeek(liftKey, w) {
   // w odczyt wiersza tabeli, którego nie ma.
   if (w == null || w < 1 || w > 12) return 'brak';
   if (isDeload(w)) return 'brak';
-  const { day, name } = MAIN[liftKey];
-  const it = state.plan.days[day].items.find(x => x.name === name);
-  if (!it) return 'brak';
+  const poz = pozycjaBoju(liftKey);
+  if (!poz) return 'brak';
+  const { day, it } = poz;
   const pl = plannedOf(it, w, day);
   const rows = logGet(w, day, it.n);
   // Ciężar planowany zmienia się wstecz przy każdej korekcie E1RM, więc oceniamy
@@ -2873,8 +2897,29 @@ function settingsView() {
   kop.append(exp, impLabel);
   body.append(kop);
 
+  const arch = archiwum();
+  for (const n of Object.keys(arch).sort()) {
+    const a = arch[n];
+    const karta = el('div', 'card');
+    karta.append(el('h3', null, `Archiwum · cykl ${n}`));
+    const serie = Object.values(a.log || {}).reduce((s, r) => s + r.filter(Boolean).length, 0);
+    const sesje = new Set(Object.keys(a.log || {}).map(k => k.split('|').slice(0, 2).join('|'))).size;
+    karta.append(el('p', null, `Zamknięty ${new Date(a.zamkniety).toLocaleDateString('pl-PL')} na tygodniu ${a.week} · ${sesje} sesji · ${serie} serii. Maksy na koniec: ${LIFTS.map(x => `${x.short} ${fmt((a.e1rm || {})[x.key])} kg`).join(', ')}.`));
+    const b = el('button', 'btn ghost', `Kopiuj raport cyklu ${n}`);
+    const info = el('p', 'filminfo', '');
+    b.onclick = async () => {
+      try {
+        const t = await raportArchiwum(n);
+        await navigator.clipboard.writeText(t);
+        info.textContent = `Skopiowane (${Math.round(t.length / 1000)} tys. znaków).`;
+      } catch { info.textContent = 'Nie udało się skopiować — spróbuj jeszcze raz z zasięgiem.'; }
+    };
+    karta.append(b, info);
+    body.append(karta);
+  }
+
   const rap = el('div', 'card');
-  rap.append(el('h3', null, 'Raport cyklu'));
+  rap.append(el('h3', null, state.plan.cykl > 1 ? `Raport cyklu ${state.plan.cykl}` : 'Raport cyklu'));
   rap.append(el('p', null, 'Cały dziennik jako zwykły tekst: tydzień po tygodniu, każda seria z ciężarem, oceny, korekty, frekwencja i przerwy. Do wklejenia w rozmowę, np. z Claude, żeby przeanalizować cykl. Bez kodu planu.'));
   const kopiujRap = el('button', 'btn primary', 'Kopiuj raport cyklu');
   const rapInfo = el('p', 'filminfo', '');
@@ -3220,7 +3265,7 @@ function statySesji(day, w) {
   let glowny = `${state.plan.days[day].items.length} ćwiczeń`;
   const lift = MAIN_OF[day];
   if (lift) {
-    const it = state.plan.days[day].items.find(x => x.name === MAIN[lift].name);
+    const it = (pozycjaBoju(lift) || {}).it;
     const rows = logGet(w, day, it.n);
     glowny = LIFTS.find(x => x.key === lift).full + ' · ' + (opisWykonania(rows) || resolve(it.scheme, w));
   }
@@ -3651,13 +3696,70 @@ function render() {
 
 window.addEventListener('hashchange', () => { state.view = location.hash || '#/'; render(); });
 
+/* ---------- nowy cykl ----------
+   Plan z wyższym numerem cyklu zamyka poprzedni: cały dziennik idzie do archiwum
+   na urządzeniu, a nowy cykl startuje od tygodnia 1 z maksami z planu. Zapis
+   prosto do pamięci, bez wysyłki — drugie urządzenie mogło już zacząć nowy cykl,
+   a pusta paczka nadpisałaby jego stan. */
+const LS_CYKL = 'trening.cykl.v1', LS_ARCH = 'trening.archiwum.v1';
+const ZBIORY_CYKLU = { log: [LS_LOG, {}], kgw: [LS_KGW, {}], mob: [LS_MOB, {}], rekal: [LS_REK, {}], adjust: [LS_ADJ, {}],
+  treningi: [LS_TRN, {}], czasy: [LS_CZASY, {}], moves: [LS_MOV, []], queue: [LS_Q, []] };
+function przejdzNaCykl(p) {
+  const nowy = p.cykl || 1;
+  const byl = +localStorage.getItem(LS_CYKL) || 1;
+  if (byl >= nowy) { localStorage.setItem(LS_CYKL, String(Math.max(byl, nowy))); return false; }
+  const maDane = Object.keys(state.log).length || Object.keys(state.mob).length || Object.keys(state.treningi).length;
+  if (maDane) {
+    const arch = readJSON(LS_ARCH, {});
+    if (!arch[byl]) {
+      arch[byl] = { zamkniety: new Date().toISOString(), week: state.week, e1rm: state.e1rm, acc: state.acc };
+      for (const k of Object.keys(ZBIORY_CYKLU)) if (k !== 'queue') arch[byl][k] = state[k];
+      localStorage.setItem(LS_ARCH, JSON.stringify(arch));
+    }
+  }
+  for (const [k, [ls, pusty]] of Object.entries(ZBIORY_CYKLU)) {
+    state[k] = Array.isArray(pusty) ? [] : {};
+    localStorage.setItem(ls, JSON.stringify(state[k]));
+  }
+  state.week = 1;
+  state.e1rm = { ...p.e1rm };
+  zapiszLokalnie();
+  localStorage.setItem(LS_CYKL, String(nowy));
+  return true;
+}
+const archiwum = () => readJSON(LS_ARCH, {});
+
+// Raport zamkniętego cyklu: na chwilę podstawiamy jego plan i dziennik pod stan
+// aplikacji, liczymy ten sam raport co dla bieżącego cyklu i oddajemy stan.
+async function raportArchiwum(n) {
+  const a = archiwum()[n];
+  if (!a) return '';
+  const plan = await (await fetch(`plan-cykl${n}.json?v=59`)).json();
+  const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
+  const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
+  const full = LIFTS[2].full;
+  try {
+    Object.assign(state, { plan, week: a.week, e1rm: a.e1rm, acc: a.acc || {} });
+    for (const k of Object.keys(ZBIORY_CYKLU)) state[k] = a[k] || (Array.isArray(kopia[k]) ? [] : {});
+    LIFTS[2].full = (pozycjaBoju('dl') || { it: { name: full } }).it.name;
+    return raportCyklu().replace('RAPORT CYKLU', `RAPORT CYKLU ${n} (archiwum)`);
+  } finally {
+    Object.assign(state, kopia);
+    LIFTS[2].full = full;
+  }
+}
+
 /* ---------- start ---------- */
-fetch('plan.json?v=58')
+fetch('plan.json?v=59')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
     loadState();
     loadStores();
+    przejdzNaCykl(p);
+    const ciag = pozycjaBoju('dl');
+    if (ciag) LIFTS[2].full = ciag.it.name;
+    if (p.mobility && p.mobility.domyslnieKrotka) state.mobShort = true;
     // Naprawa przed pierwszym renderem: tydzień, z którego coś przeniesiono, mógł
     // się odbudować z bazy, zanim wysyłka kolejki zdążyła go tam wyzerować.
     sprzatnijPoPrzeniesieniach();

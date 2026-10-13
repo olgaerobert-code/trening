@@ -97,7 +97,10 @@ const document = {
   body: korzen,
 };
 
-const planJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan.json'), 'utf8'));
+// Logika aplikacji jest sprawdzana na planie cyklu 1 — znanym, z liczbami, na których
+// opierają się asercje. Bieżący plan (plan.json) ma własną sekcję na końcu pliku.
+const planJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl1.json'), 'utf8'));
+const planBiezacy = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan.json'), 'utf8'));
 const sandbox = {
   document, localStorage, console,
   location: { hash: '', search: '', href: 'http://localhost/' },
@@ -724,6 +727,70 @@ console.log('Ciezar po przeniesieniu');
   test('raport bez kodu planu', !r.includes(S.key));
   S.view = '#/ustawienia'; A.render();
   test('przycisk raportu w Dzienniku', app.textContent.includes('Kopiuj raport cyklu'));
+}
+
+{
+  console.log('\nCykl 2: przejscie i plan');
+  // Na tym samym localStorage zostaje dziennik cyklu 1 — nowa instancja aplikacji
+  // z plan.json ma go zarchiwizowac i zaczac od tygodnia 1.
+  const it1 = S.plan.days.A.items.find(x => x.n === 2), pl1 = A.plannedOf(it1, 4, 'A');
+  A.logSet(4, 'A', 2, 0, { r: pl1.target, kg: pl1.kg, pr: pl1.target, pk: pl1.planKg });
+  S.week = 11; localStorage.setItem('trening.v1', JSON.stringify({ week: 11, e1rm: { bench: 135, front: 102.5, dl: 110 } }));
+  const serieC1 = Object.keys(S.log).length;
+  app.children = []; timer.children = [];
+  const sb2 = { ...sandbox, fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planBiezacy) }) };
+  delete sb2.API;
+  vm.createContext(sb2);
+  for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb2, { filename: plik });
+  vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, judgeWeek, kgOf, raportCyklu, pozycjaBoju, resolve };`, sb2);
+  const B2 = sb2.API;
+  await new Promise(r => setTimeout(r, 20));
+  const S2 = B2.state;
+  test('plan cyklu 2 wczytany', S2.plan.cykl === 2);
+  test('nowy cykl startuje od tygodnia 1', S2.week === 1);
+  test('maksy z nowego planu', S2.e1rm.front === 95 && S2.e1rm.dl === 100 && S2.e1rm.bench === 135);
+  test('dziennik nowego cyklu pusty', Object.keys(S2.log).length === 0);
+  const arch = B2.archiwum();
+  test('cykl 1 w archiwum z calym dziennikiem', arch[1] && Object.keys(arch[1].log).length === serieC1 && arch[1].week === 11);
+  test('osobny klucz synchronizacji cyklu', B2.kluczSync() === S2.key + '-C2');
+  test('joga domyslnie krotka', S2.mobShort === true);
+
+  for (let w = 1; w <= 12; w++) {
+    for (const d of ['A', 'B', 'C']) for (const it of S2.plan.days[d].items) {
+      const pl = B2.plannedOf(it, w, d);
+      if (!pl.sets || !pl.target) test(`tydz. ${w} ${d}${it.n} ma serie i powtorzenia`, false, String(B2.resolve(it.scheme, w)));
+    }
+    for (const L of ['bench', 'front', 'dl']) if (!(B2.kgOf(L, w) > 0)) test(`tydz. ${w} ciezar ${L}`, false);
+  }
+  test('kazde cwiczenie ma serie we wszystkich tygodniach i ciezar boju', true);
+  test('boje znalezione w planie', ['bench', 'front', 'dl'].every(L => B2.pozycjaBoju(L)));
+  test('front squat tydz. 1 = 57,5 kg', B2.kgOf('front', 1) === 57.5);
+  test('ciag z podlogi tydz. 1 = 62,5 kg', B2.kgOf('dl', 1) === 62.5);
+  test('wyciskanie tydz. 1 = 90 kg', B2.kgOf('bench', 1) === 90);
+  for (const d of ['A', 'B', 'C']) {
+    const its = S2.plan.days[d].items;
+    for (const it of its.filter(x => x.superset && x.superset.endsWith('2')))
+      test(`${d}: superseria ${it.superset} ma pare i przerwe po parze`, its.some(x => x.superset === it.superset[0] + '1') && B2.przerwaPo(it, d, 1) >= 60);
+    test(`${d}: kazde cwiczenie ma opis i film`, its.every(x => x.note && x.film && x.id));
+  }
+  const tib = S2.plan.days.B.items.find(x => /piszczelowy/.test(x.name));
+  test('maszyna na piszczelowy ma ciezar startowy', B2.plannedOf(tib, 1, 'B').kg === 10);
+  const SENS = /skolioz|cobb|przodopochyl|ból|bólu|boles|dolegliw|rehabilit|fizjoterapeu|ortoped|RTG|MRI|diagnoz|leczen|chorob|kontuzj|uraz|skręc|tendinop|patolog|obrzęk|wysięk|drętwi|mrowie|przeciwbólow|specjalist|zwyrodnien|nawrot/i;
+  test('plan bez tresci zdrowotnych', !SENS.test(JSON.stringify(S2.plan)));
+
+  for (const v of ['#/', '#/d/A', '#/d/B', '#/d/C', '#/mobilnosc', '#/postep', '#/zasady', '#/1rm', '#/ustawienia']) {
+    S2.view = v; let blad = null;
+    try { B2.render(); } catch (e) { blad = e; }
+    test('cykl 2 renderuje ' + v, !blad && app.children.length > 0, blad && blad.stack);
+  }
+  S2.view = '#/d/B'; B2.render();
+  test('suwak ciezaru przy hantlach i maszynie', app.querySelectorAll('.kgslider').length >= 3);
+  test('przyciski filmow w dniu silowym', app.querySelectorAll('.filmsila').length > 0);
+  S2.view = '#/ustawienia'; B2.render();
+  test('archiwum cyklu 1 w Dzienniku', app.textContent.includes('Archiwum · cykl 1') && app.textContent.includes('Kopiuj raport cyklu 1'));
+  const pa = S2.plan.days.A.items.find(x => x.n === 2), ppa = B2.plannedOf(pa, 1, 'A');
+  B2.logSet(1, 'A', 2, 0, { r: ppa.target, kg: ppa.kg, pr: ppa.target, pk: ppa.planKg });
+  test('raport cyklu 2 ma nowe cwiczenia', B2.raportCyklu().includes('Cykl 2') && B2.raportCyklu().includes('Wyciskanie leżąc'));
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));

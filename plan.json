@@ -1,5 +1,6 @@
 {
- "title": "Plan 12 tygodni",
+ "cykl": 2,
+ "title": "Cykl 2 · kolana, biodra, postawa",
  "schedule": "pon A · śr B · pt C · nd joga",
  "bar": 20,
  "plates": [
@@ -12,9 +13,9 @@
   1.25
  ],
  "e1rm": {
-  "front": 80,
-  "dl": 105,
-  "bench": 150
+  "front": 95,
+  "dl": 100,
+  "bench": 135
  },
  "weeks": {
   "lower": [
@@ -22,55 +23,55 @@
     "week": 1,
     "block": "1",
     "scheme": "3 × 8",
-    "pct": 0.55,
+    "pct": 0.625,
     "dlAdj": 0,
-    "rpe": 6,
-    "barHeight": "tuż pod kolanem (~50 cm)"
+    "rpe": 6.5,
+    "barHeight": "z podłogi"
    },
    {
     "week": 2,
     "block": "1",
     "scheme": "3 × 8",
-    "pct": 0.575,
+    "pct": 0.65,
     "dlAdj": 0,
-    "rpe": 6,
-    "barHeight": "tuż pod kolanem (~50 cm)"
+    "rpe": 6.5,
+    "barHeight": "z podłogi"
    },
    {
     "week": 3,
     "block": "1",
     "scheme": "3 × 8",
-    "pct": 0.6,
+    "pct": 0.675,
     "dlAdj": 0,
-    "rpe": 6,
-    "barHeight": "tuż pod kolanem (~50 cm)"
+    "rpe": 6.5,
+    "barHeight": "z podłogi"
    },
    {
     "week": 4,
-    "block": "1",
-    "scheme": "4 × 8",
-    "pct": 0.6,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.7,
     "dlAdj": 0,
-    "rpe": 6,
-    "barHeight": "tuż pod kolanem (~50 cm)"
+    "rpe": 7,
+    "barHeight": "z podłogi"
    },
    {
     "week": 5,
     "block": "2",
-    "scheme": "4 × 8",
-    "pct": 0.625,
-    "dlAdj": -0.05,
-    "rpe": 6.5,
-    "barHeight": "połowa piszczeli (~35 cm)"
+    "scheme": "4 × 6",
+    "pct": 0.725,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
    },
    {
     "week": 6,
     "block": "2",
-    "scheme": "4 × 8",
-    "pct": 0.65,
+    "scheme": "4 × 6",
+    "pct": 0.75,
     "dlAdj": 0,
-    "rpe": 6.5,
-    "barHeight": "połowa piszczeli (~35 cm)"
+    "rpe": 7,
+    "barHeight": "z podłogi"
    },
    {
     "week": 7,
@@ -79,108 +80,108 @@
     "pct": 0.55,
     "dlAdj": 0,
     "rpe": 5,
-    "barHeight": "jak w bloku 2"
+    "barHeight": "z podłogi"
    },
    {
     "week": 8,
-    "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.675,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.75,
     "dlAdj": 0,
     "rpe": 7,
-    "barHeight": "połowa piszczeli (~35 cm)"
+    "barHeight": "z podłogi"
    },
    {
     "week": 9,
     "block": "3",
-    "scheme": "4 × 6",
-    "pct": 0.7,
-    "dlAdj": -0.05,
+    "scheme": "4 × 5",
+    "pct": 0.775,
+    "dlAdj": 0,
     "rpe": 7,
-    "barHeight": "tuż nad podłogą (~5 cm)"
+    "barHeight": "z podłogi"
    },
    {
     "week": 10,
     "block": "3",
-    "scheme": "4 × 6",
-    "pct": 0.7,
+    "scheme": "4 × 5",
+    "pct": 0.8,
     "dlAdj": 0,
     "rpe": 7,
-    "barHeight": "tuż nad podłogą (~5 cm)"
+    "barHeight": "z podłogi"
    },
    {
     "week": 11,
     "block": "3",
-    "scheme": "4 × 6",
-    "pct": 0.725,
+    "scheme": "4 × 5",
+    "pct": 0.8,
     "dlAdj": 0,
     "rpe": 7,
-    "barHeight": "tuż nad podłogą (~5 cm)"
+    "barHeight": "z podłogi"
    },
    {
     "week": 12,
     "block": "3",
-    "scheme": "3 × 6 + kontrola",
-    "pct": 0.725,
+    "scheme": "3 × 5 + kontrola",
+    "pct": 0.7,
     "dlAdj": 0,
     "rpe": 7,
-    "barHeight": "tuż nad podłogą (~5 cm)"
+    "barHeight": "z podłogi"
    }
   ],
   "upper": [
    {
     "week": 1,
     "block": "1",
-    "scheme": "4 × 8",
-    "pct": 0.65,
+    "scheme": "3 × 8",
+    "pct": 0.675,
     "rpe": 7,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 2,
     "block": "1",
-    "scheme": "4 × 8",
-    "pct": 0.675,
+    "scheme": "3 × 8",
+    "pct": 0.7,
     "rpe": 7,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 3,
     "block": "1",
-    "scheme": "4 × 8",
-    "pct": 0.7,
-    "rpe": 7.5,
+    "scheme": "3 × 8",
+    "pct": 0.725,
+    "rpe": 7,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 4,
-    "block": "1",
-    "scheme": "4 × 8",
+    "block": "2",
+    "scheme": "4 × 6",
     "pct": 0.725,
-    "rpe": 8,
+    "rpe": 7.5,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 5,
     "block": "2",
     "scheme": "4 × 6",
     "pct": 0.75,
-    "rpe": 8,
+    "rpe": 7.5,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 6,
     "block": "2",
     "scheme": "4 × 6",
     "pct": 0.775,
-    "rpe": 8,
+    "rpe": 7.5,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 7,
@@ -189,74 +190,77 @@
     "pct": 0.625,
     "rpe": 5,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 8,
     "block": "3",
-    "scheme": "5 × 4",
-    "pct": 0.825,
-    "rpe": 8,
+    "scheme": "4 × 5",
+    "pct": 0.775,
+    "rpe": 7.5,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 9,
     "block": "3",
-    "scheme": "5 × 4",
-    "pct": 0.85,
-    "rpe": 8.5,
+    "scheme": "4 × 5",
+    "pct": 0.8,
+    "rpe": 7.5,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 10,
     "block": "3",
-    "scheme": "4 × 4",
-    "pct": 0.875,
-    "rpe": 9,
+    "scheme": "4 × 5",
+    "pct": 0.825,
+    "rpe": 8,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 11,
-    "block": "4",
-    "scheme": "4 × 3",
-    "pct": 0.9,
-    "rpe": 9,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.825,
+    "rpe": 8,
     "benchText": null,
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "pullup": null
    },
    {
     "week": 12,
-    "block": "4",
-    "scheme": "test 1RM",
-    "pct": null,
-    "rpe": 10,
-    "benchText": "dojście: 5-3-2-1-1, potem próby",
-    "pullup": "masa ciała; +2,5 kg na pasie po pełnym zakresie"
+    "block": "3",
+    "scheme": "3 × 5",
+    "pct": 0.8,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": null
    }
   ]
  },
  "days": {
   "A": {
    "key": "A",
-   "title": "GÓRA",
+   "title": "GÓRA · postawa i jednonóż",
    "day": "Poniedziałek",
-   "minutes": 62,
+   "minutes": 55,
    "items": [
     {
      "n": 1,
-     "name": "Mobilizacja odcinka piersiowego",
+     "id": "c2a1",
+     "name": "Mobilizacja odcinka piersiowego na wałku",
      "superset": null,
      "scheme": "2 × 8",
      "load": "masa ciała",
      "rpe": "—",
-     "note": "Górna część pleców na krawędzi ławki albo na wałku, ręce za głową, wyprost do tyłu. Wałek przesuwasz co 2 powtórzenia. ~4 min.",
-     "noCut": false
+     "note": "Wałek pod łopatkami, dłonie podtrzymują głowę, pośladki na podłodze. Z wydechem odchyl się nad wałkiem, z wdechem wróć. Przesuń wałek o kilka centymetrów i powtórz. Ruch w odcinku piersiowym, nie w lędźwiach — żebra trzymaj w dole.",
+     "noCut": false,
+     "film": "thoracic extension foam roller"
     },
     {
      "n": 2,
+     "id": "c2a2",
      "name": "Wyciskanie leżąc",
      "superset": null,
      "scheme": {
@@ -268,193 +272,251 @@
      "rpe": {
       "ref": "upper.rpe"
      },
-     "note": "Bój główny. Przerwy 3 min (od bloku 3: 4 min). Umiarkowany mostek, stopy szerzej i płasko. ~22 min.",
-     "noCut": true
+     "note": "Bój główny. Przerwy 2 min. Łopatki ściągnięte i wbite w ławkę, stopy płasko, umiarkowany mostek. Sztanga schodzi na dolną część mostka, łokcie ok. 45° od tułowia. Sufit RPE pilnuje zapasu — tu nie szukasz maksa.",
+     "noCut": true,
+     "film": "wyciskanie leżąc technika"
     },
     {
      "n": 3,
-     "name": "Podciąganie",
+     "id": "c2a3",
+     "name": "Podciąganie — negatywy",
      "superset": null,
-     "scheme": {
-      "ref": "upper.scheme"
-     },
-     "load": {
-      "ref": "upper.pullup"
-     },
-     "rpe": {
-      "ref": "upper.rpe"
-     },
-     "note": "Bój główny. Przerwy 2 min. Poniżej 8 powtórzeń: negatywy 4×5 po 4 s albo asysta gumą. ~12 min.",
-     "noCut": true
+     "scheme": "4 × 5",
+     "load": "wejście z ławki, 4 s w dół",
+     "rpe": 8,
+     "note": "Przerwy 2 min. Wejdź z ławki do pozycji brodą nad drążkiem, łopatki ściągnięte w dół. Opuszczaj się 4 s do pełnego zwisu. Gdy 4 × 5 idzie swobodnie, dorzuć 1–2 pełne podciągnięcia na początku każdej serii.",
+     "noCut": false,
+     "film": "negative pull ups technique"
     },
     {
      "n": 4,
-     "name": "Podciąganie podchwytem, wąsko",
+     "id": "c2a4",
+     "name": "Wiosłowanie hantlem w podporze",
      "superset": null,
-     "scheme": "3 × 10",
-     "load": "masa ciała → pas",
-     "rpe": "8",
-     "note": "Druga ekspozycja na ciągnięcie, innym kątem niż bój główny. Podchwyt dokłada biceps, wąski chwyt zmienia tor. Poniżej 8 powtórzeń: asysta gumą. Przerwa 90 s. ~9 min.",
-     "noCut": false
+     "scheme": "3 × 10 / stronę",
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Przerwa 90 s. Kolano i dłoń na ławce, plecy płasko. Ciągnij hantel do biodra, nie do barku — łokieć blisko tułowia, łopatka zjeżdża w dół i do kręgosłupa. 1 s pauzy na górze, bez skrętu tułowia.",
+     "noCut": false,
+     "film": "one arm dumbbell row technique",
+     "kgStart": 20
     },
     {
      "n": 5,
-     "name": "Przyciąganie gumy do brzucha, siedząc",
+     "id": "c2a5",
+     "name": "Przysiad bułgarski z hantlami",
      "superset": null,
-     "scheme": "3 × 15",
-     "load": "coraz grubsza guma",
-     "rpe": "7",
-     "note": "Guma zaczepiona na wysokości klatki, siad na podłodze lub ławce. Łokcie przy tułowiu, ŁOPATKI ŚCIĄGNIĘTE na końcu ruchu, powrót 3 s. Poziome ciągnięcie bez obciążania prostowników grzbietu. ~7 min.",
-     "noCut": false
+     "scheme": "3 × 8 / nogę",
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Przerwa 90 s. Tylna stopa na ławce, przednia na tyle daleko, żeby kolano w dole było nad stopą lub lekko przed nią. Kolano prowadzisz w linii drugiego palca stopy, 3 s w dół. Tułów lekko pochylony obciąża pośladek, pionowy — udo.",
+     "noCut": true,
+     "film": "bulgarian split squat technique",
+     "kgStart": 12
     },
     {
      "n": 6,
-     "name": "Spacer farmera jednorącz (suitcase carry)",
+     "id": "c2a6",
+     "name": "Spacer farmera jednorącz",
      "superset": null,
      "scheme": "3 × 30 m / stronę",
      "load": "podwójna progresja",
-     "rpe": "8",
-     "note": "Hantel W JEDNEJ RĘCE. Miednica POZIOMO, żebra w dół, NIE odchylaj się w przeciwną stronę. Barki ściągnięte, chód normalny. Zaczynaj od słabszej strony. Przerwa 90 s. ~9 min.",
-     "noCut": false
+     "rpe": 7,
+     "note": "Przerwa 60 s. Ciężki hantel w jednej ręce, druga ręka swobodnie. Barki na jednym poziomie, tułów pionowo — nie przechylaj się w żadną stronę. Krótkie, spokojne kroki. Pracują mięśnie skośne i biodro po przeciwnej stronie.",
+     "noCut": false,
+     "film": "suitcase carry technique",
+     "kgStart": 24
     },
     {
      "n": 7,
-     "name": "Face pull z gumą",
-     "superset": null,
-     "scheme": "3 × 20",
-     "load": "stała guma",
-     "rpe": "6",
-     "note": "Guma na wysokości twarzy, łokcie wysoko, ciągniesz do czoła z rotacją zewnętrzną. Przeciwwaga dla objętości pchania. ~5 min.",
-     "noCut": false
+     "id": "c2a7",
+     "name": "Y-T-W leżąc na ławce skośnej",
+     "superset": "A1",
+     "scheme": "3 × 6 / literę",
+     "load": "bez ciężaru albo 1–2 kg",
+     "rpe": 6,
+     "note": "SUPERSERIA z bird dogiem — 60 s po parze. Leżysz przodem na ławce ustawionej na ok. 30°. Ramiona unosisz kciukami w górę w kształt litery Y, potem T, potem W (łokcie zgięte, ściągnij łopatki). 2 s pauzy na górze każdej litery. Szyja przedłuża kręgosłup.",
+     "noCut": false,
+     "film": "YTW raises incline bench"
+    },
+    {
+     "n": 8,
+     "id": "c2a8",
+     "name": "Bird dog z pauzą",
+     "superset": "A2",
+     "scheme": "3 × 8 / stronę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Klęk podparty, dłonie pod barkami, kolana pod biodrami. Z wydechem wyprostuj przeciwną rękę i nogę do poziomu, 3 s pauzy, wróć bez opierania. Miednica nie przechyla się na bok — wyobraź sobie szklankę wody na lędźwiach.",
+     "noCut": false,
+     "film": "bird dog exercise technique"
     }
    ]
   },
   "B": {
    "key": "B",
-   "title": "DÓŁ · kontrola i stabilizacja",
+   "title": "DÓŁ · kolana, kostki, mięśnie głębokie",
    "day": "Środa",
-   "minutes": 67,
+   "minutes": 50,
    "items": [
     {
      "n": 1,
+     "id": "c2b1",
      "name": "Knee-to-wall — mobilizacja zgięcia grzbietowego stopy",
      "superset": null,
      "scheme": "2 × 10 / nogę",
      "load": "masa ciała",
      "rpe": "—",
-     "note": "Stopa przed ścianą, kolano jedzie do ściany po linii drugiego palca, PIĘTA NIE ODRYWA SIĘ. Rób po rowerze, nie na zimno; tempo 2 s w dół. Raz w tygodniu zmierz odległość palców od ściany. ~4 min.",
-     "noCut": false
+     "note": "Stopa ok. 10 cm od ściany, pięta cały czas na podłodze. Wypchnij kolano do ściany w linii drugiego palca, 2 s, wróć. Gdy dotykasz ściany swobodnie, odsuń stopę o 1 cm.",
+     "noCut": false,
+     "film": "knee to wall ankle mobility"
     },
     {
      "n": 2,
-     "name": "Przysiad hiszpański (izometria)",
+     "id": "c2b2",
+     "name": "Przysiad hiszpański z hantlem (izometria)",
      "superset": null,
-     "scheme": "5 × 45 s",
-     "load": "guma / hantel",
-     "rpe": "6",
-     "note": "Przerwa 60 s. Piszczele pionowo, tułów pionowo. Trudniej = głębiej albo hantel przy klatce.",
-     "noCut": true
+     "scheme": "4 × 45 s",
+     "load": "podwójna progresja",
+     "rpe": 6,
+     "note": "Przerwa 60 s. Guma za kolanami przyczepiona do stałego punktu, hantel trzymany przy klatce. Zejdź do ok. 60–70° zgięcia w kolanie, piszczele pionowo, tułów pionowo, i trzymaj. Trudniej = cięższy hantel, nie głębiej.",
+     "noCut": true,
+     "film": "spanish squat isometric",
+     "kgStart": 8
     },
     {
      "n": 3,
-     "name": "Przysiad bułgarski z hantlami",
+     "id": "c2b3",
+     "name": "Zejście ze stopnia, wolne",
      "superset": null,
-     "scheme": "4 × 10 / nogę",
-     "load": "podwójna progresja",
-     "rpe": "7",
-     "note": "Wykrok 60–90 cm, przednia stopa 15–20 cm w bok od linii tylnej. W dole piszczel PIONOWA, tułów PIONOWO. Tylna stopa podbiciem na skrzyni 30–35 cm, nie na wysokiej ławce. Przerwa 90 s. ~13 min.",
-     "noCut": true
+     "scheme": "3 × 8 / nogę",
+     "load": "masa ciała → hantel",
+     "rpe": 7,
+     "note": "Przerwa 60 s. Stoisz jedną nogą na stopniu 15–20 cm. Druga noga schodzi powoli przed stopień i tylko dotyka piętą podłogi — 3 s w dół. Kolano nogi na stopniu w linii drugiego palca, miednica pozioma. Wracasz siłą nogi na stopniu.",
+     "noCut": false,
+     "film": "eccentric step down knee"
     },
     {
      "n": 4,
-     "name": "Hip thrust jednonóż",
+     "id": "c2b4",
+     "name": "Hip thrust jednonóż z hantlem",
      "superset": null,
-     "scheme": "3 × 12 / nogę",
-     "load": "masa ciała → hantel na biodrze",
-     "rpe": "7",
-     "note": "Barki na ławce, jedna stopa na podłodze, druga noga uniesiona. 2 s pauzy w górze, biodra na równi. ~8 min.",
-     "noCut": false
+     "scheme": "3 × 10 / nogę",
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Przerwa 60 s. Łopatki na ławce, hantel na biodrze nogi pracującej. Wypchnij biodra w górę, aż tułów i udo będą w linii, 2 s pauzy. Żebra w dole — ruch z bioder, nie z wyginania lędźwi.",
+     "noCut": false,
+     "film": "single leg hip thrust technique",
+     "kgStart": 10
     },
     {
      "n": 5,
-     "name": "Odwodzenie w staniu z gumą",
+     "id": "c2b5",
+     "name": "Plank kopenhaski (krótka dźwignia)",
      "superset": null,
-     "scheme": "3 × 15 / nogę",
-     "load": "coraz grubsza guma",
-     "rpe": "6",
-     "note": "Guma wokół kostek, przy stojaku dla równowagi. Biodro NEUTRALNE — noga nie schodzi przed ani za linię ciała, nie krzyżuje. ~6 min.",
-     "noCut": false
+     "scheme": "3 × 20 s / stronę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Przerwa 60 s. Bokiem na przedramieniu, kolano górnej nogi na ławce, dolna noga swobodnie. Unieś biodra do linii prostej i trzymaj. Pracują przywodziciele górnej nogi i boczna taśma tułowia. Wydłużenie: stopa zamiast kolana na ławce.",
+     "noCut": false,
+     "film": "copenhagen plank short lever"
     },
     {
      "n": 6,
-     "name": "Wspięcia na palce jednonóż",
-     "superset": "A1",
-     "scheme": "3 × 15 / nogę",
-     "load": "masa ciała → hantel",
-     "rpe": "7",
-     "note": "SUPERSERIA z A2 — bez przerwy między nimi, 90 s po parze. Przednia część stopy na talerzu, pełny zakres, 1 s w górze, 3 s w dół. Nie trzymaj się, jeśli dasz radę. ~9 min na obie.",
-     "noCut": false
+     "id": "c2b6",
+     "name": "Chód boczny z gumą",
+     "superset": null,
+     "scheme": "3 × 12 / stronę",
+     "load": "coraz grubsza guma",
+     "rpe": 6,
+     "note": "Przerwa 60 s. Mała guma nad kolanami albo przy kostkach, półprzysiad, stopy na szerokość bioder. Krok w bok bez opadania kolan do środka i bez kołysania tułowiem. Pracuje pośladek średni, który trzyma kolano w osi.",
+     "noCut": false,
+     "film": "lateral band walk technique"
     },
     {
      "n": 7,
+     "id": "c2b7",
      "name": "Zgięcie grzbietowe na maszynie (piszczelowy przedni)",
-     "superset": "A2",
-     "scheme": "3 × 20",
-     "load": "coraz cięższy stos",
-     "rpe": "7",
-     "note": "SUPERSERIA z A1. Pełny zakres, powrót WOLNO (3 s). Trenuje przednią stronę podudzia — przeciwwaga dla wspięć.",
-     "noCut": false
+     "superset": "A1",
+     "scheme": "3 × 15",
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA z wspięciami — 90 s po parze. Pełny zakres: palce wysoko do góry, 1 s pauzy, 3 s w dół. Gdy 3 × 15 wchodzi czysto, dokładasz najmniejszy skok na maszynie. Ustaw raz suwakiem ciężar, którego używasz — aplikacja go zapamięta.",
+     "noCut": false,
+     "film": "tibialis raise machine",
+     "kgStart": 10
     },
     {
      "n": 8,
-     "name": "Ewersja stopy z gumą (siedząc)",
-     "superset": "B1",
-     "scheme": "3 × 20 / nogę",
-     "load": "coraz grubsza guma",
-     "rpe": "6",
-     "note": "SUPERSERIA z B2 — 60 s po parze. Guma wokół śródstopia, drugi koniec zaczepiony po WEWNĘTRZNEJ stronie. Odchylasz stopę na zewnątrz, wracasz WOLNO (3 s). ~7 min na obie.",
-     "noCut": false
+     "id": "c2b8",
+     "name": "Wspięcia na palce jednonóż, kolano ugięte",
+     "superset": "A2",
+     "scheme": "3 × 15 / nogę",
+     "load": "masa ciała → hantel",
+     "rpe": 7,
+     "note": "Przednia część stopy na stopniu, kolano ugięte ok. 20–30° przez cały ruch — tak pracuje płaszczkowaty, który stabilizuje kostkę. Pełny zakres, 1 s na górze, 3 s w dół.",
+     "noCut": false,
+     "film": "bent knee calf raise soleus"
     },
     {
      "n": 9,
-     "name": "Stanie na jednej nodze — oczy zamknięte",
-     "superset": "B2",
-     "scheme": "3 × 30 s / nogę",
-     "load": "masa ciała",
-     "rpe": "—",
-     "note": "SUPERSERIA z B1. Boso, przy ścianie na wypadek utraty równowagi. Postęp: poduszka lub złożony ręcznik pod stopą. Trening równowagi i czucia ułożenia stopy.",
-     "noCut": false
+     "id": "c2b9",
+     "name": "Ewersja stopy z gumą (siedząc)",
+     "superset": null,
+     "scheme": "2 × 20 / nogę",
+     "load": "coraz grubsza guma",
+     "rpe": 6,
+     "note": "Przerwa 45 s. Siedzisz, guma wokół przedniej części stopy, zaczepiona po wewnętrznej stronie. Odwiedź stopę na zewnątrz, ruch tylko w kostce — kolano i udo nieruchomo.",
+     "noCut": false,
+     "film": "ankle eversion resistance band"
     },
     {
      "n": 10,
-     "name": "Deska bokiem",
+     "id": "c2b10",
+     "name": "Pallof press z gumą",
      "superset": null,
-     "scheme": "3 × 40 s / stronę",
-     "load": "masa ciała",
-     "rpe": "—",
-     "note": "Biodra wysoko, ciało w jednej linii, łokieć pod barkiem. Wytrzymałość bocznego łańcucha tułowia. ~6 min.",
-     "noCut": false
+     "scheme": "3 × 10 / stronę",
+     "load": "coraz grubsza guma",
+     "rpe": 7,
+     "note": "Przerwa 45 s. Guma przyczepiona bokiem na wysokości klatki. Stań bokiem, dłonie przy mostku, wypchnij ręce przed siebie i trzymaj 2 s. Guma ciągnie w bok, ty nie dajesz się obrócić — to są mięśnie głębokie w pracy.",
+     "noCut": false,
+     "film": "pallof press technique"
     },
     {
      "n": 11,
-     "name": "Wykręcanie sztangi z kolan (barbell rollout)",
+     "id": "c2b11",
+     "name": "Rozciąganie zginacza biodra w półklęku",
      "superset": null,
-     "scheme": "3 × 8",
-     "load": "masa ciała → talerze 5 kg",
-     "rpe": "7",
-     "note": "Klęk, dłonie na gryfie, wykręcasz tak daleko, jak UTRZYMASZ lędźwie bez wygięcia. Wracasz brzuchem, nie rękami. Zasięg zwiększasz dopiero, gdy plecy zostają neutralne przez całą serię. ~5 min.",
-     "noCut": false
+     "scheme": "2 × 45 s / stronę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Półklęk, pod tylnym kolanem złożony koc, przednia stopa płasko, oba kolana zgięte pod kątem prostym. Napnij pośladek tylnej nogi i podwiń miednicę — rozciąganie czujesz z przodu biodra bez przesuwania się do przodu. Łagodnie, bez sprężynowania. Dobre też codziennie po pracy przy biurku.",
+     "noCut": false,
+     "film": "half kneeling hip flexor stretch"
     }
    ]
   },
   "C": {
    "key": "C",
-   "title": "DÓŁ · boje",
+   "title": "DÓŁ · boje i postawa",
    "day": "Piątek",
-   "minutes": 60,
+   "minutes": 55,
    "items": [
     {
      "n": 1,
+     "id": "c2c1",
+     "name": "Oddech 90/90 ze stopami na ścianie",
+     "superset": null,
+     "scheme": "2 × 5 oddechów",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Leżysz na plecach, stopy na ścianie, biodra i kolana zgięte pod kątem prostym. Lekko dociśnij pięty, aż poczujesz tył uda. Wdech nosem w boki żeber, długi wydech ustami — żebra schodzą w dół, lędźwie miękko do podłogi. Ustawia miednicę przed przysiadem.",
+     "noCut": false,
+     "film": "90 90 breathing wall"
+    },
+    {
+     "n": 2,
+     "id": "c2c2",
      "name": "Front squat",
      "superset": null,
      "scheme": {
@@ -466,12 +528,14 @@
      "rpe": {
       "ref": "lower.rpe"
      },
-     "note": "Bój główny. Przerwy 3 min. Głębokość: tak nisko, jak plecy neutralne i kolano milczy. ~20 min.",
-     "noCut": true
+     "note": "Bój główny. Przerwy 3 min. Sztanga na przednich naramiennych, łokcie wysoko. Głębokość: tak nisko, jak plecy zostają neutralne, a kolana idą w linii stóp. Tułów pionowo przez cały ruch.",
+     "noCut": true,
+     "film": "front squat technique"
     },
     {
-     "n": 2,
-     "name": "Martwy ciąg z podwyższenia",
+     "n": 3,
+     "id": "c2c3",
+     "name": "Martwy ciąg",
      "superset": null,
      "scheme": {
       "ref": "lower.scheme"
@@ -482,38 +546,70 @@
      "rpe": {
       "ref": "lower.rpe"
      },
-     "note": "Bój główny. Przerwy 3 min, krótsza rozgrzewka — jesteś już rozgrzany. Wysokość gryfu w arkuszu Ciężary. ~18 min.",
-     "noCut": true
-    },
-    {
-     "n": 3,
-     "name": "RDL z hantlami",
-     "superset": null,
-     "scheme": "3 × 10",
-     "load": "tempo 3-0-1",
-     "rpe": "7",
-     "note": "Przerwa 90 s. ~7 min.",
-     "noCut": false
+     "note": "Bój główny. Przerwy 3 min. Teraz z podłogi. Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.",
+     "noCut": true,
+     "film": "conventional deadlift technique"
     },
     {
      "n": 4,
-     "name": "Reverse hyper na ławce",
+     "id": "c2c4",
+     "name": "Martwy ciąg rumuński jednonóż z hantlem",
      "superset": null,
-     "scheme": "3 × 15",
-     "load": "masa ciała → hantel między stopami",
-     "rpe": "7",
-     "note": "Brzuchem na ławce, biodra na krawędzi, nogi wiszą, dłonie trzymają ławkę OD SPODU. Unosisz nogi do linii ciała, 1 s pauzy, WOLNO w dół (3 s). Zatrzymujesz się na linii — nie wyginasz lędźwi ponad nią. Nic nie trzeba blokować. ~8 min.",
-     "noCut": false
+     "scheme": "3 × 8 / nogę",
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Przerwa 90 s. Hantel w ręce po stronie nogi wolnej. Biodro cofa się, tułów i wolna noga tworzą jedną linię jak dźwignia, kolano nogi podporowej lekko ugięte. Miednica równo — nie otwieraj biodra w bok. Stabilizacja biodra, kolana i kostki naraz.",
+     "noCut": false,
+     "film": "single leg romanian deadlift dumbbell",
+     "kgStart": 12
     },
     {
      "n": 5,
-     "name": "Przysiad hiszpański (izometria)",
+     "id": "c2c5",
+     "name": "Wiosłowanie z gumą siedząc",
+     "superset": "A1",
+     "scheme": "3 × 15",
+     "load": "coraz grubsza guma",
+     "rpe": 7,
+     "note": "SUPERSERIA z face pullem — 60 s po parze. Siad prosty, guma wokół stóp, plecy pionowo. Ciągnij łokcie w tył przy tułowiu, ściągnij łopatki, 1 s pauzy. Nie odchylaj się — pracują plecy, nie lędźwie.",
+     "noCut": false,
+     "film": "seated resistance band row"
+    },
+    {
+     "n": 6,
+     "id": "c2c6",
+     "name": "Face pull z gumą",
+     "superset": "A2",
+     "scheme": "3 × 15",
+     "load": "coraz grubsza guma",
+     "rpe": 6,
+     "note": "Guma na wysokości twarzy. Ciągnij do czoła, rozkładając dłonie na boki, łokcie wysoko, kciuki do tyłu. 1 s pauzy z łopatkami ściągniętymi. Prostuje barki po dniu przy biurku.",
+     "noCut": false,
+     "film": "face pull resistance band"
+    },
+    {
+     "n": 7,
+     "id": "c2c7",
+     "name": "Dead bug",
      "superset": null,
-     "scheme": "4 × 45 s",
-     "load": "guma / hantel",
-     "rpe": "6",
-     "note": "Przerwa 60 s. Piszczele pionowo, tułów pionowo. Trudniej = głębiej albo hantel przy klatce.",
-     "noCut": true
+     "scheme": "3 × 8 / stronę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Przerwa 45 s. Na plecach, ręce w górę, biodra i kolana zgięte 90°. Lędźwie przyklejone do podłogi przez cały czas. Z wydechem opuszczasz przeciwną rękę i nogę do podłogi, wracasz. Gdy lędźwie się odklejają — mniejszy zakres.",
+     "noCut": false,
+     "film": "dead bug exercise technique"
+    },
+    {
+     "n": 8,
+     "id": "c2c8",
+     "name": "Otwieranie odcinka piersiowego w leżeniu bokiem",
+     "superset": null,
+     "scheme": "2 × 8 / stronę",
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Leżysz bokiem, kolana zgięte 90° i dociśnięte do podłogi (możesz przytrzymać je dolną ręką). Górna ręka zatacza łuk nad tobą na drugą stronę, wzrok za dłonią, wydech w końcowej pozycji. Kolana zostają razem — ruch tylko w odcinku piersiowym.",
+     "noCut": false,
+     "film": "open book thoracic rotation"
     }
    ]
   }
@@ -538,28 +634,28 @@
     },
     {
      "lift": "dl",
-     "name": "Martwy ciąg z podwyższenia"
+     "name": "Martwy ciąg"
     }
    ]
   },
+  "skip": [
+   "Rozciągania statycznego przed sztangą — zostaje na koniec dnia B i na jogę.",
+   "Długiego rolowania — 1–2 minuty na miejsce, które naprawdę tego potrzebuje, wystarczą.",
+   "Krążeń bioder i pracy w końcowych zakresach.",
+   "Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć."
+  ],
   "notes": [
-   "Przerwy między seriami dojściowymi: 60 s. Mają rozgrzewać, nie męczyć — żadna nie jest ciężka.",
-   "Od bloku 3 (tydzień 8) dołóż jeszcze jedno pojedyncze powtórzenie na ~93% ciężaru roboczego.",
-   "W dniu C przed ciągiem wystarczą DWIE serie (50% × 5, 75% × 3) — jesteś już rozgrzany po przysiadzie."
+   "Przerwy między seriami dojściowymi: 60 s. Mają rozgrzewać, nie męczyć.",
+   "W dniu C przed ciągiem wystarczą DWIE serie (50% × 5, 75% × 3) — po przysiadzie jesteś rozgrzany."
   ],
   "days": {
    "A": {
     "label": "DZIEŃ A — góra  ·  ~6 min",
     "steps": [
      {
-      "what": "Rower spokojnie",
+      "what": "Rower albo orbitrek spokojnie",
       "dose": "4 min",
-      "note": "Podniesienie temperatury. Bez zadyszki."
-     },
-     {
-      "what": "Przewlekanie gumy nad głową (dislocates)",
-      "dose": "2 × 10",
-      "note": "Szeroki chwyt, ręce proste, wolno. Zwężaj chwyt z tygodnia na tydzień."
+      "note": "Bez zadyszki."
      },
      {
       "what": "Band pull-apart",
@@ -569,57 +665,42 @@
      {
       "what": "Rotacja zewnętrzna z gumą",
       "dose": "1 × 15 / rękę",
-      "note": "Łokieć przy tułowiu, przedramię na zewnątrz. Budzi stożek rotatorów przed wyciskaniem."
+      "note": "Łokieć przy tułowiu."
      },
      {
       "what": "Mobilizacja odcinka piersiowego",
       "dose": "2 × 8",
-      "note": "To już ćwiczenie nr 1 z arkusza Dzień A — nie robisz go drugi raz."
+      "note": "To ćwiczenie nr 1 dnia A — nie robisz go drugi raz."
      },
      {
       "what": "Serie dojściowe do wyciskania",
       "dose": "wg tabeli",
-      "note": "Patrz tabela wyżej."
-     },
-     {
-      "what": "Przed podciąganiem",
-      "dose": "zwis 2 × 20 s + 1 × 5 lekko",
-      "note": "Zwis rozluźnia bark i przygotowuje chwyt."
-     }
-    ]
-   },
-   "B": {
-    "label": "DZIEŃ B — kontrola i stabilizacja  ·  ~5 min",
-    "steps": [
-     {
-      "what": "Rower spokojnie",
-      "dose": "5 min",
-      "note": "Dzień bez sztangi, więc rozgrzewka może być krótsza i łagodniejsza."
-     },
-     {
-      "what": "Przysiady z masą ciała",
-      "dose": "2 × 10",
-      "note": "Do połowy zakresu, spokojnie."
-     },
-     {
-      "what": "Mostek biodrowy",
-      "dose": "1 × 15",
-      "note": "Budzi pośladki przed hip thrustami i odwodzeniem."
-     },
-     {
-      "what": "Knee-to-wall",
-      "dose": "2 × 10 / nogę",
-      "note": "To już ćwiczenie nr 1 z arkusza Dzień B — pełni podwójną rolę."
-     },
-     {
-      "what": "BEZ krążeń bioder i szukania końcowych zakresów",
-      "dose": "",
       "note": ""
      }
     ]
    },
+   "B": {
+    "label": "DZIEŃ B — kolana i kostki  ·  ~6 min",
+    "steps": [
+     {
+      "what": "Rower spokojnie",
+      "dose": "5 min",
+      "note": "Kolana mają być ciepłe przed izometrią."
+     },
+     {
+      "what": "Krążenia w kostkach",
+      "dose": "10 / stronę",
+      "note": "Wolne kółka stopą, kolano nieruchomo."
+     },
+     {
+      "what": "Mostek biodrowy obunóż",
+      "dose": "1 × 15",
+      "note": "Budzi pośladki przed pracą jednonóż."
+     }
+    ]
+   },
    "C": {
-    "label": "DZIEŃ C — dół  ·  ~6 min",
+    "label": "DZIEŃ C — dół  ·  ~7 min",
     "steps": [
      {
       "what": "Rower spokojnie",
@@ -627,134 +708,106 @@
       "note": "Najcięższy dzień — nie skracaj tego."
      },
      {
-      "what": "Przysiady z masą ciała",
-      "dose": "2 × 10",
-      "note": "Pełne tempo, kontrolowane."
-     },
-     {
-      "what": "Mostek biodrowy",
-      "dose": "1 × 15",
-      "note": ""
+      "what": "Oddech 90/90 ze stopami na ścianie",
+      "dose": "2 × 5 oddechów",
+      "note": "To ćwiczenie nr 1 dnia C."
      },
      {
       "what": "Goblet squat z lekkim hantlem",
       "dose": "1 × 8",
-      "note": "Ustawia wzorzec przysiadu przed sztangą. Lekko, 3 s w dół."
+      "note": "Ustawia wzorzec przed sztangą. 3 s w dół."
      },
      {
       "what": "Serie dojściowe do front squata",
       "dose": "wg tabeli",
-      "note": "Patrz tabela wyżej."
+      "note": ""
      },
      {
       "what": "Serie dojściowe do ciągu",
       "dose": "50% × 5, 75% × 3",
-      "note": "Krótsza wersja — już jesteś rozgrzany."
+      "note": "Krótsza wersja."
      }
     ]
    }
-  },
-  "skip": [
-   "Statycznego rozciągania przed treningiem — obniża wytwarzaną siłę na kilkadziesiąt minut. Od tego jest niedziela.",
-   "Rolowania jako obowiązkowego punktu — daje chwilową ulgę, ale nie zmienia niczego trwale. Jeśli lubisz, rób, tylko nie zamiast reszty.",
-   "Krążeń bioder i pracy w końcowych zakresach."
-  ]
+  }
  },
  "rules": [
   {
    "heading": "Układ tygodnia",
    "lines": [
-    "Poniedziałek — Dzień A: GÓRA (wyciskanie i podciąganie jako boje główne)",
-    "Wtorek — wolne",
-    "Środa — Dzień B: DÓŁ, kontrola i stabilizacja (bez sztangi, bez obciążenia osiowego)",
-    "Czwartek — wolne",
-    "Piątek — Dzień C: DÓŁ (front squat + ciąg)",
-    "Sobota — wolne · Niedziela — joga (~44 min, bez obciążenia)",
-    "Ciężki dzień dolny wypada w piątek, więc ma pełny weekend na regenerację, a środa trafia dokładnie w środek między nim a kolejnym."
+    "Poniedziałek — Dzień A: GÓRA i postawa (wyciskanie, plecy, praca jednonóż, mięśnie głębokie).",
+    "Środa — Dzień B: kolana, kostki i mięśnie głębokie. Bez sztangi.",
+    "Piątek — Dzień C: DÓŁ ze sztangą (front squat, martwy ciąg z podłogi) i postawa.",
+    "Niedziela — joga, domyślnie wersja krótka (~20 min), pełna, gdy jest czas.",
+    "Na każde ćwiczenie pchające przypadają co najmniej dwa ciągnące — tak plan równoważy godziny przy biurku."
    ]
   },
   {
    "heading": "Czas trwania",
    "lines": [
-    "Dzień A ~62 min, dzień B ~67 min, dzień C ~60 min. Plus 5–6 min rozgrzewki z osobnego arkusza.",
-    "Niedziela ~44 min, bez obciążenia — nie liczy się do objętości treningowej.",
-    "PRZERWY: bój główny 3 min (wyciskanie od bloku 3: 4 min), pozostałe 90 s, izometrie 60 s.",
-    "ROZGRZEWKA: pełny rozpis w osobnym arkuszu ROZGRZEWKA, z przeliczonymi ciężarami serii dojściowych.",
-    "SUPERSERIE w dniu B (pary A1/A2 i B1/B2): robisz bez przerwy w środku, odpoczywasz po parze. To ~8 min oszczędności.",
-    "Jeśli brakuje czasu, tniesz w kolejności: rollout → deska bokiem → jedna seria z każdej superserii.",
-    "Boju głównego, przysiadu hiszpańskiego i przysiadu bułgarskiego nie tniesz nigdy."
+    "Dzień A ~55 min, dzień B ~50 min, dzień C ~55 min. Plus 6–7 min rozgrzewki.",
+    "PRZERWY: boje 2–3 min, praca jednonóż 60–90 s, mięśnie głębokie 45 s. Superserie: bez przerwy w środku, odpoczynek po parze.",
+    "Timer przerwy rusza sam po odhaczeniu serii — przerwy w cyklu 1 były 1,5–3× dłuższe niż plan, a ćwiczenia z końca listy wypadały.",
+    "Jeśli brakuje czasu, tniesz w kolejności: ostatnie ćwiczenie dnia → jedna seria z superserii → jedna seria pracy jednonóż.",
+    "Boju głównego, przysiadu bułgarskiego i przysiadu hiszpańskiego nie tniesz.",
+    "Rozciąganie zginacza biodra w półklęku z dnia B możesz robić codziennie po pracy — 2 minuty."
    ]
   },
   {
-   "heading": "Dwa reżimy w jednym planie",
+   "heading": "Cel cyklu",
    "lines": [
-    "DÓŁ (front squat, martwy ciąg) — sufit 72,5% E1RM, sufit RPE 7, bez testu maksa.",
-    "GÓRA (wyciskanie, podciąganie) — normalna progresja siłowa do 90% i test 1RM w tygodniu 12.",
-    "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar z tabeli wychodzi ciężej niż sufit, zdejmujesz z gryfu."
+    "Kolana, biodra i kostki: siła jednonóż, kontrola kolana w osi, przód i tył goleni.",
+    "Mięśnie głębokie: ćwiczenia, w których tułów opiera się ruchowi (dead bug, bird dog, Pallof, spacer farmera, plank kopenhaski).",
+    "Postawa: plecy i łopatki w każdej sesji, odcinek piersiowy i przód bioder na otwarcie po siedzeniu.",
+    "Boje zostają, ale jako baza — sufit RPE 7 na dole, 7,5–8 na górze. Nie testujesz maksa."
    ]
   },
   {
-   "heading": "Rekalibracja ciężarów",
+   "heading": "Ciężary",
    "lines": [
-    "DÓŁ — po tygodniu 3 i po tygodniu 7: jeśli KAŻDA sesja zmieściła się w suficie RPE, podnieś E1RM front squata i ciągu o 10%. Choć raz nie — bez zmian.",
-    "GÓRA — E1RM policzone z aktualnej serii, więc nie wymaga korekty. Zmieniasz tylko wtedy, gdy tydzień 1 wyraźnie mija się z sufitem RPE.",
-    "Nigdy więcej niż 10% naraz. Zbyt lekki start kosztuje trzy tygodnie, zbyt ciężki kosztuje cykl.",
-    "Przycisk +10% jest przy każdym E1RM na dole ekranu głównego."
-   ]
-  },
-  {
-   "heading": "Reguła zaokrągleń",
-   "lines": [
-    "Zawsze w dół do 2,5 kg. Przy hantlach — do najbliższego dostępnego skoku, w dół."
+    "Start cyklu: front squat E1RM 95 kg, martwy ciąg z podłogi 100 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1.",
+    "Ciąg schodzi z podwyższenia na podłogę, dlatego jego E1RM startuje niżej niż w cyklu 1.",
+    "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.",
+    "Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć."
    ]
   },
   {
    "heading": "Progresja ćwiczeń dodatkowych",
    "lines": [
-    "Zakres np. 3×8–12. Zaczynasz od 8. Gdy zrobisz 12 we wszystkich seriach →",
-    "dokładasz najmniejszy możliwy ciężar i wracasz do 8. Sufit RPE wg kolumny w arkuszu dnia."
+    "Przy hantlach i maszynie ustaw raz suwakiem ciężar, którego używasz — aplikacja go zapamięta i podpowie podwyżkę.",
+    "Gdy dwa tygodnie z rzędu robisz komplet powtórzeń, dokładasz najmniejszy skok.",
+    "Przy gumach: najpierw pełny zakres i pauza, dopiero potem grubsza guma.",
+    "Izometria: trudniej = cięższy hantel, nie głębsze zejście."
    ]
   },
   {
    "heading": "Zasada złego dnia",
    "lines": [
-    "Rozgrzewkowe serie idą wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.",
-    "Nie odwołujesz treningu i nie przepychasz na siłę.",
-    "Plecy sztywne rano: zamień dzień C na dzień B. Kolejność da się przestawić w obrębie tygodnia."
+    "Rozgrzewka idzie wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.",
+    "Plecy sztywne rano: zamień dzień C na dzień B. Kolejność da się przestawić w obrębie tygodnia.",
+    "Ćwiczenie, w którym coś nie gra w stawie (nie zmęczenie mięśnia) — pomiń je w tej sesji i zanotuj."
    ]
   },
   {
-   "heading": "Tydzień 7 — deload (nie jest opcjonalny)",
+   "heading": "Tydzień 7 — lżejszy (nie jest opcjonalny)",
    "lines": [
-    "Dół: 2 × 6 przy 55% E1RM, RPE 5. Góra: 2 × 6 przy 62,5%, RPE 5.",
-    "Ćwiczenia dodatkowe: 2 serie zamiast 3, ten sam ciężar.",
-    "Dzień B w tygodniu deloadu: zostaw izometrię, resztę po 2 serie, superserie pomiń (~30 min)."
+    "Boje: 2 × 6 przy 55% (dół) i 62,5% (góra), RPE 5.",
+    "Ćwiczenia dodatkowe: 2 serie zamiast 3, ten sam ciężar. Mobilność i oddech bez zmian."
    ]
   },
   {
-   "heading": "Tydzień 12, góra — test 1RM",
+   "heading": "Tydzień 12 — sprawdzian",
    "lines": [
-    "Dojście: 5 powt. @ 60%, 3 @ 75%, 2 @ 85%, 1 @ 92%, potem 2–3 próby, 4–5 min przerwy między nimi.",
-    "Asekuracja albo stojaki z ogranicznikami ustawionymi na wysokość klatki — obowiązkowo, bez wyjątków.",
-    "Jeśli druga próba idzie wolno i technika się psuje — kończysz. Trzecia próba jest opcjonalna, nie obowiązkowa."
-   ]
-  },
-  {
-   "heading": "Tydzień 12, dół — test kontrolny",
-   "lines": [
-    "Weź ciężar z tygodnia 3 i zrób jedną serię na maksymalną liczbę powtórzeń, ale zatrzymaj się",
-    "przy 15 albo przy RPE 8 — co nastąpi pierwsze. Porównaj z tygodniem 3.",
-    "Więcej powtórzeń przy tym samym ciężarze = cykl zadziałał, a dowiadujesz się tego bez podejścia do granicy.",
-    "Dopiero po tym decydujesz, czy schodzić ciągiem na podłogę i wracać do przysiadu ze sztangą z tyłu."
+    "Bez testu maksa. Boje lżej (3 × 5).",
+    "Dół: po seriach roboczych weź ciężar z tygodnia 3 front squata i zrób jedną serię na maksymalną liczbę powtórzeń — stop przy 15 albo RPE 8. Porównaj z tygodniem 3.",
+    "Jednonóż: zanotuj, ile powtórzeń zejścia ze stopnia robisz czysto na każdą nogę i jak długo trzymasz plank kopenhaski. To jest miara celu tego cyklu."
    ]
   },
   {
    "heading": "Kiedy powtórzyć tydzień",
    "lines": [
-    "Tydzień podbijasz tylko wtedy, gdy KAŻDA sesja zmieściła się w suficie RPE.",
-    "Jeśli nie — nie zmieniasz numeru i powtarzasz ten sam tydzień z tym samym ciężarem.",
-    "Dwa razy z rzędu — cofasz się o 10% i zawężasz zakres ruchu.",
-    "To nie jest opóźnienie planu. To jest plan."
+    "Tydzień podbijasz, gdy każda sesja zmieściła się w suficie RPE.",
+    "Jeśli nie — powtarzasz ten sam tydzień z tym samym ciężarem. To nie jest opóźnienie planu."
    ]
   }
  ],
@@ -1187,6 +1240,9 @@
    "Rozciąganie statyczne robisz TYLKO w tym dniu. Przed serią roboczą nigdy — obniża siłę na kilkadziesiąt minut.",
    "Krótka wersja (~20 min) to pozycje oznaczone kropką: po jednej albo dwie z każdego bloku.",
    "Po ciężkim piątku zrób bloki 1, 2 i 6. Reszta poczeka do następnej niedzieli."
-  ]
- }
+  ],
+  "domyslnieKrotka": true
+ },
+ "deloadTekst": "Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar. Mobilność i oddech bez zmian.",
+ "tydzien12Tekst": "Bez testu maksa. Dół: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Zanotuj zejście ze stopnia i plank kopenhaski."
 }
