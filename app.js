@@ -3720,12 +3720,24 @@ function przejdzNaCykl(p) {
 }
 const archiwum = () => readJSON(LS_ARCH, {});
 
+// Poprawka maksów wpisana w plan: stosuje się raz na urządzeniu (numer wersji
+// w pamięci), nadpisuje tylko boje podane w planie i idzie do synchronizacji.
+const LS_KOR = 'trening.korektaE1rm.v1';
+function korektaMaksow(p) {
+  const k = p.korektaE1rm;
+  if (!k || (+localStorage.getItem(LS_KOR) || 0) >= k.wersja) return false;
+  for (const lift of ['bench', 'front', 'dl']) if (k[lift] != null) state.e1rm[lift] = k[lift];
+  localStorage.setItem(LS_KOR, String(k.wersja));
+  save();
+  return true;
+}
+
 // Raport zamkniętego cyklu: na chwilę podstawiamy jego plan i dziennik pod stan
 // aplikacji, liczymy ten sam raport co dla bieżącego cyklu i oddajemy stan.
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=61`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=62`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3741,13 +3753,15 @@ async function raportArchiwum(n) {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=61')
+fetch('plan.json?v=62')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
     loadState();
     loadStores();
     przejdzNaCykl(p);
+    if (!state.e1rm) state.e1rm = { ...p.e1rm };
+    korektaMaksow(p);
     const ciag = pozycjaBoju('dl');
     if (ciag) LIFTS[2].full = ciag.it.name;
     if (p.mobility && p.mobility.domyslnieKrotka) state.mobShort = true;
