@@ -60,7 +60,7 @@ C = [
   it(2, 'c2c2', 'Front squat', REF('lower.scheme'), REF('front.kg'), REF('lower.rpe'),
      'Bój główny. Przerwy 3 min. Sztanga na przednich naramiennych, łokcie wysoko. Głębokość: tak nisko, jak plecy zostają neutralne, a kolana idą w linii stóp. Tułów pionowo przez cały ruch.', noCut=True),
   it(3, 'c2c3', 'Martwy ciąg', REF('lower.scheme'), REF('dl.kg'), REF('lower.rpe'),
-     'Bój główny. Przerwy 3 min. Teraz z podłogi. Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.', noCut=True),
+     'Bój główny. Przerwy 3 min. Z podłogi. Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.', noCut=True),
   it(4, 'c2c4', 'Martwy ciąg rumuński jednonóż z hantlem', '3 × 8 / nogę', 'podwójna progresja', 7,
      'Przerwa 90 s. Hantel w ręce po stronie nogi wolnej. Biodro cofa się, tułów i wolna noga tworzą jedną linię jak dźwignia, kolano nogi podporowej lekko ugięte. Miednica równo — nie otwieraj biodra w bok. Stabilizacja biodra, kolana i kostki naraz.', kgStart=12),
   it(5, 'c2c5', 'Wiosłowanie z gumą siedząc', '3 × 15', 'coraz grubsza guma', 7,
@@ -79,8 +79,8 @@ def upper(w, block, scheme, pct, rpe):
     return {'week': w, 'block': block, 'scheme': scheme, 'pct': pct, 'rpe': rpe, 'benchText': None, 'pullup': None}
 
 weeks = {
-  # Start z ciężarów z końca cyklu 1 (tydz. 10: front 4×6 @ 72,5, ciąg z podwyższenia 4×6 @ 85,
-  # oba „z zapasem"): tydzień 1 to ok. 70 kg i 77,5 kg na 3×8, ciąg trochę niżej, bo z podłogi.
+  # Start z ciężarów z końca cyklu 1 (tydz. 10: front 4×6 @ 72,5, ciąg z podłogi 4×6 @ 85,
+  # oba „z zapasem"): tydzień 1 to 70 kg i 80 kg na 3×8.
   'lower': [lower(1,'1','3 × 8',.675,7), lower(2,'1','3 × 8',.70,7), lower(3,'1','3 × 8',.725,7),
             lower(4,'2','4 × 6',.725,7), lower(5,'2','4 × 6',.75,7), lower(6,'2','4 × 6',.775,7),
             lower(7,'deload','2 × 6',.55,5),
@@ -142,8 +142,7 @@ rules = [
     'Postawa: plecy i łopatki w każdej sesji, odcinek piersiowy i przód bioder na otwarcie po siedzeniu.',
     'Boje zostają, ale jako baza — sufit RPE 7 na dole, 7,5–8 na górze. Nie testujesz maksa.']},
   {'heading': 'Ciężary', 'lines': [
-    'Start cyklu: front squat E1RM 105 kg, martwy ciąg z podłogi 115 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front ~70 kg, ciąg ~77,5 kg.',
-    'Ciąg schodzi z podwyższenia na podłogę, dlatego jego E1RM startuje niżej niż w cyklu 1.',
+    'Start cyklu: front squat E1RM 105 kg, martwy ciąg 120 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front 70 kg, ciąg 80 kg.',
     'Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.',
     'Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć.']},
   {'heading': 'Progresja ćwiczeń dodatkowych', 'lines': [
@@ -177,9 +176,10 @@ plan = {
   'title': 'Cykl 2 · kolana, biodra, postawa',
   'schedule': 'pon A · śr B · pt C · nd joga',
   'bar': stary['bar'], 'plates': stary['plates'],
-  'e1rm': {'front': 105, 'dl': 115, 'bench': 135},
-  # Jednorazowo nadpisuje maksy dołu u kogoś, kto zaczął cykl 2 ze starszym planem (95/100).
-  'korektaE1rm': {'wersja': 1, 'front': 105, 'dl': 115},
+  'e1rm': {'front': 105, 'dl': 120, 'bench': 135},
+  # Jednorazowo nadpisuje maksy dołu u kogoś, kto zaczął cykl 2 ze starszym planem
+  # (wersja 1: 95/100 → 105/115, wersja 2: ciąg bez obniżki za podłogę → 120).
+  'korektaE1rm': {'wersja': 2, 'front': 105, 'dl': 120},
   'weeks': weeks,
   'days': {
     'A': {'key': 'A', 'title': 'GÓRA · postawa i jednonóż', 'day': 'Poniedziałek', 'minutes': 55, 'items': A},

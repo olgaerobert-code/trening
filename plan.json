@@ -14,13 +14,13 @@
  ],
  "e1rm": {
   "front": 105,
-  "dl": 115,
+  "dl": 120,
   "bench": 135
  },
  "korektaE1rm": {
-  "wersja": 1,
+  "wersja": 2,
   "front": 105,
-  "dl": 115
+  "dl": 120
  },
  "weeks": {
   "lower": [
@@ -530,7 +530,7 @@
      "rpe": {
       "ref": "lower.rpe"
      },
-     "note": "Bój główny. Przerwy 3 min. Teraz z podłogi. Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.",
+     "note": "Bój główny. Przerwy 3 min. Z podłogi. Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.",
      "noCut": true
     },
     {
@@ -743,8 +743,7 @@
   {
    "heading": "Ciężary",
    "lines": [
-    "Start cyklu: front squat E1RM 105 kg, martwy ciąg z podłogi 115 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front ~70 kg, ciąg ~77,5 kg.",
-    "Ciąg schodzi z podwyższenia na podłogę, dlatego jego E1RM startuje niżej niż w cyklu 1.",
+    "Start cyklu: front squat E1RM 105 kg, martwy ciąg 120 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front 70 kg, ciąg 80 kg.",
     "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.",
     "Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć."
    ]
