@@ -742,7 +742,7 @@ console.log('Ciezar po przeniesieniu');
   delete sb2.API;
   vm.createContext(sb2);
   for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb2, { filename: plik });
-  vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, judgeWeek, kgOf, raportCyklu, pozycjaBoju, resolve, korektaMaksow };`, sb2);
+  vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, judgeWeek, kgOf, raportCyklu, pozycjaBoju, resolve, korektaMaksow, stanLokalny, pullStan };`, sb2);
   const B2 = sb2.API;
   await new Promise(r => setTimeout(r, 20));
   const S2 = B2.state;
@@ -755,17 +755,30 @@ console.log('Ciezar po przeniesieniu');
   test('osobny klucz synchronizacji cyklu', B2.kluczSync() === S2.key + '-C2');
   test('joga domyslnie krotka', S2.mobShort === true);
   // Ktos, kto zaczal cykl 2 ze starszym planem, ma w pamieci maksy 95/100 i wyciskanie po korekcie.
-  localStorage.removeItem('trening.korektaE1rm.v1');
+  S2.korekta = 0;
   S2.e1rm = { front: 95, dl: 100, bench: 137.5 };
   test('korekta maksow dolu wchodzi raz', B2.korektaMaksow(S2.plan) && S2.e1rm.front === 107.5 && S2.e1rm.dl === 120);
   test('korekta nie rusza wyciskania', S2.e1rm.bench === 137.5);
+  test('numer korekty jedzie w synchronizacji', B2.stanLokalny().korekta === 3);
   S2.e1rm.front = 110;
   test('drugi raz korekta juz nie wchodzi', !B2.korektaMaksow(S2.plan) && S2.e1rm.front === 110);
-  // Urzadzenie po wersji 1 (105/115) dostaje tylko nowy ciag.
-  localStorage.setItem('trening.korektaE1rm.v1', '1');
-  S2.e1rm = { front: 105, dl: 115, bench: 135 };
+  // Baza oddaje stare maksy bez numeru korekty (tak jak u uzytkownika po starcie).
+  S2.korekta = 0; S2.e1rm = { front: 95, dl: 100, bench: 135 };
+  test('stare maksy z bazy dostaja korekte jeszcze raz', B2.korektaMaksow(S2.plan) && S2.e1rm.front === 107.5);
+  S2.korekta = 1; S2.e1rm = { front: 105, dl: 115, bench: 135 };
   test('nowsza wersja poprawia urzadzenie po wersji 1', B2.korektaMaksow(S2.plan) && S2.e1rm.dl === 120 && S2.e1rm.front === 107.5);
   S2.e1rm = { front: 107.5, dl: 120, bench: 135 };
+  // Pelna sciezka: start z korekta, potem synchronizacja oddaje z bazy stary stan.
+  {
+    const staryFetch = sb2.fetch;
+    sb2.navigator = { ...sb2.navigator, onLine: true };
+    sb2.fetch = url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('stan_pull')
+      ? [{ ts: new Date(Date.now() + 60000).toISOString(), dane: { week: 1, e1rm: { front: 95, dl: 100, bench: 135 } } }] : null) });
+    await B2.pullStan();
+    test('synchronizacja ze starymi maksami nie cofa korekty', S2.e1rm.front === 107.5 && S2.e1rm.dl === 120 && S2.korekta === 3);
+    sb2.fetch = staryFetch;
+    sb2.navigator = { ...sb2.navigator, onLine: false };
+  }
   const poz2 = S2.plan.mobility.blocks.flatMap(b => b.items);
   const nazwy1 = new Set(planJson.mobility.blocks.flatMap(b => b.items).map(i => i.name));
   test('nowa joga: 20 pozycji, zadna z cyklu 1', poz2.length === 20 && poz2.every(i => !nazwy1.has(i.name)));

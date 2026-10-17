@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {},
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
 };
 
 /* ---------- Supabase ---------- */
@@ -105,11 +105,12 @@ function loadState() {
     if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
     if (typeof raw.zegarek === 'boolean') state.zegarek = raw.zegarek;
     if (typeof raw.autoPrzerwa === 'boolean') state.autoPrzerwa = raw.autoPrzerwa;
+    if (typeof raw.korekta === 'number') state.korekta = raw.korekta;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, autoPrzerwa: state.autoPrzerwa }));
+const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, autoPrzerwa: state.autoPrzerwa, korekta: state.korekta }));
 const save = () => {
   zapiszLokalnie();
   if (typeof pushStan === 'function') pushStan();
@@ -2044,7 +2045,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -2070,7 +2071,13 @@ async function pullStan() {
     const inny = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
     let zm = false;
     if (d.week >= 1 && d.week <= 12 && d.week !== state.week) { state.week = d.week; zm = true; }
-    if (d.e1rm && inny(d.e1rm, state.e1rm)) { state.e1rm = d.e1rm; zm = true; }
+    if (d.e1rm && inny(d.e1rm, state.e1rm)) {
+      state.e1rm = d.e1rm; zm = true;
+      // Maksy z bazy niosą ze sobą numer korekty, którą już przeszły. Starsze
+      // (albo bez numeru) dostają korektę jeszcze raz.
+      state.korekta = typeof d.korekta === 'number' ? d.korekta : 0;
+      korektaMaksow(state.plan);
+    }
     if (d.adjust && inny(d.adjust, state.adjust)) { state.adjust = d.adjust; saveAdjust(); zm = true; }
     if (d.acc && inny(d.acc, state.acc)) { state.acc = d.acc; saveAcc(); zm = true; }
     if (d.kgw && inny(d.kgw, state.kgw)) { state.kgw = d.kgw; saveKgw(); zm = true; }
@@ -3734,14 +3741,15 @@ function przejdzNaCykl(p) {
 }
 const archiwum = () => readJSON(LS_ARCH, {});
 
-// Poprawka maksów wpisana w plan: stosuje się raz na urządzeniu (numer wersji
-// w pamięci), nadpisuje tylko boje podane w planie i idzie do synchronizacji.
-const LS_KOR = 'trening.korektaE1rm.v1';
+// Poprawka maksów wpisana w plan: stosuje się raz i nadpisuje tylko boje podane
+// w planie. Numer zastosowanej wersji jedzie RAZEM z maksami w stanie planu —
+// wcześniej siedział tylko w pamięci telefonu, a synchronizacja zaraz po starcie
+// przywracała z bazy stare maksy i korekta już nigdy nie wracała.
 function korektaMaksow(p) {
-  const k = p.korektaE1rm;
-  if (!k || (+localStorage.getItem(LS_KOR) || 0) >= k.wersja) return false;
+  const k = p && p.korektaE1rm;
+  if (!k || (state.korekta || 0) >= k.wersja) return false;
   for (const lift of ['bench', 'front', 'dl']) if (k[lift] != null) state.e1rm[lift] = k[lift];
-  localStorage.setItem(LS_KOR, String(k.wersja));
+  state.korekta = k.wersja;
   save();
   return true;
 }
@@ -3751,7 +3759,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=65`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=66`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3804,7 +3812,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=65')
+fetch('plan.json?v=66')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
