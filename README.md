@@ -104,7 +104,7 @@ według ustawienia telefonu.
   po fakcie) i dłuższe niż 15 min są pomijane
 - **Cykl 2 — kolana, biodra, postawa** (plan.json, generator `tools/cykl2.py`): 3 dni
   (pn A góra i postawa, śr B kolana, kostki i mięśnie głębokie bez sztangi, pt C front
-  squat i martwy ciąg z podłogi) + joga w niedzielę, domyślnie krótka. Na każde ćwiczenie
+  squat i martwy ciąg) + joga w niedzielę, domyślnie krótka. Na każde ćwiczenie
   pchające co najmniej dwa ciągnące. Joga nowa (`tools/joga2.py`): 20 pozycji statycznych
   w 6 blokach (ustawienie, równowaga, wojownicy, plecy i postawa, biodra, wyciszenie),
   krótka wersja 9 pozycji. Każde ćwiczenie ma opis (filmy tylko w jodze); przy
