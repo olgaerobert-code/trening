@@ -79,11 +79,13 @@ def upper(w, block, scheme, pct, rpe):
     return {'week': w, 'block': block, 'scheme': scheme, 'pct': pct, 'rpe': rpe, 'benchText': None, 'pullup': None}
 
 weeks = {
-  'lower': [lower(1,'1','3 × 8',.625,6.5), lower(2,'1','3 × 8',.65,6.5), lower(3,'1','3 × 8',.675,6.5),
-            lower(4,'2','4 × 6',.70,7), lower(5,'2','4 × 6',.725,7), lower(6,'2','4 × 6',.75,7),
+  # Start z ciężarów z końca cyklu 1 (tydz. 10: front 4×6 @ 72,5, ciąg z podwyższenia 4×6 @ 85,
+  # oba „z zapasem"): tydzień 1 to ok. 70 kg i 77,5 kg na 3×8, ciąg trochę niżej, bo z podłogi.
+  'lower': [lower(1,'1','3 × 8',.675,7), lower(2,'1','3 × 8',.70,7), lower(3,'1','3 × 8',.725,7),
+            lower(4,'2','4 × 6',.725,7), lower(5,'2','4 × 6',.75,7), lower(6,'2','4 × 6',.775,7),
             lower(7,'deload','2 × 6',.55,5),
-            lower(8,'3','4 × 5',.75,7), lower(9,'3','4 × 5',.775,7), lower(10,'3','4 × 5',.80,7),
-            lower(11,'3','4 × 5',.80,7), lower(12,'3','3 × 5 + kontrola',.70,7)],
+            lower(8,'3','4 × 5',.775,7), lower(9,'3','4 × 5',.80,7), lower(10,'3','4 × 5',.825,7),
+            lower(11,'3','4 × 5',.825,7), lower(12,'3','3 × 5 + kontrola',.70,7)],
   'upper': [upper(1,'1','3 × 8',.675,7), upper(2,'1','3 × 8',.70,7), upper(3,'1','3 × 8',.725,7),
             upper(4,'2','4 × 6',.725,7.5), upper(5,'2','4 × 6',.75,7.5), upper(6,'2','4 × 6',.775,7.5),
             upper(7,'deload','2 × 6',.625,5),
@@ -140,7 +142,7 @@ rules = [
     'Postawa: plecy i łopatki w każdej sesji, odcinek piersiowy i przód bioder na otwarcie po siedzeniu.',
     'Boje zostają, ale jako baza — sufit RPE 7 na dole, 7,5–8 na górze. Nie testujesz maksa.']},
   {'heading': 'Ciężary', 'lines': [
-    'Start cyklu: front squat E1RM 95 kg, martwy ciąg z podłogi 100 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1.',
+    'Start cyklu: front squat E1RM 105 kg, martwy ciąg z podłogi 115 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front ~70 kg, ciąg ~77,5 kg.',
     'Ciąg schodzi z podwyższenia na podłogę, dlatego jego E1RM startuje niżej niż w cyklu 1.',
     'Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.',
     'Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć.']},
@@ -175,7 +177,9 @@ plan = {
   'title': 'Cykl 2 · kolana, biodra, postawa',
   'schedule': 'pon A · śr B · pt C · nd joga',
   'bar': stary['bar'], 'plates': stary['plates'],
-  'e1rm': {'front': 95, 'dl': 100, 'bench': 135},
+  'e1rm': {'front': 105, 'dl': 115, 'bench': 135},
+  # Jednorazowo nadpisuje maksy dołu u kogoś, kto zaczął cykl 2 ze starszym planem (95/100).
+  'korektaE1rm': {'wersja': 1, 'front': 105, 'dl': 115},
   'weeks': weeks,
   'days': {
     'A': {'key': 'A', 'title': 'GÓRA · postawa i jednonóż', 'day': 'Poniedziałek', 'minutes': 55, 'items': A},

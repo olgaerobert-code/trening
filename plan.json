@@ -13,9 +13,14 @@
   1.25
  ],
  "e1rm": {
-  "front": 95,
-  "dl": 100,
+  "front": 105,
+  "dl": 115,
   "bench": 135
+ },
+ "korektaE1rm": {
+  "wersja": 1,
+  "front": 105,
+  "dl": 115
  },
  "weeks": {
   "lower": [
@@ -23,40 +28,31 @@
     "week": 1,
     "block": "1",
     "scheme": "3 × 8",
-    "pct": 0.625,
+    "pct": 0.675,
     "dlAdj": 0,
-    "rpe": 6.5,
+    "rpe": 7,
     "barHeight": "z podłogi"
    },
    {
     "week": 2,
     "block": "1",
     "scheme": "3 × 8",
-    "pct": 0.65,
-    "dlAdj": 0,
-    "rpe": 6.5,
-    "barHeight": "z podłogi"
-   },
-   {
-    "week": 3,
-    "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.675,
-    "dlAdj": 0,
-    "rpe": 6.5,
-    "barHeight": "z podłogi"
-   },
-   {
-    "week": 4,
-    "block": "2",
-    "scheme": "4 × 6",
     "pct": 0.7,
     "dlAdj": 0,
     "rpe": 7,
     "barHeight": "z podłogi"
    },
    {
-    "week": 5,
+    "week": 3,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.725,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 4,
     "block": "2",
     "scheme": "4 × 6",
     "pct": 0.725,
@@ -65,10 +61,19 @@
     "barHeight": "z podłogi"
    },
    {
-    "week": 6,
+    "week": 5,
     "block": "2",
     "scheme": "4 × 6",
     "pct": 0.75,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 6,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.775,
     "dlAdj": 0,
     "rpe": 7,
     "barHeight": "z podłogi"
@@ -86,7 +91,7 @@
     "week": 8,
     "block": "3",
     "scheme": "4 × 5",
-    "pct": 0.75,
+    "pct": 0.775,
     "dlAdj": 0,
     "rpe": 7,
     "barHeight": "z podłogi"
@@ -95,7 +100,7 @@
     "week": 9,
     "block": "3",
     "scheme": "4 × 5",
-    "pct": 0.775,
+    "pct": 0.8,
     "dlAdj": 0,
     "rpe": 7,
     "barHeight": "z podłogi"
@@ -104,7 +109,7 @@
     "week": 10,
     "block": "3",
     "scheme": "4 × 5",
-    "pct": 0.8,
+    "pct": 0.825,
     "dlAdj": 0,
     "rpe": 7,
     "barHeight": "z podłogi"
@@ -113,7 +118,7 @@
     "week": 11,
     "block": "3",
     "scheme": "4 × 5",
-    "pct": 0.8,
+    "pct": 0.825,
     "dlAdj": 0,
     "rpe": 7,
     "barHeight": "z podłogi"
@@ -738,7 +743,7 @@
   {
    "heading": "Ciężary",
    "lines": [
-    "Start cyklu: front squat E1RM 95 kg, martwy ciąg z podłogi 100 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1.",
+    "Start cyklu: front squat E1RM 105 kg, martwy ciąg z podłogi 115 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front ~70 kg, ciąg ~77,5 kg.",
     "Ciąg schodzi z podwyższenia na podłogę, dlatego jego E1RM startuje niżej niż w cyklu 1.",
     "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.",
     "Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć."
