@@ -13,13 +13,13 @@
   1.25
  ],
  "e1rm": {
-  "front": 105,
+  "front": 107.5,
   "dl": 120,
   "bench": 135
  },
  "korektaE1rm": {
-  "wersja": 2,
-  "front": 105,
+  "wersja": 3,
+  "front": 107.5,
   "dl": 120
  },
  "weeks": {
@@ -743,7 +743,7 @@
   {
    "heading": "Ciężary",
    "lines": [
-    "Start cyklu: front squat E1RM 105 kg, martwy ciąg 120 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front 70 kg, ciąg 80 kg.",
+    "Start cyklu: front squat E1RM 107,5 kg, martwy ciąg 120 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front 72,5 kg, ciąg 80 kg.",
     "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.",
     "Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć."
    ]

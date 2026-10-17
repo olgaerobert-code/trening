@@ -80,7 +80,7 @@ def upper(w, block, scheme, pct, rpe):
 
 weeks = {
   # Start z ciężarów z końca cyklu 1 (tydz. 10: front 4×6 @ 72,5, ciąg z podłogi 4×6 @ 85,
-  # oba „z zapasem"): tydzień 1 to 70 kg i 80 kg na 3×8.
+  # oba „z zapasem"): tydzień 1 to 72,5 kg i 80 kg na 3×8.
   'lower': [lower(1,'1','3 × 8',.675,7), lower(2,'1','3 × 8',.70,7), lower(3,'1','3 × 8',.725,7),
             lower(4,'2','4 × 6',.725,7), lower(5,'2','4 × 6',.75,7), lower(6,'2','4 × 6',.775,7),
             lower(7,'deload','2 × 6',.55,5),
@@ -142,7 +142,7 @@ rules = [
     'Postawa: plecy i łopatki w każdej sesji, odcinek piersiowy i przód bioder na otwarcie po siedzeniu.',
     'Boje zostają, ale jako baza — sufit RPE 7 na dole, 7,5–8 na górze. Nie testujesz maksa.']},
   {'heading': 'Ciężary', 'lines': [
-    'Start cyklu: front squat E1RM 105 kg, martwy ciąg 120 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front 70 kg, ciąg 80 kg.',
+    'Start cyklu: front squat E1RM 107,5 kg, martwy ciąg 120 kg, wyciskanie 135 kg — z ostatnich tygodni cyklu 1 (front 4×6 @ 72,5, ciąg 4×6 @ 85 z zapasem). Tydzień 1: front 72,5 kg, ciąg 80 kg.',
     'Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.',
     'Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 1. Każdą da się cofnąć.']},
   {'heading': 'Progresja ćwiczeń dodatkowych', 'lines': [
@@ -176,10 +176,11 @@ plan = {
   'title': 'Cykl 2 · kolana, biodra, postawa',
   'schedule': 'pon A · śr B · pt C · nd joga',
   'bar': stary['bar'], 'plates': stary['plates'],
-  'e1rm': {'front': 105, 'dl': 120, 'bench': 135},
+  'e1rm': {'front': 107.5, 'dl': 120, 'bench': 135},
   # Jednorazowo nadpisuje maksy dołu u kogoś, kto zaczął cykl 2 ze starszym planem
-  # (wersja 1: 95/100 → 105/115, wersja 2: ciąg bez obniżki za podłogę → 120).
-  'korektaE1rm': {'wersja': 2, 'front': 105, 'dl': 120},
+  # (wersja 1: 95/100 → 105/115, wersja 2: ciąg bez obniżki za podłogę → 120,
+  # wersja 3: przysiad od 72,5 kg w tygodniu 1 → 107,5).
+  'korektaE1rm': {'wersja': 3, 'front': 107.5, 'dl': 120},
   'weeks': weeks,
   'days': {
     'A': {'key': 'A', 'title': 'GÓRA · postawa i jednonóż', 'day': 'Poniedziałek', 'minutes': 55, 'items': A},
