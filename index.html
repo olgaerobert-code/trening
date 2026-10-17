@@ -20,7 +20,7 @@
    systemowym, żeby aplikacja czytała się jak natywna. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=64) format('woff2');
+  src:url(fonts/Archivo.woff2?v=65) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -795,12 +795,14 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .przcw b{flex:none}
 table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 .raportpole{width:100%;min-height:220px;margin-top:10px;padding:10px;border-radius:var(--r-s);border:1px solid var(--line);background:var(--s2);color:var(--ink);font:12px/1.4 ui-monospace,monospace}
+.aktualizacja{position:fixed;left:16px;right:16px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:90;padding:14px 16px;border-radius:14px;
+  background:var(--ink);color:var(--on-ink);font:700 14.5px/1.3 var(--sans);box-shadow:0 12px 30px -10px rgba(0,0,0,.45);animation:prowWjazd .3s var(--ease)}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=64"></script>
-<script src="app.js?v=64"></script>
+<script src="progresja.js?v=65"></script>
+<script src="app.js?v=65"></script>
 </body>
 </html>

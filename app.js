@@ -2909,6 +2909,20 @@ function settingsView() {
     body.append(karta);
   }
 
+  const wer = el('div', 'card');
+  wer.append(el('h3', null, 'Wersja aplikacji'));
+  const werInfo = el('p', null, `Działa wersja ${WERSJA || '—'}. Nowa wersja wczytuje się sama przy otwarciu aplikacji.`);
+  const werBtn = el('button', 'btn ghost', 'Sprawdź teraz');
+  werBtn.onclick = async () => {
+    werInfo.textContent = 'Sprawdzam…';
+    const n = await sprawdzWersje();
+    werInfo.textContent = n == null ? 'Brak połączenia — spróbuj z zasięgiem.'
+      : n > WERSJA ? `Jest wersja ${n} — odświeżam…` : `Masz najnowszą wersję (${WERSJA}).`;
+    if (n > WERSJA) przeladuj();
+  };
+  wer.append(werInfo, werBtn);
+  body.append(wer);
+
   const rap = el('div', 'card');
   rap.append(el('h3', null, state.plan.cykl > 1 ? `Raport cyklu ${state.plan.cykl}` : 'Raport cyklu'));
   rap.append(el('p', null, 'Cały dziennik jako zwykły tekst: tydzień po tygodniu, każda seria z ciężarem, oceny, korekty, frekwencja i przerwy. Do wklejenia w rozmowę, np. z Claude, żeby przeanalizować cykl. Bez kodu planu.'));
@@ -3737,7 +3751,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=64`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=65`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3752,8 +3766,45 @@ async function raportArchiwum(n) {
   }
 }
 
+/* ---------- samoczynna aktualizacja ----------
+   Aplikacja z ekranu początkowego iPhone'a potrafi żyć w tle całymi dniami
+   i nigdy się nie przeładować. Przy starcie i przy każdym powrocie pobieramy
+   świeży index.html i porównujemy numer wersji z tym, który właśnie działa.
+   Nowsza wersja = przeładowanie od razu, chyba że trwa sesja albo przerwa —
+   wtedy pasek z przyciskiem, żeby nie zgubić odliczania. */
+const WERSJA = (() => {
+  const s = typeof document !== 'undefined' && document.currentScript && document.currentScript.src;
+  const m = s && /[?&]v=(\d+)/.exec(s);
+  return m ? +m[1] : null;
+})();
+let przeladowuje = false;
+function przeladuj() {
+  if (przeladowuje) return;
+  przeladowuje = true;
+  location.reload();
+}
+function nowaWersja() {
+  const v = state.view || '';
+  const wSesji = v.startsWith('#/d/') || v.startsWith('#/mobilnosc');
+  if (!wSesji && !tId && !document.querySelector('.prow')) { przeladuj(); return; }
+  if (document.querySelector('.aktualizacja')) return;
+  const b = el('button', 'aktualizacja', 'Nowa wersja aplikacji — tapnij, żeby odświeżyć');
+  b.onclick = przeladuj;
+  document.body.appendChild(b);
+}
+async function sprawdzWersje() {
+  if (!WERSJA || !navigator.onLine) return null;
+  try {
+    const r = await fetch('./?wersja=' + Date.now(), { cache: 'no-store' });
+    const m = /app\.js\?v=(\d+)/.exec(await r.text());
+    const najnowsza = m ? +m[1] : null;
+    if (najnowsza && najnowsza > WERSJA) nowaWersja();
+    return najnowsza;
+  } catch { return null; }
+}
+
 /* ---------- start ---------- */
-fetch('plan.json?v=64')
+fetch('plan.json?v=65')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3783,12 +3834,24 @@ fetch('plan.json?v=64')
       render();
       pullAll(); flushQueue();
     });
+    sprawdzWersje();
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').then(reg => {
         // Aplikacja z ekranu początkowego potrafi wisieć w tle całymi dniami —
         // przy każdym powrocie pytamy, czy nie ma nowszej wersji.
-        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState !== 'visible') return;
+          reg.update().catch(() => {});
+          sprawdzWersje();
+        });
       }).catch(() => {});
+      // Nowy service worker przejął stronę — stary kod dalej by działał aż do
+      // ręcznego zamknięcia, więc przeładowujemy sami.
+      let bylKontroler = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (bylKontroler) nowaWersja();
+        bylKontroler = true;
+      });
     }
   })
   .catch(() => {
