@@ -115,6 +115,11 @@ według ustawienia telefonu.
   startuje od tygodnia 1 z maksami z planu. W bazie każdy cykl ma osobny klucz
   (kod planu + `-C2`), żeby tygodnie nowego cyklu nie mieszały się ze starymi.
   Plan cyklu 1 zostaje w `plan-cykl1.json` i na nim działają testy logiki
+- **Samoczynna aktualizacja**: przy starcie i przy każdym powrocie do aplikacji pobiera
+  świeży index.html i porównuje numer wersji (`?v=`) z działającym. Nowsza wersja =
+  przeładowanie od razu; w trakcie sesji, jogi albo przerwy — pasek „Nowa wersja
+  aplikacji" do tapnięcia. To samo po przejęciu strony przez nowy service worker.
+  Dziennik → Wersja aplikacji pokazuje numer i ma „Sprawdź teraz"
 - **Raport cyklu** (Dziennik → Raport cyklu → „Kopiuj raport cyklu"): cały dziennik
   jako zwykły tekst — każda seria z ciężarem, oceny tygodni, korekty, rekalibracje,
   czasy sesji, przerwy i joga — do wklejenia w rozmowę i analizy cyklu. Bez kodu planu
