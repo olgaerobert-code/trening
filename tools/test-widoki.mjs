@@ -748,7 +748,7 @@ console.log('Ciezar po przeniesieniu');
   const S2 = B2.state;
   test('plan cyklu 2 wczytany', S2.plan.cykl === 2);
   test('nowy cykl startuje od tygodnia 1', S2.week === 1);
-  test('maksy z nowego planu', S2.e1rm.front === 105 && S2.e1rm.dl === 120 && S2.e1rm.bench === 135);
+  test('maksy z nowego planu', S2.e1rm.front === 107.5 && S2.e1rm.dl === 120 && S2.e1rm.bench === 135);
   test('dziennik nowego cyklu pusty', Object.keys(S2.log).length === 0);
   const arch = B2.archiwum();
   test('cykl 1 w archiwum z calym dziennikiem', arch[1] && Object.keys(arch[1].log).length === serieC1 && arch[1].week === 11);
@@ -757,15 +757,15 @@ console.log('Ciezar po przeniesieniu');
   // Ktos, kto zaczal cykl 2 ze starszym planem, ma w pamieci maksy 95/100 i wyciskanie po korekcie.
   localStorage.removeItem('trening.korektaE1rm.v1');
   S2.e1rm = { front: 95, dl: 100, bench: 137.5 };
-  test('korekta maksow dolu wchodzi raz', B2.korektaMaksow(S2.plan) && S2.e1rm.front === 105 && S2.e1rm.dl === 120);
+  test('korekta maksow dolu wchodzi raz', B2.korektaMaksow(S2.plan) && S2.e1rm.front === 107.5 && S2.e1rm.dl === 120);
   test('korekta nie rusza wyciskania', S2.e1rm.bench === 137.5);
-  S2.e1rm.front = 107.5;
-  test('drugi raz korekta juz nie wchodzi', !B2.korektaMaksow(S2.plan) && S2.e1rm.front === 107.5);
+  S2.e1rm.front = 110;
+  test('drugi raz korekta juz nie wchodzi', !B2.korektaMaksow(S2.plan) && S2.e1rm.front === 110);
   // Urzadzenie po wersji 1 (105/115) dostaje tylko nowy ciag.
   localStorage.setItem('trening.korektaE1rm.v1', '1');
   S2.e1rm = { front: 105, dl: 115, bench: 135 };
-  test('wersja 2 podnosi ciag do 120', B2.korektaMaksow(S2.plan) && S2.e1rm.dl === 120);
-  S2.e1rm = { front: 105, dl: 120, bench: 135 };
+  test('nowsza wersja poprawia urzadzenie po wersji 1', B2.korektaMaksow(S2.plan) && S2.e1rm.dl === 120 && S2.e1rm.front === 107.5);
+  S2.e1rm = { front: 107.5, dl: 120, bench: 135 };
   const poz2 = S2.plan.mobility.blocks.flatMap(b => b.items);
   const nazwy1 = new Set(planJson.mobility.blocks.flatMap(b => b.items).map(i => i.name));
   test('nowa joga: 20 pozycji, zadna z cyklu 1', poz2.length === 20 && poz2.every(i => !nazwy1.has(i.name)));
@@ -783,9 +783,9 @@ console.log('Ciezar po przeniesieniu');
   }
   test('kazde cwiczenie ma serie we wszystkich tygodniach i ciezar boju', true);
   test('boje znalezione w planie', ['bench', 'front', 'dl'].every(L => B2.pozycjaBoju(L)));
-  test('front squat tydz. 1 = 70 kg', B2.kgOf('front', 1) === 70);
+  test('front squat tydz. 1 = 72,5 kg', B2.kgOf('front', 1) === 72.5);
   test('ciag tydz. 1 = 80 kg', B2.kgOf('dl', 1) === 80);
-  test('front squat tydz. 10 = 85 kg, ciag 97,5 kg', B2.kgOf('front', 10) === 85 && B2.kgOf('dl', 10) === 97.5);
+  test('front squat tydz. 10 = 87,5 kg, ciag 97,5 kg', B2.kgOf('front', 10) === 87.5 && B2.kgOf('dl', 10) === 97.5);
   test('wyciskanie tydz. 1 = 90 kg', B2.kgOf('bench', 1) === 90);
   for (const d of ['A', 'B', 'C']) {
     const its = S2.plan.days[d].items;
