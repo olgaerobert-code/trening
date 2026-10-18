@@ -784,6 +784,7 @@ console.log('Ciezar po przeniesieniu');
   test('nowa joga: 20 pozycji, zadna z cyklu 1', poz2.length === 20 && poz2.every(i => !nazwy1.has(i.name)));
   test('nowa joga: krotka wersja 8-10 pozycji', poz2.filter(i => i.core).length >= 8 && poz2.filter(i => i.core).length <= 10);
   test('nowa joga: kazda pozycja ma kroki, blad, opis i wyszukiwanie filmu', poz2.every(i => i.steps.length >= 4 && i.blad && i.note && i.film));
+  test('nowa joga: kazda pozycja ma film (ID YouTube), bez powtorzen', poz2.every(i => /^[A-Za-z0-9_-]{11}$/.test(i.yt || '')) && new Set(poz2.map(i => i.yt)).size === 20);
   test('nowa joga: unikalne identyfikatory, inne niz w cyklu 1', new Set(poz2.map(i => i.id)).size === 20 && poz2.every(i => /^z\d+$/.test(i.id)));
   test('nowa joga: bloki sumuja sie do pelnej wersji', S2.plan.mobility.blocks.reduce((a, b) => a + b.minutes, 0) === S2.plan.mobility.minutes);
 

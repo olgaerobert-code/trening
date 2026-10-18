@@ -193,6 +193,33 @@ BLOKI = [
   ]},
 ]
 
+# Filmy (YouTube ID) — linki podane przez użytkownika, wyszukane w Gemini; nie sprawdzone z tego środowiska.
+YT = {
+    'z1': 'Tda7u6mQ68Y',
+    'z2': '0kYwPUUHMWs',
+    'z3': 'cw-3W992h0s',
+    'z4': 'kKwofcX9vJA',
+    'z5': 'VoiwtLrL12Q',
+    'z6': 'B4JWwXTvi7M',
+    'z7': 'CPbp3o6jD7s',
+    'z8': 'pd0ahRFnVNU',
+    'z9': '0FKV52GP-2c',
+    'z10': 'MB90z9KuBhw',
+    'z11': '0kxczNm1xF4',
+    'z12': 'Q5r-Ook-2BA',
+    'z13': 'VRMDN9WqATc',
+    'z14': 'rekWo0mrXFM',
+    'z15': 'fG9mvQUglr0',
+    'z16': 'eJ7A6s4hqxk',
+    'z17': 'y5YY9BaE0bE',
+    'z18': 'P9-nPFSFyzk',
+    'z19': 'hRJvY9Ht2vw',
+    'z20': 'nXkfTKEDsN8',
+}
+for _b in BLOKI:
+    for _i in _b['items']:
+        _i['yt'] = YT[_i['id']]
+
 JOGA = {
  'key': 'D', 'title': 'JOGA', 'day': 'Niedziela', 'minutes': 44, 'shortMinutes': 20,
  'domyslnieKrotka': True,
