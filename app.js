@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
 };
 
 /* ---------- Supabase ---------- */
@@ -74,10 +74,26 @@ function sesjaKompletna(key, w) {
   return total > 0 && done >= total;
 }
 
+/* Sesja, której w tym tygodniu nie było — plan zaczęty w środę nie ma
+   poniedziałku w tygodniu 1. Pominięta nie czeka na wpis, nie psuje serii
+   tygodni z kompletem i nie wstrzymuje werdyktu bloku. Pierwsza zapisana seria
+   (albo odklikana pozycja jogi) sama ją odwołuje. */
+const kluczPominiecia = (key, w) => w + '|' + key;
+function sesjaPominieta(key, w) {
+  if (!state.pominiete || !state.pominiete[kluczPominiecia(key, w)]) return false;
+  if (key === 'D') return mobDone(w) === 0;
+  return postepDnia(w, key).done === 0;
+}
+function pominSesje(key, w, czy = true) {
+  const k = kluczPominiecia(key, w);
+  if (czy) state.pominiete[k] = true; else delete state.pominiete[k];
+  savePominiete();
+}
+
 function domyslnaSesja() {
   const w = state.week, dzis = pozycjaDzis();
   const zalegle = Object.keys(POZYCJA_DNIA)
-    .filter(k => POZYCJA_DNIA[k] <= dzis && !sesjaKompletna(k, w))
+    .filter(k => POZYCJA_DNIA[k] <= dzis && !sesjaKompletna(k, w) && !sesjaPominieta(k, w))
     .sort((a, b) => POZYCJA_DNIA[b] - POZYCJA_DNIA[a]);
   return zalegle[0] || dzisiaj();
 }
@@ -121,6 +137,9 @@ const LS_LOG = 'trening.log.v1', LS_ADJ = 'trening.adjust.v1', LS_ACC = 'trening
 const LS_Q = 'trening.queue.v1', LS_KEY = 'trening.key.v1', LS_MOB = 'trening.mob.v1';
 const LS_REK = 'trening.rekal.v1', LS_KGW = 'trening.kgw.v1', LS_MOV = 'trening.moves.v1';
 const LS_TRN = 'trening.treningi.v1';
+// Sesje, których w danym tygodniu nie było (plan zaczęty w środę): { "1|A": true }.
+const LS_POM = 'trening.pominiete.v1';
+const savePominiete = () => { localStorage.setItem(LS_POM, JSON.stringify(state.pominiete)); pushStan(); };
 const readJSON = (k, dflt) => { try { return JSON.parse(localStorage.getItem(k)) ?? dflt; } catch { return dflt; } };
 const saveLog = () => localStorage.setItem(LS_LOG, JSON.stringify(state.log));
 const saveAdjust = () => { localStorage.setItem(LS_ADJ, JSON.stringify(state.adjust)); pushStan(); };
@@ -156,6 +175,7 @@ function loadStores() {
   state.mob = readJSON(LS_MOB, {});
   state.rekal = readJSON(LS_REK, {});
   state.treningi = readJSON(LS_TRN, {});
+  state.pominiete = readJSON(LS_POM, {});
   // Tętna i kalorii już nie zbieramy — stare liczby znikają przy pierwszym starcie.
   for (const t of Object.values(state.treningi)) if (t) { delete t.hr; delete t.kcal; }
   state.filmy = readJSON(LS_FILMY, {});
@@ -422,14 +442,14 @@ function daneSesji(k, w) {
     const m = p.mobility, mDone = mobDone(w), mAll = mobWidoczne().length;
     return {
       k: m.key, color: DAY_COLOR.D, title: 'Joga',
-      sub: mDone ? `${m.day} · ${mDone}/${mAll} pozycji` : `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
+      sub: mDone ? `${m.day} · ${mDone}/${mAll} pozycji` : sesjaPominieta('D', w) ? `${m.day} · pominięta` : `${m.day} · ${mAll} ${odmiana(mAll, 'pozycja', 'pozycje', 'pozycji')} · ~${m.minutes} min`,
       progress: { done: mDone, total: mAll }, href: '#/mobilnosc',
     };
   }
   const d = p.days[k], pg = postepDnia(w, k);
   return {
     k, color: DAY_COLOR[k], title: tytulDnia(d.title),
-    sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
+    sub: pg.done ? `${d.day} · ${pg.done}/${pg.total} serii` : sesjaPominieta(k, w) ? `${d.day} · pominięta` : `${d.day} · ${d.items.length} ćwiczeń · ~${d.minutes} min`,
     progress: pg, href: '#/d/' + k,
   };
 }
@@ -637,6 +657,7 @@ function dayView(key, wArg) {
   wrapper.append(head(tytulDnia(d.title), `Dzień ${d.key} · ${d.day} · ~${d.minutes} min`, true, d.key));
   wrapper.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
   wrapper.append(pasekTreningu(key, w));
+  wrapper.append(pominiecieBox(key, w));
 
   const { done, total } = postepDnia(w, key);
   if (total) {
@@ -1101,6 +1122,7 @@ function mobilityView(wArg) {
     `Dzień ${m.key} · ${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true, m.key));
   body.append(wyborTygodnia(w, x => '#/mobilnosc/' + x));
   body.append(pasekTreningu('D', w));
+  body.append(pominiecieBox('D', w));
 
   const widoczne = mobWidoczne();
   const done = mobDone(w), total = widoczne.length;
@@ -1284,7 +1306,12 @@ const blokZakonczony = blok => state.week > blok.weeks[blok.weeks.length - 1];
 const blokTrwa = blok => blok.weeks.includes(state.week);
 
 // Ocena jednego boju w bloku: po jednym werdykcie na tydzień treningowy.
-const ocenaBojuWBloku = (key, blok) => ocenaBloku(tygodnieOceniane(blok).map(x => judgeWeek(key, x)));
+// Tydzień, w którym sesji tego boju nie było (pominięta), nie wchodzi do oceny.
+const ocenaBojuWBloku = (key, blok) => {
+  const poz = pozycjaBoju(key);
+  const tygodnie = tygodnieOceniane(blok).filter(x => !(poz && sesjaPominieta(poz.day, x)));
+  return ocenaBloku(tygodnie.map(x => judgeWeek(key, x)));
+};
 
 // Czy blok kwalifikuje się do rekalibracji i czy nie jest już rozliczony.
 function rekalDoWziecia(blok) {
@@ -1834,18 +1861,19 @@ function kgwSet(w, day, n, kg, planKg) {
 // został z poprzedniego razu. Przeniesienie przepina cały tydzień: dziennik serii,
 // własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.
 
-const kluczeTygodnia = (obj, w) => Object.keys(obj).filter(k => +k.split('|')[0] === w);
+const kluczeTygodnia = (obj, w, day) => Object.keys(obj).filter(k => +k.split('|')[0] === w && (!day || k.split('|')[1] === day));
 
-function zawartoscTygodnia(w) {
-  const klucze = kluczeTygodnia(state.log, w).filter(k => state.log[k].some(Boolean));
+// `day` zawęża do jednego dnia (A, B, C albo D = joga); bez niego cały tydzień.
+function zawartoscTygodnia(w, day) {
+  const klucze = kluczeTygodnia(state.log, w, day).filter(k => state.log[k].some(Boolean));
   return {
     serie: klucze.reduce((a, k) => a + state.log[k].filter(Boolean).length, 0),
     dni: [...new Set(klucze.map(k => k.split('|')[1]))].sort(),
-    kgw: kluczeTygodnia(state.kgw, w).length,
-    mob: Object.keys(state.mob[w] || {}).length,
+    kgw: kluczeTygodnia(state.kgw, w, day).length,
+    mob: !day || day === 'D' ? Object.keys(state.mob[w] || {}).length : 0,
   };
 }
-const tydzienMaDane = w => { const z = zawartoscTygodnia(w); return z.serie > 0 || z.kgw > 0 || z.mob > 0; };
+const tydzienMaDane = (w, day) => { const z = zawartoscTygodnia(w, day); return z.serie > 0 || z.kgw > 0 || z.mob > 0; };
 
 /* Sam ruch. Bez pytań o zgodę i bez sprawdzania, czy cel jest pusty — o tym
    decyduje ekran, który to wywołuje, albo urządzenie, które ruch już wykonało.
@@ -1856,8 +1884,10 @@ const tydzienMaDane = w => { const z = zawartoscTygodnia(w); return z.serie > 0 
 function przeniesTydzien(from, to, opcje = {}) {
   const ts = opcje.ts || new Date().toISOString();
   const sync = opcje.sync !== false;
+  // opcje.day: tylko ten dzień (A, B, C albo D = joga) — np. sam poniedziałek.
+  const day = opcje.day || null;
 
-  for (const k of kluczeTygodnia(state.log, from)) {
+  for (const k of kluczeTygodnia(state.log, from, day)) {
     const [, day, n] = k.split('|');
     // Znacznik czasu serii przestawiamy na chwilę przeniesienia. To nie jest
     // „kiedy trenowałaś" — tego pola nikt nie pokazuje — tylko rozstrzygnięcie,
@@ -1875,24 +1905,26 @@ function przeniesTydzien(from, to, opcje = {}) {
   }
   saveLog();
 
-  for (const k of kluczeTygodnia(state.kgw, from)) {
-    const [, day, n] = k.split('|');
-    state.kgw[kgwKey(to, day, n)] = state.kgw[k];
+  for (const k of kluczeTygodnia(state.kgw, from, day)) {
+    const [, d, n] = k.split('|');
+    state.kgw[kgwKey(to, d, n)] = state.kgw[k];
     delete state.kgw[k];
   }
   saveKgw();
 
-  if (state.mob[from]) { state.mob[to] = state.mob[from]; delete state.mob[from]; }
+  if ((!day || day === 'D') && state.mob[from]) { state.mob[to] = state.mob[from]; delete state.mob[from]; }
   saveMob();
 
-  for (const k of kluczeTygodnia(state.czasy, from)) {
-    const [, day, n] = k.split('|');
-    state.czasy[logKey(to, day, n)] = state.czasy[k];
+  for (const k of kluczeTygodnia(state.czasy, from, day)) {
+    const [, d, n] = k.split('|');
+    state.czasy[logKey(to, d, n)] = state.czasy[k];
     delete state.czasy[k];
   }
   saveCzasy();
 
-  state.moves.push({ id: opcje.id || ts + '|' + from + '>' + to, from, to, ts });
+  const ruch = { id: opcje.id || ts + '|' + from + '>' + to + (day ? '|' + day : ''), from, to, ts };
+  if (day) ruch.day = day;                  // bez pola = cały tydzień, jak dotąd
+  state.moves.push(ruch);
   // Lista jedzie w każdej paczce stanu, więc trzymamy sam ogon.
   if (state.moves.length > 20) state.moves = state.moves.slice(-20);
   saveMoves();
@@ -1904,17 +1936,17 @@ function przeniesTydzien(from, to, opcje = {}) {
    wróci na urządzenie, zasada „puste z bazy nie kasuje lokalnego" broni go już
    na zawsze. Stąd granica po czasie, a nie zwykłe „ignoruj ten tydzień": sesja
    zapisana w tym tygodniu PO przeniesieniu jest normalnym, żywym zapisem. */
-const poPrzeniesieniu = (week, ts) =>
-  state.moves.some(m => m.from === week && (!ts || new Date(ts) <= new Date(m.ts)));
+const poPrzeniesieniu = (week, ts, day) =>
+  state.moves.some(m => m.from === week && (!m.day || !day || m.day === day) && (!ts || new Date(ts) <= new Date(m.ts)));
 
 /* Ten sam warunek zastosowany do tego, co już leży na urządzeniu. Naprawia stan
    po rozminięciu opisanym wyżej — i po każdym kolejnym, gdyby do niego doszło. */
 function sprzatnijPoPrzeniesieniach() {
   let zm = false;
   for (const m of state.moves) {
-    for (const k of kluczeTygodnia(state.log, m.from)) {
+    for (const k of kluczeTygodnia(state.log, m.from, m.day)) {
       const stare = state.log[k];
-      const rows = stare.map(r => (r && poPrzeniesieniu(m.from, r.ts) ? null : r));
+      const rows = stare.map(r => (r && poPrzeniesieniu(m.from, r.ts, k.split('|')[1]) ? null : r));
       if (rows.every((r, i) => r === stare[i])) continue;
       while (rows.length && rows[rows.length - 1] == null) rows.pop();
       if (rows.length) state.log[k] = rows; else delete state.log[k];
@@ -1936,7 +1968,8 @@ function zastosujZdalnePrzeniesienia(zdalne) {
   for (const m of zdalne) {
     if (!m || !m.id || znane.has(m.id)) continue;
     if (!(m.from >= 1 && m.from <= 12 && m.to >= 1 && m.to <= 12)) continue;
-    przeniesTydzien(m.from, m.to, { sync: false, id: m.id, ts: m.ts });
+    if (m.day && !['A', 'B', 'C', 'D'].includes(m.day)) continue;
+    przeniesTydzien(m.from, m.to, { sync: false, id: m.id, ts: m.ts, day: m.day || null });
     zm = true;
   }
   // Tydzień źródłowy mógł się już zdążyć odbudować z bazy — czyścimy go tym
@@ -2008,7 +2041,7 @@ function scalZdalneWiersze(rows) {
   let changed = false;
   for (const r of rows) {
     // Zapis, który przeniesienie już przestawiło gdzie indziej.
-    if (poPrzeniesieniu(r.week, r.ts)) continue;
+    if (poPrzeniesieniu(r.week, r.ts, r.day)) continue;
     const k = logKey(r.week, r.day, r.ex), i = r.set_no - 1;
     const arr = (state.log[k] || []).slice();
     while (arr.length <= i) arr.push(null);
@@ -2045,7 +2078,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta, pominiete: state.pominiete });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -2093,6 +2126,7 @@ async function pullStan() {
       if (inny(razem, state.czasy)) { state.czasy = razem; localStorage.setItem(LS_CZASY, JSON.stringify(state.czasy)); zm = true; }
     }
     if (d.filmy && inny(d.filmy, state.filmy)) { state.filmy = { ...state.filmy, ...d.filmy }; localStorage.setItem(LS_FILMY, JSON.stringify(state.filmy)); zm = true; }
+    if (d.pominiete && inny(d.pominiete, state.pominiete)) { state.pominiete = d.pominiete; localStorage.setItem(LS_POM, JSON.stringify(state.pominiete)); zm = true; }
     // Trening w toku na tym urządzeniu wygrywa — stoper żyje tutaj.
     if (d.treningi && inny(d.treningi, state.treningi)) {
       state.treningi = { ...d.treningi, ...wToku() }; saveTreningi(true); zm = true;
@@ -2689,7 +2723,9 @@ document.addEventListener('visibilitychange', () => {
    nie da się odtworzyć, a dziennik treningowy jest wart więcej niż wygoda. */
 function przeniesCard() {
   const box = el('div', 'card');
-  let z = null, na = null, pewny = false;
+  let z = null, na = null, pewny = false, dzien = null;   // dzien = null: cały tydzień
+  const ZAKRES = [[null, 'Cały tydzień'], ['A', 'Pn · A'], ['B', 'Śr · B'], ['C', 'Pt · C'], ['D', 'Nd · joga']];
+  const nazwaZakresu = () => (dzien ? ZAKRES.find(x => x[0] === dzien)[1].replace(' · ', ' ') : 'tydzień');
 
   // Kropka na kafelku tygodnia mówi, gdzie cokolwiek jest zapisane — bez tego
   // wybór numeru byłby zgadywanką.
@@ -2698,7 +2734,7 @@ function przeniesCard() {
     w.append(el('div', 'przenlab', etykieta));
     const chipy = el('div', 'wchipy');
     for (let i = 1; i <= 12; i++) {
-      const c = el('button', 'wchip' + (i === wybrany ? ' on' : '') + (tydzienMaDane(i) ? ' ma' : ''), String(i));
+      const c = el('button', 'wchip' + (i === wybrany ? ' on' : '') + (tydzienMaDane(i, dzien) ? ' ma' : ''), String(i));
       c.onclick = () => { ustaw(i); pewny = false; odswiez(); };
       chipy.append(c);
     }
@@ -2707,7 +2743,7 @@ function przeniesCard() {
   };
 
   const opis = t => {
-    const c = zawartoscTygodnia(t), cz = [];
+    const c = zawartoscTygodnia(t, dzien), cz = [];
     if (c.serie) cz.push(c.serie + ' ' + odmiana(c.serie, 'seria', 'serie', 'serii')
       + (c.dni.length ? ' (dni ' + c.dni.join(', ') + ')' : ''));
     if (c.kgw) cz.push(c.kgw + ' ' + odmiana(c.kgw, 'własny ciężar', 'własne ciężary', 'własnych ciężarów'));
@@ -2720,30 +2756,44 @@ function przeniesCard() {
   function odswiez() {
     box.innerHTML = '';
     box.append(el('h3', null, 'Przenieś dziennik między tygodniami'));
-    box.append(el('p', null, 'Numer tygodnia ustawiasz ręcznie, więc sesja potrafi trafić pod numer, który został z poprzedniego razu. Tutaj przepinasz cały tydzień naraz: serie, własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.'));
+    box.append(el('p', null, 'Numer tygodnia ustawiasz ręcznie, więc sesja potrafi trafić pod numer, który został z poprzedniego razu. Tutaj przepinasz cały tydzień naraz albo jeden dzień: serie, własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.'));
+    // Zakres: cały tydzień albo jeden dzień — np. sam poniedziałek, gdy plan
+    // zaczął się w środę i sesja A trafiła pod zły numer.
+    const zak = el('div', 'przenrzad');
+    zak.append(el('div', 'przenlab', 'Co przenieść'));
+    const zchipy = el('div', 'wchipy zakres');
+    for (const [k, nazwa] of ZAKRES) {
+      const c = el('button', 'wchip' + (k === dzien ? ' on' : ''), nazwa);
+      c.onclick = () => { dzien = k; pewny = false; odswiez(); };
+      zchipy.append(c);
+    }
+    zak.append(zchipy);
+    box.append(zak);
     box.append(rzad('Z tygodnia', z, i => { z = i; }));
     box.append(rzad('Na tydzień', na, i => { na = i; }));
 
+    const co = nazwaZakresu();
     let blokada = null;
-    if (z == null || na == null) blokada = 'Wybierz tydzień, z którego przenosisz, i ten, na który ma trafić. Kropka oznacza tydzień, w którym coś jest zapisane.';
+    if (z == null || na == null) blokada = 'Wybierz tydzień, z którego przenosisz, i ten, na który ma trafić. Kropka oznacza tydzień, w którym coś jest zapisane'
+      + (dzien ? ' w tym dniu.' : '.');
     else if (z === na) blokada = 'To ten sam tydzień.';
-    else if (!tydzienMaDane(z)) blokada = 'Tydzień ' + z + ' jest pusty — nie ma czego przenosić.';
-    else if (tydzienMaDane(na)) blokada = 'Tydzień ' + na + ' nie jest pusty: ' + opis(na)
+    else if (!tydzienMaDane(z, dzien)) blokada = (dzien ? co + ' w tygodniu ' + z : 'Tydzień ' + z) + ' — pusto, nie ma czego przenosić.';
+    else if (tydzienMaDane(na, dzien)) blokada = (dzien ? co + ' w tygodniu ' + na : 'Tydzień ' + na) + ' nie jest pusty: ' + opis(na)
       + '. Przeniesienie nadpisałoby ten zapis, więc jest zablokowane.';
 
     const info = el('div', 'przeninfo' + (blokada && z != null && na != null ? ' stop' : ''));
-    info.textContent = blokada || ('Z tygodnia ' + z + ' na ' + na + ': ' + opis(z) + '.');
+    info.textContent = blokada || ((dzien ? co + ' z' : 'Z') + ' tygodnia ' + z + ' na ' + na + ': ' + opis(z) + '.');
     box.append(info);
 
     if (!blokada) {
       const b = el('button', 'btn ghost' + (pewny ? ' warn' : ''),
-        pewny ? 'Na pewno? Tapnij jeszcze raz' : `Przenieś tydzień ${z} na ${na}`);
+        pewny ? 'Na pewno? Tapnij jeszcze raz' : (dzien ? `Przenieś ${co} z tygodnia ${z} na ${na}` : `Przenieś tydzień ${z} na ${na}`));
       b.onclick = () => {
         if (!pewny) { pewny = true; odswiez(); return; }
-        const zrodlo = z, cel = na, co = opis(z);
-        przeniesTydzien(zrodlo, cel);
+        const zrodlo = z, cel = na, opisZ = opis(z), zakres = dzien;
+        przeniesTydzien(zrodlo, cel, { day: zakres });
         z = null; na = null; pewny = false;
-        komunikat = `Przeniesione z tygodnia ${zrodlo} na ${cel}: ${co}. Drugie urządzenie `
+        komunikat = `Przeniesione z tygodnia ${zrodlo} na ${cel}${zakres ? ' (' + co + ')' : ''}: ${opisZ}. Drugie urządzenie `
           + 'wykona ten sam ruch przy najbliższej synchronizacji.';
         odswiez();
       };
@@ -2861,7 +2911,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy , pominiete: state.pominiete };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -2888,6 +2938,7 @@ function settingsView() {
       if (d.treningi) { state.treningi = d.treningi; saveTreningi(); }
       if (d.filmy) { state.filmy = d.filmy; saveFilmy(); }
       if (d.czasy) { state.czasy = d.czasy; saveCzasy(); }
+      if (d.pominiete) { state.pominiete = d.pominiete; savePominiete(); }
       render();
     } catch { alert('Nie udało się odczytać pliku.'); }
   };
@@ -3081,6 +3132,28 @@ function startPrzyPierwszejSerii(day, w) {
 
 // Pasek na górze sesji: przed startem duży przycisk, w trakcie stoper
 // i „Zakończ", po końcu — podsumowanie czasu.
+/* Pominięcie sesji: jedno tapnięcie w pustej sesji, cofnięcie drugim.
+   Zapis jedzie w paczce stanu, więc drugie urządzenie widzi to samo. */
+function pominiecieBox(day, w) {
+  const frag = document.createDocumentFragment();
+  const maWpisy = day === 'D' ? mobDone(w) > 0 : postepDnia(w, day).done > 0;
+  if (maWpisy) return frag;
+  if (sesjaPominieta(day, w)) {
+    const n = el('div', 'note uwaga pominieta');
+    n.append(el('b', null, `Sesja pominięta w tygodniu ${w}`));
+    n.append(document.createTextNode('Nie czeka na wpis, nie przerywa serii tygodni z kompletem i nie wstrzymuje werdyktu bloku. Pierwsza zapisana seria sama ją przywraca.'));
+    const r = el('div', 'kbtn');
+    r.append(miniBtn('Przywróć sesję', () => { pominSesje(day, w, false); render(); }));
+    n.append(r);
+    frag.append(n);
+  } else {
+    const b = el('button', 'pomin', `Nie było tej sesji w tygodniu ${w} — pomiń`);
+    b.onclick = () => { pominSesje(day, w, true); render(); };
+    frag.append(b);
+  }
+  return frag;
+}
+
 function pasekTreningu(day, w) {
   const box = el('div', 'trn');
   box.style.setProperty('--tc', DAY_HEX[day]);
@@ -3204,7 +3277,7 @@ function postepSesji(k, w) {
 
 // Tonaż całego tygodnia (A, B, C) — joga nie ma kilogramów.
 const tonazTygodnia = w => ['A', 'B', 'C'].reduce((a, d) => a + tonazDnia(w, d).ton, 0);
-const tydzienZaliczony = w => ['A', 'B', 'C'].every(d => sesjaKompletna(d, w));
+const tydzienZaliczony = w => ['A', 'B', 'C'].every(d => sesjaKompletna(d, w) || sesjaPominieta(d, w));
 
 // Ile tygodni z rzędu ma komplet trzech sesji z ciężarem, licząc wstecz od
 // bieżącego (bieżący wlicza się dopiero, gdy jest pełny — inaczej seria
@@ -3248,7 +3321,7 @@ function panelTygodnia(w) {
     r.style.setProperty('--tc', DAY_HEX[k]);
     const nazwa = k === 'D' ? 'Joga' : tytulDnia(state.plan.days[k].title).split(' · ')[0];
     r.append(el('i'), el('span', 'pln', `${SKROT_DNIA[k]} · ${nazwa}`),
-      el('span', 'plv', pg.ile >= 1 ? '✓' : pg.total ? Math.round(pg.ile * 100) + '%' : '—'));
+      el('span', 'plv', pg.ile >= 1 ? '✓' : sesjaPominieta(k, w) ? 'pom.' : pg.total ? Math.round(pg.ile * 100) + '%' : '—'));
     r.onclick = () => go(trasaDnia(k));
     leg.append(r);
   }
@@ -3715,7 +3788,7 @@ window.addEventListener('hashchange', () => { state.view = location.hash || '#/'
    a pusta paczka nadpisałaby jego stan. */
 const LS_CYKL = 'trening.cykl.v1', LS_ARCH = 'trening.archiwum.v1';
 const ZBIORY_CYKLU = { log: [LS_LOG, {}], kgw: [LS_KGW, {}], mob: [LS_MOB, {}], rekal: [LS_REK, {}], adjust: [LS_ADJ, {}],
-  treningi: [LS_TRN, {}], czasy: [LS_CZASY, {}], moves: [LS_MOV, []], queue: [LS_Q, []] };
+  treningi: [LS_TRN, {}], czasy: [LS_CZASY, {}], moves: [LS_MOV, []], queue: [LS_Q, []], pominiete: [LS_POM, {}] };
 function przejdzNaCykl(p) {
   const nowy = p.cykl || 1;
   const byl = +localStorage.getItem(LS_CYKL) || 1;
@@ -3759,7 +3832,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=70`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=71`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3812,7 +3885,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=70')
+fetch('plan.json?v=71')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
