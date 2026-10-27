@@ -19,7 +19,7 @@
    i ciężki na liczby i tytuły, pełnej szerokości na tekst. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=69) format('woff2');
+  src:url(fonts/Archivo.woff2?v=70) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -941,13 +941,80 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
   background:var(--ink);color:var(--on-ink);font:800 14.5px/1.3 var(--sans);box-shadow:0 16px 40px -10px rgba(0,0,0,.5);animation:prowWjazd .35s var(--spring)}
 /* konfetti — płótno nad wszystkim, ruch.js */
 #konfetti{position:fixed;inset:0;z-index:95;pointer-events:none}
+/* ══ ekrany na całą wysokość — przewijanie z przyciąganiem jak w pionowym wideo ══
+   Dziś: karta sesji i każda sesja z listy to plakat na cały ekran.
+   Sesja: każde ćwiczenie to jeden ekran — tytuł u góry, sztanga albo dawka
+   na środku, serie na dole. Skończone ćwiczenie zwija się do jednego wiersza. */
+html:has(#app > .home),html:has(body.w-sesji){scroll-snap-type:y proximity}
+.tile.hero-s,.lista .tile,body.w-sesji .ex{scroll-snap-align:start;scroll-snap-stop:normal}
+.tile.hero-s{min-height:calc(100vh - 150px);min-height:calc(100dvh - 150px);scroll-margin-top:10px;display:flex;flex-direction:column}
+.tile.hero-s .eyebrow{align-self:flex-start}
+.tile.hero-s .presk{margin-top:auto}
+.sztanga3d-host{position:relative;width:100%;min-height:150px;margin:10px 0 0;flex:1;display:flex;flex-direction:column;justify-content:center}
+.sztanga3d{display:block;width:100%;height:190px;max-height:36vh;touch-action:pan-y;cursor:grab;filter:drop-shadow(0 18px 24px rgba(0,0,0,.35))}
+.sztanga3d:active{cursor:grabbing}
+.sztanga3d-opis{text-align:center;font:800 10.5px/1.3 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px;min-height:14px}
+.hero3d .sztanga3d-opis{color:rgba(255,255,255,.85)}
+.hero3d .sztanga3d{height:220px}
+
+/* lista sesji na ekranie Dziś: plakaty */
+.lista{background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;overflow:visible;display:flex;flex-direction:column;gap:14px;margin:0 -8px}
+.lista .tile,.lista .tile+.tile{border:0;border-radius:var(--r-l);min-height:calc(100vh - 150px);min-height:calc(100dvh - 150px);scroll-margin-top:10px;
+  flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:12px;padding:26px 24px 26px;color:#fff;position:relative;overflow:hidden;isolation:isolate;
+  background:
+    radial-gradient(60% 55% at 15% 20%,color-mix(in srgb,var(--tc) 90%,#fff) 0%,transparent 60%),
+    radial-gradient(55% 60% at 85% 25%,color-mix(in srgb,var(--tc) 55%,#000) 0%,transparent 60%),
+    radial-gradient(70% 60% at 50% 100%,color-mix(in srgb,var(--tc) 70%,#000) 0%,transparent 65%),
+    color-mix(in srgb,var(--tc) 62%,#000);
+  background-size:220% 220%,220% 220%,220% 220%,100% 100%;animation:aurora 18s ease-in-out infinite;
+  box-shadow:0 30px 60px -24px color-mix(in srgb,var(--tc) 85%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
+.lista .tile:active{background-color:color-mix(in srgb,var(--tc) 55%,#000)}
+.lista .tile .k{position:absolute;right:-14px;top:-30px;width:auto;height:auto;border-radius:0;background:none;box-shadow:none;
+  font:900 300px/1 var(--disp);font-stretch:75%;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.3);pointer-events:none;z-index:-1;
+  transform:translateY(calc(var(--sy) * .06px))}
+.lista .tile .tmid{position:absolute;left:24px;right:24px;bottom:26px;padding-right:70px}
+.lista .tile .tt{font:900 44px/.95 var(--disp);font-stretch:78%;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance;text-shadow:0 6px 24px rgba(0,0,0,.3)}
+.lista .tile .ts{font:700 13px/1.4 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:10px}
+.lista .tile .kring{position:absolute;top:24px;left:24px;width:68px;height:68px}
+.lista .tile .kring .kbg{stroke:rgba(255,255,255,.22)}
+.lista .tile .kring .kfg{stroke:#fff;filter:none}
+.lista .tile.pelny-tile .kring .kfg,.lista .tile .kring.pelny .kfg{stroke:#fff}
+.lista .tile .go{position:absolute;right:22px;bottom:26px;width:52px;height:52px;border-radius:50%;background:#fff;color:#0C0E14;display:grid;place-items:center;font-size:26px;margin:0;
+  box-shadow:0 10px 24px -6px rgba(0,0,0,.45)}
+.lista .tile:active .go{transform:scale(.94)}
+.lista .tile::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 6px);mix-blend-mode:overlay}
+
+/* sesja: ćwiczenie na cały ekran */
+body.w-sesji .ex{min-height:calc(100vh - 24px);min-height:calc(100dvh - 24px);display:flex;flex-direction:column;scroll-margin-top:8px;padding-top:22px;padding-bottom:18px}
+body.w-sesji .trn.live ~ * .ex{scroll-margin-top:98px}
+body.w-sesji .ex .exn{font-size:150px;right:-6px;top:auto;bottom:-20px;opacity:.07}
+body.w-sesji .ex.main .exn{opacity:.14}
+body.w-sesji .ex .exname{font-size:24px;line-height:1.1;font-weight:900;font-stretch:85%;letter-spacing:-.01em}
+body.w-sesji .ex:not(.mob):not(.main) .metrics{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:18px;padding:18px 0;position:relative}
+body.w-sesji .ex:not(.mob):not(.main) .metrics .m:nth-child(3){text-align:left}
+body.w-sesji .ex:not(.mob):not(.main) .metrics::before{content:'';position:absolute;left:-20px;right:-18px;top:0;bottom:0;z-index:-1;background:radial-gradient(60% 70% at 30% 50%,color-mix(in srgb,var(--dc,var(--ink)) 16%,transparent),transparent 70%)}
+body.w-sesji .ex:not(.mob):not(.main) .m .mv{font-size:56px;font-stretch:76%;line-height:1;letter-spacing:-.02em}
+body.w-sesji .ex:not(.mob):not(.main) .m .mv.txt{font-size:22px;line-height:1.25;font-weight:600;max-width:30ch}
+body.w-sesji .ex:not(.mob):not(.main) .m .ml{font-size:11px}
+body.w-sesji .ex.main .metrics{padding-top:6px}
+body.w-sesji .ex .sets{margin-top:auto}
+body.w-sesji .ex.mob{padding-top:18px}
+body.w-sesji .ex.mob .filmwkarcie{flex:1;display:flex;flex-direction:column;min-height:0;margin-top:14px}
+body.w-sesji .ex.mob .filmekran{flex:1;display:flex;flex-direction:column;min-height:0}
+body.w-sesji .ex.mob .filmramka{flex:1;aspect-ratio:auto;min-height:220px;border-radius:18px}
+body.w-sesji .ex.mob .more{margin-top:14px}
+body.w-sesji .ex.mob .exnote{margin-top:auto}
+body.w-sesji .ex.zwiniety:not(.otwarty){min-height:0;display:block;padding-top:12px;padding-bottom:12px;scroll-snap-align:none}
+body.w-sesji .ex.zwiniety:not(.otwarty) .exname{font-size:15px;font-weight:800}
+body.w-sesji .sswrap .ex{min-height:calc(50vh - 20px);min-height:calc(50dvh - 20px)}
+@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=69"></script>
-<script src="app.js?v=69"></script>
-<script src="ruch.js?v=69"></script>
+<script src="progresja.js?v=70"></script>
+<script src="app.js?v=70"></script>
+<script src="ruch.js?v=70"></script>
 </body>
 </html>
