@@ -66,14 +66,14 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 ## Wygląd
 
-Kierunek: **papierowy dziennik z siłowni**. Ciepły papier z ledwo widoczną
-siatką kropek zamiast szarego tła, kreski i krawędzie zamiast cieni, jeden pełny
-kolor dnia zamiast gradientów, metadane (data, licznik serii, etykiety rubryk)
-krojem maszynowym jak na wydruku, tytuły wielką zwężoną czcionką jak na tablicy
-z ciężarami. Jasny motyw jest bazą, ciemny to ten sam papier po zgaszeniu światła
-i włącza się sam według ustawienia telefonu. Dane są na pierwszym planie, ale
-interfejs ma reagować jak rzecz fizyczna: przyciski wciskają się pod palcem,
-odhaczenie jest stemplem, ciężar dostaje zakreślacz.
+Kierunek: **tablica wyników na stadionie nocą**. Szkło z rozmyciem na ciemnym
+granacie, zorza w kolorach dni, która powoli krąży pod wszystkim, poświata
+koloru dnia na pierścieniach, przyciskach i szynach kart. Jeden krój (Archivo)
+w całej aplikacji: zwężony i ciężki na liczby i tytuły, pełnej szerokości na
+tekst. Numer tygodnia zajmuje pół ekranu, tygodnie leżą na wstędze przewijanej
+palcem, dolny pasek jest pływającą kapsułą, a karta sesji to plakat z literą dnia
+w paralaksie. Jasny motyw to ta sama konstrukcja na białym tle; ciemny włącza
+się sam według ustawienia telefonu.
 
 - **Ekran Dziś**: duży tytuł z datą i numerem tygodnia, pod nim dwanaście
   tygodni jednym rzędem (deload na bursztynowo), pasek dni Pn–Nd z literą
@@ -158,13 +158,15 @@ odhaczenie jest stemplem, ciężar dostaje zakreślacz.
   siedzi w cache service workera. Tekst do czytania idzie krojem systemowym
 - Jedyny kolor poza kolorami dni i serii to zieleń „zapisane" i bursztyn
   ostrzeżeń. Główny przycisk jest czarny (w ciemnym motywie biały)
-- **Ruch**: elementy widoku wjeżdżają jeden po drugim, linie rubryk i nagłówków
-  rysują się od lewej, liczby na kartach liczą się od zera (`ruch.js` — tylko
-  obserwuje DOM, nic nie zapisuje), zakreślacz wjeżdża pod ciężar, pasek postępu
-  ma biegnące pasy, dopóki sesja nie jest kompletna, odhaczenie serii wbija się
-  jak stempel i przekreśla wiersz, zakładka dostaje wskaźnik u góry, przyciski
-  wciskają się o 3 px, pierścienie i wykresy wypełniają się przy wejściu, karta
-  zaliczenia ma tytuł w ramce stempla. `prefers-reduced-motion` wyłącza wszystko
+- **Ruch** (`ruch.js` — tylko obserwuje DOM, nic nie zapisuje): duch poprzedniego
+  ekranu odsuwa się, gdy wjeżdża nowy (w głąb w lewo, wstecz w prawo), elementy
+  wjeżdżają jeden po drugim, karty poniżej ekranu pokazują się dopiero po
+  przewinięciu, fala po każdym tapnięciu, konfetti i krótka wibracja przy odhaczeniu
+  serii, dwie salwy konfetti na karcie zaliczenia, paralaksa litery dnia i numeru
+  tygodnia, karta „Dziś" pochyla się pod palcem, dolna kapsuła wypełnia się w czasie
+  przerwy i błyska na koniec, wstęga tygodni sama przewija się do bieżącego, pod
+  nagłówkiem biegnie pasek z datą i blokiem, liczby liczą się od zera, pierścienie
+  i wykresy wypełniają się przy wejściu. `prefers-reduced-motion` wyłącza wszystko
 
 Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli:
 kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie na zewnątrz, średnice
@@ -295,7 +297,7 @@ albo service worker poda starą wersję:
 ```
 index.html      struktura + style (wszystko inline, zero CDN)
 app.js          router, przeliczenia, timer, kalkulator talerzy
-ruch.js         liczby odliczane od zera przy wejściu w widok (bez dostępu do danych)
+ruch.js         warstwa efektów: przejścia, fale, konfetti, paralaksa (bez dostępu do danych)
 plan.json       dane planu
 sw.js           cache offline
 tools/xlsx.mjs          czytnik XLSX bez zależności
