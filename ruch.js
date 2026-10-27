@@ -383,7 +383,7 @@
     const cT = Math.cos(th), sT = Math.sin(th), cP = Math.cos(ph), sP = Math.sin(ph);
     const proj = (x, y, z) => { const x1 = x * cT - z * sT, z1 = x * sT + z * cT; return [cx + x1 * sc, cy - (y * cP - z1 * sP) * sc, z1 * cP + y * sP]; };
     const L = [0.35, 0.8, 0.5]; const Ln = Math.hypot(...L); L[0] /= Ln; L[1] /= Ln; L[2] /= Ln;
-    const N = 30;
+    const N = 22;
 
     // walec wzdłuż osi x od xa do xb, promień R, kolor bazowy; blizszy koniec rysowany jako ścianka
     const walec = (xa, xb, R, kolor, dziura) => {
@@ -451,14 +451,20 @@
     return ruch;
   };
 
-  let petla = false;
+  // Rysujemy co drugą klatkę (~30 kl/s) i nie w czasie przewijania strony —
+  // na telefonie liczy się każda klatka, a sztanga i tak obraca się powoli.
+  let petla = false, parzysta = false, przewija = 0;
+  window.addEventListener('scroll', () => { przewija = performance.now(); }, { passive: true });
   const krok = () => {
     let zywe = false;
     const teraz = performance.now();
+    parzysta = !parzysta;
     for (const s of sceny) {
       if (!s.c.isConnected) { sceny.delete(s); continue; }
       zywe = true;
       if (!s.widoczna || document.hidden) continue;
+      if (parzysta && !s.drag) continue;
+      if (teraz - przewija < 160 && !s.drag) continue;
       rysuj(s, teraz);
     }
     if (zywe) raf(krok); else petla = false;
