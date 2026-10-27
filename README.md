@@ -66,10 +66,14 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 ## Wygląd
 
-Kierunek: **natywna aplikacja treningowa**, taka, za którą płaci się abonament
-(punkt odniesienia: Nike Training Club, Strong, Apple Fitness). Powściągliwie,
-z danymi na pierwszym planie. Jasny motyw jest bazą, ciemny włącza się sam
-według ustawienia telefonu.
+Kierunek: **papierowy dziennik z siłowni**. Ciepły papier z ledwo widoczną
+siatką kropek zamiast szarego tła, kreski i krawędzie zamiast cieni, jeden pełny
+kolor dnia zamiast gradientów, metadane (data, licznik serii, etykiety rubryk)
+krojem maszynowym jak na wydruku, tytuły wielką zwężoną czcionką jak na tablicy
+z ciężarami. Jasny motyw jest bazą, ciemny to ten sam papier po zgaszeniu światła
+i włącza się sam według ustawienia telefonu. Dane są na pierwszym planie, ale
+interfejs ma reagować jak rzecz fizyczna: przyciski wciskają się pod palcem,
+odhaczenie jest stemplem, ciężar dostaje zakreślacz.
 
 - **Ekran Dziś**: duży tytuł z datą i numerem tygodnia, pod nim dwanaście
   tygodni jednym rzędem (deload na bursztynowo), pasek dni Pn–Nd z literą
@@ -154,9 +158,13 @@ według ustawienia telefonu.
   siedzi w cache service workera. Tekst do czytania idzie krojem systemowym
 - Jedyny kolor poza kolorami dni i serii to zieleń „zapisane" i bursztyn
   ostrzeżeń. Główny przycisk jest czarny (w ciemnym motywie biały)
-- **Ruch** tylko tam, gdzie coś się dzieje: wypełnianie pierścieni i pasków
-  przy wejściu, liczby odliczane od zera, sprężynowe odhaczenie serii, linie
-  wykresu rysowane od lewej. `prefers-reduced-motion` wyłącza wszystko
+- **Ruch**: elementy widoku wjeżdżają jeden po drugim, linie rubryk i nagłówków
+  rysują się od lewej, liczby na kartach liczą się od zera (`ruch.js` — tylko
+  obserwuje DOM, nic nie zapisuje), zakreślacz wjeżdża pod ciężar, pasek postępu
+  ma biegnące pasy, dopóki sesja nie jest kompletna, odhaczenie serii wbija się
+  jak stempel i przekreśla wiersz, zakładka dostaje wskaźnik u góry, przyciski
+  wciskają się o 3 px, pierścienie i wykresy wypełniają się przy wejściu, karta
+  zaliczenia ma tytuł w ramce stempla. `prefers-reduced-motion` wyłącza wszystko
 
 Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli:
 kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie na zewnątrz, średnice
@@ -279,7 +287,7 @@ Adres: `https://<login>.github.io/<repo>/`. Na telefonie: menu przeglądarki →
 Po każdej zmianie plików podbij **oba** znaczniki wersji, inaczej przeglądarka
 albo service worker poda starą wersję:
 
-- `?v=N` przy `app.js` w `index.html`, przy `plan.json` w `app.js` i w liście `ASSETS` w `sw.js`
+- `?v=N` przy `app.js`, `progresja.js` i `ruch.js` w `index.html`, przy `plan.json` w `app.js` i w liście `ASSETS` w `sw.js`
 - `CACHE` w `sw.js`
 
 ## Struktura
@@ -287,6 +295,7 @@ albo service worker poda starą wersję:
 ```
 index.html      struktura + style (wszystko inline, zero CDN)
 app.js          router, przeliczenia, timer, kalkulator talerzy
+ruch.js         liczby odliczane od zera przy wejściu w widok (bez dostępu do danych)
 plan.json       dane planu
 sw.js           cache offline
 tools/xlsx.mjs          czytnik XLSX bez zależności

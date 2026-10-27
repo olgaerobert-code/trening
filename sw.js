@@ -1,9 +1,9 @@
 /* Cache-first: po pierwszym wejściu aplikacja działa bez zasięgu.
    Zmiana CACHE unieważnia stary komplet plików. */
-const CACHE = 'plan12-v68';
+const CACHE = 'plan12-v69';
 const ASSETS = [
-  './', './index.html', './app.js?v=67', './progresja.js?v=67', './plan.json?v=67', './plan-cykl1.json?v=67',
-  './fonts/Archivo.woff2?v=67',
+  './', './index.html', './app.js?v=68', './progresja.js?v=68', './ruch.js?v=68', './plan.json?v=68', './plan-cykl1.json?v=68',
+  './fonts/Archivo.woff2?v=68',
   './manifest.webmanifest', './icon-192.png', './icon-512.png',
 ];
 

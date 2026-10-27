@@ -3759,7 +3759,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=67`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=68`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3812,7 +3812,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=67')
+fetch('plan.json?v=68')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
