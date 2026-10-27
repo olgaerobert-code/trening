@@ -158,6 +158,15 @@ się sam według ustawienia telefonu.
   siedzi w cache service workera. Tekst do czytania idzie krojem systemowym
 - Jedyny kolor poza kolorami dni i serii to zieleń „zapisane" i bursztyn
   ostrzeżeń. Główny przycisk jest czarny (w ciemnym motywie biały)
+- **Ekrany na całą wysokość**, przewijane z przyciąganiem jak pionowe wideo:
+  na Dziś karta sesji i każda sesja z listy to plakat w kolorze dnia z literą
+  w paralaksie; w sesji każde ćwiczenie to jeden ekran — tytuł u góry, sztanga
+  albo dawka na środku, serie na dole, a w jodze film na pół ekranu. Skończone
+  ćwiczenie zwija się do jednego wiersza
+- **Sztanga 3D** (`ruch.js`, płótno bez bibliotek): gryf, kołnierze, tuleje
+  i talerze w kolorach IPF, obraca się sama i pod palcem. Na karcie Dziś pokazuje
+  ciężar boju, w karcie boju talerze wjeżdżają na gryf przy każdym ruchu suwaka
+  „Ciężar na sztandze"; pod spodem rozkład na stronę
 - **Ruch** (`ruch.js` — tylko obserwuje DOM, nic nie zapisuje): duch poprzedniego
   ekranu odsuwa się, gdy wjeżdża nowy (w głąb w lewo, wstecz w prawo), elementy
   wjeżdżają jeden po drugim, karty poniżej ekranu pokazują się dopiero po
@@ -297,7 +306,7 @@ albo service worker poda starą wersję:
 ```
 index.html      struktura + style (wszystko inline, zero CDN)
 app.js          router, przeliczenia, timer, kalkulator talerzy
-ruch.js         warstwa efektów: przejścia, fale, konfetti, paralaksa (bez dostępu do danych)
+ruch.js         warstwa efektów: przejścia, fale, konfetti, paralaksa, sztanga 3D (bez dostępu do danych)
 plan.json       dane planu
 sw.js           cache offline
 tools/xlsx.mjs          czytnik XLSX bez zależności
