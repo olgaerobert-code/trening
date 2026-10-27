@@ -1861,6 +1861,11 @@ function kgwSet(w, day, n, kg, planKg) {
 // został z poprzedniego razu. Przeniesienie przepina cały tydzień: dziennik serii,
 // własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.
 
+// Ruch całego tygodnia ma pola from/to. Ruch JEDNEGO DNIA ma w/na/day — celowo
+// inne nazwy: starsza wersja aplikacji na drugim urządzeniu sprawdza `m.from >= 1`,
+// więc takiego ruchu nie wykona jako przeniesienia całego tygodnia.
+const ruchOd = m => (m.from != null ? m.from : m.w);
+const ruchDo = m => (m.to != null ? m.to : m.na);
 const kluczeTygodnia = (obj, w, day) => Object.keys(obj).filter(k => +k.split('|')[0] === w && (!day || k.split('|')[1] === day));
 
 // `day` zawęża do jednego dnia (A, B, C albo D = joga); bez niego cały tydzień.
@@ -1922,9 +1927,8 @@ function przeniesTydzien(from, to, opcje = {}) {
   }
   saveCzasy();
 
-  const ruch = { id: opcje.id || ts + '|' + from + '>' + to + (day ? '|' + day : ''), from, to, ts };
-  if (day) ruch.day = day;                  // bez pola = cały tydzień, jak dotąd
-  state.moves.push(ruch);
+  const id = opcje.id || ts + '|' + from + '>' + to + (day ? '|' + day : '');
+  state.moves.push(day ? { id, w: from, na: to, day, ts } : { id, from, to, ts });
   // Lista jedzie w każdej paczce stanu, więc trzymamy sam ogon.
   if (state.moves.length > 20) state.moves = state.moves.slice(-20);
   saveMoves();
@@ -1937,16 +1941,16 @@ function przeniesTydzien(from, to, opcje = {}) {
    na zawsze. Stąd granica po czasie, a nie zwykłe „ignoruj ten tydzień": sesja
    zapisana w tym tygodniu PO przeniesieniu jest normalnym, żywym zapisem. */
 const poPrzeniesieniu = (week, ts, day) =>
-  state.moves.some(m => m.from === week && (!m.day || !day || m.day === day) && (!ts || new Date(ts) <= new Date(m.ts)));
+  state.moves.some(m => ruchOd(m) === week && (!m.day || !day || m.day === day) && (!ts || new Date(ts) <= new Date(m.ts)));
 
 /* Ten sam warunek zastosowany do tego, co już leży na urządzeniu. Naprawia stan
    po rozminięciu opisanym wyżej — i po każdym kolejnym, gdyby do niego doszło. */
 function sprzatnijPoPrzeniesieniach() {
   let zm = false;
   for (const m of state.moves) {
-    for (const k of kluczeTygodnia(state.log, m.from, m.day)) {
+    for (const k of kluczeTygodnia(state.log, ruchOd(m), m.day)) {
       const stare = state.log[k];
-      const rows = stare.map(r => (r && poPrzeniesieniu(m.from, r.ts, k.split('|')[1]) ? null : r));
+      const rows = stare.map(r => (r && poPrzeniesieniu(ruchOd(m), r.ts, k.split('|')[1]) ? null : r));
       if (rows.every((r, i) => r === stare[i])) continue;
       while (rows.length && rows[rows.length - 1] == null) rows.pop();
       if (rows.length) state.log[k] = rows; else delete state.log[k];
@@ -1967,9 +1971,10 @@ function zastosujZdalnePrzeniesienia(zdalne) {
   let zm = false;
   for (const m of zdalne) {
     if (!m || !m.id || znane.has(m.id)) continue;
-    if (!(m.from >= 1 && m.from <= 12 && m.to >= 1 && m.to <= 12)) continue;
+    const od = ruchOd(m), na = ruchDo(m);
+    if (!(od >= 1 && od <= 12 && na >= 1 && na <= 12)) continue;
     if (m.day && !['A', 'B', 'C', 'D'].includes(m.day)) continue;
-    przeniesTydzien(m.from, m.to, { sync: false, id: m.id, ts: m.ts, day: m.day || null });
+    przeniesTydzien(od, na, { sync: false, id: m.id, ts: m.ts, day: m.day || null });
     zm = true;
   }
   // Tydzień źródłowy mógł się już zdążyć odbudować z bazy — czyścimy go tym
@@ -3134,6 +3139,30 @@ function startPrzyPierwszejSerii(day, w) {
 // i „Zakończ", po końcu — podsumowanie czasu.
 /* Pominięcie sesji: jedno tapnięcie w pustej sesji, cofnięcie drugim.
    Zapis jedzie w paczce stanu, więc drugie urządzenie widzi to samo. */
+/* Jednorazowe porządki w cyklu 2: plan zaczął się w środę, więc poniedziałek
+   tygodnia 1 ma być pusty i pominięty, a zapisany poniedziałek przesuwa się
+   o tydzień w górę (2 → 3, a gdy coś siedzi pod tygodniem 1, także 1 → 2).
+   Wykonuje się raz na urządzeniu; stałe identyfikatory ruchów sprawiają, że
+   drugie urządzenie tego samego przeniesienia nie powtórzy. Nic nie nadpisuje:
+   ruch idzie tylko w pusty cel. */
+const LS_MIG = 'trening.migracja.v1';
+function migracjaPoniedzialku(final) {
+  if (!state.plan || !(state.plan.cykl >= 2)) return false;
+  const mig = readJSON(LS_MIG, {});
+  if (mig.pn2na3) return false;
+  const znane = new Set(state.moves.map(m => m.id));
+  let zm = false;
+  if (!znane.has('migracja-A-2-3') && tydzienMaDane(2, 'A') && !tydzienMaDane(3, 'A')) {
+    przeniesTydzien(2, 3, { day: 'A', id: 'migracja-A-2-3' }); zm = true;
+  }
+  if (!znane.has('migracja-A-1-2') && tydzienMaDane(1, 'A') && !tydzienMaDane(2, 'A')) {
+    przeniesTydzien(1, 2, { day: 'A', id: 'migracja-A-1-2' }); zm = true;
+  }
+  if (!tydzienMaDane(1, 'A') && !sesjaPominieta('A', 1)) { pominSesje('A', 1, true); zm = true; }
+  if (final) { mig.pn2na3 = true; localStorage.setItem(LS_MIG, JSON.stringify(mig)); }
+  return zm;
+}
+
 function pominiecieBox(day, w) {
   const frag = document.createDocumentFragment();
   const maWpisy = day === 'D' ? mobDone(w) > 0 : postepDnia(w, day).done > 0;
@@ -3832,7 +3861,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=71`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=72`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3885,7 +3914,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=71')
+fetch('plan.json?v=72')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
@@ -3900,6 +3929,7 @@ fetch('plan.json?v=71')
     // Naprawa przed pierwszym renderem: tydzień, z którego coś przeniesiono, mógł
     // się odbudować z bazy, zanim wysyłka kolejki zdążyła go tam wyzerować.
     sprzatnijPoPrzeniesieniach();
+    migracjaPoniedzialku(false);               // na danych z urządzenia; po pobraniu z bazy jeszcze raz
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
     // Zimny start bez hasha: wchodzimy prosto w niedokończoną sesję. Wejście
@@ -3910,10 +3940,12 @@ fetch('plan.json?v=71')
       history.replaceState(null, '', state.view);
     }
     render();
-    pullStan().then(() => {
+    pullStan().then(async () => {
       przeliczPlan();
       render();
-      pullAll(); flushQueue();
+      await pullAll();
+      if (migracjaPoniedzialku(navigator.onLine && state.sync !== 'off')) render();
+      flushQueue();
     });
     sprawdzWersje();
     if ('serviceWorker' in navigator) {

@@ -19,7 +19,7 @@
    i ciężki na liczby i tytuły, pełnej szerokości na tekst. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=71) format('woff2');
+  src:url(fonts/Archivo.woff2?v=72) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -42,7 +42,7 @@
   --good-bg:#DFF4E6;
   --warn:#9A5A00;
   --warn-bg:#FBEFD8;
-  --glass:rgba(255,255,255,.72);
+  --glass:rgba(255,255,255,.88);
   --glass-line:rgba(12,14,20,.08);
   --shadow:0 1px 2px rgba(12,14,20,.04),0 12px 40px -12px rgba(12,14,20,.14);
   --glow:0 0 0 transparent;
@@ -75,10 +75,10 @@
     --ink:#F2F4F8; --ink-2:#A9B0C0; --ink-3:#7C8496; --on-ink:#0A0B10;
     --good:#3DDC84; --good-bg:rgba(61,220,132,.14);
     --warn:#F5B041; --warn-bg:rgba(245,176,65,.14);
-    --glass:rgba(255,255,255,.045);
+    --glass:#15171F;
     --glass-line:rgba(255,255,255,.09);
     --shadow:0 20px 50px -20px rgba(0,0,0,.7);
-    --bar-bg:rgba(20,22,30,.72);
+    --bar-bg:rgba(20,22,30,.82);
     --zorza-1:rgba(57,135,229,.26);
     --zorza-2:rgba(217,89,38,.16);
     --zorza-3:rgba(25,158,112,.2);
@@ -91,10 +91,10 @@
   --ink:#F2F4F8; --ink-2:#A9B0C0; --ink-3:#7C8496; --on-ink:#0A0B10;
   --good:#3DDC84; --good-bg:rgba(61,220,132,.14);
   --warn:#F5B041; --warn-bg:rgba(245,176,65,.14);
-  --glass:rgba(255,255,255,.045);
+  --glass:#15171F;
   --glass-line:rgba(255,255,255,.09);
   --shadow:0 20px 50px -20px rgba(0,0,0,.7);
-  --bar-bg:rgba(20,22,30,.72);
+  --bar-bg:rgba(20,22,30,.82);
   --zorza-1:rgba(57,135,229,.26);
   --zorza-2:rgba(217,89,38,.16);
   --zorza-3:rgba(25,158,112,.2);
@@ -114,11 +114,11 @@ body{
 /* zorza: trzy plamy koloru dni, które powoli krążą pod wszystkim */
 body::before{content:'';position:fixed;inset:-20%;z-index:-1;pointer-events:none;
   background:
-    radial-gradient(40% 35% at 20% 15%,var(--zorza-1),transparent 70%),
-    radial-gradient(35% 30% at 85% 30%,var(--zorza-2),transparent 70%),
-    radial-gradient(45% 40% at 60% 90%,var(--zorza-3),transparent 70%);
-  filter:blur(40px);opacity:var(--aurora-alpha);
-  animation:zorza 26s ease-in-out infinite alternate}
+    radial-gradient(40% 35% at 20% 15%,var(--zorza-1),transparent 72%),
+    radial-gradient(35% 30% at 85% 30%,var(--zorza-2),transparent 72%),
+    radial-gradient(45% 40% at 60% 90%,var(--zorza-3),transparent 72%);
+  opacity:var(--aurora-alpha);will-change:transform;
+  animation:zorza 40s ease-in-out infinite alternate}
 @keyframes zorza{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(4%,-3%) rotate(3deg)}100%{transform:translate(-3%,4%) rotate(-2deg)}}
 .wrap{max-width:600px;margin:0 auto;padding:env(safe-area-inset-top,0px) 16px 132px;position:relative}
 h1,h2,h3{margin:0}
@@ -171,8 +171,7 @@ html[data-ruch] .ukryty.widac{opacity:1;transform:none;transition:opacity .6s va
 
 /* ══ szkło ══ */
 .lista,.card,.note,details.acc,.ex,.stats,.dni,.trn,.hero,.zmiany,.wyborbtn,.prmin{
-  background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);
-  backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3)}
+  background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow)}
 
 /* ══ nagłówek tygodnia — numer na pół ekranu, jak na tablicy wyników ══ */
 .top{padding:18px 0 0;position:relative}
@@ -196,7 +195,7 @@ html[data-ruch] .ukryty.widac{opacity:1;transform:none;transition:opacity .6s va
 .marq span{display:inline-block;padding-right:40px;font:800 11px/1 var(--disp);letter-spacing:.22em;text-transform:uppercase;color:var(--ink-3);animation:biez 22s linear infinite}
 @keyframes biez{to{transform:translateX(-100%)}}
 /* wstęga tygodni: przewijana palcem, bieżący tydzień w środku i większy */
-.wstrip{display:flex;gap:8px;margin:14px -16px 0;padding:10px 16px 14px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+.wstrip{display:flex;gap:8px;margin:14px -16px 0;padding:10px 16px 14px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
 .wstrip::-webkit-scrollbar{display:none}
 .wp{flex:0 0 58px;height:70px;border-radius:18px;scroll-snap-align:center;position:relative;overflow:hidden;
@@ -239,12 +238,12 @@ button.dzien:active .dk{transform:scale(.88)}
     radial-gradient(55% 60% at 85% 25%,color-mix(in srgb,var(--tc) 55%,#000) 0%,transparent 60%),
     radial-gradient(70% 60% at 50% 100%,color-mix(in srgb,var(--tc) 70%,#000) 0%,transparent 65%),
     color-mix(in srgb,var(--tc) 62%,#000);
-  background-size:220% 220%,220% 220%,220% 220%,100% 100%;
-  animation:aurora 16s ease-in-out infinite;
   box-shadow:0 30px 60px -24px color-mix(in srgb,var(--tc) 85%,transparent),inset 0 1px 0 rgba(255,255,255,.25);
   transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .25s var(--ease)}
-.tile.hero-s::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 6px);mix-blend-mode:overlay}
+.tile.hero-s::before,.lista .tile::before,.zkarta::before,.prowstart::before{content:'';position:absolute;left:-30%;top:-30%;width:160%;height:160%;z-index:-1;pointer-events:none;
+  background:radial-gradient(30% 30% at 30% 35%,rgba(255,255,255,.22),transparent 70%),radial-gradient(28% 32% at 70% 70%,rgba(0,0,0,.25),transparent 70%);
+  will-change:transform;animation:plama 18s ease-in-out infinite alternate}
+@keyframes plama{from{transform:translate(-6%,-4%) rotate(0deg)}to{transform:translate(6%,5%) rotate(8deg)}}
 .tile.hero-s::after{content:attr(data-k);position:absolute;right:-10px;bottom:-70px;z-index:-1;
   font:900 300px/1 var(--disp);font-stretch:75%;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.3);pointer-events:none;
   transform:translateY(calc(var(--sy) * .18px));animation:rise 1s var(--ease) .2s backwards}
@@ -277,12 +276,12 @@ button.dzien:active .dk{transform:scale(.88)}
 .panel{display:grid;grid-template-columns:auto 1fr;gap:16px 18px;align-items:center;margin:14px 0 12px;padding:20px;
   border-radius:var(--r-l);background:#0E1017;color:#F2F4F8;position:relative;overflow:hidden;isolation:isolate;
   box-shadow:0 24px 50px -22px rgba(0,0,0,.7)}
-.panel::before{content:'';position:absolute;inset:-60%;z-index:-2;
+.panel::before{content:'';position:absolute;inset:-45%;z-index:-2;will-change:transform;
   background:conic-gradient(from 0deg,transparent 0 62%,var(--a) 72%,var(--b) 78%,var(--c) 84%,transparent 94%);
   animation:spin 9s linear infinite;opacity:.9}
 .panel::after{content:'';position:absolute;inset:1.5px;z-index:-1;border-radius:calc(var(--r-l) - 1.5px);background:#0E1017;
   background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1.2px);background-size:14px 14px}
-.pring{position:relative;width:150px;height:150px;filter:drop-shadow(0 0 14px rgba(57,135,229,.25))}
+.pring{position:relative;width:150px;height:150px}
 .pring svg{display:block}
 .pring .pr{animation:wypelnij 1.3s var(--ease) .2s backwards}
 .pmid{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1}
@@ -321,7 +320,7 @@ button.dzien:active .dk{transform:scale(.88)}
 .kring{position:relative;width:34px;height:34px;flex:none}
 .kring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .kring .kbg{fill:none;stroke:var(--s3);stroke-width:5}
-.kring .kfg{fill:none;stroke:var(--tc,var(--ink));stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 4px var(--tc,transparent))}
+.kring .kfg{fill:none;stroke:var(--tc,var(--ink));stroke-width:5;stroke-linecap:round}
 .kring.pelny .kfg{stroke:var(--good)}
 @keyframes wypelnij{from{stroke-dashoffset:var(--c)}}
 .stagger .kring .kfg{animation:wypelnij 1s var(--ease) .3s backwards}
@@ -629,7 +628,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
     radial-gradient(55% 60% at 85% 30%,color-mix(in srgb,var(--tc) 50%,#000) 0%,transparent 60%),
     radial-gradient(70% 60% at 50% 100%,color-mix(in srgb,var(--tc) 65%,#000) 0%,transparent 65%),
     color-mix(in srgb,var(--tc) 55%,#000);
-  background-size:220% 220%,220% 220%,220% 220%,100% 100%;animation:zalWjazd .6s var(--spring),aurora 14s ease-in-out infinite;
+  animation:zalWjazd .6s var(--spring);
   box-shadow:0 40px 80px -24px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.3)}
 @keyframes zalWjazd{from{transform:translateY(80px) scale(.94);opacity:0}}
 .zcheck{width:64px;height:64px}
@@ -665,7 +664,6 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
   background:
     radial-gradient(60% 80% at 10% 0%,color-mix(in srgb,var(--tc) 85%,#fff) 0%,transparent 60%),
     color-mix(in srgb,var(--tc) 62%,#000);
-  background-size:220% 220%,100% 100%;animation:aurora 12s ease-in-out infinite;
   box-shadow:0 16px 40px -14px color-mix(in srgb,var(--tc) 80%,transparent)}
 .trn.live .trn-pod{color:rgba(255,255,255,.8);text-align:left}
 .trn-l{flex:1;min-width:0}
@@ -782,7 +780,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 /* ══ dolny pasek: pływająca kapsuła — zakładki albo timer; w trakcie przerwy
    kapsuła wypełnia się od lewej (--p z ruch.js) ══ */
 .timer{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:40;
-  background:var(--bar-bg);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);
+  background:var(--bar-bg);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border:1px solid var(--glass-line);border-radius:999px;padding:8px 10px;overflow:hidden;isolation:isolate;
   box-shadow:0 20px 50px -16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.2);animation:unosPasek .6s var(--spring) backwards;--p:0}
 @keyframes unosPasek{from{transform:translateY(80px);opacity:0}}
@@ -860,7 +858,6 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
   background:
     radial-gradient(60% 80% at 10% 0%,color-mix(in srgb,var(--dc) 85%,#fff) 0%,transparent 60%),
     color-mix(in srgb,var(--dc) 65%,#000);
-  background-size:220% 220%,100% 100%;animation:aurora 12s ease-in-out infinite;
   box-shadow:0 18px 40px -14px color-mix(in srgb,var(--dc) 85%,transparent);transition:transform .15s}
 .prowstart:active{transform:scale(.98)}
 .pico{grid-row:1 / 3;width:48px;height:48px;border-radius:50%;background:#fff;position:relative;box-shadow:0 8px 20px rgba(0,0,0,.3);animation:pulsuj 2.4s ease-in-out infinite}
@@ -874,6 +871,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
     var(--img) center / auto 134% no-repeat,
     color-mix(in srgb,var(--tc) 40%,#000)}
 .tile.hero-s.zdjecie::after,.tile.hero-s.zdjecie::before{display:none}
+.zkarta{isolation:isolate}
 
 /* ══ joga: tryb prowadzenia ══ */
 .prow{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;background:var(--bg);animation:prowWjazd .4s var(--ease)}
@@ -899,7 +897,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .prmin.koniec{background:var(--good-bg);border-color:var(--good);box-shadow:0 0 24px color-mix(in srgb,var(--good) 35%,transparent)}
 .prmin.koniec span{color:var(--good)}
 .prtresc .kroki{font-size:15px;color:var(--ink-2);line-height:1.45}
-.prdol{border-top:1px solid var(--glass-line);background:var(--bar-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 12px)}
+.prdol{border-top:1px solid var(--glass-line);background:var(--bar-bg);padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 12px)}
 .prdol>*{max-width:568px;margin-left:auto;margin-right:auto}
 .prnast{font-size:12.5px;color:var(--ink-3);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .prprzyc{display:flex;gap:10px}
@@ -945,13 +943,11 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
    Dziś: karta sesji i każda sesja z listy to plakat na cały ekran.
    Sesja: każde ćwiczenie to jeden ekran — tytuł u góry, sztanga albo dawka
    na środku, serie na dole. Skończone ćwiczenie zwija się do jednego wiersza. */
-html:has(#app > .home),html:has(body.w-sesji){scroll-snap-type:y proximity}
-.tile.hero-s,.lista .tile,body.w-sesji .ex{scroll-snap-align:start;scroll-snap-stop:normal}
 .tile.hero-s{min-height:calc(100vh - 150px);min-height:calc(100dvh - 150px);scroll-margin-top:10px;display:flex;flex-direction:column}
 .tile.hero-s .eyebrow{align-self:flex-start}
 .tile.hero-s .presk{margin-top:auto}
 .sztanga3d-host{position:relative;width:100%;min-height:150px;margin:10px 0 0;flex:1;display:flex;flex-direction:column;justify-content:center}
-.sztanga3d{display:block;width:100%;height:190px;max-height:36vh;touch-action:pan-y;cursor:grab;filter:drop-shadow(0 18px 24px rgba(0,0,0,.35))}
+.sztanga3d{display:block;width:100%;height:190px;max-height:36vh;touch-action:pan-y;cursor:grab}
 .sztanga3d:active{cursor:grabbing}
 .sztanga3d-opis{text-align:center;font:800 10.5px/1.3 var(--disp);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-top:2px;min-height:14px}
 .hero3d .sztanga3d-opis{color:rgba(255,255,255,.85)}
@@ -966,13 +962,13 @@ html:has(#app > .home),html:has(body.w-sesji){scroll-snap-type:y proximity}
     radial-gradient(55% 60% at 85% 25%,color-mix(in srgb,var(--tc) 55%,#000) 0%,transparent 60%),
     radial-gradient(70% 60% at 50% 100%,color-mix(in srgb,var(--tc) 70%,#000) 0%,transparent 65%),
     color-mix(in srgb,var(--tc) 62%,#000);
-  background-size:220% 220%,220% 220%,220% 220%,100% 100%;animation:aurora 18s ease-in-out infinite;
   box-shadow:0 30px 60px -24px color-mix(in srgb,var(--tc) 85%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
 .lista .tile:active{background-color:color-mix(in srgb,var(--tc) 55%,#000)}
 .lista .tile .k{position:absolute;right:-14px;top:-30px;width:auto;height:auto;border-radius:0;background:none;box-shadow:none;
   font:900 300px/1 var(--disp);font-stretch:75%;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.3);pointer-events:none;z-index:-1;
   transform:translateY(calc(var(--sy) * .06px))}
 .lista .tile .tmid{position:absolute;left:24px;right:24px;bottom:26px;padding-right:70px}
+.zmiany .note{background:transparent}
 .lista .tile .tt{font:900 44px/.95 var(--disp);font-stretch:78%;letter-spacing:-.02em;text-transform:uppercase;text-wrap:balance;text-shadow:0 6px 24px rgba(0,0,0,.3)}
 .lista .tile .ts{font:700 13px/1.4 var(--disp);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.85);margin-top:10px}
 .lista .tile .kring{position:absolute;top:24px;left:24px;width:68px;height:68px}
@@ -982,7 +978,7 @@ html:has(#app > .home),html:has(body.w-sesji){scroll-snap-type:y proximity}
 .lista .tile .go{position:absolute;right:22px;bottom:26px;width:52px;height:52px;border-radius:50%;background:#fff;color:#0C0E14;display:grid;place-items:center;font-size:26px;margin:0;
   box-shadow:0 10px 24px -6px rgba(0,0,0,.45)}
 .lista .tile:active .go{transform:scale(.94)}
-.lista .tile::after{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 6px);mix-blend-mode:overlay}
+
 
 /* sesja: ćwiczenie na cały ekran */
 body.w-sesji .ex{min-height:calc(100vh - 24px);min-height:calc(100dvh - 24px);display:flex;flex-direction:column;scroll-margin-top:8px;padding-top:22px;padding-bottom:18px}
@@ -1004,10 +1000,9 @@ body.w-sesji .ex.mob .filmekran{flex:1;display:flex;flex-direction:column;min-he
 body.w-sesji .ex.mob .filmramka{flex:1;aspect-ratio:auto;min-height:220px;border-radius:18px}
 body.w-sesji .ex.mob .more{margin-top:14px}
 body.w-sesji .ex.mob .exnote{margin-top:auto}
-body.w-sesji .ex.zwiniety:not(.otwarty){min-height:0;display:block;padding-top:12px;padding-bottom:12px;scroll-snap-align:none}
+body.w-sesji .ex.zwiniety:not(.otwarty){min-height:0;display:block;padding-top:12px;padding-bottom:12px}
 body.w-sesji .ex.zwiniety:not(.otwarty) .exname{font-size:15px;font-weight:800}
 body.w-sesji .sswrap .ex{min-height:calc(50vh - 20px);min-height:calc(50dvh - 20px)}
-@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none!important}}
 /* ══ pominięta sesja ══ */
 .pomin{display:block;width:100%;margin:0 0 12px;padding:12px 16px;border-radius:999px;text-align:center;
   font:700 12.5px/1.3 var(--disp);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--glass);border:1px solid var(--glass-line);position:relative;overflow:hidden}
@@ -1020,8 +1015,8 @@ body.w-sesji .sswrap .ex{min-height:calc(50vh - 20px);min-height:calc(50dvh - 20
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=71"></script>
-<script src="app.js?v=71"></script>
-<script src="ruch.js?v=71"></script>
+<script src="progresja.js?v=72"></script>
+<script src="app.js?v=72"></script>
+<script src="ruch.js?v=72"></script>
 </body>
 </html>

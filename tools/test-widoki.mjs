@@ -126,7 +126,7 @@ vm.runInContext(`globalThis.API = {
   cofnijRekalibracje, rekalibracjaCard, stanLokalny, plannedOf, logSet, judgeWeek, podsumowanieBlokow,
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
-  domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku,
+  domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -532,7 +532,7 @@ console.log('Przenoszenie jednego dnia');
   test('joga zostala w tygodniu 2', S.mob[Z] && !S.mob[NA]);
   test('wlasny ciezar poniedzialku poszedl razem z nim', S.kgw[NA + '|A|' + itA.n] === 55 && !(Z + '|A|' + itA.n in S.kgw));
   const ruch = S.moves[S.moves.length - 1];
-  test('ruch niesie dzien', ruch.day === 'A' && ruch.from === Z && ruch.to === NA);
+  test('ruch niesie dzien, a pola from/to zostawia pustym (stara wersja go nie wykona)', ruch.day === 'A' && ruch.w === Z && ruch.na === NA && ruch.from === undefined);
   test('do bazy poszly tylko wiersze dnia A', S.queue.every(r => r.day === 'A') && S.queue.some(r => r.week === NA) && S.queue.some(r => r.week === Z && r.reps === null));
 
   // Stary wiersz dnia A z bazy jest martwy, wiersz dnia B z tego samego tygodnia zyje.
@@ -543,7 +543,7 @@ console.log('Przenoszenie jednego dnia');
   // Powrot i zdalne powtorzenie z dniem.
   A.przeniesTydzien(NA, Z, { day: 'A' });
   test('ruch w druga strone cofa zmiane', A.zawartoscTygodnia(Z, 'A').serie === serieA && !A.tydzienMaDane(NA, 'A'));
-  const zdalne = [{ id: 'test-dzien-1', from: Z, to: NA, ts: new Date().toISOString(), day: 'A' }];
+  const zdalne = [{ id: 'test-dzien-1', w: Z, na: NA, ts: new Date().toISOString(), day: 'A' }];
   test('zdalny ruch jednego dnia wykonuje sie raz', A.zastosujZdalnePrzeniesienia(zdalne) === true
     && A.zawartoscTygodnia(NA, 'A').serie === serieA && A.zawartoscTygodnia(Z, 'B').serie === serieB
     && A.zastosujZdalnePrzeniesienia(zdalne) === false);
@@ -610,6 +610,42 @@ console.log('Pominieta sesja');
   test('pierwsza zapisana seria sama odwoluje pominiecie', A.sesjaPominieta('A', W) === false);
   for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
   S.pominiete = {};
+}
+
+/* ---------- jednorazowa migracja poniedzialku (cykl 2) ---------- */
+console.log('');
+console.log('Migracja poniedzialku');
+{
+  const zapiszDzien = (w, key) => S.plan.days[key].items.forEach(it => {
+    const pl = A.plannedOf(it, w, key);
+    for (let i = 0; i < pl.sets; i++) A.logSet(w, key, it.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  });
+  const czysc = () => { for (const w of [1, 2, 3]) for (const k of Object.keys(S.log)) if (+k.split('|')[0] === w) delete S.log[k]; S.moves = []; S.pominiete = {}; localStorage.removeItem('trening.migracja.v1'); };
+  const cykl = S.plan.cykl;
+  S.plan.cykl = 2;
+  czysc();
+  zapiszDzien(2, 'A'); zapiszDzien(2, 'B');
+  const serie = A.zawartoscTygodnia(2, 'A').serie, serieB = A.zawartoscTygodnia(2, 'B').serie;
+  test('przed: poniedzialek w tygodniu 2, tydzien 1 pusty', serie > 0 && !A.tydzienMaDane(1, 'A'));
+  test('migracja cos zmienia', A.migracjaPoniedzialku(true) === true);
+  test('poniedzialek poszedl z 2 na 3', A.zawartoscTygodnia(3, 'A').serie === serie && !A.tydzienMaDane(2, 'A'));
+  test('sroda tygodnia 2 zostala', A.zawartoscTygodnia(2, 'B').serie === serieB);
+  test('pusty poniedzialek tygodnia 1 jest pominiety', A.sesjaPominieta('A', 1) === true);
+  test('ruch ma staly identyfikator', S.moves.some(m => m.id === 'migracja-A-2-3'));
+  test('drugie uruchomienie nic nie robi', A.migracjaPoniedzialku(true) === false);
+  // Wariant: poniedzialek tygodnia 2 siedzi pod tygodniem 1 — lancuch 2→3, 1→2.
+  czysc();
+  zapiszDzien(1, 'A'); zapiszDzien(2, 'A');
+  A.migracjaPoniedzialku(true);
+  test('lancuch: 2→3 i 1→2, tydzien 1 pusty i pominiety',
+    A.tydzienMaDane(3, 'A') && A.tydzienMaDane(2, 'A') && !A.tydzienMaDane(1, 'A') && A.sesjaPominieta('A', 1));
+  // Nic nie nadpisuje: pelny cel blokuje ruch.
+  czysc();
+  zapiszDzien(2, 'A'); zapiszDzien(3, 'A');
+  A.migracjaPoniedzialku(true);
+  test('pelny tydzien 3 blokuje ruch, dane zostaja', A.tydzienMaDane(2, 'A') && A.tydzienMaDane(3, 'A'));
+  czysc();
+  S.plan.cykl = cykl;
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */

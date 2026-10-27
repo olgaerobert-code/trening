@@ -36,6 +36,14 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   się do serii tygodni z kompletem, a werdykt bloku pomija ten tydzień dla tego
   boju. Pierwsza zapisana seria sama odwołuje pominięcie; „Przywróć sesję" też.
   Zapis synchronizuje się z drugim urządzeniem
+- **Jednorazowa migracja cyklu 2** (`migracjaPoniedzialku` w `app.js`): plan zaczął
+  się w środę, więc przy pierwszym otwarciu każde urządzenie samo przesuwa
+  poniedziałek z tygodnia 2 na 3 (a gdy coś siedzi pod tygodniem 1, także 1 → 2)
+  i oznacza pusty poniedziałek tygodnia 1 jako pominięty. Ruchy mają stałe
+  identyfikatory, więc drugie urządzenie ich nie powtarza; pełny cel blokuje ruch.
+  Ruch jednego dnia jest zapisany polami `w`/`na`/`day` zamiast `from`/`to`, żeby
+  starsza wersja aplikacji nie wykonała go jako przeniesienia całego tygodnia.
+  Po zakończeniu cyklu ten blok można usunąć
 - **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
   (kolory wg standardu IPF)
 - **Postęp** — wykres trzech bojów przez 12 tygodni (jedna oś, krzyżyk i dymek pod
@@ -175,6 +183,10 @@ się sam według ustawienia telefonu.
   i talerze w kolorach IPF, obraca się sama i pod palcem. Na karcie Dziś pokazuje
   ciężar boju, w karcie boju talerze wjeżdżają na gryf przy każdym ruchu suwaka
   „Ciężar na sztandze"; pod spodem rozkład na stronę
+- **Wydajność na telefonie**: bez przyciągania przewijania, bez `backdrop-filter`
+  na kartach (zostaje tylko na dolnej kapsule i nakładkach), zorza w tle bez
+  filtra rozmycia, plamy światła na kartach animowane wyłącznie przez `transform`,
+  sztanga 3D rysowana ~30 kl/s i wstrzymywana w czasie przewijania
 - **Ruch** (`ruch.js` — tylko obserwuje DOM, nic nie zapisuje): duch poprzedniego
   ekranu odsuwa się, gdy wjeżdża nowy (w głąb w lewo, wstecz w prawo), elementy
   wjeżdżają jeden po drugim, karty poniżej ekranu pokazują się dopiero po
