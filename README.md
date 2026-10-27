@@ -25,9 +25,17 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   plan przelicza się przy wejściu, a decyzje zostają do cofnięcia, nie do podjęcia
 - **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),
   offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
-- **Przeniesienie tygodnia** — sesja zapisana pod złym numerem przepina się w ustawieniach
-  jednym ruchem: serie, własne ciężary bojów i odklikana joga. Cel musi być pusty,
-  ruch w drugą stronę cofa zmianę, a drugie urządzenie powtarza go u siebie
+- **Przeniesienie tygodnia albo jednego dnia** — sesja zapisana pod złym numerem
+  przepina się w ustawieniach jednym ruchem: cały tydzień albo sam wybrany dzień
+  (Pn A, Śr B, Pt C, Nd joga): serie, własne ciężary bojów i odklikana joga. Cel
+  musi być pusty, ruch w drugą stronę cofa zmianę, a drugie urządzenie powtarza
+  go u siebie
+- **Pominięta sesja** — plan zaczęty w środę nie ma poniedziałku w tygodniu 1.
+  W pustej sesji jest przycisk „Nie było tej sesji — pomiń": aplikacja przestaje
+  ją proponować na starcie i na karcie Dziś, tydzień ze środą i piątkiem liczy
+  się do serii tygodni z kompletem, a werdykt bloku pomija ten tydzień dla tego
+  boju. Pierwsza zapisana seria sama odwołuje pominięcie; „Przywróć sesję" też.
+  Zapis synchronizuje się z drugim urządzeniem
 - **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
   (kolory wg standardu IPF)
 - **Postęp** — wykres trzech bojów przez 12 tygodni (jedna oś, krzyżyk i dymek pod
@@ -248,8 +256,8 @@ dźwięk ze stron. Wtedy zostaje wibracja.
 
 W `localStorage`: numer tygodnia, trzy E1RM i przełącznik dźwięku (`trening.v1`),
 dziennik serii (`trening.log.v1`), historia korekt (`trening.adjust.v1`), własne
-ciężary ćwiczeń dodatkowych (`trening.acc.v1`), kolejka wysyłkowa (`trening.queue.v1`)
-i kod planu (`trening.key.v1`).
+ciężary ćwiczeń dodatkowych (`trening.acc.v1`), kolejka wysyłkowa (`trening.queue.v1`),
+pominięte sesje (`trening.pominiete.v1`) i kod planu (`trening.key.v1`).
 
 W Supabase: wyłącznie liczby — kod planu, tydzień, dzień, ćwiczenie, seria,
 powtórzenia, kilogramy, znacznik czasu. Tabela jest zamknięta dla klucza publikowalnego,

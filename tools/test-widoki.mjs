@@ -126,7 +126,7 @@ vm.runInContext(`globalThis.API = {
   cofnijRekalibracje, rekalibracjaCard, stanLokalny, plannedOf, logSet, judgeWeek, podsumowanieBlokow,
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
-  domyslnaSesja, sesjaKompletna, mobWidoczne,
+  domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -486,9 +486,9 @@ console.log('Przenoszenie tygodnia');
   // potwierdzenie, ruch. Po nim tydzien zrodlowy jest pusty.
   const zrodlo = A.tydzienMaDane(NA) ? NA : Z, cel = zrodlo === NA ? Z : NA;
   const rzedy = app.querySelectorAll('.przenrzad');
-  test('karta ma dwa rzedy numerow', rzedy.length === 2);
-  rzedy[0].querySelectorAll('.wchip')[zrodlo - 1].click();
-  rzedy[1].querySelectorAll('.wchip')[cel - 1].click();
+  test('karta ma rzad zakresu i dwa rzedy numerow', rzedy.length === 3);
+  rzedy[1].querySelectorAll('.wchip')[zrodlo - 1].click();
+  rzedy[2].querySelectorAll('.wchip')[cel - 1].click();
   const przycisk = () => app.querySelectorAll('.btn').find(b => b.textContent.includes('Przenieś tydzień')
     || b.textContent.includes('Na pewno'));
   test('po wybraniu pary pojawia sie przycisk', !!przycisk()
@@ -499,6 +499,117 @@ console.log('Przenoszenie tygodnia');
   przycisk().click();
   test('drugie wykonuje ruch', !A.tydzienMaDane(zrodlo) && A.tydzienMaDane(cel));
   test('i mowi, co sie stalo', app.textContent.includes(`Przeniesione z tygodnia ${zrodlo} na ${cel}`));
+}
+
+/* ---------- przenoszenie jednego dnia ---------- */
+console.log('');
+console.log('Przenoszenie jednego dnia');
+{
+  const Z = 2, NA = 3;
+  const zapiszDzien = (w, key) => S.plan.days[key].items.forEach(it => {
+    const pl = A.plannedOf(it, w, key);
+    for (let i = 0; i < pl.sets; i++) A.logSet(w, key, it.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  });
+  for (const w of [Z, NA]) {
+    for (const k of Object.keys(S.log)) if (+k.split('|')[0] === w) delete S.log[k];
+    for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === w) delete S.kgw[k];
+    delete S.mob[w];
+  }
+  S.moves = []; S.queue = [];
+  zapiszDzien(Z, 'A'); zapiszDzien(Z, 'B');
+  S.mob[Z] = { y1: true };
+  const itA = S.plan.days.A.items[0];
+  S.kgw[Z + '|A|' + itA.n] = 55;
+  const serieA = A.zawartoscTygodnia(Z, 'A').serie, serieB = A.zawartoscTygodnia(Z, 'B').serie;
+  test('zawartosc dnia A liczona osobno', serieA > 0 && A.zawartoscTygodnia(Z, 'A').dni.join('') === 'A');
+  test('joga nie wchodzi w zawartosc dnia A', A.zawartoscTygodnia(Z, 'A').mob === 0 && A.zawartoscTygodnia(Z, 'D').mob === 1);
+  test('tydzien 3 w dniu A jest pusty', !A.tydzienMaDane(NA, 'A'));
+
+  S.queue = [];
+  A.przeniesTydzien(Z, NA, { day: 'A' });
+  test('poniedzialek przeniesiony z 2 na 3', A.zawartoscTygodnia(NA, 'A').serie === serieA && A.zawartoscTygodnia(Z, 'A').serie === 0);
+  test('sroda zostala w tygodniu 2', A.zawartoscTygodnia(Z, 'B').serie === serieB && A.zawartoscTygodnia(NA, 'B').serie === 0);
+  test('joga zostala w tygodniu 2', S.mob[Z] && !S.mob[NA]);
+  test('wlasny ciezar poniedzialku poszedl razem z nim', S.kgw[NA + '|A|' + itA.n] === 55 && !(Z + '|A|' + itA.n in S.kgw));
+  const ruch = S.moves[S.moves.length - 1];
+  test('ruch niesie dzien', ruch.day === 'A' && ruch.from === Z && ruch.to === NA);
+  test('do bazy poszly tylko wiersze dnia A', S.queue.every(r => r.day === 'A') && S.queue.some(r => r.week === NA) && S.queue.some(r => r.week === Z && r.reps === null));
+
+  // Stary wiersz dnia A z bazy jest martwy, wiersz dnia B z tego samego tygodnia zyje.
+  const dawniej = new Date(Date.now() - 60000).toISOString();
+  test('stary wiersz A z tygodnia 2 odrzucony', A.poPrzeniesieniu(Z, dawniej, 'A') === true);
+  test('wiersz B z tygodnia 2 przyjety', A.poPrzeniesieniu(Z, dawniej, 'B') === false);
+
+  // Powrot i zdalne powtorzenie z dniem.
+  A.przeniesTydzien(NA, Z, { day: 'A' });
+  test('ruch w druga strone cofa zmiane', A.zawartoscTygodnia(Z, 'A').serie === serieA && !A.tydzienMaDane(NA, 'A'));
+  const zdalne = [{ id: 'test-dzien-1', from: Z, to: NA, ts: new Date().toISOString(), day: 'A' }];
+  test('zdalny ruch jednego dnia wykonuje sie raz', A.zastosujZdalnePrzeniesienia(zdalne) === true
+    && A.zawartoscTygodnia(NA, 'A').serie === serieA && A.zawartoscTygodnia(Z, 'B').serie === serieB
+    && A.zastosujZdalnePrzeniesienia(zdalne) === false);
+
+  // Ekran ustawien: wybor zakresu „Pn · A", potem numery, potem przycisk z nazwa dnia.
+  S.view = '#/ustawienia'; A.render();
+  const zakres = app.querySelectorAll('.przenrzad')[0].querySelectorAll('.wchip');
+  test('karta ma wybor zakresu', zakres.length === 5 && zakres[1].textContent.includes('Pn'));
+  zakres[1].click();
+  let rzedy = app.querySelectorAll('.przenrzad');
+  rzedy[1].querySelectorAll('.wchip')[NA - 1].click();
+  rzedy = app.querySelectorAll('.przenrzad');
+  rzedy[2].querySelectorAll('.wchip')[Z - 1].click();
+  const przycisk = () => app.querySelectorAll('.btn').find(b => b.textContent.includes('Przenieś') || b.textContent.includes('Na pewno'));
+  test('przycisk nazywa dzien', !!przycisk() && przycisk().textContent.includes('Pn A') && przycisk().textContent.includes(`z tygodnia ${NA} na ${Z}`));
+  przycisk().click(); przycisk().click();
+  test('ruch z ekranu przenosi sam poniedzialek', A.zawartoscTygodnia(Z, 'A').serie === serieA && !A.tydzienMaDane(NA, 'A') && A.zawartoscTygodnia(Z, 'B').serie === serieB);
+  for (const w of [Z, NA]) {
+    for (const k of Object.keys(S.log)) if (+k.split('|')[0] === w) delete S.log[k];
+    for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === w) delete S.kgw[k];
+    delete S.mob[w];
+  }
+  S.moves = [];
+}
+
+/* ---------- pominieta sesja ---------- */
+console.log('');
+console.log('Pominieta sesja');
+{
+  const W = 1;
+  S.week = W;
+  S.pominiete = {};
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  const wDzien = (nr, fn) => { const realny = Date.prototype.getDay; Date.prototype.getDay = () => nr; try { return fn(); } finally { Date.prototype.getDay = realny; } };
+  const zapisz = key => S.plan.days[key].items.forEach(it => {
+    const pl = A.plannedOf(it, W, key);
+    for (let i = 0; i < pl.sets; i++) A.logSet(W, key, it.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg });
+  });
+  const SOB = 6;
+  zapisz('B'); zapisz('C');
+  test('plan zaczety w srode: sobota proponuje zalegly poniedzialek', wDzien(SOB, A.domyslnaSesja) === 'A');
+  test('tydzien bez poniedzialku nie jest zaliczony', A.tydzienZaliczony(W) === false);
+  A.pominSesje('A', W, true);
+  test('pominiety poniedzialek jest pominiety', A.sesjaPominieta('A', W) === true);
+  test('i sobota juz go nie proponuje', wDzien(SOB, A.domyslnaSesja) == null);
+  test('tydzien ze sroda i piatkiem liczy sie jako komplet', A.tydzienZaliczony(W) === true && A.seriaTygodni(W) >= 1);
+  test('pominiecie jedzie w paczce stanu', A.stanLokalny().pominiete && A.stanLokalny().pominiete['1|A'] === true);
+  const blok1 = A.BLOKI[0];
+  const ocena = A.ocenaBojuWBloku('bench', blok1);
+  test('tydzien 1 nie wchodzi w ocene wyciskania w bloku 1', ocena.tygodni === blok1.weeks.filter(x => x !== W).length);
+
+  // Ekran dnia A: karta pominiecia z przyciskiem powrotu; na Dzis kafel mowi „pominieta".
+  S.view = '#/d/A'; A.render();
+  test('dzien A pokazuje, ze sesja jest pominieta', app.textContent.includes('Sesja pominięta w tygodniu 1'));
+  S.view = '#/'; A.render();
+  test('lista tygodnia oznacza poniedzialek jako pominiety', app.textContent.includes('pominięta'));
+  const przywroc = app.querySelectorAll('.mini').find(b => b.textContent.includes('Przywróć'));
+  S.view = '#/d/A'; A.render();
+  app.querySelectorAll('.mini').find(b => b.textContent.includes('Przywróć sesję')).click();
+  test('przywrocenie zdejmuje pominiecie', A.sesjaPominieta('A', W) === false && !!app.querySelectorAll('.pomin').length);
+  app.querySelectorAll('.pomin')[0].click();
+  test('przycisk w pustej sesji pomija ja ponownie', A.sesjaPominieta('A', W) === true);
+  zapisz('A');
+  test('pierwsza zapisana seria sama odwoluje pominiecie', A.sesjaPominieta('A', W) === false);
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  S.pominiete = {};
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */
