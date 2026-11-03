@@ -2227,6 +2227,7 @@ function setRows(it, day, w, pl, onKg) {
   const rows = () => logGet(w, day, it.n);
 
   let kgTeraz = pl.kg;
+  let zatwierdzKg = null;                      // ustawiane niżej, gdy ćwiczenie ma ciężar
 
   if (pl.kg != null) {
     // Zakres liczymy od ciezaru z planu, zeby nie wedrowal przy kazdej odchylce,
@@ -2274,7 +2275,7 @@ function setRows(it, day, w, pl, onKg) {
       else kgwSet(w, day, it.n, kgTeraz, pl.planKg);
       if (onKg) onKg(kgTeraz);            // liczba na karcie i talerze na gryfie
     };
-    const zatwierdzKg = kg => { sl.value = kg; podglad(kg); zapiszKg(); };
+    zatwierdzKg = kg => { sl.value = kg; podglad(kg); zapiszKg(); };
     sl.oninput = () => podglad(+sl.value);
     sl.onchange = () => zatwierdzKg(+sl.value);
     // Tapnięcie w liczbę: klawiatura zamiast suwaka. Zakres szerszy niż suwak —
@@ -2319,13 +2320,34 @@ function setRows(it, day, w, pl, onKg) {
 
     const zapisz = () => { logSet(w, day, it.n, i, { r: powt, kg: kgTeraz, pr: pl.target, pk: pl.planKg }); };
 
-    tick.onclick = () => {
-      const jest = r.classList.toggle('done');
-      if (jest) { zapisz(); zapiszCzasSerii(w, day, it.n, i); blysk(tick); } else { logSet(w, day, it.n, i, null); usunCzasSerii(w, day, it.n, i); rozwinKarte(box.closest && box.closest('.ex')); }
+    // Tap odhacza. Tap w odhaczoną serię NIC nie cofa — spocony kciuk trafia
+    // w ✓ przez pomyłkę; cofnięcie i poprawka są pod przytrzymaniem.
+    const cofnij = () => {
+      r.classList.remove('done');
+      logSet(w, day, it.n, i, null); usunCzasSerii(w, day, it.n, i); rozwinKarte(box.closest && box.closest('.ex'));
       odswiezPrzerwy();
       odswiezPostep(day, w);
-      if (jest) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
+    tick.onclick = () => {
+      if (poPrzytrzymaniu(tick)) return;
+      if (r.classList.contains('done')) {
+        blysk(tick, 300);
+        podpowiedz(r, 'Przytrzymaj ✓, żeby poprawić');
+        return;
+      }
+      r.classList.add('done');
+      zapisz(); zapiszCzasSerii(w, day, it.n, i); blysk(tick);
+      if (navigator.vibrate) navigator.vibrate(12);
+      odswiezPrzerwy();
+      odswiezPostep(day, w);
+      startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet();
+    };
+    tick._hold = przytrzymanie(tick, { hold: () => arkuszSerii({
+      nazwa: it.name, seria: i + 1, serii: pl.sets, powt, kg: pl.kg != null ? kgTeraz : null,
+      jednostka: pl.unit === 's' ? 's' : pl.unit === 'm' ? 'm' : '', done: r.classList.contains('done'),
+      naZapis: (np, nk) => { if (nk != null && zatwierdzKg && nk !== kgTeraz) zatwierdzKg(nk); zatwierdzPowt(np); },
+      naCofnij: cofnij,
+    }) });
     // Zmiana liczby powtórzeń zapisuje serię — z suwaka albo z klawiatury tą samą drogą.
     const zatwierdzPowt = v => {
       powt = v;
@@ -2374,6 +2396,108 @@ function odswiezPostep(day, w) {
 /* ---------- ruch ---------- */
 // Klasa na chwilę: CSS gra animację tylko na elemencie, który właśnie się zmienił,
 // a nie na wszystkim, co się przebudowało przy odświeżeniu z bazy.
+/* Przytrzymanie przycisku. Tap (krótko, bez ruchu) idzie zwykłą drogą — przez
+   onclick, więc działa też z klawiatury. Hold (ms, domyślnie 450) woła `hold`,
+   a następne kliknięcie, które przeglądarka i tak wyśle po puszczeniu palca,
+   jest połknięte. Ruch palca ponad `luz` px (przewijanie) przerywa odliczanie.
+   Zwraca uchwyty, żeby dało się to sprawdzić testem bez przeglądarki. */
+function przytrzymanie(el, { hold, ms = 450, luz = 10 } = {}) {
+  let t = null, start = null;
+  const sprzatnij = () => { if (t) { clearTimeout(t); t = null; } start = null; if (el.classList) el.classList.remove('trzymany'); };
+  const u = {
+    down(e) {
+      if (e && e.button) return;                 // tylko główny przycisk / palec
+      sprzatnij();
+      start = { x: e && e.clientX || 0, y: e && e.clientY || 0 };
+      if (el.classList) el.classList.add('trzymany');
+      t = setTimeout(() => {
+        t = null; start = null;
+        if (el.classList) el.classList.remove('trzymany');
+        el._trzymane = true;                     // połknij click, który przyjdzie po puszczeniu
+        try { if (navigator.vibrate) navigator.vibrate(20); } catch { /* bez wibracji */ }
+        if (hold) hold();
+      }, ms);
+    },
+    move(e) {
+      if (!start || !e) return;
+      if (Math.abs(e.clientX - start.x) > luz || Math.abs(e.clientY - start.y) > luz) sprzatnij();
+    },
+    up() { sprzatnij(); },
+    cancel() { sprzatnij(); },
+  };
+  if (el.addEventListener) {
+    el.addEventListener('pointerdown', u.down, { passive: true });
+    el.addEventListener('pointermove', u.move, { passive: true });
+    el.addEventListener('pointerup', u.up, { passive: true });
+    el.addEventListener('pointercancel', u.cancel, { passive: true });
+    el.addEventListener('pointerleave', u.cancel, { passive: true });
+    el.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  return u;
+}
+// Czy to kliknięcie przyszło po przytrzymaniu — wtedy nie liczy się jako tap.
+const poPrzytrzymaniu = el => { if (el._trzymane) { el._trzymane = false; return true; } return false; };
+
+// Podpowiedź pod wierszem na chwilę: „Przytrzymaj, żeby poprawić".
+function podpowiedz(r, tekst, ms = 1500) {
+  const stara = r.querySelector && r.querySelector('.podp');
+  if (stara && stara.remove) stara.remove();
+  const p = el('div', 'podp', tekst);
+  r.append(p);
+  setTimeout(() => { if (p.remove) p.remove(); }, ms);
+}
+
+/* Arkusz korekty serii: dwa duże steppery pod kciuk, zapis tą samą drogą co
+   suwak, cofnięcie odhaczenia tylko stąd — tap w ✓ nic nie cofa. */
+function arkuszSerii({ nazwa, seria, serii, powt, kg, kgKrok = 2.5, jednostka, done, naZapis, naCofnij }) {
+  if (!document.body || !document.body.appendChild) return null;
+  const stary = document.querySelector('.arkusz-tlo');
+  if (stary && stary.remove) stary.remove();
+  const tlo = el('div', 'arkusz-tlo');
+  const ark = el('div', 'arkusz');
+  ark.setAttribute('role', 'dialog');
+  ark.setAttribute('aria-label', 'Poprawka serii');
+  let p = powt, k = kg;
+  const zamknij = () => { tlo.remove(); document.removeEventListener('keydown', klaw); };
+  const klaw = e => { if (e.key === 'Escape') zamknij(); };
+  document.addEventListener('keydown', klaw);
+  tlo.onclick = e => { if (e.target === tlo) zamknij(); };
+
+  ark.append(el('div', 'ark-t', nazwa), el('div', 'ark-s', `Seria ${seria} z ${serii}`));
+  const stepper = (etykieta, pobierz, ustaw, krok, min, suf) => {
+    const box = el('div', 'krok3');
+    box.append(el('div', 'krok3-l', etykieta));
+    const row = el('div', 'krok3-r');
+    const minus = el('button', 'krok3-b', '−'); minus.setAttribute('aria-label', etykieta + ': mniej');
+    const v = el('div', 'krok3-v');
+    const plus = el('button', 'krok3-b', '+'); plus.setAttribute('aria-label', etykieta + ': więcej');
+    const odswiez = () => { v.textContent = ''; v.append(el('b', null, fmt(pobierz())), el('u', null, suf || '')); };
+    minus.onclick = () => { ustaw(Math.max(min, Math.round((pobierz() - krok) * 100) / 100)); odswiez(); };
+    plus.onclick = () => { ustaw(Math.round((pobierz() + krok) * 100) / 100); odswiez(); };
+    v.onclick = () => edycjaLiczby(v, { wartosc: pobierz(), krok, min, max: 999, calk: krok === 1, etykieta, naZapis: x => { ustaw(x); odswiez(); } });
+    odswiez();
+    row.append(minus, v, plus);
+    box.append(row);
+    return box;
+  };
+  ark.append(stepper('Powtórzenia', () => p, x => { p = x; }, 1, 0, jednostka || ''));
+  if (kg != null) ark.append(stepper('Ciężar', () => k, x => { k = x; }, kgKrok, 0, 'kg'));
+  const zapisz = el('button', 'btn primary', done ? 'Zapisz poprawkę' : 'Zapisz serię');
+  zapisz.onclick = () => { zamknij(); naZapis(p, k); };
+  ark.append(zapisz);
+  if (done && naCofnij) {
+    const cof = el('button', 'btn warn', 'Cofnij odhaczenie');
+    cof.onclick = () => { zamknij(); naCofnij(); };
+    ark.append(cof);
+  }
+  const anuluj = el('button', 'btn ghost', 'Anuluj');
+  anuluj.onclick = zamknij;
+  ark.append(anuluj);
+  tlo.append(ark);
+  document.body.appendChild(tlo);
+  return tlo;
+}
+
 function blysk(n, ms = 700) {
   n.classList.add('swiezo');
   setTimeout(() => n.classList.remove('swiezo'), ms);
@@ -3921,7 +4045,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=74`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=75`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3974,7 +4098,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=74')
+fetch('plan.json?v=75')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

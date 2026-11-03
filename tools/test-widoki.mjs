@@ -44,7 +44,8 @@ class El {
   set textContent(v) { this._txt = v == null ? '' : String(v); this.children = []; }
   set innerHTML(v) { this._html = String(v); if (!v) this.children = []; }
   get innerHTML() { return this._html; }
-  append(...n) { for (const x of n) this.children.push(typeof x === 'object' ? x : txt(String(x))); }
+  append(...n) { for (const x of n) { const c = typeof x === 'object' ? x : txt(String(x)); c.parentNode = this; this.children.push(c); } }
+  remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(c => c !== this); this.parentNode = null; }
   appendChild(n) { this.append(n); return n; }
   setAttribute(k, v) { this.attrs[k] = String(v); }
   getAttribute(k) { return this.attrs[k]; }
@@ -90,6 +91,7 @@ const document = {
   createDocumentFragment: () => new El('#fragment'),
   createTextNode: t => txt(t),
   querySelector: s => (pasuje(korzen, s) ? korzen : szukaj(korzen, s)[0] || null),
+  removeEventListener() {},
   getElementById: id => szukaj(korzen, '#' + id)[0] || null,
   querySelectorAll: s => szukaj(korzen, s),
   addEventListener() {},
@@ -127,7 +129,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
-  parsujLiczbe, domknijLiczbe, edycjaLiczby,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -691,6 +693,69 @@ console.log('Liczba z klawiatury');
   }
   for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
   for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === W) delete S.kgw[k];
+}
+
+/* ---------- przytrzymanie ✓ i arkusz korekty ---------- */
+console.log('');
+console.log('Przytrzymanie ✓');
+{
+  // Czysta logika: krotkie nacisniecie nie wola hold, dlugie wola i polyka nastepny click.
+  const el = document.createElement('button');
+  let holdy = 0;
+  const u = A.przytrzymanie(el, { hold: () => { holdy++; }, ms: 8, luz: 10 });
+  u.down({ clientX: 0, clientY: 0 }); u.up();
+  await new Promise(r => setTimeout(r, 30));
+  test('krotkie nacisniecie nie wola hold', holdy === 0 && !el._trzymane);
+  u.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 30));
+  test('dlugie nacisniecie wola hold i oznacza przycisk', holdy === 1 && el._trzymane === true);
+  u.down({ clientX: 0, clientY: 0 }); u.move({ clientX: 30, clientY: 0 });
+  await new Promise(r => setTimeout(r, 30));
+  test('ruch palca (przewijanie) przerywa odliczanie', holdy === 1);
+
+  // Wiersz serii: tap odhacza, drugi tap nie cofa, arkusz cofa.
+  const W = 4;
+  S.week = W;
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  S.view = '#/d/A'; A.render();
+  const itA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').sets > 0);
+  const wiersz = app.querySelectorAll('.setrow')[0];
+  const tick = wiersz.querySelector('.tick');
+  tick.click();
+  test('tap odhacza serie', wiersz.classList.contains('done') && !!A.logGet(W, 'A', itA.n)[0]);
+  tick.click();
+  test('drugi tap nie cofa odhaczenia', wiersz.classList.contains('done') && !!A.logGet(W, 'A', itA.n)[0]);
+  test('i pokazuje podpowiedz', !!wiersz.querySelector('.podp'));
+  tick._trzymane = true; tick.click();
+  test('klik po przytrzymaniu jest polkniety', wiersz.classList.contains('done') && !tick._trzymane);
+  // hold: arkusz z dwoma stepperami, Cofnij odhaczenie cofa
+  tick._hold.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 480));
+  const ark = document.querySelector('.arkusz');
+  test('przytrzymanie otwiera arkusz korekty', !!ark && ark.textContent.includes('Seria 1 z'));
+  const plus = ark.querySelectorAll('.krok3-b')[1];
+  plus.click();
+  const zapisz = ark.querySelectorAll('.btn').find(b => b.textContent.includes('Zapisz'));
+  zapisz.click();
+  const pl = A.plannedOf(itA, W, 'A');
+  test('plus i Zapisz zapisuja o jedno powtorzenie wiecej', A.logGet(W, 'A', itA.n)[0].r === pl.target + 1 && !document.querySelector('.arkusz'));
+  tick._trzymane = false;
+  tick._hold.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 480));
+  const ark2 = document.querySelector('.arkusz');
+  const cof = ark2.querySelectorAll('.btn').find(b => b.textContent.includes('Cofnij'));
+  test('odhaczona seria ma w arkuszu Cofnij odhaczenie', !!cof);
+  cof.click();
+  test('Cofnij odhaczenie zdejmuje serie z dziennika', !wiersz.classList.contains('done') && !A.logGet(W, 'A', itA.n)[0]);
+  tick._trzymane = false;
+  tick._hold.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 480));
+  const ark3 = document.querySelector('.arkusz');
+  test('nieodhaczona seria nie ma Cofnij, ma Zapisz serie', !ark3.querySelectorAll('.btn').find(b => b.textContent.includes('Cofnij')) && !!ark3.querySelectorAll('.btn').find(b => b.textContent.includes('Zapisz serię')));
+  ark3.querySelectorAll('.btn').find(b => b.textContent.includes('Anuluj')).click();
+  test('Anuluj zamyka arkusz bez zapisu', !document.querySelector('.arkusz') && !A.logGet(W, 'A', itA.n)[0]);
+  tick._trzymane = false;
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */
