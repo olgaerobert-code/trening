@@ -19,7 +19,7 @@
    i ciężki na liczby i tytuły, pełnej szerokości na tekst. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=76) format('woff2');
+  src:url(fonts/Archivo.woff2?v=77) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -943,13 +943,33 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 .krok3-v .wpis{width:5ch;font-size:30px;text-align:center}
 .arkusz .btn{margin-top:10px;min-height:56px}
 .arkusz .btn.ghost{min-height:48px}
+/* ══ prowadzenie sesji siłowej ══ */
+.prow-sila .prtresc{padding-bottom:12px}
+.pr-ost{display:inline-block;margin:0 0 10px;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--dc) 18%,transparent);color:var(--dc);font:700 13px/1 var(--sans)}
+.pr-sztanga{width:100%;height:170px;margin:4px 0 6px;position:relative}
+.pr-sztanga .sztanga3d{height:150px}
+.pr-sztanga .sztanga3d-opis{margin-top:-4px}
+.prow-sila .krok3{border-top:0;padding:6px 0 10px}
+.prow-sila .pr-kg .krok3-v b{font-size:56px}
+.prow-sila .pr-powt .krok3-v b{font-size:56px}
+.pr-dawka{font:600 20px/1.3 var(--sans);color:var(--ink);margin:6px 0 12px}
+.pr-uwaga{font:500 14px/1.5 var(--sans);color:var(--ink-2);margin:8px 0 0}
+.prok.pr-zalicz{height:64px;font-size:18px}
+.pr-przerwa{display:flex;flex-direction:column;align-items:center;text-align:center}
+.pr-odl{font:900 112px/1 var(--disp);font-stretch:75%;letter-spacing:-.03em;color:var(--ink);margin:18px 0 6px;font-variant-numeric:tabular-nums}
+.pr-odl.koniec{color:var(--good)}
+.pr-pod{font:500 15px/1.4 var(--sans);color:var(--ink-2);margin-bottom:18px}
+.pr-przyciski{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:360px}
+.pr-przyciski .btn{min-height:52px;margin:0}
+.pr-nast{margin-top:22px;padding:14px 16px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-line);font:600 14px/1.4 var(--sans);color:var(--ink);width:100%;max-width:360px}
+.prowstart{margin-bottom:12px}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=76"></script>
-<script src="app.js?v=76"></script>
-<script src="ruch.js?v=76"></script>
+<script src="progresja.js?v=77"></script>
+<script src="app.js?v=77"></script>
+<script src="ruch.js?v=77"></script>
 </body>
 </html>

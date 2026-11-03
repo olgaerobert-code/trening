@@ -46,6 +46,7 @@ class El {
   get innerHTML() { return this._html; }
   append(...n) { for (const x of n) { const c = typeof x === 'object' ? x : txt(String(x)); c.parentNode = this; this.children.push(c); } }
   remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(c => c !== this); this.parentNode = null; }
+  replaceChildren(...n) { this.children = []; this.append(...n); }
   appendChild(n) { this.append(n); return n; }
   setAttribute(k, v) { this.attrs[k] = String(v); }
   getAttribute(k) { return this.attrs[k]; }
@@ -129,7 +130,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
-  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie, kolejkaSesji, nastepnyKrok, prowadzSesje, przerwaPo, zapiszCiezar,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -782,6 +783,80 @@ console.log('Przerwa i powiadomienie');
   const stop = A.stanPrzerwy();
   test('Pomin konczy przerwe, wracaja presety', !stop.leci && stop.tTotal === 0 && timer.querySelectorAll('.tbtn').map(b => b.textContent).includes('60 s'));
   test('+30 s bez trwajacej przerwy nic nie robi', (A.przedluzPrzerwe(30), A.stanPrzerwy().tTotal === 0));
+}
+
+/* ---------- prowadzenie sesji silowej ---------- */
+console.log('');
+console.log('Prowadzenie sesji');
+{
+  const W = 5;
+  S.week = W;
+  const czysc = () => { for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k]; for (const k of Object.keys(S.czasy)) if (+k.split('|')[0] === W) delete S.czasy[k]; delete S.treningi[W + '|A']; delete S.treningi[W + '|B']; };
+  czysc();
+  // Kolejka: suma serii, superseria przeplatana (plan cyklu 1, dzien B: A1/A2 i B1/B2).
+  const kB = A.kolejkaSesji('B', W);
+  const sumaB = S.plan.days.B.items.reduce((a, it) => a + A.plannedOf(it, W, 'B').sets, 0);
+  test('kolejka ma tyle krokow, ile serii w dniu', kB.length === sumaB && kB.length > 0);
+  const a1 = S.plan.days.B.items.find(it => it.superset === 'A1'), a2 = S.plan.days.B.items.find(it => it.superset === 'A2');
+  const idx = kB.map(k => k.it.superset || '-');
+  const p1 = idx.indexOf('A1'), p2 = idx.indexOf('A2');
+  test('superseria przeplata serie pary: A1 s1, A2 s1, A1 s2…', p2 === p1 + 1 && idx[p1 + 2] === 'A1' && idx[p1 + 3] === 'A2' && kB[p1].i === 0 && kB[p1 + 2].i === 1);
+  test('kroki poza superseria ida seria po serii', kB[0].it === S.plan.days.B.items[0] && kB[0].i === 0 && kB[1].i === 1);
+  test('nastepny krok to pierwszy bez zapisu', A.nastepnyKrok(kB, 'B', W) === 0);
+  A.logSet(W, 'B', kB[0].it.n, 0, { r: 5, kg: null, pr: 5, pk: null });
+  test('po zapisie pierwszej serii nastepny to drugi krok', A.nastepnyKrok(kB, 'B', W) === 1);
+  czysc();
+
+  // Ekran: pierwsza seria dnia A, Zaliczona → zapis, czas serii, przerwa z opisu cwiczenia.
+  S.view = '#/d/A'; A.render();
+  test('ekran sesji ma przycisk Prowadz sesje', app.querySelectorAll('.prowstart').length === 1 && app.textContent.includes('Prowadź sesję'));
+  const prow = A.prowadzSesje('A', W);
+  const kA = A.kolejkaSesji('A', W);
+  test('tryb prowadzenia otwiera sie na pierwszej serii', !!prow && prow.querySelector('.prnr').textContent === '1/' + kA.length && prow.textContent.includes(kA[0].it.name));
+  const okBtn = () => prow.querySelectorAll('.prok')[0];
+  prow.querySelector('.pr-powt').querySelectorAll('.krok3-b')[1].click();      // + jedno powtorzenie
+  okBtn().click();
+  const z0 = A.logGet(W, 'A', kA[0].it.n)[0];
+  test('Zaliczona zapisuje serie z ustawiona liczba powtorzen', !!z0 && z0.r === kA[0].pl.target + 1 && z0.pr === kA[0].pl.target);
+  test('czas serii zapisany', Array.isArray(S.czasy[W + '|A|' + kA[0].it.n]) && !!S.czasy[W + '|A|' + kA[0].it.n][0]);
+  test('trening wystartowal przy pierwszej serii', !!S.treningi[W + '|A'] && !!S.treningi[W + '|A'].start);
+  const sek = A.przerwaPo(kA[0].it, 'A', W);
+  const st = A.stanPrzerwy();
+  test('po serii ekran przerwy z odliczaniem z opisu cwiczenia', st.leci && st.tTotal === sek && !!prow.querySelector('.pr-odl') && prow.textContent.includes('Następna: ' + kA[1].it.name));
+  prow.querySelectorAll('.prok')[0].click();                   // Dalej →
+  test('Dalej konczy przerwe i pokazuje druga serie', !A.stanPrzerwy().leci && prow.querySelector('.prnr').textContent === '2/' + kA.length);
+  test('kreski postepu: pierwsza zaliczona, druga biezaca', prow.querySelector('.prkreski').querySelectorAll('i')[0].classList.contains('z') && prow.querySelector('.prkreski').querySelectorAll('i')[1].classList.contains('teraz'));
+  // Ciezar boju w trybie prowadzenia idzie ta sama droga co suwak (kgw).
+  const glowny = kA.findIndex(k => k.pl.planKg != null);
+  if (glowny >= 0) {
+    while (prow.querySelector('.prnr').textContent.split('/')[0] !== String(glowny + 1)) prow.querySelectorAll('.prok')[0].click(), (A.stanPrzerwy().leci && prow.querySelectorAll('.prok')[0].click());
+    const kgPrzed = kA[glowny].pl.kg;
+    prow.querySelector('.pr-kg').querySelectorAll('.krok3-b')[1].click();       // +2,5 kg
+    test('plus przy ciezarze zapisuje wlasny ciezar boju', A.plannedOf(kA[glowny].it, W, 'A').kg === kgPrzed + 2.5 && S.kgw[W + '|A|' + kA[glowny].it.n] === kgPrzed + 2.5);
+    test('ekran ma miejsce na sztange 3D z aktualnym ciezarem', prow.querySelector('.pr-sztanga') && +prow.querySelector('.pr-sztanga').dataset.kg === kgPrzed + 2.5);
+  }
+  prow.querySelector('.prx').click();
+  test('zamkniecie zostawia zapisane serie', !document.querySelector('.prow') && !!A.logGet(W, 'A', kA[0].it.n)[0]);
+  if (A.stanPrzerwy().leci) A.stopTimer();
+
+  // Ostatnia seria: bez przerwy, karta zaliczenia.
+  czysc();
+  kA.slice(0, -1).forEach(k => A.logSet(W, 'A', k.it.n, k.i, { r: k.pl.target, kg: k.pl.kg, pr: k.pl.target, pk: k.pl.planKg }));
+  const prow2 = A.prowadzSesje('A', W);
+  test('tryb prowadzenia startuje od ostatniej nieodhaczonej serii', prow2.querySelector('.prnr').textContent === kA.length + '/' + kA.length && !!prow2.querySelector('.pr-ost'));
+  prow2.querySelectorAll('.prok')[0].click();
+  await new Promise(r => setTimeout(r, 320));
+  test('ostatnia seria: bez przerwy, prowadzenie zamkniete, karta zaliczenia', !A.stanPrzerwy().leci && !document.querySelector('.prow') && !!document.querySelector('.zal') && A.sesjaKompletna('A', W));
+  const zal = document.querySelector('.zal'); if (zal) zal.remove();
+  // Karta Dzis: sesja w trakcie → „Prowadź dalej" i nazwa nastepnego cwiczenia.
+  czysc();
+  A.logSet(W, 'A', kA[0].it.n, 0, { r: kA[0].pl.target, kg: kA[0].pl.kg, pr: kA[0].pl.target, pk: kA[0].pl.planKg });
+  const realny = Date.prototype.getDay; Date.prototype.getDay = () => 1;   // poniedzialek → karta Dzis to dzien A
+  S.view = '#/'; A.render();
+  Date.prototype.getDay = realny;
+  const hero = app.querySelector('.hero-s');
+  test('karta Dzis w trakcie sesji prowadzi dalej', !!hero && hero.textContent.includes('Prowadź dalej') && hero.textContent.includes('następna: ' + kA[1].it.name));
+  czysc();
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */

@@ -429,11 +429,21 @@
     ustawKg(s, parseFloat(hv.dataset.cnt));
     uruchom();
   };
+  // tryb prowadzenia: host .pr-sztanga z data-kg (poza #app), zmiana ciężaru przez data-kg
+  const zalozNaProwadzenie = host => {
+    if (host.querySelector('.sztanga3d')) return;
+    const s = Scena(host, '#fff');
+    ustawKg(s, parseFloat(host.dataset.kg));
+    new MutationObserver(() => { const kg = parseFloat(host.dataset.kg); if (kg !== s.kg) ustawKg(s, kg); }).observe(host, { attributes: true, attributeFilter: ['data-kg'] });
+    uruchom();
+  };
   const przejrzyj = () => {
     app.querySelectorAll('.ex.main').forEach(zalozNaKarte);
     app.querySelectorAll('.tile.hero-s').forEach(zalozNaHero);
+    document.querySelectorAll('.prow .pr-sztanga').forEach(zalozNaProwadzenie);
   };
   new MutationObserver(muts => { if (muts.some(m => m.addedNodes.length)) raf(przejrzyj); }).observe(app, { childList: true });
+  new MutationObserver(muts => { if (muts.some(m => m.addedNodes.length)) raf(przejrzyj); }).observe(document.body, { childList: true, subtree: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) uruchom(); });
   window.addEventListener('resize', () => { for (const s of sceny) s.brudna = true; uruchom(); }, { passive: true });
   przejrzyj();
