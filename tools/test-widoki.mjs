@@ -41,10 +41,15 @@ class El {
   get className() { return [...this._cls].join(' '); }
   set className(v) { this._cls = new Set(String(v).split(/\s+/).filter(Boolean)); }
   get textContent() { return this._txt + this.children.map(c => c.textContent).join(''); }
-  set textContent(v) { this._txt = v == null ? '' : String(v); this.children = []; }
+  // Jak w przegladarce: tekst staje sie wezlem tekstowym, a childNodes to dzieci.
+  set textContent(v) { this._txt = ''; this.children = v == null || v === '' ? [] : [txt(String(v))]; }
+  get childNodes() { return this.children; }
   set innerHTML(v) { this._html = String(v); if (!v) this.children = []; }
   get innerHTML() { return this._html; }
-  append(...n) { for (const x of n) this.children.push(typeof x === 'object' ? x : txt(String(x))); }
+  append(...n) { for (const x of n) { const c = typeof x === 'object' ? x : txt(String(x)); c.parentNode = this; this.children.push(c); } }
+  remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(c => c !== this); this.parentNode = null; }
+  replaceChildren(...n) { this.children = []; this.append(...n); }
+  closest(sel) { let n = this; while (n && n.tagName) { if (n.tagName !== '#TEXT' && pasuje(n, sel)) return n; n = n.parentNode; } return null; }
   appendChild(n) { this.append(n); return n; }
   setAttribute(k, v) { this.attrs[k] = String(v); }
   getAttribute(k) { return this.attrs[k]; }
@@ -90,6 +95,7 @@ const document = {
   createDocumentFragment: () => new El('#fragment'),
   createTextNode: t => txt(t),
   querySelector: s => (pasuje(korzen, s) ? korzen : szukaj(korzen, s)[0] || null),
+  removeEventListener() {},
   getElementById: id => szukaj(korzen, '#' + id)[0] || null,
   querySelectorAll: s => szukaj(korzen, s),
   addEventListener() {},
@@ -107,7 +113,7 @@ const sandbox = {
   history: { replaceState() {} },
   navigator: { onLine: false, vibrate() {} },      // offline: zero ruchu do Supabase
   window: { addEventListener() {}, scrollTo() {} },
-  setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
+  setTimeout, clearTimeout, setInterval: () => 1, clearInterval() {},   // 1, nie 0: uchwyt timera ma byc prawdziwy
   crypto: { getRandomValues: a => { a.fill(7); return a; } },
   fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planJson) }),
   URL: { createObjectURL: () => 'blob:x', revokeObjectURL() {} },
@@ -127,6 +133,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie, kolejkaSesji, nastepnyKrok, prowadzSesje, przerwaPo, zapiszCiezar, rozwinKarte,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -646,6 +653,285 @@ console.log('Migracja poniedzialku');
   test('pelny tydzien 3 blokuje ruch, dane zostaja', A.tydzienMaDane(2, 'A') && A.tydzienMaDane(3, 'A'));
   czysc();
   S.plan.cykl = cykl;
+}
+
+/* ---------- liczba z klawiatury ---------- */
+console.log('');
+console.log('Liczba z klawiatury');
+{
+  test('przecinek i kropka', A.parsujLiczbe('72,5') === 72.5 && A.parsujLiczbe('72.5') === 72.5);
+  test('spacje nieistotne', A.parsujLiczbe(' 1 00 ') === 100);
+  test('smieci daja null', A.parsujLiczbe('') === null && A.parsujLiczbe('abc') === null && A.parsujLiczbe('7,,5') === null && A.parsujLiczbe(null) === null);
+  test('ciezar domkniety do kroku 2,5 i zakresu', A.domknijLiczbe(93, { krok: 2.5, min: 0, max: 500 }) === 92.5 && A.domknijLiczbe(900, { krok: 2.5, max: 500 }) === 500);
+  test('powtorzenia to liczby calkowite nie mniejsze od zera', A.domknijLiczbe(7.6, { krok: 1, min: 0 }) === 8 && A.domknijLiczbe(-3, { krok: 1, min: 0 }) === 0);
+
+  // Pole w miejscu liczby: Enter zapisuje ta sama droga co suwak, Escape anuluje.
+  const W = 4;
+  S.week = W;
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  S.view = '#/d/A'; A.render();
+  const wiersz = app.querySelectorAll('.setrow')[0];
+  const val = wiersz.querySelector('.setval');
+  const vb = val.querySelector('b');
+  const przed = vb.textContent;
+  val.click();
+  const pole = vb.querySelector('.wpis');
+  test('tapniecie w liczbe otwiera pole liczbowe', !!pole && pole.attrs.inputmode === 'numeric');
+  pole.value = '6';
+  pole.onkeydown({ key: 'Enter', preventDefault() {} });
+  const itA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').sets > 0);
+  test('Enter zapisuje serie z wpisana liczba', vb.textContent === '6' && A.logGet(W, 'A', itA.n)[0] && A.logGet(W, 'A', itA.n)[0].r === 6 && wiersz.classList.contains('done'));
+  val.click();
+  const pole2 = vb.querySelector('.wpis');
+  pole2.value = '99';
+  pole2.onkeydown({ key: 'Escape', preventDefault() {} });
+  test('Escape nic nie zmienia', vb.textContent === '6' && A.logGet(W, 'A', itA.n)[0].r === 6 && !vb.querySelector('.wpis'));
+  const kgb = app.querySelector('.kglab b');
+  if (kgb) {
+    kgb.click();
+    const pk = kgb.querySelector('.wpis');
+    test('pole ciezaru ma klawiature dziesietna', !!pk && pk.attrs.inputmode === 'decimal');
+    pk.value = '77,5';
+    pk.onblur();
+    test('zejscie z pola zapisuje ciezar na serii', A.logGet(W, 'A', itA.n)[0].kg === 77.5 && kgb.textContent === '77,5');
+  }
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === W) delete S.kgw[k];
+}
+
+/* ---------- przytrzymanie ✓ i arkusz korekty ---------- */
+console.log('');
+console.log('Przytrzymanie ✓');
+{
+  // Czysta logika: krotkie nacisniecie nie wola hold, dlugie wola i polyka nastepny click.
+  const el = document.createElement('button');
+  let holdy = 0;
+  const u = A.przytrzymanie(el, { hold: () => { holdy++; }, ms: 8, luz: 10 });
+  u.down({ clientX: 0, clientY: 0 }); u.up();
+  await new Promise(r => setTimeout(r, 30));
+  test('krotkie nacisniecie nie wola hold', holdy === 0 && !el._trzymane);
+  u.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 30));
+  test('dlugie nacisniecie wola hold i oznacza przycisk', holdy === 1 && el._trzymane === true);
+  u.down({ clientX: 0, clientY: 0 }); u.move({ clientX: 30, clientY: 0 });
+  await new Promise(r => setTimeout(r, 30));
+  test('ruch palca (przewijanie) przerywa odliczanie', holdy === 1);
+  el._trzymane = true; u.down({ clientX: 0, clientY: 0 }); u.up();
+  test('nowe nacisniecie czysci stara flage po przytrzymaniu', el._trzymane === false);
+
+  // Wiersz serii: tap odhacza, drugi tap nie cofa, arkusz cofa.
+  const W = 4;
+  S.week = W;
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  S.view = '#/d/A'; A.render();
+  const itA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').sets > 0);
+  const wiersz = app.querySelectorAll('.setrow')[0];
+  const tick = wiersz.querySelector('.tick');
+  tick.click();
+  test('tap odhacza serie', wiersz.classList.contains('done') && !!A.logGet(W, 'A', itA.n)[0]);
+  tick.click();
+  test('drugi tap nie cofa odhaczenia', wiersz.classList.contains('done') && !!A.logGet(W, 'A', itA.n)[0]);
+  test('i pokazuje podpowiedz', !!wiersz.querySelector('.podp'));
+  tick._trzymane = true; tick.click();
+  test('klik po przytrzymaniu jest polkniety', wiersz.classList.contains('done') && !tick._trzymane);
+  // hold: arkusz z dwoma stepperami, Cofnij odhaczenie cofa
+  tick._hold.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 480));
+  const ark = document.querySelector('.arkusz');
+  test('przytrzymanie otwiera arkusz korekty', !!ark && ark.textContent.includes('Seria 1 z'));
+  const plus = ark.querySelectorAll('.krok3-b')[1];
+  plus.click();
+  const zapisz = ark.querySelectorAll('.btn').find(b => b.textContent.includes('Zapisz'));
+  zapisz.click();
+  const pl = A.plannedOf(itA, W, 'A');
+  test('plus i Zapisz zapisuja o jedno powtorzenie wiecej', A.logGet(W, 'A', itA.n)[0].r === pl.target + 1 && !document.querySelector('.arkusz'));
+  tick._trzymane = false;
+  tick._hold.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 480));
+  const ark2 = document.querySelector('.arkusz');
+  const cof = ark2.querySelectorAll('.btn').find(b => b.textContent.includes('Cofnij'));
+  test('odhaczona seria ma w arkuszu Cofnij odhaczenie', !!cof);
+  cof.click();
+  test('Cofnij odhaczenie zdejmuje serie z dziennika', !wiersz.classList.contains('done') && !A.logGet(W, 'A', itA.n)[0]);
+  tick._trzymane = false;
+  tick._hold.down({ clientX: 0, clientY: 0 });
+  await new Promise(r => setTimeout(r, 480));
+  const ark3 = document.querySelector('.arkusz');
+  test('nieodhaczona seria nie ma Cofnij, ma Zapisz serie', !ark3.querySelectorAll('.btn').find(b => b.textContent.includes('Cofnij')) && !!ark3.querySelectorAll('.btn').find(b => b.textContent.includes('Zapisz serię')));
+  ark3.querySelectorAll('.btn').find(b => b.textContent.includes('Anuluj')).click();
+  test('Anuluj zamyka arkusz bez zapisu', !document.querySelector('.arkusz') && !A.logGet(W, 'A', itA.n)[0]);
+  tick._trzymane = false;
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+}
+
+/* ---------- przerwa i powiadomienie ---------- */
+console.log('');
+console.log('Przerwa i powiadomienie');
+{
+  test('powiadomienie o koncu przerwy domyslnie wlaczone', S.powiadomPrzerwa === true);
+  S.powiadomPrzerwa = false; A.zapiszLokalnie();
+  test('przelacznik zapisuje sie w trening.v1', (magazyn.get('trening.v1') || '').includes('"powiadomPrzerwa":false'));
+  S.powiadomPrzerwa = true; A.zapiszLokalnie();
+  S.view = '#/ustawienia'; A.render();
+  test('ustawienia maja przelacznik powiadomienia o koncu przerwy', app.textContent.includes('Powiadomienie o końcu przerwy'));
+
+  S.view = '#/d/A'; A.render();
+  A.startTimer(60);
+  const przed = A.stanPrzerwy();
+  test('timer rusza na 60 s', przed.leci && przed.tTotal === 60);
+  const przyciski = timer.querySelectorAll('.tbtn').map(b => b.textContent);
+  test('w czasie przerwy kapsula ma +30 s i Pomin, bez presetow', przyciski.includes('+30 s') && przyciski.includes('Pomiń') && !przyciski.includes('60 s'));
+  A.przedluzPrzerwe(30);
+  const po = A.stanPrzerwy();
+  test('+30 s wydluza koniec przerwy o pol minuty', po.tTotal === 90 && po.tEnd - przed.tEnd === 30000 && po.tLeft >= 89);
+  timer.querySelectorAll('.tbtn').find(b => b.textContent === 'Pomiń').click();
+  const stop = A.stanPrzerwy();
+  test('Pomin konczy przerwe, wracaja presety', !stop.leci && stop.tTotal === 0 && timer.querySelectorAll('.tbtn').map(b => b.textContent).includes('60 s'));
+  test('+30 s bez trwajacej przerwy nic nie robi', (A.przedluzPrzerwe(30), A.stanPrzerwy().tTotal === 0));
+  test('ciezar z klawiatury nie schodzi ponizej 2,5 kg', A.domknijLiczbe(0, { krok: 2.5, min: 2.5, max: 500 }) === 2.5);
+}
+
+/* ---------- prowadzenie sesji silowej ---------- */
+console.log('');
+console.log('Prowadzenie sesji');
+{
+  const W = 5;
+  S.week = W;
+  const czysc = () => { for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k]; for (const k of Object.keys(S.czasy)) if (+k.split('|')[0] === W) delete S.czasy[k]; delete S.treningi[W + '|A']; delete S.treningi[W + '|B']; };
+  czysc();
+  // Kolejka: suma serii, superseria przeplatana (plan cyklu 1, dzien B: A1/A2 i B1/B2).
+  const kB = A.kolejkaSesji('B', W);
+  const sumaB = S.plan.days.B.items.reduce((a, it) => a + A.plannedOf(it, W, 'B').sets, 0);
+  test('kolejka ma tyle krokow, ile serii w dniu', kB.length === sumaB && kB.length > 0);
+  const a1 = S.plan.days.B.items.find(it => it.superset === 'A1'), a2 = S.plan.days.B.items.find(it => it.superset === 'A2');
+  const idx = kB.map(k => k.it.superset || '-');
+  const p1 = idx.indexOf('A1'), p2 = idx.indexOf('A2');
+  test('superseria przeplata serie pary: A1 s1, A2 s1, A1 s2…', p2 === p1 + 1 && idx[p1 + 2] === 'A1' && idx[p1 + 3] === 'A2' && kB[p1].i === 0 && kB[p1 + 2].i === 1);
+  test('kroki poza superseria ida seria po serii', kB[0].it === S.plan.days.B.items[0] && kB[0].i === 0 && kB[1].i === 1);
+  test('nastepny krok to pierwszy bez zapisu', A.nastepnyKrok(kB, 'B', W) === 0);
+  A.logSet(W, 'B', kB[0].it.n, 0, { r: 5, kg: null, pr: 5, pk: null });
+  test('po zapisie pierwszej serii nastepny to drugi krok', A.nastepnyKrok(kB, 'B', W) === 1);
+  czysc();
+
+  // Ekran: pierwsza seria dnia A, Zaliczona → zapis, czas serii, przerwa z opisu cwiczenia.
+  S.view = '#/d/A'; A.render();
+  test('ekran sesji ma przycisk Prowadz sesje', app.querySelectorAll('.prowstart').length === 1 && app.textContent.includes('Prowadź sesję'));
+  const prow = A.prowadzSesje('A', W);
+  const kA = A.kolejkaSesji('A', W);
+  test('tryb prowadzenia otwiera sie na pierwszej serii', !!prow && prow.querySelector('.prnr').textContent === '1/' + kA.length && prow.textContent.includes(kA[0].it.name));
+  const okBtn = () => prow.querySelectorAll('.prok')[0];
+  prow.querySelector('.pr-powt').querySelectorAll('.krok3-b')[1].click();      // + jedno powtorzenie
+  okBtn().click();
+  const z0 = A.logGet(W, 'A', kA[0].it.n)[0];
+  test('Zaliczona zapisuje serie z ustawiona liczba powtorzen', !!z0 && z0.r === kA[0].pl.target + 1 && z0.pr === kA[0].pl.target);
+  test('czas serii zapisany', Array.isArray(S.czasy[W + '|A|' + kA[0].it.n]) && !!S.czasy[W + '|A|' + kA[0].it.n][0]);
+  test('trening wystartowal przy pierwszej serii', !!S.treningi[W + '|A'] && !!S.treningi[W + '|A'].start);
+  const sek = A.przerwaPo(kA[0].it, 'A', W);
+  const st = A.stanPrzerwy();
+  test('po serii ekran przerwy z odliczaniem z opisu cwiczenia', st.leci && st.tTotal === sek && !!prow.querySelector('.pr-odl') && prow.textContent.includes('Następna: ' + kA[1].it.name));
+  prow.querySelectorAll('.prok')[0].click();                   // Dalej →
+  test('Dalej konczy przerwe i pokazuje druga serie', !A.stanPrzerwy().leci && prow.querySelector('.prnr').textContent === '2/' + kA.length);
+  // Ponowne otwarcie prowadzenia sprzata poprzednia instancje (jeden .prow, stary uchwyt zamkniety).
+  const prowBis = A.prowadzSesje('A', W);
+  test('ponowne otwarcie zostawia jedna instancje', document.querySelectorAll('.prow').length === 1 && prowBis !== prow);
+  prowBis.querySelector('.prx').click();
+  const prow3 = A.prowadzSesje('A', W);
+  // dalej testujemy na swiezej instancji
+  test('po zamknieciu da sie otworzyc znowu', !!prow3 && document.querySelectorAll('.prow').length === 1);
+  // Enter w polu liczbowym nie zalicza serii — tylko zapisuje liczbe w stepperze.
+  const vPowt = prow3.querySelector('.pr-powt').querySelector('.krok3-v');
+  vPowt.click();
+  const polePowt = vPowt.querySelector('.wpis');
+  polePowt.value = '9';
+  polePowt.onkeydown({ key: 'Enter', preventDefault() {}, stopPropagation() {} });
+  test('Enter w polu powtorzen ustawia liczbe bez zaliczania serii', vPowt.textContent.startsWith('9') && !A.logGet(W, 'A', kA[1].it.n)[kA[1].i] && prow3.querySelector('.prnr').textContent === '2/' + kA.length);
+  vPowt.click();
+  const polePowt2 = vPowt.querySelector('.wpis');
+  polePowt2.onkeydown({ key: 'Escape', preventDefault() {}, stopPropagation() {} });
+  test('Escape przywraca liczbe ze stepperem (b i jednostka), nie goly tekst', !!vPowt.querySelector('b') && vPowt.querySelector('b').textContent === '9');
+  test('kreski postepu: pierwsza zaliczona, druga biezaca', prow3.querySelector('.prkreski').querySelectorAll('i')[0].classList.contains('z') && prow3.querySelector('.prkreski').querySelectorAll('i')[1].classList.contains('teraz'));
+  // Ciezar boju w trybie prowadzenia idzie ta sama droga co suwak (kgw).
+  const glowny = kA.findIndex(k => k.pl.planKg != null);
+  if (glowny >= 0) {
+    while (prow3.querySelector('.prnr').textContent.split('/')[0] !== String(glowny + 1)) prow3.querySelectorAll('.prok')[0].click(), (A.stanPrzerwy().leci && prow3.querySelectorAll('.prok')[0].click());
+    const kgPrzed = kA[glowny].pl.kg;
+    prow3.querySelector('.pr-kg').querySelectorAll('.krok3-b')[1].click();       // +2,5 kg
+    test('plus przy ciezarze zapisuje wlasny ciezar boju', A.plannedOf(kA[glowny].it, W, 'A').kg === kgPrzed + 2.5 && S.kgw[W + '|A|' + kA[glowny].it.n] === kgPrzed + 2.5);
+    test('ekran ma miejsce na sztange 3D z aktualnym ciezarem', prow3.querySelector('.pr-sztanga') && +prow3.querySelector('.pr-sztanga').dataset.kg === kgPrzed + 2.5);
+  }
+  prow3.querySelector('.prx').click();
+  test('zamkniecie zostawia zapisane serie', !document.querySelector('.prow') && !!A.logGet(W, 'A', kA[0].it.n)[0]);
+  if (A.stanPrzerwy().leci) A.stopTimer();
+
+  // Ostatnia seria: bez przerwy, karta zaliczenia.
+  czysc();
+  kA.slice(0, -1).forEach(k => A.logSet(W, 'A', k.it.n, k.i, { r: k.pl.target, kg: k.pl.kg, pr: k.pl.target, pk: k.pl.planKg }));
+  const prow2 = A.prowadzSesje('A', W);
+  test('tryb prowadzenia startuje od ostatniej nieodhaczonej serii', prow2.querySelector('.prnr').textContent === kA.length + '/' + kA.length && !!prow2.querySelector('.pr-ost'));
+  prow2.querySelectorAll('.prok')[0].click();
+  await new Promise(r => setTimeout(r, 320));
+  test('ostatnia seria: bez przerwy, prowadzenie zamkniete, karta zaliczenia', !A.stanPrzerwy().leci && !document.querySelector('.prow') && !!document.querySelector('.zal') && A.sesjaKompletna('A', W));
+  const zal = document.querySelector('.zal'); if (zal) zal.remove();
+  // Karta Dzis: sesja w trakcie → „Prowadź dalej" i nazwa nastepnego cwiczenia.
+  czysc();
+  A.logSet(W, 'A', kA[0].it.n, 0, { r: kA[0].pl.target, kg: kA[0].pl.kg, pr: kA[0].pl.target, pk: kA[0].pl.planKg });
+  const realny = Date.prototype.getDay; Date.prototype.getDay = () => 1;   // poniedzialek → karta Dzis to dzien A
+  S.view = '#/'; A.render();
+  Date.prototype.getDay = realny;
+  const hero = app.querySelector('.hero-s');
+  test('karta Dzis w trakcie sesji prowadzi dalej', !!hero && hero.textContent.includes('Prowadź dalej') && hero.textContent.includes('następna: ' + kA[1].it.name));
+  czysc();
+}
+
+/* ---------- przyrost od zeszlego tygodnia na karcie Dzis ---------- */
+console.log('');
+console.log('Przyrost od zeszlego tygodnia');
+{
+  const W = 3;
+  S.week = W;
+  const realny = Date.prototype.getDay; Date.prototype.getDay = () => 1;
+  S.view = '#/'; A.render();
+  Date.prototype.getDay = realny;
+  const hv = app.querySelector('.hero-s').querySelector('.hv');
+  const bojA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').planKg != null);
+  const teraz = A.plannedOf(bojA, W, 'A').kg, poprz = A.plannedOf(bojA, W - 1, 'A').kg;
+  test('karta Dzis niesie ciezar z zeszlego tygodnia, gdy sie rozni', teraz !== poprz ? +hv.dataset.poprz === poprz : hv.dataset.poprz === undefined);
+  S.week = 1; S.view = '#/'; A.render();
+  test('w tygodniu 1 nie ma zeszlego tygodnia', app.querySelector('.hero-s').querySelector('.hv').dataset.poprz === undefined);
+}
+
+/* ---------- sztanga rozladowuje sie po ostatniej serii boju ---------- */
+console.log('');
+console.log('Rozladowanie sztangi');
+{
+  const W = 6;
+  S.week = W;
+  const czysc = () => { for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k]; delete S.treningi[W + '|A']; };
+  czysc();
+  S.view = '#/d/A'; A.render();
+  const karta = app.querySelectorAll('.ex').find(e => e.classList.contains('main'));
+  const ticki = karta.querySelector('.sets').querySelectorAll('.tick');
+  ticki.slice(0, -1).forEach(t => t.click());
+  test('przed ostatnia seria karta boju nie jest oznaczona', !karta.dataset.zaliczone);
+  ticki[ticki.length - 1].click();
+  test('ostatnia seria boju oznacza karte do rozladowania', karta.dataset.zaliczone === '1');
+  A.render();
+  const karta2 = app.querySelectorAll('.ex').find(e => e.classList.contains('main'));
+  test('cofniecie (rozwiniecie karty) zdejmuje oznaczenie', (A.rozwinKarte(karta2), !karta2.dataset.zaliczone));
+  // Tryb prowadzenia: ostatnia seria boju ustawia data-rozladuj na hoście sztangi.
+  czysc();
+  const kA = A.kolejkaSesji('A', W);
+  const ost = kA.findIndex((k, idx) => k.pl.planKg != null && k.i === k.pl.sets - 1);
+  kA.slice(0, ost).forEach(k => A.logSet(W, 'A', k.it.n, k.i, { r: k.pl.target, kg: k.pl.kg, pr: k.pl.target, pk: k.pl.planKg }));
+  const prow = A.prowadzSesje('A', W);
+  test('prowadzenie stoi na ostatniej serii boju', prow.querySelector('.prnr').textContent.startsWith((ost + 1) + '/') && !!prow.querySelector('.pr-sztanga'));
+  prow.querySelectorAll('.prok')[0].click();
+  test('zaliczenie ostatniej serii boju rozladowuje sztange, przerwa juz leci', prow.querySelector('.pr-sztanga').dataset.rozladuj === '1' && A.stanPrzerwy().leci);
+  await new Promise(r => setTimeout(r, 1000));
+  test('po chwili ekran przerwy', !!prow.querySelector('.pr-odl'));
+  prow.querySelector('.prx').click();
+  if (A.stanPrzerwy().leci) A.stopTimer();
+  czysc();
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */

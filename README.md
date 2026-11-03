@@ -82,14 +82,18 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
 
 ## Wygląd
 
-Kierunek: **tablica wyników na stadionie nocą**. Szkło z rozmyciem na ciemnym
-granacie, zorza w kolorach dni, która powoli krąży pod wszystkim, poświata
-koloru dnia na pierścieniach, przyciskach i szynach kart. Jeden krój (Archivo)
-w całej aplikacji: zwężony i ciężki na liczby i tytuły, pełnej szerokości na
-tekst. Numer tygodnia zajmuje pół ekranu, tygodnie leżą na wstędze przewijanej
-palcem, dolny pasek jest pływającą kapsułą, a karta sesji to plakat z literą dnia
-w paralaksie. Jasny motyw to ta sama konstrukcja na białym tle; ciemny włącza
-się sam według ustawienia telefonu.
+Kierunek: **tablica wyników na stadionie nocą**, ściszona. Ciemny granat,
+płaskie kolory dni (A niebieski, B zielony, C pomarańczowy, joga fioletowa),
+jeden krój (Archivo): zwężony i ciężki na liczby i tytuły, pełnej szerokości
+na tekst. Podpisy to zwykłe pismo 12–13 px, wielkie litery zostają tylko
+w tytułach. Numer tygodnia zajmuje pół ekranu, tygodnie leżą na wstędze
+przewijanej palcem, dolny pasek jest pływającą kapsułą, a karta sesji to
+plakat z literą dnia w paralaksie. Nic nie gra w tle: żadnych plam, zorzy,
+pulsowania ani pasów — jedyną gwiazdą jest sztanga 3D. Jasny motyw to ta
+sama konstrukcja na białym tle; ciemny włącza się sam według ustawienia
+telefonu. Aplikacja jest robiona pod telefon na siłowni: każdy cel dotyku ma
+co najmniej 44 px, pasek stanu iPhone'a jest przezroczysty, a ekrany trzymają
+się bezpiecznych marginesów.
 
 - **Ekran Dziś**: duży tytuł z datą i numerem tygodnia, pod nim dwanaście
   tygodni jednym rzędem (deload na bursztynowo), pasek dni Pn–Nd z literą
@@ -166,7 +170,28 @@ się sam według ustawienia telefonu.
   - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
     przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
 - **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
-  wartość, odhaczenie po prawej. Odhaczona seria robi się zielona
+  wartość, odhaczenie po prawej. Odhaczona seria robi się zielona. Tapnięcie
+  w liczbę (ciężar albo powtórzenia) otwiera w tym samym miejscu pole
+  liczbowe z klawiaturą telefonu; Enter albo zejście z pola zapisuje tą samą
+  drogą co suwak, Escape anuluje
+- **Przytrzymanie ✓**: tap odhacza serię (z krótką wibracją), tap w odhaczoną
+  serię nic nie cofa — spocony kciuk trafia w ✓ przez pomyłkę. Przytrzymanie
+  ✓ przez pół sekundy otwiera arkusz korekty: duże steppery powtórzeń
+  i ciężaru (co 2,5 kg), „Zapisz", „Cofnij odhaczenie", „Anuluj"
+- **Prowadź sesję** (dni A, B, C): jedna seria na cały ekran, jak „Prowadź mnie"
+  w jodze. Kreski postępu na górze, nazwa ćwiczenia, „Seria 2 z 4 · cel 8
+  powt. · RPE 7", przy boju sztanga 3D załadowana na bieżący ciężar, steppery
+  ciężaru i powtórzeń, wielki przycisk „Zaliczona ✓". Superseria przeplata
+  serie pary (A1, A2, A1, A2…). Po serii ekran przerwy z wielkim odliczaniem,
+  „+30 s", „Pomiń przerwę" i zapowiedzią następnej serii; ekran nie przeskakuje
+  sam, „Dalej →" czeka pod kciukiem. Ostatnia seria zamyka trening i pokazuje
+  kartę zaliczenia. ✕ wychodzi do listy, serie zostają. Wejście: przycisk na
+  ekranie sesji, a karta Dziś w trakcie sesji pokazuje następne ćwiczenie
+  i „Prowadź dalej"
+- **Powiadomienie o końcu przerwy** (Dziennik → W trakcie sesji): niezależne od
+  zegarka, domyślnie włączone. Gdy timer dojdzie do zera przy zgaszonym ekranie,
+  telefon wibruje i pokazuje „Koniec przerwy" z opisem następnej serii.
+  W kapsule w czasie przerwy są „+30 s" i „Pomiń" zamiast presetów
 - **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
   sesji zamienia się w timer przerwy
 - **Archivo** w zwężonej, ciężkiej odmianie na liczby i tytuły — tak wygląda
@@ -174,28 +199,22 @@ się sam według ustawienia telefonu.
   siedzi w cache service workera. Tekst do czytania idzie krojem systemowym
 - Jedyny kolor poza kolorami dni i serii to zieleń „zapisane" i bursztyn
   ostrzeżeń. Główny przycisk jest czarny (w ciemnym motywie biały)
-- **Ekrany na całą wysokość**, przewijane z przyciąganiem jak pionowe wideo:
-  na Dziś karta sesji i każda sesja z listy to plakat w kolorze dnia z literą
-  w paralaksie; w sesji każde ćwiczenie to jeden ekran — tytuł u góry, sztanga
-  albo dawka na środku, serie na dole, a w jodze film na pół ekranu. Skończone
-  ćwiczenie zwija się do jednego wiersza
+- **Plakaty sesji** na Dziś: każda sesja z listy to karta w kolorze dnia
+  (najwyżej 42% wysokości ekranu) z literą w paralaksie, a karta „Dziś" ma
+  sztangę 3D z ciężarem boju. W sesji karty ćwiczeń mają naturalną wysokość,
+  skończone ćwiczenie zwija się do jednego wiersza
 - **Sztanga 3D** (`ruch.js`, płótno bez bibliotek): gryf, kołnierze, tuleje
-  i talerze w kolorach IPF, obraca się sama i pod palcem. Na karcie Dziś pokazuje
-  ciężar boju, w karcie boju talerze wjeżdżają na gryf przy każdym ruchu suwaka
-  „Ciężar na sztandze"; pod spodem rozkład na stronę
-- **Wydajność na telefonie**: bez przyciągania przewijania, bez `backdrop-filter`
-  na kartach (zostaje tylko na dolnej kapsule i nakładkach), zorza w tle bez
-  filtra rozmycia, plamy światła na kartach animowane wyłącznie przez `transform`,
-  sztanga 3D rysowana ~30 kl/s i wstrzymywana w czasie przewijania
+  i talerze w kolorach IPF. W spoczynku stoi nieruchomo; rysuje się tylko wtedy,
+  gdy talerze wjeżdżają na gryf po zmianie ciężaru (suwak, klawiatura, stepper
+  w trybie prowadzenia) albo gdy palec ją obraca. Pod spodem rozkład na stronę
 - **Ruch** (`ruch.js` — tylko obserwuje DOM, nic nie zapisuje): duch poprzedniego
-  ekranu odsuwa się, gdy wjeżdża nowy (w głąb w lewo, wstecz w prawo), elementy
-  wjeżdżają jeden po drugim, karty poniżej ekranu pokazują się dopiero po
-  przewinięciu, fala po każdym tapnięciu, konfetti i krótka wibracja przy odhaczeniu
-  serii, dwie salwy konfetti na karcie zaliczenia, paralaksa litery dnia i numeru
-  tygodnia, karta „Dziś" pochyla się pod palcem, dolna kapsuła wypełnia się w czasie
-  przerwy i błyska na koniec, wstęga tygodni sama przewija się do bieżącego, pod
-  nagłówkiem biegnie pasek z datą i blokiem, liczby liczą się od zera, pierścienie
-  i wykresy wypełniają się przy wejściu. `prefers-reduced-motion` wyłącza wszystko
+  ekranu odsuwa się 220 ms, gdy wjeżdża nowy, elementy wjeżdżają jeden po drugim
+  (260 ms), fala po tapnięciu (320 ms), konfetti tylko na karcie zaliczenia,
+  paralaksa litery dnia i numeru tygodnia przy przewijaniu, dolna kapsuła
+  wypełnia się w czasie przerwy, wstęga tygodni sama przewija się do bieżącego,
+  liczby liczą się od zera, pierścienie i wykresy wypełniają się przy wejściu.
+  Wszystko ≤ 300 ms, ease-out, tylko `transform` i `opacity`; nic nie animuje się
+  w nieskończoność; `prefers-reduced-motion` wyłącza wszystko
 
 Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli:
 kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie na zewnątrz, średnice
@@ -266,7 +285,8 @@ dźwięk ze stron. Wtedy zostaje wibracja.
 
 ## Co się zapisuje
 
-W `localStorage`: numer tygodnia, trzy E1RM i przełącznik dźwięku (`trening.v1`),
+W `localStorage`: numer tygodnia, trzy E1RM, przełączniki dźwięku, automatycznej
+przerwy i powiadomienia o końcu przerwy (`trening.v1`),
 dziennik serii (`trening.log.v1`), historia korekt (`trening.adjust.v1`), własne
 ciężary ćwiczeń dodatkowych (`trening.acc.v1`), kolejka wysyłkowa (`trening.queue.v1`),
 pominięte sesje (`trening.pominiete.v1`) i kod planu (`trening.key.v1`).

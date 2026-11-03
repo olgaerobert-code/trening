@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, powiadomPrzerwa: true, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
 };
 
 /* ---------- Supabase ---------- */
@@ -105,6 +105,55 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const floor25 = x => Math.floor(x / 2.5) * 2.5;
 // round25 pochodzi z progresja.js — jeden wspólny zasięg globalny, jedna definicja.
 const fmt = n => (n == null ? '—' : String(Math.round(n * 100) / 100).replace('.', ','));
+// Liczba wpisana z klawiatury: przecinek albo kropka, spacje nieistotne, śmieci → null.
+function parsujLiczbe(tekst) {
+  const t = String(tekst == null ? '' : tekst).replace(/\s+/g, '').replace(',', '.');
+  if (!/^-?\d*\.?\d+$/.test(t)) return null;
+  const v = parseFloat(t);
+  return Number.isFinite(v) ? v : null;
+}
+// Domyka wpisaną liczbę do zakresu i kroku (np. ciężar co 2,5 kg, powtórzenia co 1).
+function domknijLiczbe(v, { min = -Infinity, max = Infinity, krok = 1 } = {}) {
+  if (v == null) return null;
+  const k = krok > 0 ? Math.round(v / krok) * krok : v;
+  return Math.min(max, Math.max(min, Math.round(k * 100) / 100));
+}
+
+/* Tapnięcie w liczbę otwiera w tym samym miejscu pole do wpisania z klawiatury —
+   suwak zostaje do szybkich korekt, klawiatura jest od dokładnych. Enter albo
+   zejście z pola zapisuje tą samą drogą co suwak, Escape anuluje. */
+function edycjaLiczby(el, opcje) {
+  if (!el || el.querySelector && el.querySelector('.wpis')) return;
+  const stare = el.childNodes ? Array.from(el.childNodes) : el.children.slice();
+  const inp = el.ownerDocument ? el.ownerDocument.createElement('input') : document.createElement('input');
+  inp.className = 'wpis';
+  inp.type = 'text';
+  inp.setAttribute('inputmode', opcje.calk ? 'numeric' : 'decimal');
+  inp.setAttribute('enterkeyhint', 'done');
+  inp.setAttribute('aria-label', opcje.etykieta || 'Wpisz liczbę');
+  inp.value = String(opcje.wartosc == null ? '' : fmt(opcje.wartosc));
+  let zamkniete = false;
+  const zamknij = () => { if (zamkniete) return; zamkniete = true; el.textContent = ''; el.append(...stare); };
+  const zatwierdz = () => {
+    if (zamkniete) return;
+    const v = domknijLiczbe(parsujLiczbe(inp.value), opcje);
+    zamknij();
+    if (v != null && v !== opcje.wartosc) opcje.naZapis(v);
+  };
+  inp.onkeydown = e => {
+    // Klawisze z pola nie idą dalej — ekran prowadzenia ma własne skróty (Enter = zaliczona).
+    if (e.stopPropagation) e.stopPropagation();
+    if (e.key === 'Enter') { e.preventDefault(); zatwierdz(); }
+    else if (e.key === 'Escape') { e.preventDefault(); zamknij(); }
+  };
+  inp.onblur = zatwierdz;
+  el.textContent = '';
+  el.append(inp);
+  if (inp.focus) { inp.focus(); if (inp.select) inp.select(); }
+  // Klawiatura nie ma zasłonić pola: przewijamy je na środek ekranu.
+  if (inp.scrollIntoView) setTimeout(() => { try { inp.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {} }, 60);
+  return inp;
+}
 // Polska odmiana po liczebniku: 1 pozycja, 22 pozycje, ale 12 i 25 pozycji.
 const odmiana = (n, jedna, kilka, wielu) => {
   const d = n % 10, s = n % 100;
@@ -120,13 +169,14 @@ function loadState() {
     if (typeof raw.sound === 'boolean') state.sound = raw.sound;
     if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
     if (typeof raw.zegarek === 'boolean') state.zegarek = raw.zegarek;
+    if (typeof raw.powiadomPrzerwa === 'boolean') state.powiadomPrzerwa = raw.powiadomPrzerwa;
     if (typeof raw.autoPrzerwa === 'boolean') state.autoPrzerwa = raw.autoPrzerwa;
     if (typeof raw.korekta === 'number') state.korekta = raw.korekta;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, autoPrzerwa: state.autoPrzerwa, korekta: state.korekta }));
+const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, powiadomPrzerwa: state.powiadomPrzerwa, autoPrzerwa: state.autoPrzerwa, korekta: state.korekta }));
 const save = () => {
   zapiszLokalnie();
   if (typeof pushStan === 'function') pushStan();
@@ -502,6 +552,12 @@ function kartaDzis(k, w, etykieta) {
     const presk = el('div', 'presk');
     const v = el('div', 'hv');
     if (kg != null) { v.textContent = fmt(kg); v.dataset.cnt = kg; v.dataset.krok = 2.5; v.append(el('u', null, 'kg')); }
+    // Co było na sztandze tydzień temu (dziennik albo plan): sztanga 3D na karcie
+    // najpierw ładuje się do tamtego ciężaru, potem dojeżdża różnica.
+    if (kg != null && it && w > 1) {
+      const poprz = plannedOf(it, w - 1, k).kg;
+      if (poprz != null && poprz !== kg) v.dataset.poprz = poprz;
+    }
     else v.textContent = 'test 1RM';
     presk.append(v);
     const L = LIFTS.find(x => x.key === lift);
@@ -534,10 +590,13 @@ function kartaDzis(k, w, etykieta) {
   fill.style.width = (ile * 100) + '%';
   pas.append(fill);
   const dol = el('div', 'hdol');
-  dol.append(el('span', 'hpg', pg.total ? `${pg.done}/${pg.total} ${k === 'D' ? 'pozycji' : 'serii'}` : ''));
-  dol.append(el('span', 'cta', ile >= 1 ? 'Zobacz sesję' : pg.done ? 'Kontynuuj' : 'Zacznij trening'));
+  // Sesja w trakcie: mówimy, która seria jest następna, a przycisk prowadzi prosto do niej.
+  const wTrakcie = k !== 'D' && pg.done > 0 && ile < 1 && w === state.week;
+  const nast = wTrakcie ? (() => { const q = kolejkaSesji(k, w); const n = nastepnyKrok(q, k, w); return n >= 0 ? q[n] : null; })() : null;
+  dol.append(el('span', 'hpg', pg.total ? `${pg.done}/${pg.total} ${k === 'D' ? 'pozycji' : 'serii'}` + (nast ? ' · następna: ' + nast.it.name : '') : ''));
+  dol.append(el('span', 'cta', ile >= 1 ? 'Zobacz sesję' : wTrakcie ? 'Prowadź dalej' : pg.done ? 'Kontynuuj' : 'Zacznij trening'));
   b.append(pas, dol);
-  b.onclick = () => go(dane.href);
+  b.onclick = () => { if (wTrakcie) prowadzPoRenderze = { day: k, w }; go(dane.href); };
   return b;
 }
 
@@ -660,6 +719,16 @@ function dayView(key, wArg) {
   wrapper.append(pominiecieBox(key, w));
 
   const { done, total } = postepDnia(w, key);
+  // Tryb prowadzenia: jedna seria na cały ekran. Startuje od pierwszej nieodhaczonej.
+  if (total && done < total && !sesjaPominieta(key, w)) {
+    const prow = el('button', 'prowstart');
+    const kroki = kolejkaSesji(key, w);
+    const nr = nastepnyKrok(kroki, key, w);
+    prow.append(el('span', 'pico'), el('span', 'pt', done ? 'Prowadź dalej' : 'Prowadź sesję'),
+      el('span', 'prs', nr >= 0 ? (done ? 'od: ' : 'seria po serii, od: ') + opisKroku(kroki[nr]) : 'seria po serii, z przerwą i sztangą'));
+    prow.onclick = () => prowadzSesje(key, w);
+    wrapper.append(prow);
+  }
   if (total) {
     const sp = el('div', 'sprog');
     sp.id = 'sprog';
@@ -808,6 +877,7 @@ function zwinKarte(box, it, day, w, odRazu) {
 }
 function rozwinKarte(box) {
   if (!box) return;
+  if (box.dataset) delete box.dataset.zaliczone;      // talerze wracają na gryf
   box.classList.remove('zwiniety', 'otwarty');
   const s = $('.exsum', box);
   if (s) s.remove();
@@ -2174,12 +2244,24 @@ window.addEventListener('offline', () => setSync('off'));
 //
 // Nic tutaj NIE wola render(). Pelna przebudowa ekranu przy kazdym ruchu suwaka
 // gubila pozycje przewijania, odgrywala animacje wejscia od nowa i po prostu mulila.
+/* Ciężar dotyczy całego ćwiczenia: przepisujemy go na już odhaczone serie
+   i zapisujemy na stałe (bez tego pierwsze odświeżenie ekranu przywracało
+   liczbę z planu, a kolejne serie szły ze starym ciężarem). Jedna droga dla
+   suwaka, klawiatury, arkusza korekty i trybu prowadzenia. */
+function zapiszCiezar(it, day, w, pl, kg) {
+  const r = logGet(w, day, it.n);
+  for (let i = 0; i < r.length; i++) if (r[i]) logSet(w, day, it.n, i, { ...r[i], kg });
+  if (pl.planKg == null) { state.acc[accKey(it)] = kg; saveAcc(); }
+  else kgwSet(w, day, it.n, kg, pl.planKg);
+}
+
 function setRows(it, day, w, pl, onKg) {
   const box = el('div', 'sets');
   const id = day + '|' + it.n;
   const rows = () => logGet(w, day, it.n);
 
   let kgTeraz = pl.kg;
+  let zatwierdzKg = null;                      // ustawiane niżej, gdy ćwiczenie ma ciężar
 
   if (pl.kg != null) {
     // Zakres liczymy od ciezaru z planu, zeby nie wedrowal przy kazdej odchylce,
@@ -2218,17 +2300,17 @@ function setRows(it, day, w, pl, onKg) {
       if (plan) plan.hidden = kgTeraz === pl.planKg;
     };
     const zapiszKg = () => {
-      // Ciezar dotyczy calego cwiczenia: przepisujemy go na juz odklikane serie.
-      const r = rows();
-      for (let i = 0; i < r.length; i++) if (r[i]) logSet(w, day, it.n, i, { ...r[i], kg: kgTeraz });
-      // I zostaje zapisany na stale. Bez tego pierwsze odswiezenie ekranu
-      // przywracalo liczbe z planu, a kolejne serie szly ze starym ciezarem.
-      if (pl.planKg == null) { state.acc[accKey(it)] = kgTeraz; saveAcc(); }
-      else kgwSet(w, day, it.n, kgTeraz, pl.planKg);
+      zapiszCiezar(it, day, w, pl, kgTeraz);
       if (onKg) onKg(kgTeraz);            // liczba na karcie i talerze na gryfie
     };
+    zatwierdzKg = kg => { sl.value = kg; podglad(kg); zapiszKg(); };
     sl.oninput = () => podglad(+sl.value);
-    sl.onchange = () => { podglad(+sl.value); zapiszKg(); };
+    sl.onchange = () => zatwierdzKg(+sl.value);
+    // Tapnięcie w liczbę: klawiatura zamiast suwaka. Zakres szerszy niż suwak —
+    // kto wpisuje ręcznie, wie, co robi; krok zostaje 2,5 kg.
+    val.setAttribute('role', 'button');
+    val.setAttribute('aria-label', 'Wpisz ciężar z klawiatury');
+    val.onclick = () => edycjaLiczby(val, { wartosc: kgTeraz, krok: 2.5, min: 2.5, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: zatwierdzKg });
     if (plan) plan.hidden = kgTeraz === pl.planKg;
     box.append(kgBox);
   }
@@ -2238,7 +2320,11 @@ function setRows(it, day, w, pl, onKg) {
   const zwinJesliKomplet = () => {
     const karta = box.closest && box.closest('.ex');
     if (!karta || rows().filter(Boolean).length < pl.sets) return;
-    setTimeout(() => zwinKarte(karta, it, day, w), 650);
+    // Bój zaliczony: talerze zjeżdżają z gryfu (ruch.js patrzy na data-zaliczone),
+    // dopiero potem karta zwija się do jednego wiersza.
+    const boj = karta.classList.contains('main');
+    if (boj) karta.dataset.zaliczone = '1';
+    setTimeout(() => zwinKarte(karta, it, day, w), boj ? 1100 : 650);
   };
 
   // Pasek przerw pod seriami: ile naprawdę trwał odpoczynek między seriami.
@@ -2266,16 +2352,39 @@ function setRows(it, day, w, pl, onKg) {
 
     const zapisz = () => { logSet(w, day, it.n, i, { r: powt, kg: kgTeraz, pr: pl.target, pk: pl.planKg }); };
 
-    tick.onclick = () => {
-      const jest = r.classList.toggle('done');
-      if (jest) { zapisz(); zapiszCzasSerii(w, day, it.n, i); blysk(tick); } else { logSet(w, day, it.n, i, null); usunCzasSerii(w, day, it.n, i); rozwinKarte(box.closest && box.closest('.ex')); }
+    // Tap odhacza. Tap w odhaczoną serię NIC nie cofa — spocony kciuk trafia
+    // w ✓ przez pomyłkę; cofnięcie i poprawka są pod przytrzymaniem.
+    const cofnij = () => {
+      r.classList.remove('done');
+      logSet(w, day, it.n, i, null); usunCzasSerii(w, day, it.n, i); rozwinKarte(box.closest && box.closest('.ex'));
       odswiezPrzerwy();
       odswiezPostep(day, w);
-      if (jest) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
-    sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
-    sl.onchange = () => {
-      powt = +sl.value;
+    tick.onclick = () => {
+      if (poPrzytrzymaniu(tick)) return;
+      if (r.classList.contains('done')) {
+        blysk(tick, 300);
+        podpowiedz(r, 'Przytrzymaj ✓, żeby poprawić');
+        return;
+      }
+      r.classList.add('done');
+      zapisz(); zapiszCzasSerii(w, day, it.n, i); blysk(tick);
+      if (navigator.vibrate) navigator.vibrate(12);
+      odswiezPrzerwy();
+      odswiezPostep(day, w);
+      startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet();
+    };
+    tick._hold = przytrzymanie(tick, { hold: () => arkuszSerii({
+      nazwa: it.name, seria: i + 1, serii: pl.sets, powt, kg: pl.kg != null ? kgTeraz : null,
+      jednostka: pl.unit === 's' ? 's' : pl.unit === 'm' ? 'm' : '', done: r.classList.contains('done'),
+      naZapis: (np, nk) => { if (nk != null && zatwierdzKg && nk !== kgTeraz) zatwierdzKg(nk); zatwierdzPowt(np); },
+      naCofnij: cofnij,
+    }) });
+    // Zmiana liczby powtórzeń zapisuje serię — z suwaka albo z klawiatury tą samą drogą.
+    const zatwierdzPowt = v => {
+      powt = v;
+      vb.textContent = String(powt);
+      sl.value = Math.min(+sl.max, Math.max(+sl.min, powt));
       const nowa = !r.classList.contains('done');
       if (nowa) { r.classList.add('done'); blysk(tick); zapiszCzasSerii(w, day, it.n, i); }
       zapisz();
@@ -2283,6 +2392,11 @@ function setRows(it, day, w, pl, onKg) {
       odswiezPostep(day, w);
       if (nowa) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
+    sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
+    sl.onchange = () => zatwierdzPowt(+sl.value);
+    val.setAttribute('role', 'button');
+    val.setAttribute('aria-label', 'Wpisz powtórzenia z klawiatury, seria ' + (i + 1));
+    val.onclick = () => edycjaLiczby(vb, { wartosc: powt, krok: 1, min: 0, max: 999, calk: true, etykieta: 'Powtórzenia w serii ' + (i + 1), naZapis: zatwierdzPowt });
 
     r.append(el('span', 'snum', String(i + 1)), sl, val, tick);
     box.append(r);
@@ -2314,6 +2428,110 @@ function odswiezPostep(day, w) {
 /* ---------- ruch ---------- */
 // Klasa na chwilę: CSS gra animację tylko na elemencie, który właśnie się zmienił,
 // a nie na wszystkim, co się przebudowało przy odświeżeniu z bazy.
+/* Przytrzymanie przycisku. Tap (krótko, bez ruchu) idzie zwykłą drogą — przez
+   onclick, więc działa też z klawiatury. Hold (ms, domyślnie 450) woła `hold`,
+   a następne kliknięcie, które przeglądarka i tak wyśle po puszczeniu palca,
+   jest połknięte. Ruch palca ponad `luz` px (przewijanie) przerywa odliczanie.
+   Zwraca uchwyty, żeby dało się to sprawdzić testem bez przeglądarki. */
+function przytrzymanie(el, { hold, ms = 450, luz = 10 } = {}) {
+  let t = null, start = null;
+  const sprzatnij = () => { if (t) { clearTimeout(t); t = null; } start = null; if (el.classList) el.classList.remove('trzymany'); };
+  const u = {
+    down(e) {
+      if (e && e.button) return;                 // tylko główny przycisk / palec
+      el._trzymane = false;                      // stara flaga nie może połknąć tego tapnięcia
+      sprzatnij();
+      start = { x: e && e.clientX || 0, y: e && e.clientY || 0 };
+      if (el.classList) el.classList.add('trzymany');
+      t = setTimeout(() => {
+        t = null; start = null;
+        if (el.classList) el.classList.remove('trzymany');
+        el._trzymane = true;                     // połknij click, który przyjdzie po puszczeniu
+        setTimeout(() => { el._trzymane = false; }, 700);   // a gdy nie przyjdzie — nie czekaj na niego w nieskończoność
+        try { if (navigator.vibrate) navigator.vibrate(20); } catch { /* bez wibracji */ }
+        if (hold) hold();
+      }, ms);
+    },
+    move(e) {
+      if (!start || !e) return;
+      if (Math.abs(e.clientX - start.x) > luz || Math.abs(e.clientY - start.y) > luz) sprzatnij();
+    },
+    up() { sprzatnij(); },
+    cancel() { sprzatnij(); },
+  };
+  if (el.addEventListener) {
+    el.addEventListener('pointerdown', u.down, { passive: true });
+    el.addEventListener('pointermove', u.move, { passive: true });
+    el.addEventListener('pointerup', u.up, { passive: true });
+    el.addEventListener('pointercancel', u.cancel, { passive: true });
+    el.addEventListener('pointerleave', u.cancel, { passive: true });
+    el.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  return u;
+}
+// Czy to kliknięcie przyszło po przytrzymaniu — wtedy nie liczy się jako tap.
+const poPrzytrzymaniu = el => { if (el._trzymane) { el._trzymane = false; return true; } return false; };
+
+// Podpowiedź pod wierszem na chwilę: „Przytrzymaj, żeby poprawić".
+function podpowiedz(r, tekst, ms = 1500) {
+  const stara = r.querySelector && r.querySelector('.podp');
+  if (stara && stara.remove) stara.remove();
+  const p = el('div', 'podp', tekst);
+  r.append(p);
+  setTimeout(() => { if (p.remove) p.remove(); }, ms);
+}
+
+/* Arkusz korekty serii: dwa duże steppery pod kciuk, zapis tą samą drogą co
+   suwak, cofnięcie odhaczenia tylko stąd — tap w ✓ nic nie cofa. */
+function arkuszSerii({ nazwa, seria, serii, powt, kg, kgKrok = 2.5, jednostka, done, naZapis, naCofnij }) {
+  if (!document.body || !document.body.appendChild) return null;
+  const stary = document.querySelector('.arkusz-tlo');
+  if (stary && stary.remove) stary.remove();
+  const tlo = el('div', 'arkusz-tlo');
+  const ark = el('div', 'arkusz');
+  ark.setAttribute('role', 'dialog');
+  ark.setAttribute('aria-label', 'Poprawka serii');
+  let p = powt, k = kg;
+  const zamknij = () => { tlo.remove(); document.removeEventListener('keydown', klaw); };
+  const klaw = e => { if (e.key === 'Escape') zamknij(); };
+  document.addEventListener('keydown', klaw);
+  tlo.onclick = e => { if (e.target === tlo) zamknij(); };
+
+  ark.append(el('div', 'ark-t', nazwa), el('div', 'ark-s', `Seria ${seria} z ${serii}`));
+  const stepper = (etykieta, pobierz, ustaw, krok, min, suf) => {
+    const box = el('div', 'krok3');
+    box.append(el('div', 'krok3-l', etykieta));
+    const row = el('div', 'krok3-r');
+    const minus = el('button', 'krok3-b', '−'); minus.setAttribute('aria-label', etykieta + ': mniej');
+    const v = el('div', 'krok3-v');
+    const plus = el('button', 'krok3-b', '+'); plus.setAttribute('aria-label', etykieta + ': więcej');
+    const odswiez = () => { v.textContent = ''; v.append(el('b', null, fmt(pobierz())), el('u', null, suf || '')); };
+    minus.onclick = () => { ustaw(Math.max(min, Math.round((pobierz() - krok) * 100) / 100)); odswiez(); };
+    plus.onclick = () => { ustaw(Math.round((pobierz() + krok) * 100) / 100); odswiez(); };
+    v.onclick = () => edycjaLiczby(v, { wartosc: pobierz(), krok, min, max: 999, calk: krok === 1, etykieta, naZapis: x => { ustaw(x); odswiez(); } });
+    odswiez();
+    row.append(minus, v, plus);
+    box.append(row);
+    return box;
+  };
+  ark.append(stepper('Powtórzenia', () => p, x => { p = x; }, 1, 0, jednostka || ''));
+  if (kg != null) ark.append(stepper('Ciężar', () => k, x => { k = x; }, kgKrok, 2.5, 'kg'));
+  const zapisz = el('button', 'btn primary', done ? 'Zapisz poprawkę' : 'Zapisz serię');
+  zapisz.onclick = () => { zamknij(); naZapis(p, k); };
+  ark.append(zapisz);
+  if (done && naCofnij) {
+    const cof = el('button', 'btn warn', 'Cofnij odhaczenie');
+    cof.onclick = () => { zamknij(); naCofnij(); };
+    ark.append(cof);
+  }
+  const anuluj = el('button', 'btn ghost', 'Anuluj');
+  anuluj.onclick = zamknij;
+  ark.append(anuluj);
+  tlo.append(ark);
+  document.body.appendChild(tlo);
+  return tlo;
+}
+
 function blysk(n, ms = 700) {
   n.classList.add('swiezo');
   setTimeout(() => n.classList.remove('swiezo'), ms);
@@ -2615,6 +2833,7 @@ function przerwaPoSerii(it, day, w) {
 
 /* ---------- timer przerwy ---------- */
 let tLeft = 0, tTotal = 0, tId = null, tFired = false, tEnd = 0;
+let tTresc = '';                                 // treść powiadomienia o końcu przerwy (tryb prowadzenia podaje, co dalej)
 const R = 24, CIRC = 2 * Math.PI * R;
 
 // Dolny pasek ma dwie role. Na ekranach przeglądowych to zakładki; w trakcie
@@ -2660,11 +2879,22 @@ function renderTimer() {
   ring.append(lab);
   inner.append(ring);
 
-  [60, 90, 120, 180].forEach(s => {
-    const b = el('button', 'tbtn' + (tId && tTotal === s ? ' on' : ''), s < 120 ? s + ' s' : (s / 60) + ' min');
-    b.onclick = () => (tId && tTotal === s) ? stopTimer() : startTimer(s);
-    inner.append(b);
-  });
+  if (tId) {
+    // W czasie przerwy pod kciukiem są tylko dwie rzeczy: dołożyć pół minuty albo skończyć.
+    const plus = el('button', 'tbtn plus', '+30 s');
+    plus.setAttribute('aria-label', 'Przedłuż przerwę o 30 sekund');
+    plus.onclick = () => przedluzPrzerwe(30);
+    const pomin = el('button', 'tbtn pomin', 'Pomiń');
+    pomin.setAttribute('aria-label', 'Zakończ przerwę teraz');
+    pomin.onclick = () => stopTimer();
+    inner.append(plus, pomin);
+  } else {
+    [60, 90, 120, 180].forEach(s => {
+      const b = el('button', 'tbtn', s < 120 ? s + ' s' : (s / 60) + ' min');
+      b.onclick = () => startTimer(s);
+      inner.append(b);
+    });
+  }
 
   const snd = el('button', 'tbtn snd' + (state.sound ? '' : ' off'));
   snd.setAttribute('aria-label', state.sound ? 'Wycisz sygnał' : 'Włącz sygnał');
@@ -2683,13 +2913,23 @@ function renderTimer() {
   box.append(inner);
 }
 function stopTimer() {
-  clearInterval(tId); tId = null; tLeft = 0; tTotal = 0; tFired = false;
+  clearInterval(tId); tId = null; tLeft = 0; tTotal = 0; tFired = false; tTresc = '';
   cancelBeeps(); renderTimer();
 }
-function startTimer(s) {
+// Pół minuty więcej: koniec przerwy przesuwa się, sygnały planują się od nowa.
+function przedluzPrzerwe(s = 30) {
+  if (!tTotal) return;
+  if (!tId) { startTimer(s, { tresc: tTresc }); return; }   // po „Czas!" dokładamy nową przerwę
+  tEnd += s * 1000; tTotal += s;
+  tLeft = Math.max(0, Math.ceil((tEnd - Date.now()) / 1000));
+  cancelBeeps(); scheduleBeeps(tLeft);
+  renderTimer();
+}
+const stanPrzerwy = () => ({ leci: !!tId, tLeft, tTotal, tEnd, tFired });
+function startTimer(s, opcje = {}) {
   clearInterval(tId);
   cancelBeeps();
-  tLeft = s; tTotal = s; tFired = false;
+  tLeft = s; tTotal = s; tFired = false; tTresc = opcje.tresc || '';
   // Liczymy od godziny końca, nie odejmujemy sekund: iPhone dławi liczniki
   // w tle i odliczanie „minus jeden co tick" rozjeżdżało się z zegarem.
   tEnd = Date.now() + s * 1000;
@@ -2700,7 +2940,7 @@ function startTimer(s) {
       clearInterval(tId); tId = null; tLeft = 0; tFired = true;
       voices = [];
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      powiadomZegarek('Koniec przerwy', 'Następna seria.');
+      powiadomZegarek('Koniec przerwy', tTresc || 'Następna seria.');
     }
     renderTimer();
   }, 1000);
@@ -2896,6 +3136,21 @@ function settingsView() {
   trow.append(el('div', 'n', 'Przerwa rusza po ✓'));
   trow.append(miniBtn(state.autoPrzerwa ? 'Włączone' : 'Wyłączone', () => { state.autoPrzerwa = !state.autoPrzerwa; save(); render(); }));
   tr.append(trow);
+  const prow2 = el('div', 'e1row');
+  prow2.append(el('div', 'n', 'Powiadomienie o końcu przerwy'));
+  const brakPow = typeof Notification === 'undefined';
+  const zgoda = !brakPow && Notification.permission === 'granted';
+  prow2.append(miniBtn(state.powiadomPrzerwa && zgoda ? 'Włączone' : 'Wyłączone', async () => {
+    if (state.powiadomPrzerwa && zgoda) { state.powiadomPrzerwa = false; save(); render(); return; }
+    if (brakPow) { render(); return; }
+    const p = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    state.powiadomPrzerwa = p === 'granted'; save(); render();
+  }));
+  tr.append(prow2);
+  tr.append(el('p', null, brakPow
+    ? 'Ta przeglądarka nie wysyła powiadomień ze stron' + (IOS ? ' — na iPhonie działa to tylko z ikony na ekranie początkowym (Dziennik → Zegarek, krok 1).' : '.')
+    : !zgoda && Notification.permission === 'denied' ? 'Powiadomienia są zablokowane w ustawieniach telefonu. Odblokuj je, a przełącznik zadziała.'
+    : 'Gdy timer dojdzie do zera przy zgaszonym ekranie albo schowanej aplikacji, telefon zawibruje i pokaże „Koniec przerwy”. Do zegarka idzie to samo powiadomienie (karta Zegarek).'));
   tr.append(el('p', null, 'Po odhaczeniu serii timer odlicza przerwę z opisu ćwiczenia: 3 min przy bojach, 90 s albo 60 s przy dodatkowych, w superserii dopiero po drugim ćwiczeniu pary. Ostatnia seria sesji nie włącza przerwy.'));
   body.append(tr);
 
@@ -3240,11 +3495,13 @@ setInterval(() => {
 /* Koniec przerwy jako powiadomienie. Aplikacja Huawei Health przekazuje
    powiadomienia z telefonu na zegarek, więc przerwa kończy się wibracją na
    nadgarstku, nawet gdy telefon leży w torbie. */
+// Powiadomienie idzie, gdy włączony jest zegarek ALBO zwykłe powiadomienie o końcu
+// przerwy (telefon w kieszeni, ekran zgaszony) — jedno i to samo powiadomienie.
 async function powiadomZegarek(tytul, tresc) {
-  if (!state.zegarek || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  if (!(state.zegarek || state.powiadomPrzerwa) || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   try {
     const reg = navigator.serviceWorker && await navigator.serviceWorker.ready;
-    const opcje = { body: tresc, tag: 'przerwa', renotify: true, vibrate: [300, 120, 300], icon: 'icon-192.png', badge: 'icon-192.png' };
+    const opcje = { body: tresc, tag: 'przerwa', renotify: true, vibrate: [200, 100, 200], icon: 'icon-192.png', badge: 'icon-192.png' };
     if (reg && reg.showNotification) await reg.showNotification(tytul, opcje);
     else new Notification(tytul, opcje);
   } catch { /* bez powiadomienia zostaje dźwięk i wibracja telefonu */ }
@@ -3702,6 +3959,260 @@ function prowadzJoge(w) {
   document.body.appendChild(tlo);
 }
 
+/* ---------- prowadzenie sesji siłowej ----------
+   Jedna seria na cały ekran, jak „Prowadź mnie" w jodze. Kolejka kroków jest
+   czystą funkcją: superseria przeplata serie pary (A1 s1, A2 s1, A1 s2…),
+   reszta idzie seria po serii. Zapis każdej serii idzie tą samą drogą co
+   w liście (logSet, czas serii, start treningu, przerwa z opisu ćwiczenia). */
+function kolejkaSesji(day, w) {
+  const items = (state.plan.days[day] || { items: [] }).items;
+  const kroki = [];
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i], nast = items[i + 1];
+    const para = it.superset && nast && nast.superset && nast.superset[0] === it.superset[0] && it.superset !== nast.superset;
+    if (para) {
+      const pa = plannedOf(it, w, day), pb = plannedOf(nast, w, day);
+      for (let s = 0; s < Math.max(pa.sets, pb.sets); s++) {
+        if (s < pa.sets) kroki.push({ it, i: s, pl: pa, para: true });
+        if (s < pb.sets) kroki.push({ it: nast, i: s, pl: pb, para: true });
+      }
+      i++;
+    } else {
+      const pl = plannedOf(it, w, day);
+      for (let s = 0; s < pl.sets; s++) kroki.push({ it, i: s, pl, para: false });
+    }
+  }
+  return kroki;
+}
+// Pierwszy krok bez zapisu w dzienniku, licząc od `od`; -1, gdy wszystko zrobione.
+const nastepnyKrok = (kroki, day, w, od = 0) => kroki.findIndex((k, idx) => idx >= od && !logGet(w, day, k.it.n)[k.i]);
+const opisKroku = k => `${k.it.name} · seria ${k.i + 1} z ${k.pl.sets}` + (k.pl.kg != null ? ` · ${fmt(k.pl.kg)} kg` : '') + (k.pl.target != null ? ` × ${k.pl.target}${k.pl.unit === 's' ? ' s' : k.pl.unit === 'm' ? ' m' : ''}` : '');
+
+// Wejście w tryb prowadzenia po następnym renderze dnia (karta Dziś → „Prowadź dalej").
+let prowadzPoRenderze = null;
+let zamknijProwadzenie = null;                 // uchwyt otwartej instancji (sprzątanie przy ponownym otwarciu)
+
+function prowadzSesje(day, w) {
+  if (!document.body || !document.body.appendChild) return null;
+  if (zamknijProwadzenie) zamknijProwadzenie(true);
+  const stary = document.querySelector('.prow');
+  if (stary && stary.remove) stary.remove();
+  let kroki = kolejkaSesji(day, w);
+  if (!kroki.length) return null;
+  let i = nastepnyKrok(kroki, day, w);
+  if (i < 0) i = 0;
+  keepAwake(true);
+
+  const tlo = el('div', 'prow prow-sila');
+  tlo.style.setProperty('--dc', DAY_COLOR[day]);
+  tlo.style.setProperty('--tc', DAY_HEX[day]);
+  let tik = null, ekran = 'seria';
+  const zamknij = cicho => {
+    clearInterval(tik);
+    tlo.remove();
+    document.removeEventListener('keydown', klaw);
+    zamknijProwadzenie = null;
+    if (cicho !== true) render();
+  };
+  zamknijProwadzenie = zamknij;
+  const koniecSesji = () => {
+    clearInterval(tik);
+    if (tId) stopTimer();
+    tlo.remove();
+    document.removeEventListener('keydown', klaw);
+    zamknijProwadzenie = null;
+    render();
+    const t = trening(w, day);
+    setTimeout(() => (t && t.start && !t.end ? zakonczTrening(day, w) : pokazZaliczenie(day, w)), 250);
+  };
+  const klaw = e => {
+    if (e.target && e.target.tagName === 'INPUT') return;    // pole liczbowe ma własne klawisze
+    if (e.key === 'Escape') zamknij();
+    else if (e.key === 'ArrowRight') { if (ekran === 'przerwa') dalej(); }
+    else if (e.key === 'Enter' && ekran === 'seria') zalicz();
+  };
+  document.addEventListener('keydown', klaw);
+
+  const gora = () => {
+    const g = el('div', 'prgora');
+    const kreski = el('div', 'prkreski');
+    kroki.forEach((k, j) => kreski.append(el('i', (logGet(w, day, k.it.n)[k.i] ? 'z' : '') + (j === i ? ' teraz' : ''))));
+    const x = el('button', 'prx', '✕');
+    x.setAttribute('aria-label', 'Zamknij prowadzenie — serie zostają zapisane');
+    x.onclick = () => zamknij();
+    g.append(el('span', 'prnr', `${i + 1}/${kroki.length}`), kreski, x);
+    return g;
+  };
+
+  // Stan serii: powtórzenia i ciężar ustawione przed ✓.
+  let powt = null, kg = null;
+  const rysujSerie = () => {
+    clearInterval(tik);
+    ekran = 'seria';
+    const k = kroki[i], it = k.it, pl = k.pl;
+    const zapis = logGet(w, day, it.n)[k.i];
+    powt = zapis ? zapis.r : pl.target;
+    kg = pl.kg;
+    tlo.replaceChildren();
+    tlo.append(gora());
+
+    const tresc = el('div', 'prtresc');
+    const nrCw = state.plan.days[day].items.indexOf(it) + 1;
+    tresc.append(el('div', 'preye', `Ćwiczenie ${nrCw} z ${state.plan.days[day].items.length}${k.para ? ' · superseria' : ''}`));
+    tresc.append(el('h2', 'prname', it.name));
+    const rpe = resolve(it.rpe, w);
+    const cel = pl.target != null ? `cel ${pl.target}${pl.unit === 's' ? ' s' : pl.unit === 'm' ? ' m' : ' powt.'}` : '';
+    tresc.append(el('div', 'prdawka', [`Seria ${k.i + 1} z ${pl.sets}`, cel, rpe != null && rpe !== '—' ? 'RPE ' + fmt(rpe) : ''].filter(Boolean).join(' · ')));
+    if (k.i === pl.sets - 1) tresc.append(el('div', 'pr-ost', 'Ostatnia seria'));
+
+    if (isMainItem(it) && pl.kg != null) {
+      const szt = el('div', 'pr-sztanga');          // ruch.js rysuje tu sztangę 3D
+      szt.dataset.kg = pl.kg;
+      tresc.append(szt);
+    }
+    if (pl.kg != null) {
+      const kgBox = el('div', 'krok3 pr-kg');
+      kgBox.append(el('div', 'krok3-l', pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar'));
+      const row = el('div', 'krok3-r');
+      const minus = el('button', 'krok3-b', '−'); minus.setAttribute('aria-label', 'Ciężar: mniej o 2,5 kg');
+      const v = el('div', 'krok3-v');
+      const plus = el('button', 'krok3-b', '+'); plus.setAttribute('aria-label', 'Ciężar: więcej o 2,5 kg');
+      const pokaz = () => { v.textContent = ''; v.append(el('b', null, fmt(kg)), el('u', null, 'kg')); const szt = tresc.querySelector && tresc.querySelector('.pr-sztanga'); if (szt) szt.dataset.kg = kg; };
+      const ustawKg = x => {
+        kg = Math.max(2.5, Math.round(x * 100) / 100);
+        zapiszCiezar(it, day, w, pl, kg);
+        k.pl = pl.kg === kg ? pl : { ...pl, kg };
+        kroki = kroki.map(q => (q.it === it ? { ...q, pl: k.pl } : q));
+        pokaz();
+        const nast = tlo.querySelector && tlo.querySelector('.prnast');          // „Potem: …" też z nowym ciężarem
+        if (nast && kroki[i + 1]) nast.textContent = 'Potem: ' + opisKroku(kroki[i + 1]);
+      };
+      minus.onclick = () => ustawKg(kg - 2.5);
+      plus.onclick = () => ustawKg(kg + 2.5);
+      v.onclick = () => edycjaLiczby(v, { wartosc: kg, krok: 2.5, min: 2.5, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: ustawKg });
+      pokaz();
+      row.append(minus, v, plus);
+      kgBox.append(row);
+      tresc.append(kgBox);
+    } else if (pl.target == null) {
+      tresc.append(el('div', 'pr-dawka', it.dose || ''));
+    }
+    if (pl.target != null) {
+      const pBox = el('div', 'krok3 pr-powt');
+      pBox.append(el('div', 'krok3-l', pl.unit === 's' ? 'Sekundy' : pl.unit === 'm' ? 'Metry' : 'Powtórzenia'));
+      const row = el('div', 'krok3-r');
+      const minus = el('button', 'krok3-b', '−'); minus.setAttribute('aria-label', 'Mniej');
+      const v = el('div', 'krok3-v');
+      const plus = el('button', 'krok3-b', '+'); plus.setAttribute('aria-label', 'Więcej');
+      const pokaz = () => { v.textContent = ''; v.append(el('b', null, String(powt)), el('u', null, pl.unit === 's' ? 's' : pl.unit === 'm' ? 'm' : '')); };
+      minus.onclick = () => { powt = Math.max(0, powt - 1); pokaz(); };
+      plus.onclick = () => { powt += 1; pokaz(); };
+      v.onclick = () => edycjaLiczby(v, { wartosc: powt, krok: 1, min: 0, max: 999, calk: true, etykieta: 'Powtórzenia', naZapis: x => { powt = x; pokaz(); } });
+      pokaz();
+      row.append(minus, v, plus);
+      pBox.append(row);
+      tresc.append(pBox);
+    }
+    if (it.note) tresc.append(el('p', 'pr-uwaga', it.note));
+    tlo.append(tresc);
+
+    const dol = el('div', 'prdol');
+    const nast = kroki[i + 1];
+    dol.append(el('div', 'prnast', nast ? 'Potem: ' + opisKroku(nast) : 'To ostatnia seria sesji'));
+    const przyc = el('div', 'prprzyc');
+    const wst = el('button', 'prwstecz', '‹');
+    wst.setAttribute('aria-label', 'Poprzednia seria');
+    wst.disabled = i === 0;
+    wst.onclick = () => { if (ekran === 'seria' && i > 0) { i--; rysujSerie(); } };
+    const ok = el('button', 'prok pr-zalicz', zapis ? 'Zapisz ponownie ✓' : 'Zaliczona ✓');
+    ok.onclick = zalicz;
+    przyc.append(wst, ok);
+    dol.append(przyc);
+    tlo.append(dol);
+    tresc.scrollTop = 0;
+  };
+
+  const zalicz = () => {
+    if (ekran !== 'seria') return;
+    const k = kroki[i], it = k.it, pl = k.pl;
+    const bylo = !!logGet(w, day, it.n)[k.i];
+    logSet(w, day, it.n, k.i, { r: powt, kg: pl.kg != null ? kg : null, pr: pl.target, pk: pl.planKg });
+    if (!bylo) zapiszCzasSerii(w, day, it.n, k.i);
+    if (navigator.vibrate) navigator.vibrate(12);
+    startPrzyPierwszejSerii(day, w);
+    const nast = kroki[i + 1];
+    // Ostatnia seria boju: talerze zjeżdżają z gryfu, zanim ekran pójdzie dalej.
+    // Przerwa i tak startuje od razu — liczy się od końca serii, nie od obrazka.
+    const szt = tlo.querySelector && tlo.querySelector('.pr-sztanga');
+    const rozladuj = szt && isMainItem(it) && k.i === pl.sets - 1;
+    if (rozladuj) {
+      szt.dataset.rozladuj = '1';
+      ekran = 'czekaj';                                   // talerze zjeżdżają: ✓ i ‹ nie reagują przez chwilę
+      tlo.querySelectorAll('.prok, .prwstecz').forEach(b => { b.disabled = true; });
+    }
+    const potem = fn => (rozladuj ? setTimeout(fn, 900) : fn());
+    if (!nast) { potem(koniecSesji); return; }
+    const sek = state.autoPrzerwa ? przerwaPo(it, day, w) : 0;
+    if (sek > 0) { startTimer(sek, { tresc: 'Następna: ' + opisKroku(nast) }); potem(() => { if (tlo.isConnected !== false && document.querySelector('.prow') === tlo) rysujPrzerwe(); }); }
+    else potem(dalej);
+  };
+  const dalej = () => {
+    clearInterval(tik);
+    if (tId) stopTimer();
+    if (i < kroki.length - 1) { i++; rysujSerie(); } else koniecSesji();
+  };
+
+  const fmtS = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+  const rysujPrzerwe = () => {
+    ekran = 'przerwa';
+    tlo.replaceChildren();
+    tlo.append(gora());
+    const tresc = el('div', 'prtresc pr-przerwa');
+    tresc.append(el('div', 'preye', 'Przerwa'));
+    const odl = el('div', 'pr-odl', fmtS(tLeft));
+    tresc.append(odl);
+    const pod = el('div', 'pr-pod', 'Oddychaj. Następna seria zaraz.');
+    tresc.append(pod);
+    const rz = el('div', 'pr-przyciski');
+    const plus = el('button', 'btn ghost', '+30 s');
+    plus.onclick = () => {
+      przedluzPrzerwe(30);
+      odl.classList.remove('koniec'); pod.textContent = 'Oddychaj. Następna seria zaraz.';
+      clearInterval(tik); tik = setInterval(odswiez, 250); odswiez();
+    };
+    const pomin = el('button', 'btn ghost', 'Pomiń przerwę');
+    pomin.onclick = dalej;
+    rz.append(plus, pomin);
+    tresc.append(rz);
+    const nast = kroki[i + 1];
+    tresc.append(el('div', 'pr-nast', 'Następna: ' + opisKroku(nast)));
+    tlo.append(tresc);
+    const dol = el('div', 'prdol');
+    const przyc = el('div', 'prprzyc');
+    const ok = el('button', 'prok', 'Dalej →');
+    ok.onclick = dalej;
+    przyc.append(ok);
+    dol.append(przyc);
+    tlo.append(dol);
+    const odswiez = () => {
+      if (tId) { odl.textContent = fmtS(tLeft); return; }
+      // Koniec przerwy: wibracja i powiadomienie poszły z timera. Ekran zostaje,
+      // bo telefon może leżeć na ławce — „Dalej" jest pod kciukiem.
+      clearInterval(tik);
+      odl.textContent = '0:00';
+      odl.classList.add('koniec');
+      pod.textContent = 'Czas! Następna seria.';
+    };
+    clearInterval(tik);
+    tik = setInterval(odswiez, 250);
+    odswiez();
+  };
+
+  rysujSerie();
+  document.body.appendChild(tlo);
+  return tlo;
+}
+
 /* ---------- wybór filmu ----------
    Okienko do wklejenia innego linku z YouTube. Plan zapamiętuje go per pozycja
    i synchronizuje z drugim urządzeniem. */
@@ -3794,7 +4305,11 @@ function render() {
 
   // "#/d/A" albo "#/d/A/3" — druga forma zapisuje do wskazanego tygodnia,
   // nie ruszając tygodnia bieżącego.
-  if (onDay) { const [k, t] = v.slice(4).split('/'); app.append(dayView(k, tydzienZAdresu(t))); }
+  if (onDay) {
+    const [k, t] = v.slice(4).split('/');
+    app.append(dayView(k, tydzienZAdresu(t)));
+    if (prowadzPoRenderze && prowadzPoRenderze.day === k) { const p = prowadzPoRenderze; prowadzPoRenderze = null; setTimeout(() => prowadzSesje(p.day, p.w), 0); }
+  }
   else if (onMob) app.append(mobilityView(tydzienZAdresu(v.split('/')[2])));
   else if (v === '#/postep' || v === '#/tabela' || v === '#/raport') app.append(postepView());
   else if (v === '#/zasady') app.append(rulesView());
@@ -3861,7 +4376,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=72`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=83`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3914,7 +4429,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=72')
+fetch('plan.json?v=83')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
