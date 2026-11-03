@@ -124,7 +124,7 @@ function domknijLiczbe(v, { min = -Infinity, max = Infinity, krok = 1 } = {}) {
    zejście z pola zapisuje tą samą drogą co suwak, Escape anuluje. */
 function edycjaLiczby(el, opcje) {
   if (!el || el.querySelector && el.querySelector('.wpis')) return;
-  const stary = el.textContent;
+  const stare = el.childNodes ? Array.from(el.childNodes) : el.children.slice();
   const inp = el.ownerDocument ? el.ownerDocument.createElement('input') : document.createElement('input');
   inp.className = 'wpis';
   inp.type = 'text';
@@ -133,7 +133,7 @@ function edycjaLiczby(el, opcje) {
   inp.setAttribute('aria-label', opcje.etykieta || 'Wpisz liczbę');
   inp.value = String(opcje.wartosc == null ? '' : fmt(opcje.wartosc));
   let zamkniete = false;
-  const zamknij = () => { if (zamkniete) return; zamkniete = true; el.textContent = stary; };
+  const zamknij = () => { if (zamkniete) return; zamkniete = true; el.textContent = ''; el.append(...stare); };
   const zatwierdz = () => {
     if (zamkniete) return;
     const v = domknijLiczbe(parsujLiczbe(inp.value), opcje);
@@ -141,6 +141,8 @@ function edycjaLiczby(el, opcje) {
     if (v != null && v !== opcje.wartosc) opcje.naZapis(v);
   };
   inp.onkeydown = e => {
+    // Klawisze z pola nie idą dalej — ekran prowadzenia ma własne skróty (Enter = zaliczona).
+    if (e.stopPropagation) e.stopPropagation();
     if (e.key === 'Enter') { e.preventDefault(); zatwierdz(); }
     else if (e.key === 'Escape') { e.preventDefault(); zamknij(); }
   };
@@ -2308,7 +2310,7 @@ function setRows(it, day, w, pl, onKg) {
     // kto wpisuje ręcznie, wie, co robi; krok zostaje 2,5 kg.
     val.setAttribute('role', 'button');
     val.setAttribute('aria-label', 'Wpisz ciężar z klawiatury');
-    val.onclick = () => edycjaLiczby(val, { wartosc: kgTeraz, krok: 2.5, min: 0, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: zatwierdzKg });
+    val.onclick = () => edycjaLiczby(val, { wartosc: kgTeraz, krok: 2.5, min: 2.5, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: zatwierdzKg });
     if (plan) plan.hidden = kgTeraz === pl.planKg;
     box.append(kgBox);
   }
@@ -2437,6 +2439,7 @@ function przytrzymanie(el, { hold, ms = 450, luz = 10 } = {}) {
   const u = {
     down(e) {
       if (e && e.button) return;                 // tylko główny przycisk / palec
+      el._trzymane = false;                      // stara flaga nie może połknąć tego tapnięcia
       sprzatnij();
       start = { x: e && e.clientX || 0, y: e && e.clientY || 0 };
       if (el.classList) el.classList.add('trzymany');
@@ -2444,6 +2447,7 @@ function przytrzymanie(el, { hold, ms = 450, luz = 10 } = {}) {
         t = null; start = null;
         if (el.classList) el.classList.remove('trzymany');
         el._trzymane = true;                     // połknij click, który przyjdzie po puszczeniu
+        setTimeout(() => { el._trzymane = false; }, 700);   // a gdy nie przyjdzie — nie czekaj na niego w nieskończoność
         try { if (navigator.vibrate) navigator.vibrate(20); } catch { /* bez wibracji */ }
         if (hold) hold();
       }, ms);
@@ -2511,7 +2515,7 @@ function arkuszSerii({ nazwa, seria, serii, powt, kg, kgKrok = 2.5, jednostka, d
     return box;
   };
   ark.append(stepper('Powtórzenia', () => p, x => { p = x; }, 1, 0, jednostka || ''));
-  if (kg != null) ark.append(stepper('Ciężar', () => k, x => { k = x; }, kgKrok, 0, 'kg'));
+  if (kg != null) ark.append(stepper('Ciężar', () => k, x => { k = x; }, kgKrok, 2.5, 'kg'));
   const zapisz = el('button', 'btn primary', done ? 'Zapisz poprawkę' : 'Zapisz serię');
   zapisz.onclick = () => { zamknij(); naZapis(p, k); };
   ark.append(zapisz);
@@ -2915,6 +2919,7 @@ function stopTimer() {
 // Pół minuty więcej: koniec przerwy przesuwa się, sygnały planują się od nowa.
 function przedluzPrzerwe(s = 30) {
   if (!tTotal) return;
+  if (!tId) { startTimer(s, { tresc: tTresc }); return; }   // po „Czas!" dokładamy nową przerwę
   tEnd += s * 1000; tTotal += s;
   tLeft = Math.max(0, Math.ceil((tEnd - Date.now()) / 1000));
   cancelBeeps(); scheduleBeeps(tLeft);
@@ -3985,9 +3990,11 @@ const opisKroku = k => `${k.it.name} · seria ${k.i + 1} z ${k.pl.sets}` + (k.pl
 
 // Wejście w tryb prowadzenia po następnym renderze dnia (karta Dziś → „Prowadź dalej").
 let prowadzPoRenderze = null;
+let zamknijProwadzenie = null;                 // uchwyt otwartej instancji (sprzątanie przy ponownym otwarciu)
 
 function prowadzSesje(day, w) {
   if (!document.body || !document.body.appendChild) return null;
+  if (zamknijProwadzenie) zamknijProwadzenie(true);
   const stary = document.querySelector('.prow');
   if (stary && stary.remove) stary.remove();
   let kroki = kolejkaSesji(day, w);
@@ -4000,22 +4007,26 @@ function prowadzSesje(day, w) {
   tlo.style.setProperty('--dc', DAY_COLOR[day]);
   tlo.style.setProperty('--tc', DAY_HEX[day]);
   let tik = null, ekran = 'seria';
-  const zamknij = () => {
+  const zamknij = cicho => {
     clearInterval(tik);
     tlo.remove();
     document.removeEventListener('keydown', klaw);
-    render();
+    zamknijProwadzenie = null;
+    if (cicho !== true) render();
   };
+  zamknijProwadzenie = zamknij;
   const koniecSesji = () => {
     clearInterval(tik);
     if (tId) stopTimer();
     tlo.remove();
     document.removeEventListener('keydown', klaw);
+    zamknijProwadzenie = null;
     render();
     const t = trening(w, day);
     setTimeout(() => (t && t.start && !t.end ? zakonczTrening(day, w) : pokazZaliczenie(day, w)), 250);
   };
   const klaw = e => {
+    if (e.target && e.target.tagName === 'INPUT') return;    // pole liczbowe ma własne klawisze
     if (e.key === 'Escape') zamknij();
     else if (e.key === 'ArrowRight') { if (ekran === 'przerwa') dalej(); }
     else if (e.key === 'Enter' && ekran === 'seria') zalicz();
@@ -4028,7 +4039,7 @@ function prowadzSesje(day, w) {
     kroki.forEach((k, j) => kreski.append(el('i', (logGet(w, day, k.it.n)[k.i] ? 'z' : '') + (j === i ? ' teraz' : ''))));
     const x = el('button', 'prx', '✕');
     x.setAttribute('aria-label', 'Zamknij prowadzenie — serie zostają zapisane');
-    x.onclick = zamknij;
+    x.onclick = () => zamknij();
     g.append(el('span', 'prnr', `${i + 1}/${kroki.length}`), kreski, x);
     return g;
   };
@@ -4067,10 +4078,18 @@ function prowadzSesje(day, w) {
       const v = el('div', 'krok3-v');
       const plus = el('button', 'krok3-b', '+'); plus.setAttribute('aria-label', 'Ciężar: więcej o 2,5 kg');
       const pokaz = () => { v.textContent = ''; v.append(el('b', null, fmt(kg)), el('u', null, 'kg')); const szt = tresc.querySelector && tresc.querySelector('.pr-sztanga'); if (szt) szt.dataset.kg = kg; };
-      const ustawKg = x => { kg = Math.max(0, Math.round(x * 100) / 100); zapiszCiezar(it, day, w, pl, kg); k.pl = pl.kg === kg ? pl : { ...pl, kg }; kroki = kroki.map(q => (q.it === it ? { ...q, pl: k.pl } : q)); pokaz(); };
+      const ustawKg = x => {
+        kg = Math.max(2.5, Math.round(x * 100) / 100);
+        zapiszCiezar(it, day, w, pl, kg);
+        k.pl = pl.kg === kg ? pl : { ...pl, kg };
+        kroki = kroki.map(q => (q.it === it ? { ...q, pl: k.pl } : q));
+        pokaz();
+        const nast = tlo.querySelector && tlo.querySelector('.prnast');          // „Potem: …" też z nowym ciężarem
+        if (nast && kroki[i + 1]) nast.textContent = 'Potem: ' + opisKroku(kroki[i + 1]);
+      };
       minus.onclick = () => ustawKg(kg - 2.5);
       plus.onclick = () => ustawKg(kg + 2.5);
-      v.onclick = () => edycjaLiczby(v, { wartosc: kg, krok: 2.5, min: 0, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: ustawKg });
+      v.onclick = () => edycjaLiczby(v, { wartosc: kg, krok: 2.5, min: 2.5, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: ustawKg });
       pokaz();
       row.append(minus, v, plus);
       kgBox.append(row);
@@ -4104,7 +4123,7 @@ function prowadzSesje(day, w) {
     const wst = el('button', 'prwstecz', '‹');
     wst.setAttribute('aria-label', 'Poprzednia seria');
     wst.disabled = i === 0;
-    wst.onclick = () => { if (i > 0) { i--; rysujSerie(); } };
+    wst.onclick = () => { if (ekran === 'seria' && i > 0) { i--; rysujSerie(); } };
     const ok = el('button', 'prok pr-zalicz', zapis ? 'Zapisz ponownie ✓' : 'Zaliczona ✓');
     ok.onclick = zalicz;
     przyc.append(wst, ok);
@@ -4114,6 +4133,7 @@ function prowadzSesje(day, w) {
   };
 
   const zalicz = () => {
+    if (ekran !== 'seria') return;
     const k = kroki[i], it = k.it, pl = k.pl;
     const bylo = !!logGet(w, day, it.n)[k.i];
     logSet(w, day, it.n, k.i, { r: powt, kg: pl.kg != null ? kg : null, pr: pl.target, pk: pl.planKg });
@@ -4125,7 +4145,11 @@ function prowadzSesje(day, w) {
     // Przerwa i tak startuje od razu — liczy się od końca serii, nie od obrazka.
     const szt = tlo.querySelector && tlo.querySelector('.pr-sztanga');
     const rozladuj = szt && isMainItem(it) && k.i === pl.sets - 1;
-    if (rozladuj) szt.dataset.rozladuj = '1';
+    if (rozladuj) {
+      szt.dataset.rozladuj = '1';
+      ekran = 'czekaj';                                   // talerze zjeżdżają: ✓ i ‹ nie reagują przez chwilę
+      tlo.querySelectorAll('.prok, .prwstecz').forEach(b => { b.disabled = true; });
+    }
     const potem = fn => (rozladuj ? setTimeout(fn, 900) : fn());
     if (!nast) { potem(koniecSesji); return; }
     const sek = state.autoPrzerwa ? przerwaPo(it, day, w) : 0;
@@ -4151,7 +4175,11 @@ function prowadzSesje(day, w) {
     tresc.append(pod);
     const rz = el('div', 'pr-przyciski');
     const plus = el('button', 'btn ghost', '+30 s');
-    plus.onclick = () => { przedluzPrzerwe(30); odswiez(); };
+    plus.onclick = () => {
+      przedluzPrzerwe(30);
+      odl.classList.remove('koniec'); pod.textContent = 'Oddychaj. Następna seria zaraz.';
+      clearInterval(tik); tik = setInterval(odswiez, 250); odswiez();
+    };
     const pomin = el('button', 'btn ghost', 'Pomiń przerwę');
     pomin.onclick = dalej;
     rz.append(plus, pomin);
@@ -4348,7 +4376,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=80`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=82`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4401,7 +4429,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=80')
+fetch('plan.json?v=82')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

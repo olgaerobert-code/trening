@@ -41,7 +41,9 @@ class El {
   get className() { return [...this._cls].join(' '); }
   set className(v) { this._cls = new Set(String(v).split(/\s+/).filter(Boolean)); }
   get textContent() { return this._txt + this.children.map(c => c.textContent).join(''); }
-  set textContent(v) { this._txt = v == null ? '' : String(v); this.children = []; }
+  // Jak w przegladarce: tekst staje sie wezlem tekstowym, a childNodes to dzieci.
+  set textContent(v) { this._txt = ''; this.children = v == null || v === '' ? [] : [txt(String(v))]; }
+  get childNodes() { return this.children; }
   set innerHTML(v) { this._html = String(v); if (!v) this.children = []; }
   get innerHTML() { return this._html; }
   append(...n) { for (const x of n) { const c = typeof x === 'object' ? x : txt(String(x)); c.parentNode = this; this.children.push(c); } }
@@ -714,6 +716,8 @@ console.log('Przytrzymanie ✓');
   u.down({ clientX: 0, clientY: 0 }); u.move({ clientX: 30, clientY: 0 });
   await new Promise(r => setTimeout(r, 30));
   test('ruch palca (przewijanie) przerywa odliczanie', holdy === 1);
+  el._trzymane = true; u.down({ clientX: 0, clientY: 0 }); u.up();
+  test('nowe nacisniecie czysci stara flage po przytrzymaniu', el._trzymane === false);
 
   // Wiersz serii: tap odhacza, drugi tap nie cofa, arkusz cofa.
   const W = 4;
@@ -784,6 +788,7 @@ console.log('Przerwa i powiadomienie');
   const stop = A.stanPrzerwy();
   test('Pomin konczy przerwe, wracaja presety', !stop.leci && stop.tTotal === 0 && timer.querySelectorAll('.tbtn').map(b => b.textContent).includes('60 s'));
   test('+30 s bez trwajacej przerwy nic nie robi', (A.przedluzPrzerwe(30), A.stanPrzerwy().tTotal === 0));
+  test('ciezar z klawiatury nie schodzi ponizej 2,5 kg', A.domknijLiczbe(0, { krok: 2.5, min: 2.5, max: 500 }) === 2.5);
 }
 
 /* ---------- prowadzenie sesji silowej ---------- */
@@ -826,17 +831,35 @@ console.log('Prowadzenie sesji');
   test('po serii ekran przerwy z odliczaniem z opisu cwiczenia', st.leci && st.tTotal === sek && !!prow.querySelector('.pr-odl') && prow.textContent.includes('Następna: ' + kA[1].it.name));
   prow.querySelectorAll('.prok')[0].click();                   // Dalej →
   test('Dalej konczy przerwe i pokazuje druga serie', !A.stanPrzerwy().leci && prow.querySelector('.prnr').textContent === '2/' + kA.length);
-  test('kreski postepu: pierwsza zaliczona, druga biezaca', prow.querySelector('.prkreski').querySelectorAll('i')[0].classList.contains('z') && prow.querySelector('.prkreski').querySelectorAll('i')[1].classList.contains('teraz'));
+  // Ponowne otwarcie prowadzenia sprzata poprzednia instancje (jeden .prow, stary uchwyt zamkniety).
+  const prowBis = A.prowadzSesje('A', W);
+  test('ponowne otwarcie zostawia jedna instancje', document.querySelectorAll('.prow').length === 1 && prowBis !== prow);
+  prowBis.querySelector('.prx').click();
+  const prow3 = A.prowadzSesje('A', W);
+  // dalej testujemy na swiezej instancji
+  test('po zamknieciu da sie otworzyc znowu', !!prow3 && document.querySelectorAll('.prow').length === 1);
+  // Enter w polu liczbowym nie zalicza serii — tylko zapisuje liczbe w stepperze.
+  const vPowt = prow3.querySelector('.pr-powt').querySelector('.krok3-v');
+  vPowt.click();
+  const polePowt = vPowt.querySelector('.wpis');
+  polePowt.value = '9';
+  polePowt.onkeydown({ key: 'Enter', preventDefault() {}, stopPropagation() {} });
+  test('Enter w polu powtorzen ustawia liczbe bez zaliczania serii', vPowt.textContent.startsWith('9') && !A.logGet(W, 'A', kA[1].it.n)[kA[1].i] && prow3.querySelector('.prnr').textContent === '2/' + kA.length);
+  vPowt.click();
+  const polePowt2 = vPowt.querySelector('.wpis');
+  polePowt2.onkeydown({ key: 'Escape', preventDefault() {}, stopPropagation() {} });
+  test('Escape przywraca liczbe ze stepperem (b i jednostka), nie goly tekst', !!vPowt.querySelector('b') && vPowt.querySelector('b').textContent === '9');
+  test('kreski postepu: pierwsza zaliczona, druga biezaca', prow3.querySelector('.prkreski').querySelectorAll('i')[0].classList.contains('z') && prow3.querySelector('.prkreski').querySelectorAll('i')[1].classList.contains('teraz'));
   // Ciezar boju w trybie prowadzenia idzie ta sama droga co suwak (kgw).
   const glowny = kA.findIndex(k => k.pl.planKg != null);
   if (glowny >= 0) {
-    while (prow.querySelector('.prnr').textContent.split('/')[0] !== String(glowny + 1)) prow.querySelectorAll('.prok')[0].click(), (A.stanPrzerwy().leci && prow.querySelectorAll('.prok')[0].click());
+    while (prow3.querySelector('.prnr').textContent.split('/')[0] !== String(glowny + 1)) prow3.querySelectorAll('.prok')[0].click(), (A.stanPrzerwy().leci && prow3.querySelectorAll('.prok')[0].click());
     const kgPrzed = kA[glowny].pl.kg;
-    prow.querySelector('.pr-kg').querySelectorAll('.krok3-b')[1].click();       // +2,5 kg
+    prow3.querySelector('.pr-kg').querySelectorAll('.krok3-b')[1].click();       // +2,5 kg
     test('plus przy ciezarze zapisuje wlasny ciezar boju', A.plannedOf(kA[glowny].it, W, 'A').kg === kgPrzed + 2.5 && S.kgw[W + '|A|' + kA[glowny].it.n] === kgPrzed + 2.5);
-    test('ekran ma miejsce na sztange 3D z aktualnym ciezarem', prow.querySelector('.pr-sztanga') && +prow.querySelector('.pr-sztanga').dataset.kg === kgPrzed + 2.5);
+    test('ekran ma miejsce na sztange 3D z aktualnym ciezarem', prow3.querySelector('.pr-sztanga') && +prow3.querySelector('.pr-sztanga').dataset.kg === kgPrzed + 2.5);
   }
-  prow.querySelector('.prx').click();
+  prow3.querySelector('.prx').click();
   test('zamkniecie zostawia zapisane serie', !document.querySelector('.prow') && !!A.logGet(W, 'A', kA[0].it.n)[0]);
   if (A.stanPrzerwy().leci) A.stopTimer();
 

@@ -229,6 +229,8 @@
   const ease = t => 1 - Math.pow(1 - t, 3);
 
   const sceny = new Set();
+  // Puszczenie palca gdziekolwiek kończy obrót każdej sceny (jeden nasłuch, nie po jednym na scenę).
+  ['pointerup', 'pointercancel'].forEach(z => document.addEventListener(z, () => { for (const s of sceny) s.drag = null; }, { passive: true }));
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(ws => { for (const w of ws) { const s = w.target._scena; if (!s) continue; s.widoczna = w.isIntersecting; if (s.widoczna && s.brudna) uruchom(); } }) : null;
 
   function Scena(host, kolor) {
@@ -246,8 +248,6 @@
     c.addEventListener('pointermove', e => { if (!s.drag) return; const dx = e.clientX - s.drag.x; s.drag.ruch = Math.max(s.drag.ruch, Math.abs(dx)); s.dTheta = s.drag.th + dx * 0.012; s.drag.t = performance.now(); }, { passive: true });
     const koniec = () => { s.drag = null; };
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(z => c.addEventListener(z, koniec, { passive: true }));
-    // Puszczenie palca poza płótnem (gdy przechwycenie wskaźnika się nie udało) też kończy obrót.
-    ['pointerup', 'pointercancel'].forEach(z => document.addEventListener(z, koniec, { passive: true }));
     // przeciągnięcie po sztandze na karcie „Dziś" nie ma otwierać sesji
     c.addEventListener('click', e => { if (s.ostatniRuch > 8) { e.stopPropagation(); e.preventDefault(); } }, true);
     c.addEventListener('pointerup', e => { s.ostatniRuch = s.drag ? s.drag.ruch : 0; }, { capture: true, passive: true });
@@ -469,7 +469,9 @@
     document.querySelectorAll('.prow .pr-sztanga').forEach(zalozNaProwadzenie);
   };
   new MutationObserver(muts => { if (muts.some(m => m.addedNodes.length)) raf(przejrzyj); }).observe(app, { childList: true });
-  new MutationObserver(muts => { if (muts.some(m => m.addedNodes.length)) raf(przejrzyj); }).observe(document.body, { childList: true, subtree: true });
+  // Poza #app interesuje nas tylko ekran prowadzenia — kapsuła przerwy przebudowuje się co sekundę i nie ma tu nic do roboty.
+  const zProwadzenia = n => n.nodeType === 1 && n.classList && (n.classList.contains('prow') || n.classList.contains('pr-sztanga') || (n.querySelector && !!n.querySelector('.pr-sztanga')));
+  new MutationObserver(muts => { if (muts.some(m => Array.from(m.addedNodes).some(zProwadzenia))) raf(przejrzyj); }).observe(document.body, { childList: true, subtree: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) uruchom(); });
   window.addEventListener('resize', () => { for (const s of sceny) s.brudna = true; uruchom(); }, { passive: true });
   przejrzyj();
