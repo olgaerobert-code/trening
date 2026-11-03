@@ -859,6 +859,23 @@ console.log('Prowadzenie sesji');
   czysc();
 }
 
+/* ---------- przyrost od zeszlego tygodnia na karcie Dzis ---------- */
+console.log('');
+console.log('Przyrost od zeszlego tygodnia');
+{
+  const W = 3;
+  S.week = W;
+  const realny = Date.prototype.getDay; Date.prototype.getDay = () => 1;
+  S.view = '#/'; A.render();
+  Date.prototype.getDay = realny;
+  const hv = app.querySelector('.hero-s').querySelector('.hv');
+  const bojA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').planKg != null);
+  const teraz = A.plannedOf(bojA, W, 'A').kg, poprz = A.plannedOf(bojA, W - 1, 'A').kg;
+  test('karta Dzis niesie ciezar z zeszlego tygodnia, gdy sie rozni', teraz !== poprz ? +hv.dataset.poprz === poprz : hv.dataset.poprz === undefined);
+  S.week = 1; S.view = '#/'; A.render();
+  test('w tygodniu 1 nie ma zeszlego tygodnia', app.querySelector('.hero-s').querySelector('.hv').dataset.poprz === undefined);
+}
+
 /* ---------- na czym otwiera sie aplikacja ---------- */
 console.log('');
 console.log('Sesja na starcie');

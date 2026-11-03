@@ -550,6 +550,12 @@ function kartaDzis(k, w, etykieta) {
     const presk = el('div', 'presk');
     const v = el('div', 'hv');
     if (kg != null) { v.textContent = fmt(kg); v.dataset.cnt = kg; v.dataset.krok = 2.5; v.append(el('u', null, 'kg')); }
+    // Co było na sztandze tydzień temu (dziennik albo plan): sztanga 3D na karcie
+    // najpierw ładuje się do tamtego ciężaru, potem dojeżdża różnica.
+    if (kg != null && it && w > 1) {
+      const poprz = plannedOf(it, w - 1, k).kg;
+      if (poprz != null && poprz !== kg) v.dataset.poprz = poprz;
+    }
     else v.textContent = 'test 1RM';
     presk.append(v);
     const L = LIFTS.find(x => x.key === lift);
@@ -4331,7 +4337,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=78`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=79`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4384,7 +4390,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=78')
+fetch('plan.json?v=79')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

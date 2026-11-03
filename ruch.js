@@ -426,7 +426,25 @@
     host.className = 'sztanga3d-host hero3d';
     htop.after(host);
     const s = Scena(host, '#fff');
-    ustawKg(s, parseFloat(hv.dataset.cnt));
+    const kg = parseFloat(hv.dataset.cnt), poprz = parseFloat(hv.dataset.poprz);
+    // Przyrost od zeszłego tygodnia: najpierw tamten ciężar, po chwili dojeżdża
+    // różnica, a podpis zostaje. Przejazd gra raz na uruchomienie aplikacji —
+    // Dziś otwiera się dziesiątki razy dziennie, podpis wystarczy.
+    const roznica = Number.isFinite(poprz) && Number.isFinite(kg) && poprz !== kg ? Math.round((kg - poprz) * 100) / 100 : 0;
+    const klucz = 'przyrost:' + hv.dataset.cnt + ':' + hv.dataset.poprz;
+    let grane = false;
+    try { grane = sessionStorage.getItem('trening.ui.przyrost') === klucz; } catch { grane = true; }
+    const podpisRoznicy = () => {
+      const znak = roznica > 0 ? '+' : '−';
+      s.opis.textContent = s.opis.textContent + ` · ${znak}${String(Math.abs(roznica)).replace('.', ',')} kg niż tydzień temu`;
+    };
+    if (roznica && !grane) {
+      ustawKg(s, poprz);
+      setTimeout(() => { if (!s.c.isConnected) return; ustawKg(s, kg); podpisRoznicy(); try { sessionStorage.setItem('trening.ui.przyrost', klucz); } catch {} }, 900);
+    } else {
+      ustawKg(s, kg);
+      if (roznica) podpisRoznicy();
+    }
     uruchom();
   };
   // tryb prowadzenia: host .pr-sztanga z data-kg (poza #app), zmiana ciężaru przez data-kg
