@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
+  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, powiadomPrzerwa: true, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
 };
 
 /* ---------- Supabase ---------- */
@@ -167,13 +167,14 @@ function loadState() {
     if (typeof raw.sound === 'boolean') state.sound = raw.sound;
     if (typeof raw.autoDzis === 'boolean') state.autoDzis = raw.autoDzis;
     if (typeof raw.zegarek === 'boolean') state.zegarek = raw.zegarek;
+    if (typeof raw.powiadomPrzerwa === 'boolean') state.powiadomPrzerwa = raw.powiadomPrzerwa;
     if (typeof raw.autoPrzerwa === 'boolean') state.autoPrzerwa = raw.autoPrzerwa;
     if (typeof raw.korekta === 'number') state.korekta = raw.korekta;
   } catch { /* pierwszy start */ }
   const t = +new URLSearchParams(location.search).get('t');
   if (t >= 1 && t <= 12) state.week = t;
 }
-const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, autoPrzerwa: state.autoPrzerwa, korekta: state.korekta }));
+const zapiszLokalnie = () => localStorage.setItem(LS, JSON.stringify({ week: state.week, e1rm: state.e1rm, sound: state.sound, autoDzis: state.autoDzis, zegarek: state.zegarek, powiadomPrzerwa: state.powiadomPrzerwa, autoPrzerwa: state.autoPrzerwa, korekta: state.korekta }));
 const save = () => {
   zapiszLokalnie();
   if (typeof pushStan === 'function') pushStan();
@@ -2799,6 +2800,7 @@ function przerwaPoSerii(it, day, w) {
 
 /* ---------- timer przerwy ---------- */
 let tLeft = 0, tTotal = 0, tId = null, tFired = false, tEnd = 0;
+let tTresc = '';                                 // treść powiadomienia o końcu przerwy (tryb prowadzenia podaje, co dalej)
 const R = 24, CIRC = 2 * Math.PI * R;
 
 // Dolny pasek ma dwie role. Na ekranach przeglądowych to zakładki; w trakcie
@@ -2844,11 +2846,22 @@ function renderTimer() {
   ring.append(lab);
   inner.append(ring);
 
-  [60, 90, 120, 180].forEach(s => {
-    const b = el('button', 'tbtn' + (tId && tTotal === s ? ' on' : ''), s < 120 ? s + ' s' : (s / 60) + ' min');
-    b.onclick = () => (tId && tTotal === s) ? stopTimer() : startTimer(s);
-    inner.append(b);
-  });
+  if (tId) {
+    // W czasie przerwy pod kciukiem są tylko dwie rzeczy: dołożyć pół minuty albo skończyć.
+    const plus = el('button', 'tbtn plus', '+30 s');
+    plus.setAttribute('aria-label', 'Przedłuż przerwę o 30 sekund');
+    plus.onclick = () => przedluzPrzerwe(30);
+    const pomin = el('button', 'tbtn pomin', 'Pomiń');
+    pomin.setAttribute('aria-label', 'Zakończ przerwę teraz');
+    pomin.onclick = () => stopTimer();
+    inner.append(plus, pomin);
+  } else {
+    [60, 90, 120, 180].forEach(s => {
+      const b = el('button', 'tbtn', s < 120 ? s + ' s' : (s / 60) + ' min');
+      b.onclick = () => startTimer(s);
+      inner.append(b);
+    });
+  }
 
   const snd = el('button', 'tbtn snd' + (state.sound ? '' : ' off'));
   snd.setAttribute('aria-label', state.sound ? 'Wycisz sygnał' : 'Włącz sygnał');
@@ -2867,13 +2880,22 @@ function renderTimer() {
   box.append(inner);
 }
 function stopTimer() {
-  clearInterval(tId); tId = null; tLeft = 0; tTotal = 0; tFired = false;
+  clearInterval(tId); tId = null; tLeft = 0; tTotal = 0; tFired = false; tTresc = '';
   cancelBeeps(); renderTimer();
 }
-function startTimer(s) {
+// Pół minuty więcej: koniec przerwy przesuwa się, sygnały planują się od nowa.
+function przedluzPrzerwe(s = 30) {
+  if (!tTotal) return;
+  tEnd += s * 1000; tTotal += s;
+  tLeft = Math.max(0, Math.ceil((tEnd - Date.now()) / 1000));
+  cancelBeeps(); scheduleBeeps(tLeft);
+  renderTimer();
+}
+const stanPrzerwy = () => ({ leci: !!tId, tLeft, tTotal, tEnd, tFired });
+function startTimer(s, opcje = {}) {
   clearInterval(tId);
   cancelBeeps();
-  tLeft = s; tTotal = s; tFired = false;
+  tLeft = s; tTotal = s; tFired = false; tTresc = opcje.tresc || '';
   // Liczymy od godziny końca, nie odejmujemy sekund: iPhone dławi liczniki
   // w tle i odliczanie „minus jeden co tick" rozjeżdżało się z zegarem.
   tEnd = Date.now() + s * 1000;
@@ -2884,7 +2906,7 @@ function startTimer(s) {
       clearInterval(tId); tId = null; tLeft = 0; tFired = true;
       voices = [];
       if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      powiadomZegarek('Koniec przerwy', 'Następna seria.');
+      powiadomZegarek('Koniec przerwy', tTresc || 'Następna seria.');
     }
     renderTimer();
   }, 1000);
@@ -3080,6 +3102,21 @@ function settingsView() {
   trow.append(el('div', 'n', 'Przerwa rusza po ✓'));
   trow.append(miniBtn(state.autoPrzerwa ? 'Włączone' : 'Wyłączone', () => { state.autoPrzerwa = !state.autoPrzerwa; save(); render(); }));
   tr.append(trow);
+  const prow2 = el('div', 'e1row');
+  prow2.append(el('div', 'n', 'Powiadomienie o końcu przerwy'));
+  const brakPow = typeof Notification === 'undefined';
+  const zgoda = !brakPow && Notification.permission === 'granted';
+  prow2.append(miniBtn(state.powiadomPrzerwa && zgoda ? 'Włączone' : 'Wyłączone', async () => {
+    if (state.powiadomPrzerwa && zgoda) { state.powiadomPrzerwa = false; save(); render(); return; }
+    if (brakPow) { render(); return; }
+    const p = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    state.powiadomPrzerwa = p === 'granted'; save(); render();
+  }));
+  tr.append(prow2);
+  tr.append(el('p', null, brakPow
+    ? 'Ta przeglądarka nie wysyła powiadomień ze stron' + (IOS ? ' — na iPhonie działa to tylko z ikony na ekranie początkowym (Dziennik → Zegarek, krok 1).' : '.')
+    : !zgoda && Notification.permission === 'denied' ? 'Powiadomienia są zablokowane w ustawieniach telefonu. Odblokuj je, a przełącznik zadziała.'
+    : 'Gdy timer dojdzie do zera przy zgaszonym ekranie albo schowanej aplikacji, telefon zawibruje i pokaże „Koniec przerwy”. Do zegarka idzie to samo powiadomienie (karta Zegarek).'));
   tr.append(el('p', null, 'Po odhaczeniu serii timer odlicza przerwę z opisu ćwiczenia: 3 min przy bojach, 90 s albo 60 s przy dodatkowych, w superserii dopiero po drugim ćwiczeniu pary. Ostatnia seria sesji nie włącza przerwy.'));
   body.append(tr);
 
@@ -3424,11 +3461,13 @@ setInterval(() => {
 /* Koniec przerwy jako powiadomienie. Aplikacja Huawei Health przekazuje
    powiadomienia z telefonu na zegarek, więc przerwa kończy się wibracją na
    nadgarstku, nawet gdy telefon leży w torbie. */
+// Powiadomienie idzie, gdy włączony jest zegarek ALBO zwykłe powiadomienie o końcu
+// przerwy (telefon w kieszeni, ekran zgaszony) — jedno i to samo powiadomienie.
 async function powiadomZegarek(tytul, tresc) {
-  if (!state.zegarek || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  if (!(state.zegarek || state.powiadomPrzerwa) || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   try {
     const reg = navigator.serviceWorker && await navigator.serviceWorker.ready;
-    const opcje = { body: tresc, tag: 'przerwa', renotify: true, vibrate: [300, 120, 300], icon: 'icon-192.png', badge: 'icon-192.png' };
+    const opcje = { body: tresc, tag: 'przerwa', renotify: true, vibrate: [200, 100, 200], icon: 'icon-192.png', badge: 'icon-192.png' };
     if (reg && reg.showNotification) await reg.showNotification(tytul, opcje);
     else new Notification(tytul, opcje);
   } catch { /* bez powiadomienia zostaje dźwięk i wibracja telefonu */ }
@@ -4045,7 +4084,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=75`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=76`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4098,7 +4137,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=75')
+fetch('plan.json?v=76')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

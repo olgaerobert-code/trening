@@ -109,7 +109,7 @@ const sandbox = {
   history: { replaceState() {} },
   navigator: { onLine: false, vibrate() {} },      // offline: zero ruchu do Supabase
   window: { addEventListener() {}, scrollTo() {} },
-  setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
+  setTimeout, clearTimeout, setInterval: () => 1, clearInterval() {},   // 1, nie 0: uchwyt timera ma byc prawdziwy
   crypto: { getRandomValues: a => { a.fill(7); return a; } },
   fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planJson) }),
   URL: { createObjectURL: () => 'blob:x', revokeObjectURL() {} },
@@ -129,7 +129,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
-  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -756,6 +756,32 @@ console.log('Przytrzymanie ✓');
   test('Anuluj zamyka arkusz bez zapisu', !document.querySelector('.arkusz') && !A.logGet(W, 'A', itA.n)[0]);
   tick._trzymane = false;
   for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+}
+
+/* ---------- przerwa i powiadomienie ---------- */
+console.log('');
+console.log('Przerwa i powiadomienie');
+{
+  test('powiadomienie o koncu przerwy domyslnie wlaczone', S.powiadomPrzerwa === true);
+  S.powiadomPrzerwa = false; A.zapiszLokalnie();
+  test('przelacznik zapisuje sie w trening.v1', (magazyn.get('trening.v1') || '').includes('"powiadomPrzerwa":false'));
+  S.powiadomPrzerwa = true; A.zapiszLokalnie();
+  S.view = '#/ustawienia'; A.render();
+  test('ustawienia maja przelacznik powiadomienia o koncu przerwy', app.textContent.includes('Powiadomienie o końcu przerwy'));
+
+  S.view = '#/d/A'; A.render();
+  A.startTimer(60);
+  const przed = A.stanPrzerwy();
+  test('timer rusza na 60 s', przed.leci && przed.tTotal === 60);
+  const przyciski = timer.querySelectorAll('.tbtn').map(b => b.textContent);
+  test('w czasie przerwy kapsula ma +30 s i Pomin, bez presetow', przyciski.includes('+30 s') && przyciski.includes('Pomiń') && !przyciski.includes('60 s'));
+  A.przedluzPrzerwe(30);
+  const po = A.stanPrzerwy();
+  test('+30 s wydluza koniec przerwy o pol minuty', po.tTotal === 90 && po.tEnd - przed.tEnd === 30000 && po.tLeft >= 89);
+  timer.querySelectorAll('.tbtn').find(b => b.textContent === 'Pomiń').click();
+  const stop = A.stanPrzerwy();
+  test('Pomin konczy przerwe, wracaja presety', !stop.leci && stop.tTotal === 0 && timer.querySelectorAll('.tbtn').map(b => b.textContent).includes('60 s'));
+  test('+30 s bez trwajacej przerwy nic nie robi', (A.przedluzPrzerwe(30), A.stanPrzerwy().tTotal === 0));
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */

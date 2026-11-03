@@ -19,7 +19,7 @@
    i ciężki na liczby i tytuły, pełnej szerokości na tekst. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=75) format('woff2');
+  src:url(fonts/Archivo.woff2?v=76) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -915,6 +915,10 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 .note.pominieta{border-left-color:var(--warn)}
 .wchipy.zakres{grid-template-columns:repeat(5,1fr)}
 .wchipy.zakres .wchip{font-size:11.5px;letter-spacing:.02em;padding:11px 2px}
+/* kapsuła w czasie przerwy: +30 s i Pomiń */
+.tbtn.plus{background:var(--s2);font-size:15px}
+.tbtn.pomin{color:var(--ink-2)}
+
 /* ══ przytrzymanie ✓, podpowiedź, arkusz korekty ══ */
 .tick{-webkit-touch-callout:none}
 .tick.trzymany{transform:scale(.9);box-shadow:inset 0 0 0 3px var(--ink)}
@@ -944,8 +948,8 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=75"></script>
-<script src="app.js?v=75"></script>
-<script src="ruch.js?v=75"></script>
+<script src="progresja.js?v=76"></script>
+<script src="app.js?v=76"></script>
+<script src="ruch.js?v=76"></script>
 </body>
 </html>
