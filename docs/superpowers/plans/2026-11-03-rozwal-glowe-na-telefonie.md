@@ -214,3 +214,29 @@ przytrzymanie ✓, klawiatura, wibracja, powiadomienie o końcu przerwy, tryb
   nie były dostępne w sesji. Plan został odtworzony z briefu właściciela
   (lista etapów A–G, zasady, część kreatywna, lista rzeczy do sprawdzenia na
   telefonie) i zapisany tutaj przed rozpoczęciem pracy.
+- Etap A: zamiast `.ring .fgc{transition:stroke-dashoffset .95s linear}` nic nie
+  zmieniono — to pierścień odliczania przerwy (stan, mały SVG), jedyne przejście
+  dłuższe niż 300 ms, świadomie. Wypełnienie kapsuły w czasie przerwy przeszło
+  z `width` na `transform:scaleX`.
+- Etap A: po niezależnym przeglądzie dopisano poprawki (osobny commit): zmiana
+  ciężaru suwakiem znów budzi rysowanie sztangi, zwinięta karta nie zostaje
+  z pustym płótnem, zgubione puszczenie palca kończy obrót, data z wielkiej
+  litery, podpisy ≤ 11 px w zwężonym kroju przeszły na zwykłe pismo.
+- Etap E, pkt 6: zamiast parametru `?prowadz=1` w adresie karta „Dziś" ustawia
+  wewnętrzną flagę `prowadzPoRenderze`, którą `render` zużywa po narysowaniu
+  dnia — adres zostaje czysty i nie trafia do zakładek ani historii.
+- Testy: atrapa DOM-u w `tools/test-widoki.mjs` dostała `parentNode`, `remove()`,
+  `replaceChildren()`, `closest()`, `document.removeEventListener`, a `setInterval`
+  zwraca 1 zamiast 0 (uchwyt timera ma być prawdziwy, bo `renderTimer` na tym
+  polega). Bez tego arkusz korekty, tryb prowadzenia i kapsuła przerwy nie
+  dały się sprawdzić bez przeglądarki.
+- Zrzuty: na świeżym profilu przeglądarki `?t=N` jest nadpisywane przez
+  przejście na cykl 2 (`przejdzNaCykl` ustawia tydzień 1 przy pierwszym
+  starcie), więc skrypty testowe ustawiają też `trening.cykl.v1 = 2`
+  w localStorage. Zachowanie aplikacji nie było ruszane.
+- Część kreatywna: zbudowano dwa dodatki w osobnych commitach — „przyrost od
+  zeszłego tygodnia" na sztandze karty Dziś i „sztanga rozładowuje się po
+  ostatniej serii boju" (lista i tryb prowadzenia). Odrzucone: stuk talerza przy
+  każdej zmianie ciężaru (dziesiątki razy na trening), rekord jako cyfra na cały
+  ekran (wymaga liczenia maksa z serii, czego README zakazuje), nastrój deloadu
+  (zmiana palety).
