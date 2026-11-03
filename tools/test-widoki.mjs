@@ -47,6 +47,7 @@ class El {
   append(...n) { for (const x of n) { const c = typeof x === 'object' ? x : txt(String(x)); c.parentNode = this; this.children.push(c); } }
   remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(c => c !== this); this.parentNode = null; }
   replaceChildren(...n) { this.children = []; this.append(...n); }
+  closest(sel) { let n = this; while (n && n.tagName) { if (n.tagName !== '#TEXT' && pasuje(n, sel)) return n; n = n.parentNode; } return null; }
   appendChild(n) { this.append(n); return n; }
   setAttribute(k, v) { this.attrs[k] = String(v); }
   getAttribute(k) { return this.attrs[k]; }
@@ -130,7 +131,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
-  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie, kolejkaSesji, nastepnyKrok, prowadzSesje, przerwaPo, zapiszCiezar,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie, kolejkaSesji, nastepnyKrok, prowadzSesje, przerwaPo, zapiszCiezar, rozwinKarte,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -874,6 +875,40 @@ console.log('Przyrost od zeszlego tygodnia');
   test('karta Dzis niesie ciezar z zeszlego tygodnia, gdy sie rozni', teraz !== poprz ? +hv.dataset.poprz === poprz : hv.dataset.poprz === undefined);
   S.week = 1; S.view = '#/'; A.render();
   test('w tygodniu 1 nie ma zeszlego tygodnia', app.querySelector('.hero-s').querySelector('.hv').dataset.poprz === undefined);
+}
+
+/* ---------- sztanga rozladowuje sie po ostatniej serii boju ---------- */
+console.log('');
+console.log('Rozladowanie sztangi');
+{
+  const W = 6;
+  S.week = W;
+  const czysc = () => { for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k]; delete S.treningi[W + '|A']; };
+  czysc();
+  S.view = '#/d/A'; A.render();
+  const karta = app.querySelectorAll('.ex').find(e => e.classList.contains('main'));
+  const ticki = karta.querySelector('.sets').querySelectorAll('.tick');
+  ticki.slice(0, -1).forEach(t => t.click());
+  test('przed ostatnia seria karta boju nie jest oznaczona', !karta.dataset.zaliczone);
+  ticki[ticki.length - 1].click();
+  test('ostatnia seria boju oznacza karte do rozladowania', karta.dataset.zaliczone === '1');
+  A.render();
+  const karta2 = app.querySelectorAll('.ex').find(e => e.classList.contains('main'));
+  test('cofniecie (rozwiniecie karty) zdejmuje oznaczenie', (A.rozwinKarte(karta2), !karta2.dataset.zaliczone));
+  // Tryb prowadzenia: ostatnia seria boju ustawia data-rozladuj na hoście sztangi.
+  czysc();
+  const kA = A.kolejkaSesji('A', W);
+  const ost = kA.findIndex((k, idx) => k.pl.planKg != null && k.i === k.pl.sets - 1);
+  kA.slice(0, ost).forEach(k => A.logSet(W, 'A', k.it.n, k.i, { r: k.pl.target, kg: k.pl.kg, pr: k.pl.target, pk: k.pl.planKg }));
+  const prow = A.prowadzSesje('A', W);
+  test('prowadzenie stoi na ostatniej serii boju', prow.querySelector('.prnr').textContent.startsWith((ost + 1) + '/') && !!prow.querySelector('.pr-sztanga'));
+  prow.querySelectorAll('.prok')[0].click();
+  test('zaliczenie ostatniej serii boju rozladowuje sztange, przerwa juz leci', prow.querySelector('.pr-sztanga').dataset.rozladuj === '1' && A.stanPrzerwy().leci);
+  await new Promise(r => setTimeout(r, 1000));
+  test('po chwili ekran przerwy', !!prow.querySelector('.pr-odl'));
+  prow.querySelector('.prx').click();
+  if (A.stanPrzerwy().leci) A.stopTimer();
+  czysc();
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */

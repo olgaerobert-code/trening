@@ -402,6 +402,8 @@
     const kg = card.querySelector('.mv.kg');
     return kg ? parseFloat(kg.dataset.cnt) : NaN;
   };
+  // Bój zaliczony: talerze zjeżdżają z gryfu, zostaje pusty gryf i podpis.
+  const rozladuj = s => { ustawKg(s, 20); s.opis.textContent = 'zaliczone — sztanga pusta'; };
   const zalozNaKarte = card => {
     if (card.querySelector('.sztanga3d')) return;
     const head = card.querySelector('.exhead');
@@ -410,10 +412,13 @@
     host.className = 'sztanga3d-host';
     head.after(host);
     const s = Scena(host, getComputedStyle(card).getPropertyValue('--dc').trim());
-    ustawKg(s, kgKarty(card));
-    const odswiez = () => { const kg = kgKarty(card); if (kg !== s.kg) ustawKg(s, kg); };
+    const odswiez = () => {
+      if (card.dataset.zaliczone) { if (s.opis.textContent !== 'zaliczone — sztanga pusta') rozladuj(s); return; }
+      const kg = kgKarty(card); if (kg !== s.kg) ustawKg(s, kg);
+    };
+    odswiez();
     card.addEventListener('input', () => raf(odswiez), { passive: true });
-    new MutationObserver(() => raf(odswiez)).observe(card, { childList: true, characterData: true, subtree: true });
+    new MutationObserver(() => raf(odswiez)).observe(card, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['data-zaliczone'] });
     uruchom();
   };
   // karta „Dziś": liczba z .hv[data-cnt]
@@ -452,7 +457,10 @@
     if (host.querySelector('.sztanga3d')) return;
     const s = Scena(host, '#fff');
     ustawKg(s, parseFloat(host.dataset.kg));
-    new MutationObserver(() => { const kg = parseFloat(host.dataset.kg); if (kg !== s.kg) ustawKg(s, kg); }).observe(host, { attributes: true, attributeFilter: ['data-kg'] });
+    new MutationObserver(() => {
+      if (host.dataset.rozladuj) { rozladuj(s); return; }
+      const kg = parseFloat(host.dataset.kg); if (kg !== s.kg) ustawKg(s, kg);
+    }).observe(host, { attributes: true, attributeFilter: ['data-kg', 'data-rozladuj'] });
     uruchom();
   };
   const przejrzyj = () => {

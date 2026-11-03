@@ -875,6 +875,7 @@ function zwinKarte(box, it, day, w, odRazu) {
 }
 function rozwinKarte(box) {
   if (!box) return;
+  if (box.dataset) delete box.dataset.zaliczone;      // talerze wracają na gryf
   box.classList.remove('zwiniety', 'otwarty');
   const s = $('.exsum', box);
   if (s) s.remove();
@@ -2317,7 +2318,11 @@ function setRows(it, day, w, pl, onKg) {
   const zwinJesliKomplet = () => {
     const karta = box.closest && box.closest('.ex');
     if (!karta || rows().filter(Boolean).length < pl.sets) return;
-    setTimeout(() => zwinKarte(karta, it, day, w), 650);
+    // Bój zaliczony: talerze zjeżdżają z gryfu (ruch.js patrzy na data-zaliczone),
+    // dopiero potem karta zwija się do jednego wiersza.
+    const boj = karta.classList.contains('main');
+    if (boj) karta.dataset.zaliczone = '1';
+    setTimeout(() => zwinKarte(karta, it, day, w), boj ? 1100 : 650);
   };
 
   // Pasek przerw pod seriami: ile naprawdę trwał odpoczynek między seriami.
@@ -4116,10 +4121,16 @@ function prowadzSesje(day, w) {
     if (navigator.vibrate) navigator.vibrate(12);
     startPrzyPierwszejSerii(day, w);
     const nast = kroki[i + 1];
-    if (!nast) { koniecSesji(); return; }
+    // Ostatnia seria boju: talerze zjeżdżają z gryfu, zanim ekran pójdzie dalej.
+    // Przerwa i tak startuje od razu — liczy się od końca serii, nie od obrazka.
+    const szt = tlo.querySelector && tlo.querySelector('.pr-sztanga');
+    const rozladuj = szt && isMainItem(it) && k.i === pl.sets - 1;
+    if (rozladuj) szt.dataset.rozladuj = '1';
+    const potem = fn => (rozladuj ? setTimeout(fn, 900) : fn());
+    if (!nast) { potem(koniecSesji); return; }
     const sek = state.autoPrzerwa ? przerwaPo(it, day, w) : 0;
-    if (sek > 0) { startTimer(sek, { tresc: 'Następna: ' + opisKroku(nast) }); rysujPrzerwe(); }
-    else dalej();
+    if (sek > 0) { startTimer(sek, { tresc: 'Następna: ' + opisKroku(nast) }); potem(() => { if (tlo.isConnected !== false && document.querySelector('.prow') === tlo) rysujPrzerwe(); }); }
+    else potem(dalej);
   };
   const dalej = () => {
     clearInterval(tik);
@@ -4337,7 +4348,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=79`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=80`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4390,7 +4401,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=79')
+fetch('plan.json?v=80')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
