@@ -105,6 +105,53 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const floor25 = x => Math.floor(x / 2.5) * 2.5;
 // round25 pochodzi z progresja.js — jeden wspólny zasięg globalny, jedna definicja.
 const fmt = n => (n == null ? '—' : String(Math.round(n * 100) / 100).replace('.', ','));
+// Liczba wpisana z klawiatury: przecinek albo kropka, spacje nieistotne, śmieci → null.
+function parsujLiczbe(tekst) {
+  const t = String(tekst == null ? '' : tekst).replace(/\s+/g, '').replace(',', '.');
+  if (!/^-?\d*\.?\d+$/.test(t)) return null;
+  const v = parseFloat(t);
+  return Number.isFinite(v) ? v : null;
+}
+// Domyka wpisaną liczbę do zakresu i kroku (np. ciężar co 2,5 kg, powtórzenia co 1).
+function domknijLiczbe(v, { min = -Infinity, max = Infinity, krok = 1 } = {}) {
+  if (v == null) return null;
+  const k = krok > 0 ? Math.round(v / krok) * krok : v;
+  return Math.min(max, Math.max(min, Math.round(k * 100) / 100));
+}
+
+/* Tapnięcie w liczbę otwiera w tym samym miejscu pole do wpisania z klawiatury —
+   suwak zostaje do szybkich korekt, klawiatura jest od dokładnych. Enter albo
+   zejście z pola zapisuje tą samą drogą co suwak, Escape anuluje. */
+function edycjaLiczby(el, opcje) {
+  if (!el || el.querySelector && el.querySelector('.wpis')) return;
+  const stary = el.textContent;
+  const inp = el.ownerDocument ? el.ownerDocument.createElement('input') : document.createElement('input');
+  inp.className = 'wpis';
+  inp.type = 'text';
+  inp.setAttribute('inputmode', opcje.calk ? 'numeric' : 'decimal');
+  inp.setAttribute('enterkeyhint', 'done');
+  inp.setAttribute('aria-label', opcje.etykieta || 'Wpisz liczbę');
+  inp.value = String(opcje.wartosc == null ? '' : fmt(opcje.wartosc));
+  let zamkniete = false;
+  const zamknij = () => { if (zamkniete) return; zamkniete = true; el.textContent = stary; };
+  const zatwierdz = () => {
+    if (zamkniete) return;
+    const v = domknijLiczbe(parsujLiczbe(inp.value), opcje);
+    zamknij();
+    if (v != null && v !== opcje.wartosc) opcje.naZapis(v);
+  };
+  inp.onkeydown = e => {
+    if (e.key === 'Enter') { e.preventDefault(); zatwierdz(); }
+    else if (e.key === 'Escape') { e.preventDefault(); zamknij(); }
+  };
+  inp.onblur = zatwierdz;
+  el.textContent = '';
+  el.append(inp);
+  if (inp.focus) { inp.focus(); if (inp.select) inp.select(); }
+  // Klawiatura nie ma zasłonić pola: przewijamy je na środek ekranu.
+  if (inp.scrollIntoView) setTimeout(() => { try { inp.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {} }, 60);
+  return inp;
+}
 // Polska odmiana po liczebniku: 1 pozycja, 22 pozycje, ale 12 i 25 pozycji.
 const odmiana = (n, jedna, kilka, wielu) => {
   const d = n % 10, s = n % 100;
@@ -2227,8 +2274,14 @@ function setRows(it, day, w, pl, onKg) {
       else kgwSet(w, day, it.n, kgTeraz, pl.planKg);
       if (onKg) onKg(kgTeraz);            // liczba na karcie i talerze na gryfie
     };
+    const zatwierdzKg = kg => { sl.value = kg; podglad(kg); zapiszKg(); };
     sl.oninput = () => podglad(+sl.value);
-    sl.onchange = () => { podglad(+sl.value); zapiszKg(); };
+    sl.onchange = () => zatwierdzKg(+sl.value);
+    // Tapnięcie w liczbę: klawiatura zamiast suwaka. Zakres szerszy niż suwak —
+    // kto wpisuje ręcznie, wie, co robi; krok zostaje 2,5 kg.
+    val.setAttribute('role', 'button');
+    val.setAttribute('aria-label', 'Wpisz ciężar z klawiatury');
+    val.onclick = () => edycjaLiczby(val, { wartosc: kgTeraz, krok: 2.5, min: 0, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: zatwierdzKg });
     if (plan) plan.hidden = kgTeraz === pl.planKg;
     box.append(kgBox);
   }
@@ -2273,9 +2326,11 @@ function setRows(it, day, w, pl, onKg) {
       odswiezPostep(day, w);
       if (jest) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
-    sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
-    sl.onchange = () => {
-      powt = +sl.value;
+    // Zmiana liczby powtórzeń zapisuje serię — z suwaka albo z klawiatury tą samą drogą.
+    const zatwierdzPowt = v => {
+      powt = v;
+      vb.textContent = String(powt);
+      sl.value = Math.min(+sl.max, Math.max(+sl.min, powt));
       const nowa = !r.classList.contains('done');
       if (nowa) { r.classList.add('done'); blysk(tick); zapiszCzasSerii(w, day, it.n, i); }
       zapisz();
@@ -2283,6 +2338,11 @@ function setRows(it, day, w, pl, onKg) {
       odswiezPostep(day, w);
       if (nowa) { startPrzyPierwszejSerii(day, w); przerwaPoSerii(it, day, w); zwinJesliKomplet(); }
     };
+    sl.oninput = () => { powt = +sl.value; vb.textContent = String(powt); };
+    sl.onchange = () => zatwierdzPowt(+sl.value);
+    val.setAttribute('role', 'button');
+    val.setAttribute('aria-label', 'Wpisz powtórzenia z klawiatury, seria ' + (i + 1));
+    val.onclick = () => edycjaLiczby(vb, { wartosc: powt, krok: 1, min: 0, max: 999, calk: true, etykieta: 'Powtórzenia w serii ' + (i + 1), naZapis: zatwierdzPowt });
 
     r.append(el('span', 'snum', String(i + 1)), sl, val, tick);
     box.append(r);
@@ -3861,7 +3921,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=73`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=74`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -3914,7 +3974,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=73')
+fetch('plan.json?v=74')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

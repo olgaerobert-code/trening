@@ -127,6 +127,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
 };`, sandbox);
@@ -646,6 +647,50 @@ console.log('Migracja poniedzialku');
   test('pelny tydzien 3 blokuje ruch, dane zostaja', A.tydzienMaDane(2, 'A') && A.tydzienMaDane(3, 'A'));
   czysc();
   S.plan.cykl = cykl;
+}
+
+/* ---------- liczba z klawiatury ---------- */
+console.log('');
+console.log('Liczba z klawiatury');
+{
+  test('przecinek i kropka', A.parsujLiczbe('72,5') === 72.5 && A.parsujLiczbe('72.5') === 72.5);
+  test('spacje nieistotne', A.parsujLiczbe(' 1 00 ') === 100);
+  test('smieci daja null', A.parsujLiczbe('') === null && A.parsujLiczbe('abc') === null && A.parsujLiczbe('7,,5') === null && A.parsujLiczbe(null) === null);
+  test('ciezar domkniety do kroku 2,5 i zakresu', A.domknijLiczbe(93, { krok: 2.5, min: 0, max: 500 }) === 92.5 && A.domknijLiczbe(900, { krok: 2.5, max: 500 }) === 500);
+  test('powtorzenia to liczby calkowite nie mniejsze od zera', A.domknijLiczbe(7.6, { krok: 1, min: 0 }) === 8 && A.domknijLiczbe(-3, { krok: 1, min: 0 }) === 0);
+
+  // Pole w miejscu liczby: Enter zapisuje ta sama droga co suwak, Escape anuluje.
+  const W = 4;
+  S.week = W;
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  S.view = '#/d/A'; A.render();
+  const wiersz = app.querySelectorAll('.setrow')[0];
+  const val = wiersz.querySelector('.setval');
+  const vb = val.querySelector('b');
+  const przed = vb.textContent;
+  val.click();
+  const pole = vb.querySelector('.wpis');
+  test('tapniecie w liczbe otwiera pole liczbowe', !!pole && pole.attrs.inputmode === 'numeric');
+  pole.value = '6';
+  pole.onkeydown({ key: 'Enter', preventDefault() {} });
+  const itA = S.plan.days.A.items.find(it => A.plannedOf(it, W, 'A').sets > 0);
+  test('Enter zapisuje serie z wpisana liczba', vb.textContent === '6' && A.logGet(W, 'A', itA.n)[0] && A.logGet(W, 'A', itA.n)[0].r === 6 && wiersz.classList.contains('done'));
+  val.click();
+  const pole2 = vb.querySelector('.wpis');
+  pole2.value = '99';
+  pole2.onkeydown({ key: 'Escape', preventDefault() {} });
+  test('Escape nic nie zmienia', vb.textContent === '6' && A.logGet(W, 'A', itA.n)[0].r === 6 && !vb.querySelector('.wpis'));
+  const kgb = app.querySelector('.kglab b');
+  if (kgb) {
+    kgb.click();
+    const pk = kgb.querySelector('.wpis');
+    test('pole ciezaru ma klawiature dziesietna', !!pk && pk.attrs.inputmode === 'decimal');
+    pk.value = '77,5';
+    pk.onblur();
+    test('zejscie z pola zapisuje ciezar na serii', A.logGet(W, 'A', itA.n)[0].kg === 77.5 && kgb.textContent === '77,5');
+  }
+  for (const k of Object.keys(S.log)) if (+k.split('|')[0] === W) delete S.log[k];
+  for (const k of Object.keys(S.kgw)) if (+k.split('|')[0] === W) delete S.kgw[k];
 }
 
 /* ---------- na czym otwiera sie aplikacja ---------- */
