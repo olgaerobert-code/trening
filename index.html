@@ -19,7 +19,7 @@
    i ciężki na liczby i tytuły, pełnej szerokości na tekst. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=82) format('woff2');
+  src:url(fonts/Archivo.woff2?v=83) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -211,7 +211,8 @@ button.dzien:active .dk{transform:scale(.88)}
 .hbar i{display:block;height:100%;border-radius:4px;background:#fff;transition:width .3s var(--ease);transform-origin:left}
 .stagger .hbar i{animation:rosnij .5s var(--ease) .1s backwards}
 .hdol{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
-.hpg{font:600 13px/1.3 var(--sans);color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums}
+.hdol .cta{flex:none;white-space:nowrap}
+.hpg{flex:1;min-width:0;font:600 13px/1.3 var(--sans);color:rgba(255,255,255,.85);font-variant-numeric:tabular-nums;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cta{display:inline-flex;align-items:center;gap:8px;padding:14px 20px;border-radius:999px;position:relative;overflow:hidden;
   background:#fff;color:#0C0E14;font:800 15px/1 var(--sans);transition:transform .15s;box-shadow:0 10px 24px -6px rgba(0,0,0,.4)}
 .cta::after{content:'→';transition:transform .25s var(--ease)}
@@ -737,7 +738,7 @@ tr.now td:last-child{border-radius:0 8px 8px 0}
 .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .ring .bgc{fill:none;stroke:var(--s3);stroke-width:4}
 .ring .fgc{fill:none;stroke:var(--ink);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .95s linear,stroke .3s}
-.ring .lab{position:absolute;inset:0;display:grid;place-items:center;font:900 15px/1 var(--disp);font-stretch:88%;font-variant-numeric:tabular-nums}
+.ring .lab{position:absolute;inset:0;display:grid;place-items:center;font:900 16px/1 var(--disp);font-stretch:88%;font-variant-numeric:tabular-nums}
 .ring.idle .lab{color:var(--ink-3)}
 .ring.done .fgc{stroke:var(--good)}
 .ring.done .lab{color:var(--good)}
@@ -923,8 +924,8 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 .tick{-webkit-touch-callout:none}
 .tick.trzymany{transform:scale(.9);box-shadow:inset 0 0 0 3px var(--ink)}
 .setrow.done .tick.trzymany{box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 45%,transparent)}
-.podp{position:absolute;right:16px;bottom:-4px;z-index:2;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--on-ink);
-  font:600 12.5px/1.2 var(--sans);box-shadow:0 8px 20px -8px rgba(0,0,0,.5);animation:rise .2s var(--ease)}
+.podp{position:absolute;left:46px;top:50%;transform:translateY(-50%);z-index:2;pointer-events:none;max-width:calc(100% - 130px);padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--on-ink);
+  font:600 12.5px/1.2 var(--sans);box-shadow:0 8px 20px -8px rgba(0,0,0,.5);animation:zalTlo .2s var(--ease)}
 .arkusz-tlo{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center;background:rgba(5,6,10,.55);animation:zalTlo .2s ease}
 .arkusz{width:100%;max-width:600px;background:var(--s1);border-radius:24px 24px 0 0;padding:14px 18px calc(16px + env(safe-area-inset-bottom,0px));
   box-shadow:0 -20px 60px -20px rgba(0,0,0,.6);animation:arkuszWjazd .22s var(--ease)}
@@ -963,13 +964,23 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 .pr-przyciski .btn{min-height:52px;margin:0}
 .pr-nast{margin-top:22px;padding:14px 16px;border-radius:16px;background:var(--glass);border:1px solid var(--glass-line);font:600 14px/1.4 var(--sans);color:var(--ink);width:100%;max-width:360px}
 .prowstart{margin-bottom:12px}
+/* niski ekran (Safari z paskami, iPhone SE): ekran serii mieści się bez przewijania */
+@media (max-height:760px){
+  .pr-sztanga{height:120px;margin:0 0 2px}
+  .pr-sztanga .sztanga3d{height:104px}
+  .prow-sila .prname{font-size:28px;margin:4px 0 2px}
+  .prow-sila .krok3{padding:2px 0 6px}
+  .prow-sila .krok3-b,.prow-sila .krok3-v{height:52px;min-height:52px}
+  .prow-sila .pr-kg .krok3-v b,.prow-sila .pr-powt .krok3-v b{font-size:44px}
+  .prow-sila .pr-uwaga{display:none}
+}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=82"></script>
-<script src="app.js?v=82"></script>
-<script src="ruch.js?v=82"></script>
+<script src="progresja.js?v=83"></script>
+<script src="app.js?v=83"></script>
+<script src="ruch.js?v=83"></script>
 </body>
 </html>

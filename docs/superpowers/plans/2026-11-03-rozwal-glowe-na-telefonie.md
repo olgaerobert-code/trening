@@ -211,7 +211,9 @@ przytrzymanie ✓, klawiatura, wibracja, powiadomienie o końcu przerwy, tryb
 
 - Plik planu nie istniał w repozytorium ani na żadnej gałęzi, a skille
   superpowers, emil-design-eng, apple-design, mobile-native i frontend-design
-  nie były dostępne w sesji. Plan został odtworzony z briefu właściciela
+  nie były zainstalowane w sesji. Skille superpowers pobrano później
+  z publicznego repozytorium (github.com/obra/superpowers) i zastosowano
+  verification-before-completion przy finale; pozostałych nie użyto. Plan został odtworzony z briefu właściciela
   (lista etapów A–G, zasady, część kreatywna, lista rzeczy do sprawdzenia na
   telefonie) i zapisany tutaj przed rozpoczęciem pracy.
 - Etap A: zamiast `.ring .fgc{transition:stroke-dashoffset .95s linear}` nic nie
@@ -248,3 +250,9 @@ przytrzymanie ✓, klawiatura, wibracja, powiadomienie o końcu przerwy, tryb
   prowadzenia sprząta poprzednią instancję, a w oknie rozładowania sztangi
   ✓ i ‹ nie reagują. W `ruch.js` jeden nasłuch puszczenia palca dla wszystkich
   scen i obserwator `body` ograniczony do ekranu prowadzenia.
+- Soczewka „telefon" drugiego przeglądu (osobny commit): podpowiedź pod ✓ stoi
+  obok przycisku i nie łapie dotyku, podpis „następna: …" na karcie Dziś
+  zawija się w dwie linie zamiast łamać „Prowadź dalej", odliczanie w kapsule
+  16 px, a na niskim ekranie (≤ 760 px, Safari z paskami, iPhone SE) ekran
+  serii w trybie prowadzenia ma mniejszą sztangę i steppery, więc mieści się
+  bez przewijania (sprawdzone na 375×667).
