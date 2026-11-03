@@ -1,15 +1,13 @@
 /* Warstwa efektów. Nie dotyka danych: nic nie czyta z localStorage, nic nie
    zapisuje, nie woła funkcji app.js. Tylko patrzy na DOM, który app.js
    buduje, i dokłada ruch:
-   - duch poprzedniego ekranu, który odsuwa się, gdy wjeżdża nowy,
-   - fala po tapnięciu w przycisk,
-   - konfetti przy odhaczeniu serii i przy zaliczeniu sesji,
-   - paralaksa litery dnia i numeru tygodnia przy przewijaniu,
-   - pochylenie karty „Dziś" pod palcem,
+   - duch poprzedniego ekranu, który odsuwa się, gdy wjeżdża nowy (220 ms),
+   - fala po tapnięciu w przycisk (320 ms),
+   - konfetti tylko na karcie zaliczenia sesji,
+   - paralaksa litery dnia i numeru tygodnia przy przewijaniu (tylko transform),
    - dolna kapsuła wypełniająca się w czasie przerwy,
-   - wstęga tygodni przewinięta do bieżącego, bieżnia z tekstem pod nagłówkiem,
-   - karty poniżej ekranu wjeżdżają dopiero, gdy do nich przewiniesz.
-   prefers-reduced-motion wyłącza wszystko. */
+   - wstęga tygodni przewinięta do bieżącego.
+   Nic nie gra w tle bez przerwy. prefers-reduced-motion wyłącza wszystko. */
 (() => {
   const app = document.getElementById('app');
   const pasek = document.getElementById('timer');
@@ -31,7 +29,7 @@
       document.documentElement.style.setProperty('--sy', String(Math.max(0, window.scrollY)));
     });
   };
-  window.addEventListener('scroll', () => { naScroll(); odsloniete(); }, { passive: true });
+  window.addEventListener('scroll', naScroll, { passive: true });
   // pozycja sprzed renderu: app.js może przewinąć do góry, scroll event przyjdzie później
   document.addEventListener('pointerdown', () => { scrollPrzed = window.scrollY; }, { capture: true, passive: true });
   window.addEventListener('hashchange', () => { scrollPrzed = window.scrollY; }, { capture: true });
@@ -67,43 +65,6 @@
       try { strip.scrollTo({ left, behavior: 'smooth' }); } catch { strip.scrollLeft = left; }
     });
   };
-  const bieznia = () => {
-    const top = app.querySelector('.top');
-    if (!top || top.querySelector('.marq')) return;
-    const data = (top.querySelector('.data') || {}).textContent || '';
-    const sub = (top.querySelector('.wsub') || {}).textContent || '';
-    const tekst = [data, sub, 'Plan 12 tygodni'].filter(Boolean).join('  ·  ') + '  ·  ';
-    const m = document.createElement('div');
-    m.className = 'marq';
-    m.setAttribute('aria-hidden', 'true');
-    for (let i = 0; i < 2; i++) { const s = document.createElement('span'); s.textContent = tekst.repeat(3); m.append(s); }
-    const row = top.querySelector('.toprow');
-    if (row) row.after(m); else top.append(m);
-  };
-  const io = 'IntersectionObserver' in window ? new IntersectionObserver(wpisy => {
-    for (const e of wpisy) if (e.isIntersecting) { e.target.classList.add('widac'); io.unobserve(e.target); }
-  }, { rootMargin: '0px 0px -40px 0px' }) : null;
-  // bezpiecznik: gdyby obserwator nie zadziałał, przewinięcie samo odsłania karty
-  let czekaOdslon = false;
-  const odsloniete = () => {
-    if (czekaOdslon) return;
-    czekaOdslon = true;
-    raf(() => {
-      czekaOdslon = false;
-      const h = window.innerHeight;
-      app.querySelectorAll('.ukryty:not(.widac)').forEach(el => { if (el.getBoundingClientRect().top < h) el.classList.add('widac'); });
-    });
-  };
-  const ponizej = () => {
-    if (!io) return;
-    const h = window.innerHeight;
-    app.querySelectorAll('.ex, .card, .lista, details.acc, .note, .stats, .zmiany, .hero, .przsesja').forEach(el => {
-      if (el.classList.contains('ukryty') || el.classList.contains('widac')) return;
-      const r = el.getBoundingClientRect();
-      if (r.top > h + 40) { el.classList.add('ukryty'); io.observe(el); }
-    });
-  };
-
   /* ---------- obserwacja #app: nowy ekran ---------- */
   let kierunekTimer = 0;
   new MutationObserver(muts => {
@@ -125,8 +86,6 @@
       // duch tylko przy zmianie adresu — odświeżenie tego samego ekranu ma być niewidoczne
       if (hash !== ostatniHash) pokazDucha(stare.filter(n => !nowe.includes(n)), kierunek);
       wstega();
-      bieznia();
-      raf(ponizej);
     }
     ostatniHash = hash;
   }).observe(app, { childList: true });
@@ -205,24 +164,6 @@
   };
   const haptyka = ms => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch {} };
 
-  // odhaczenie serii / pozycji jogi: klasa done / zrobione pojawia się na wierszu
-  new MutationObserver(muts => {
-    for (const m of muts) {
-      const t = m.target;
-      if (t.nodeType !== 1) continue;
-      const bylo = m.oldValue || '';
-      const seria = t.classList.contains('setrow') && t.classList.contains('done') && !/\bdone\b/.test(bylo);
-      const joga = t.classList.contains('ex') && t.classList.contains('zrobione') && !/\bzrobione\b/.test(bylo);
-      if (!seria && !joga) continue;
-      const tick = t.querySelector('.tick') || t;
-      const r = tick.getBoundingClientRect();
-      const dc = kolorZ(t, '--dc', '') || kolorZ(t, '--tc', '');
-      const good = kolorZ(document.documentElement, '--good', '#3DDC84');
-      wybuch(r.left + r.width / 2, r.top + r.height / 2, 16, [good, dc || good, '#ffffff'], 6);
-      haptyka(12);
-    }
-  }).observe(app, { attributes: true, subtree: true, attributeFilter: ['class'], attributeOldValue: true });
-
   // zaliczenie sesji: karta .zal wjeżdża poza #app
   new MutationObserver(muts => {
     for (const m of muts) for (const n of m.addedNodes) {
@@ -238,27 +179,6 @@
     }
   }).observe(document.body, { childList: true });
 
-  /* ---------- pochylenie karty „Dziś" pod palcem ---------- */
-  let pochylona = null;
-  const pochyl = (el, x, y) => {
-    const r = el.getBoundingClientRect();
-    const px = (x - r.left) / r.width - .5, py = (y - r.top) / r.height - .5;
-    el.style.setProperty('--ry', (px * 8).toFixed(2) + 'deg');
-    el.style.setProperty('--rx', (-py * 8).toFixed(2) + 'deg');
-  };
-  const prostuj = () => { if (pochylona) { pochylona.style.removeProperty('--rx'); pochylona.style.removeProperty('--ry'); pochylona = null; } };
-  document.addEventListener('pointerdown', e => {
-    const el = e.target.closest && e.target.closest('.tile.hero-s');
-    if (!el) return;
-    pochylona = el; pochyl(el, e.clientX, e.clientY);
-  }, { passive: true });
-  document.addEventListener('pointermove', e => {
-    if (pochylona) { pochyl(pochylona, e.clientX, e.clientY); return; }
-    if (e.pointerType === 'mouse') { const el = e.target.closest && e.target.closest('.tile.hero-s'); if (el) { pochylona = el; pochyl(el, e.clientX, e.clientY); } }
-  }, { passive: true });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(z => document.addEventListener(z, prostuj, { passive: true }));
-  document.addEventListener('pointerout', e => { if (pochylona && !pochylona.contains(e.relatedTarget)) prostuj(); }, { passive: true });
-
   /* ---------- dolna kapsuła: wypełnienie w czasie przerwy ---------- */
   if (pasek) {
     let bylDone = false;
@@ -273,9 +193,7 @@
       const done = !!(ring && ring.classList.contains('done'));
       if (done && !bylDone) {
         pasek.classList.add('koniec');
-        setTimeout(() => pasek.classList.remove('koniec'), 1900);
-        const r = ring.getBoundingClientRect();
-        wybuch(r.left + r.width / 2, r.top + r.height / 2, 24, [kolorZ(document.documentElement, '--good', '#3DDC84'), '#ffffff'], 7);
+        setTimeout(() => pasek.classList.remove('koniec'), 700);
       }
       bylDone = done;
     };
@@ -286,8 +204,9 @@
 
 /* ══ Sztanga 3D ══
    Rysowana na płótnie, bez bibliotek: gryf, kołnierze, tuleje i talerze w kolorach
-   IPF. Obraca się sama, da się ją obrócić palcem, a talerze wjeżdżają na gryf,
-   gdy zmienia się ciężar (suwak „Ciężar na sztandze" albo karta „Dziś").
+   IPF. W spoczynku stoi nieruchomo (jeden kadr); rysuje się tylko wtedy, gdy
+   talerze wjeżdżają na gryf po zmianie ciężaru (suwak „Ciężar na sztandze"
+   albo karta „Dziś") albo gdy palec ją obraca.
    Czyta tylko liczbę z DOM-u, który buduje app.js — niczego nie zapisuje. */
 (() => {
   if (!document.documentElement.dataset.ruch) return;
@@ -310,7 +229,7 @@
   const ease = t => 1 - Math.pow(1 - t, 3);
 
   const sceny = new Set();
-  const io = 'IntersectionObserver' in window ? new IntersectionObserver(ws => { for (const w of ws) { const s = w.target._scena; if (s) s.widoczna = w.isIntersecting; } }) : null;
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(ws => { for (const w of ws) { const s = w.target._scena; if (!s) continue; s.widoczna = w.isIntersecting; if (s.widoczna && s.brudna) uruchom(); } }) : null;
 
   function Scena(host, kolor) {
     const c = document.createElement('canvas');
@@ -323,7 +242,7 @@
     c._scena = s;
     if (io) io.observe(c);
     // obrót palcem: tylko poziomo, pionowe przewijanie zostaje stronie
-    c.addEventListener('pointerdown', e => { s.drag = { x: e.clientX, th: s.dTheta, ruch: 0 }; try { c.setPointerCapture(e.pointerId); } catch {} }, { passive: true });
+    c.addEventListener('pointerdown', e => { s.drag = { x: e.clientX, th: s.dTheta, ruch: 0 }; try { c.setPointerCapture(e.pointerId); } catch {} uruchom(); }, { passive: true });
     c.addEventListener('pointermove', e => { if (!s.drag) return; const dx = e.clientX - s.drag.x; s.drag.ruch = Math.max(s.drag.ruch, Math.abs(dx)); s.dTheta = s.drag.th + dx * 0.012; }, { passive: true });
     const koniec = () => { s.drag = null; };
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(z => c.addEventListener(z, koniec, { passive: true }));
@@ -376,7 +295,7 @@
     }
     s.talerze = s.talerze.filter(t => !(t.won && Math.abs(t.x - t.cel) < 1));
 
-    const th = Math.max(-0.95, Math.min(0.95, s.theta * Math.sin((teraz - s.t0) / 2600) + s.dTheta));
+    const th = Math.max(-0.95, Math.min(0.95, s.theta + s.dTheta));
     const ph = 0.22;
     const sc = (W - 28) / (2 * GRYF.pol + 120);
     const cx = W / 2, cy = H / 2 + 4;
@@ -451,25 +370,24 @@
     return ruch;
   };
 
-  // Rysujemy co drugą klatkę (~30 kl/s) i nie w czasie przewijania strony —
-  // na telefonie liczy się każda klatka, a sztanga i tak obraca się powoli.
-  let petla = false, parzysta = false, przewija = 0;
-  window.addEventListener('scroll', () => { przewija = performance.now(); }, { passive: true });
+  // Pętla chodzi tylko wtedy, gdy coś się rusza: talerze wjeżdżają albo palec
+  // obraca sztangę. W spoczynku zostaje jeden kadr i zero pracy w tle.
+  let petla = false;
   const krok = () => {
-    let zywe = false;
+    let dalej = false;
     const teraz = performance.now();
-    parzysta = !parzysta;
     for (const s of sceny) {
       if (!s.c.isConnected) { sceny.delete(s); continue; }
-      zywe = true;
-      if (!s.widoczna || document.hidden) continue;
-      if (parzysta && !s.drag) continue;
-      if (teraz - przewija < 160 && !s.drag) continue;
-      rysuj(s, teraz);
+      if (document.hidden) { dalej = true; continue; }       // w tle nic nie rysujemy, ale wracamy po odsłonięciu
+      if (!s.widoczna && !s.drag) { s.brudna = true; continue; }
+      const ruch = rysuj(s, teraz);
+      s.brudna = false;
+      if (ruch || s.drag) dalej = true;
     }
-    if (zywe) raf(krok); else petla = false;
+    if (dalej) raf(krok); else petla = false;
   };
   const uruchom = () => { if (!petla) { petla = true; raf(krok); } };
+  // Scena, która przewinęła się na ekran z nierysowanym kadrem, dostaje go raz.
 
   // karta ćwiczenia głównego: liczba z suwaka „Ciężar na sztandze" (na żywo) albo z karty
   const kgKarty = card => {
@@ -511,5 +429,6 @@
   };
   new MutationObserver(muts => { if (muts.some(m => m.addedNodes.length)) raf(przejrzyj); }).observe(app, { childList: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) uruchom(); });
+  window.addEventListener('resize', () => { for (const s of sceny) s.brudna = true; uruchom(); }, { passive: true });
   przejrzyj();
 })();
