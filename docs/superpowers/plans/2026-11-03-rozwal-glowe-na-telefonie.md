@@ -240,3 +240,11 @@ przytrzymanie ✓, klawiatura, wibracja, powiadomienie o końcu przerwy, tryb
   każdej zmianie ciężaru (dziesiątki razy na trening), rekord jako cyfra na cały
   ekran (wymaga liczenia maksa z serii, czego README zakazuje), nastrój deloadu
   (zmiana palety).
+- Po niezależnym przeglądzie etapów B–E (osobny commit): Enter/Escape w polu
+  liczbowym nie idą do skrótów ekranu prowadzenia, „+30 s" po „Czas!" wznawia
+  odliczanie, flaga po przytrzymaniu wygasa, anulowanie pola przywraca dokładnie
+  poprzednią zawartość, ciężar z nowych dróg zapisu nie schodzi poniżej 2,5 kg
+  (jak suwak), „Potem: …" odświeża się po zmianie ciężaru, ponowne otwarcie
+  prowadzenia sprząta poprzednią instancję, a w oknie rozładowania sztangi
+  ✓ i ‹ nie reagują. W `ruch.js` jeden nasłuch puszczenia palca dla wszystkich
+  scen i obserwator `body` ograniczony do ekranu prowadzenia.
