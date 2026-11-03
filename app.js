@@ -4143,9 +4143,11 @@ function prowadzSesje(day, w) {
     tresc.append(el('div', 'pr-nast', 'Następna: ' + opisKroku(nast)));
     tlo.append(tresc);
     const dol = el('div', 'prdol');
+    const przyc = el('div', 'prprzyc');
     const ok = el('button', 'prok', 'Dalej →');
     ok.onclick = dalej;
-    dol.append(ok);
+    przyc.append(ok);
+    dol.append(przyc);
     tlo.append(dol);
     const odswiez = () => {
       if (tId) { odl.textContent = fmtS(tLeft); return; }
@@ -4329,7 +4331,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=77`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=78`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4382,7 +4384,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=77')
+fetch('plan.json?v=78')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
