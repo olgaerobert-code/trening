@@ -55,7 +55,7 @@
     duchTimer = setTimeout(() => { if (duch) duch.innerHTML = ''; }, 420);
   };
 
-  /* ---------- wstęga tygodni, bieżnia, karty poniżej ekranu ---------- */
+  /* ---------- wstęga tygodni przewinięta do bieżącego ---------- */
   const wstega = () => {
     const strip = app.querySelector('.wstrip');
     const now = strip && strip.querySelector('.wp.now');
@@ -242,10 +242,12 @@
     c._scena = s;
     if (io) io.observe(c);
     // obrót palcem: tylko poziomo, pionowe przewijanie zostaje stronie
-    c.addEventListener('pointerdown', e => { s.drag = { x: e.clientX, th: s.dTheta, ruch: 0 }; try { c.setPointerCapture(e.pointerId); } catch {} uruchom(); }, { passive: true });
-    c.addEventListener('pointermove', e => { if (!s.drag) return; const dx = e.clientX - s.drag.x; s.drag.ruch = Math.max(s.drag.ruch, Math.abs(dx)); s.dTheta = s.drag.th + dx * 0.012; }, { passive: true });
+    c.addEventListener('pointerdown', e => { s.drag = { x: e.clientX, th: s.dTheta, ruch: 0, t: performance.now() }; try { c.setPointerCapture(e.pointerId); } catch {} uruchom(); }, { passive: true });
+    c.addEventListener('pointermove', e => { if (!s.drag) return; const dx = e.clientX - s.drag.x; s.drag.ruch = Math.max(s.drag.ruch, Math.abs(dx)); s.dTheta = s.drag.th + dx * 0.012; s.drag.t = performance.now(); }, { passive: true });
     const koniec = () => { s.drag = null; };
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(z => c.addEventListener(z, koniec, { passive: true }));
+    // Puszczenie palca poza płótnem (gdy przechwycenie wskaźnika się nie udało) też kończy obrót.
+    ['pointerup', 'pointercancel'].forEach(z => document.addEventListener(z, koniec, { passive: true }));
     // przeciągnięcie po sztandze na karcie „Dziś" nie ma otwierać sesji
     c.addEventListener('click', e => { if (s.ostatniRuch > 8) { e.stopPropagation(); e.preventDefault(); } }, true);
     c.addEventListener('pointerup', e => { s.ostatniRuch = s.drag ? s.drag.ruch : 0; }, { capture: true, passive: true });
@@ -274,6 +276,7 @@
     s.talerze = wynik;
     const naStrone = nowe.map(p => String(p[0]).replace('.', ',')).join(' · ');
     s.opis.textContent = nowe.length ? `na stronę: ${naStrone} kg` : kg > 0 ? 'sam gryf 20 kg' : '';
+    uruchom();                                   // talerze wjeżdżają — pętla rusza na czas przejazdu
   };
 
   const rysuj = (s, teraz) => {
@@ -378,16 +381,19 @@
     const teraz = performance.now();
     for (const s of sceny) {
       if (!s.c.isConnected) { sceny.delete(s); continue; }
-      if (document.hidden) { dalej = true; continue; }       // w tle nic nie rysujemy, ale wracamy po odsłonięciu
+      // Karta w tle: pętla gaśnie, kadr do narysowania po powrocie (visibilitychange woła uruchom()).
+      if (document.hidden) { s.brudna = true; continue; }
       if (!s.widoczna && !s.drag) { s.brudna = true; continue; }
+      // Palec, który nie ruszył się od 1,5 s, nie trzyma już sztangi (zgubione pointerup).
+      if (s.drag && teraz - (s.drag.t || teraz) > 1500) s.drag = null;
       const ruch = rysuj(s, teraz);
+      if (ruch === undefined) { s.brudna = true; continue; }   // płótno bez wymiarów (zwinięta karta) — kadr czeka
       s.brudna = false;
       if (ruch || s.drag) dalej = true;
     }
     if (dalej) raf(krok); else petla = false;
   };
   const uruchom = () => { if (!petla) { petla = true; raf(krok); } };
-  // Scena, która przewinęła się na ekran z nierysowanym kadrem, dostaje go raz.
 
   // karta ćwiczenia głównego: liczba z suwaka „Ciężar na sztandze" (na żywo) albo z karty
   const kgKarty = card => {
