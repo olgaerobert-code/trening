@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, powiadomPrzerwa: true, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
+  mob: {}, rozc: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, powiadomPrzerwa: true, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
 };
 
 /* ---------- Supabase ---------- */
@@ -204,6 +204,10 @@ const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
 const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
+// Wtorek i czwartek: odhaczone pozycje rozciągania, { "3|wt": { r1: 1 } }. Ten sam
+// kanał co niedziela — paczka stanu.
+const LS_ROZC = 'trening.rozc.v1';
+const saveRozc = () => { localStorage.setItem(LS_ROZC, JSON.stringify(state.rozc)); pushStan(); };
 const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); pushStan(); };
 // Filmy do pozycji jogi wybrane przez użytkownika: { y3: 'dQw4w9WgXcQ' }.
 const LS_FILMY = 'trening.filmy.v1';
@@ -223,6 +227,7 @@ function loadStores() {
   state.kgw = readJSON(LS_KGW, {});
   state.moves = readJSON(LS_MOV, []);
   state.mob = readJSON(LS_MOB, {});
+  state.rozc = readJSON(LS_ROZC, {});
   state.rekal = readJSON(LS_REK, {});
   state.treningi = readJSON(LS_TRN, {});
   state.pominiete = readJSON(LS_POM, {});
@@ -377,6 +382,10 @@ function homeView() {
     : POZYCJA_DNIA[heroKey] <= pozycjaDzis() ? 'Do wpisania'
     : 'Następny · ' + nast.dzien;
   body.append(kartaDzis(heroKey, w, etykieta));
+  // Wtorek i czwartek: rozciąganie zaraz pod kartą, dopóki nie jest odhaczone.
+  const rozcTeraz = rozcDzisiaj();
+  const rozcNaGorze = rozcTeraz && !rozcKomplet(w, rozcTeraz.k);
+  if (rozcNaGorze) body.append(kafelRozc(w));
 
   const ostatni = kartaOstatniego();
   if (ostatni) body.append(ostatni);
@@ -400,6 +409,8 @@ function homeView() {
   const lista = el('div', 'lista');
   for (const k of ['A', 'B', 'C', 'D'].filter(x => x !== heroKey)) lista.append(tile(daneSesji(k, w)));
   body.append(lista);
+  // Poza listą plakatów: dwanaście minut w domu to niski wiersz, nie pół ekranu.
+  if (rozcPlan() && !rozcNaGorze) body.append(kafelRozc(w));
 
   body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
   frag.append(body);
@@ -484,7 +495,13 @@ function ciezaryIMaksy(body) {
 
 }
 
-const MAIN_OF = { A: 'bench', B: null, C: 'front' };
+// Boje dnia w kolejności z planu. Cykl 1 i 2 trzymały przysiad i ciąg w piątek,
+// cykl 3 daje każdemu bojowi osobny dzień — dlatego bierzemy to z planu, a nie z tabelki.
+function bojeDnia(k) {
+  const items = (state.plan.days[k] || { items: [] }).items;
+  return items.map(it => Object.keys(REF_BOJU).find(L => it.load && it.load.ref === REF_BOJU[L])).filter(Boolean);
+}
+const glownyBoj = k => bojeDnia(k)[0] || null;
 
 function daneSesji(k, w) {
   const p = state.plan;
@@ -544,7 +561,7 @@ function kartaDzis(k, w, etykieta) {
   tyt.append(el('span', 'hk', k), el('span', 'tt', dane.title));
   b.append(tyt);
 
-  const lift = MAIN_OF[k];
+  const lift = glownyBoj(k);
   if (lift) {
     const it = (pozycjaBoju(lift) || {}).it;
     const pl = it ? plannedOf(it, w, k) : null;
@@ -1045,19 +1062,22 @@ function warmupAcc(key, wArg) {
     b.append(wrap);
   };
 
-  const full = key === 'A' ? ['bench'] : key === 'C' ? ['front'] : [];
+  // Pierwszy bój dnia dostaje pełną drabinkę. Drugi w tej samej sesji (ciąg po
+  // przysiadzie w cyklu 1 i 2) idzie skrótem — nogi są już rozgrzane.
+  const boje = bojeDnia(key);
+  const full = boje.slice(0, 1), krotkie = boje.slice(1);
   if (full.length) {
     mkTable(['Serie dojściowe', ...p.warmup.ramp.steps], full.map(lift => {
       const kg = kgOf(lift, w);
       return [names[lift], ...(kg == null ? ['—', '—', '—', '—', '—'] : ramp(kg).map(v => fmt(v) + ' kg'))];
     }));
   }
-  if (key === 'C') {
-    const kg = kgOf('dl', w);
-    mkTable(['Przed ciągiem', '50% × 5', '75% × 3', 'Ciężar roboczy'],
-      [[names.dl, ...(kg == null ? ['—', '—', '—'] : [fmt(floor25(kg * 0.5)) + ' kg', fmt(floor25(kg * 0.75)) + ' kg', fmt(kg) + ' kg'])]]);
+  for (const lift of krotkie) {
+    const kg = kgOf(lift, w);
+    mkTable([lift === 'dl' ? 'Przed ciągiem' : 'Przed bojem', '50% × 5', '75% × 3', 'Ciężar roboczy'],
+      [[names[lift], ...(kg == null ? ['—', '—', '—'] : [fmt(floor25(kg * 0.5)) + ' kg', fmt(floor25(kg * 0.75)) + ' kg', fmt(kg) + ' kg'])]]);
   }
-  if (full.length || key === 'C') {
+  if (boje.length) {
     p.warmup.notes.forEach(n => { const x = el('p', null, n); x.style.fontSize = '12.5px'; x.style.marginTop = '9px'; b.append(x); });
   }
   acc.append(b);
@@ -1255,25 +1275,36 @@ function mobilityView(wArg) {
   return frag;
 }
 
-function mobCard(it, w) {
+// Kontekst odhaczania karty: joga (niedziela) albo rozciąganie (wtorek, czwartek).
+// Karta i tryb prowadzenia są wspólne, różni je tylko to, gdzie zapisują ✓.
+const ctxJogi = w => ({
+  jest: id => mobJest(w, id),
+  toggle: id => mobToggle(w, id),
+  po: nowe => {
+    if (nowe) startPrzyPierwszejSerii('D', w);
+    if (nowe && sesjaKompletna('D', w)) setTimeout(() => pokazZaliczenie('D', w), 450);
+    odswiezPasekMob(w);
+  },
+});
+
+function mobCard(it, w, ctx = ctxJogi(w)) {
   const box = el('div', 'ex mob');
-  const zrobione = mobJest(w, it.id);
+  const zrobione = ctx.jest(it.id);
   if (zrobione) box.classList.add('zrobione');
 
   const h = el('div', 'exhead');
   const tick = el('button', 'tick', zrobione ? '✓' : '');
   tick.setAttribute('aria-label', zrobione ? 'Cofnij' : 'Odhacz jako zrobione');
   tick.onclick = () => {
-    mobToggle(w, it.id);
+    ctx.toggle(it.id);
     // Sama pozycja i pasek postępu — bez przebudowy całego ekranu, żeby lista
     // nie skakała pod palcem przy odklikiwaniu.
-    const nowe = mobJest(w, it.id);
+    const nowe = ctx.jest(it.id);
     box.classList.toggle('zrobione', nowe);
-    if (nowe) { blysk(tick); startPrzyPierwszejSerii('D', w); }
-    if (nowe && sesjaKompletna('D', w)) setTimeout(() => pokazZaliczenie('D', w), 450);
+    if (nowe) blysk(tick);
     tick.textContent = nowe ? '✓' : '';
     tick.setAttribute('aria-label', nowe ? 'Cofnij' : 'Odhacz jako zrobione');
-    odswiezPasekMob(w);
+    ctx.po(nowe);
   };
   h.append(tick);
   h.append(el('div', 'exname', it.name));
@@ -1285,7 +1316,7 @@ function mobCard(it, w) {
   const metrics = el('div', 'metrics');
   metrics.append(metric('Dawka', it.dose, 'mv txt'));
   if (it.sec) {
-    const b = el('button', 'timebtn', '⏱ ' + (it.sec >= 60 ? it.sec / 60 + ' min' : it.sec + ' s'));
+    const b = el('button', 'timebtn', '⏱ ' + (it.sec >= 60 && it.sec % 60 === 0 ? it.sec / 60 + ' min' : it.sec + ' s'));
     b.onclick = () => startTimer(it.sec);
     metrics.append(b);
   }
@@ -1318,7 +1349,7 @@ function mobCard(it, w) {
   }
   if (it.note) {
     const n = el('div', 'posztange');
-    n.append(el('span', null, 'Pod sztangę'), el('p', null, it.note));
+    n.append(el('span', null, ctx.etykietaNote || 'Pod sztangę'), el('p', null, it.note));
     opis.append(n);
   }
   opis.hidden = true;
@@ -1331,14 +1362,15 @@ function mobCard(it, w) {
   return box;
 }
 
-function odswiezPasekMob(w) {
+function odswiezPasekMob(w) { odswiezPasek(mobDone(w), mobWidoczne().length); }
+function odswiezPasek(done, total) {
   const sp = $('.sprog');
   if (!sp) return;
-  const total = mobWidoczne().length, done = mobDone(w);
   const proc = total ? done / total * 100 : 0;
   $('.ile', sp).textContent = `${done}/${total} pozycji`;
   $('.fill', sp).style.width = proc + '%';
   $('.proc', sp).textContent = Math.round(proc) + '%';
+  sp.classList.toggle('komplet', total > 0 && done >= total);
 }
 
 // Kasowanie zawsze przez potwierdzenie i tylko w obrębie jednego tygodnia —
@@ -1355,6 +1387,108 @@ function mobReset(w) {
   };
   box.append(b);
   return box;
+}
+
+/* ---------- wtorek i czwartek: rozciąganie ----------
+   Dwanaście minut w domu, te same pozycje oba dni. Nie wchodzi do pierścieni,
+   serii tygodni ani werdyktów — to dodatek do trzech dni na siłowni, nie
+   czwarta sesja. Odhaczenia per tydzień i dzień: { "3|wt": { r1: 1 } }. */
+const rozcPlan = () => (state.plan && state.plan.rozciaganie) || null;
+const rozcKlucz = (w, d) => w + '|' + d;
+const rozcJest = (w, d, id) => !!(state.rozc[rozcKlucz(w, d)] || {})[id];
+function rozcDone(w, d) {
+  const r = rozcPlan(), t = state.rozc[rozcKlucz(w, d)] || {};
+  return r ? r.items.filter(i => t[i.id]).length : 0;
+}
+const rozcKomplet = (w, d) => !!rozcPlan() && rozcDone(w, d) >= rozcPlan().items.length;
+function rozcToggle(w, d, id) {
+  const k = rozcKlucz(w, d), t = state.rozc[k] || (state.rozc[k] = {});
+  if (t[id]) delete t[id]; else t[id] = 1;
+  if (!Object.keys(t).length) delete state.rozc[k];
+  saveRozc();
+}
+const pozDnia = getDay => (getDay + 6) % 7;      // poniedziałek 0 … niedziela 6, jak POZYCJA_DNIA
+// Dzień rozciągania, o który teraz chodzi: dzisiejszy, potem najbliższy w tym
+// tygodniu, a pod koniec tygodnia ostatni — do odhaczenia po fakcie.
+function rozcNaDzis() {
+  const r = rozcPlan(), dzis = pozycjaDzis();
+  return r.dni.find(x => pozDnia(x.dzien) === dzis) || r.dni.find(x => pozDnia(x.dzien) > dzis) || r.dni[r.dni.length - 1];
+}
+const rozcDzisiaj = () => { const r = rozcPlan(); return r ? r.dni.find(x => pozDnia(x.dzien) === pozycjaDzis()) || null : null; };
+
+function kafelRozc(w) {
+  const r = rozcPlan();
+  if (!r) return null;
+  const done = r.dni.reduce((a, x) => a + rozcDone(w, x.k), 0);
+  const stan = done
+    ? r.dni.map(x => x.skrot + (rozcKomplet(w, x.k) ? ' ✓' : rozcDone(w, x.k) ? ` ${rozcDone(w, x.k)}/${r.items.length}` : ' —')).join(' · ')
+    : r.dni.map(x => x.skrot).join(' i ');
+  const t = tile({ k: r.key, color: DAY_COLOR.D, title: r.title, sub: `${stan} · ~${r.minutes} min w domu`,
+    href: '#/rozciaganie/' + rozcNaDzis().k, progress: { done, total: r.items.length * r.dni.length } });
+  t.classList.add('rozc');
+  return t;
+}
+
+function rozcView(k, wArg) {
+  const r = rozcPlan(), w = wArg || state.week;
+  const frag = document.createDocumentFragment();
+  frag.append(backLink());
+  if (!r) { frag.append(noteBox('Brak rozciągania w tym planie.', ' Bieżący cykl go nie przewiduje.')); return frag; }
+  const dz = r.dni.find(x => x.k === k) || rozcNaDzis();
+
+  const body = el('div');
+  body.style.setProperty('--dc', DAY_COLOR.D);
+  body.append(head(r.title, `${dz.nazwa} · ~${r.minutes} min · w domu`, true, r.key));
+  body.append(wyborTygodnia(w, x => `#/rozciaganie/${dz.k}/${x}`));
+
+  // Wtorek albo czwartek — te same pozycje, osobne odhaczenia.
+  const sw = el('div', 'mobsw');
+  for (const x of r.dni) {
+    const b = el('button', 'mobopt' + (x.k === dz.k ? ' on' : ''), x.nazwa + (rozcKomplet(w, x.k) ? ' ✓' : ''));
+    b.onclick = () => go(`#/rozciaganie/${x.k}` + (w !== state.week ? '/' + w : ''));
+    sw.append(b);
+  }
+  body.append(sw);
+
+  const done = rozcDone(w, dz.k), total = r.items.length;
+  const sp = el('div', 'sprog' + (done >= total ? ' komplet' : ''));
+  sp.append(el('span', 'ile', `${done}/${total} pozycji`));
+  const bar = el('div', 'bar'), fill = el('div', 'fill');
+  fill.style.width = (done / total * 100) + '%';
+  bar.append(fill); sp.append(bar);
+  sp.append(el('span', 'proc', Math.round(done / total * 100) + '%'));
+  body.append(sp);
+
+  const ctx = {
+    jest: id => rozcJest(w, dz.k, id),
+    toggle: id => rozcToggle(w, dz.k, id),
+    po: () => odswiezPasek(rozcDone(w, dz.k), total),
+    etykietaNote: 'Po co',
+  };
+  const prow = el('button', 'prowstart');
+  const nastepna = r.items.find(i => !ctx.jest(i.id));
+  prow.append(el('span', 'pico'), el('span', 'pt', done && nastepna ? 'Prowadź dalej' : 'Prowadź mnie'),
+    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z minutnikiem') : 'wszystko odhaczone — przejdź jeszcze raz'));
+  prow.onclick = () => prowadzPozycje({ lista: r.items, jest: ctx.jest, toggle: ctx.toggle, kolor: DAY_COLOR.D, blok: () => `${r.title} · ${dz.nazwa}` });
+  body.append(prow);
+
+  const wstep = noteBox('Po co to jest:', ' ' + r.intro, 'zwiniety');
+  const wiecej = el('button', 'wiecej', 'więcej ▾');
+  wiecej.onclick = () => { const z = wstep.classList.toggle('zwiniety'); wiecej.textContent = z ? 'więcej ▾' : 'mniej ▴'; };
+  const wstepBox = el('div', 'wstep');
+  wstepBox.append(wstep, wiecej);
+  body.append(wstepBox);
+
+  const list = el('div', klasaWejscia());
+  r.items.forEach(it => list.append(mobCard(it, w, ctx)));
+  body.append(list);
+
+  const zas = el('div', 'card');
+  zas.append(el('h3', null, 'Jak to robić'));
+  r.rules.forEach(l => zas.append(el('p', null, l)));
+  body.append(zas);
+  frag.append(body);
+  return frag;
 }
 
 /* ---------- raport bloków i rekalibracja ---------- */
@@ -1989,6 +2123,13 @@ function przeniesTydzien(from, to, opcje = {}) {
 
   if ((!day || day === 'D') && state.mob[from]) { state.mob[to] = state.mob[from]; delete state.mob[from]; }
   saveMob();
+  // Rozciąganie jedzie tylko z całym tygodniem — nie należy do żadnego z dni A–D.
+  if (!day) {
+    for (const k of Object.keys(state.rozc).filter(k => +k.split('|')[0] === from)) {
+      state.rozc[to + '|' + k.split('|')[1]] = state.rozc[k]; delete state.rozc[k];
+    }
+    saveRozc();
+  }
 
   for (const k of kluczeTygodnia(state.czasy, from, day)) {
     const [, d, n] = k.split('|');
@@ -2153,7 +2294,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta, pominiete: state.pominiete });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rozc: state.rozc, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta, pominiete: state.pominiete });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -2192,6 +2333,7 @@ async function pullStan() {
     // Brak pola `mob` w paczce znaczy „starsza wersja aplikacji", a nie „nic nie
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
+    if (d.rozc && inny(d.rozc, state.rozc)) { state.rozc = d.rozc; localStorage.setItem(LS_ROZC, JSON.stringify(state.rozc)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
     // Czasy serii: każde urządzenie dopisuje swoje, a przy tej samej serii
     // wygrywa to, co jest tutaj — tu ją odhaczono.
@@ -3171,7 +3313,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy , pominiete: state.pominiete };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rozc: state.rozc, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy , pominiete: state.pominiete };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -3193,6 +3335,7 @@ function settingsView() {
       if (d.acc) { state.acc = d.acc; saveAcc(); }
       if (d.kgw) { state.kgw = d.kgw; saveKgw(); }
       if (d.mob) { state.mob = d.mob; saveMob(); }
+      if (d.rozc) { state.rozc = d.rozc; saveRozc(); }
       if (d.rekal) { state.rekal = d.rekal; saveRekal(); }
       if (Array.isArray(d.moves)) { state.moves = d.moves; saveMoves(); }
       if (d.treningi) { state.treningi = d.treningi; saveTreningi(); }
@@ -3282,7 +3425,8 @@ function raportCyklu() {
   for (let w = 1; w <= 12; w++) {
     const dni = ['A', 'B', 'C'].filter(d => postepDnia(w, d).done);
     const mob = mobDone(w);
-    if (!dni.length && !mob) continue;
+    const rz = rozcPlan() ? rozcPlan().dni.map(x => [x, rozcDone(w, x.k)]).filter(([, n]) => n) : [];
+    if (!dni.length && !mob && !rz.length) continue;
     L.push('');
     L.push(`== Tydzień ${w}${isDeload(w) ? ' (deload)' : ''} ==`);
     const oceny = LIFTS.map(x => `${x.short}: ${SLOWNIK_OCEN[judgeWeek(x.key, w)] || '—'}`).join(' · ');
@@ -3310,6 +3454,7 @@ function raportCyklu() {
       }
     }
     if (mob) L.push(`D Joga — ${mob}/${mobItems().length} pozycji`);
+    if (rz.length) L.push('Rozciąganie — ' + rz.map(([x, n]) => `${x.skrot} ${n}/${rozcPlan().items.length}`).join(', '));
   }
   return L.join('\n');
 }
@@ -3402,7 +3547,9 @@ function startPrzyPierwszejSerii(day, w) {
    ruch idzie tylko w pusty cel. */
 const LS_MIG = 'trening.migracja.v1';
 function migracjaPoniedzialku(final) {
-  if (!state.plan || !(state.plan.cykl >= 2)) return false;
+  // Tylko cykl 2. Urządzenie, które nigdy jej nie wykonało (świeża instalacja
+  // w cyklu 3), przestawiłoby inaczej poniedziałki nowego cyklu.
+  if (!state.plan || state.plan.cykl !== 2) return false;
   const mig = readJSON(LS_MIG, {});
   if (mig.pn2na3) return false;
   const znane = new Set(state.moves.map(m => m.id));
@@ -3634,7 +3781,7 @@ function statySesji(day, w) {
   }
   const t = tonazDnia(w, day), pg = postepDnia(w, day);
   let glowny = `${state.plan.days[day].items.length} ćwiczeń`;
-  const lift = MAIN_OF[day];
+  const lift = glownyBoj(day);
   if (lift) {
     const it = (pozycjaBoju(lift) || {}).it;
     const rows = logGet(w, day, it.n);
@@ -3855,13 +4002,30 @@ function prowadzJoge(w) {
   if (!document.body || !document.body.appendChild) return;
   const lista = mobWidoczne();
   if (!lista.length) return;
-  let i = Math.max(0, lista.findIndex(x => !mobJest(w, x.id)));
-  const t0 = trening(w, 'D');
-  if (!t0) rozpocznijTrening('D', w);            // stoper rusza razem z pierwszą pozycją
+  if (!trening(w, 'D')) rozpocznijTrening('D', w);   // stoper rusza razem z pierwszą pozycją
+  prowadzPozycje({
+    lista, kolor: DAY_COLOR.D,
+    jest: id => mobJest(w, id),
+    toggle: id => mobToggle(w, id),
+    blok: it => (state.plan.mobility.blocks.find(b => b.items.some(x => x.id === it.id)) || {}).name,
+    // Cała joga przerobiona: stoper staje, a karta zaliczenia pokazuje czas.
+    naKoniec: () => {
+      if (!sesjaKompletna('D', w)) return;
+      const t = trening(w, 'D');
+      setTimeout(() => (t && t.start && !t.end ? zakonczTrening('D', w) : pokazZaliczenie('D', w)), 300);
+    },
+  });
+}
+
+/* Wspólny ekran prowadzenia pozycji: joga w niedzielę, rozciąganie we wtorek
+   i czwartek. Zna tylko listę i to, jak odhaczyć pozycję — resztę daje wołający. */
+function prowadzPozycje({ lista, jest, toggle, blok, kolor, naKoniec }) {
+  if (!document.body || !document.body.appendChild || !lista.length) return;
+  let i = Math.max(0, lista.findIndex(x => !jest(x.id)));
   keepAwake(true);
 
   const tlo = el('div', 'prow');
-  tlo.style.setProperty('--dc', DAY_COLOR.D);
+  tlo.style.setProperty('--dc', kolor);
   let tik = null;
   const zamknij = () => {
     clearInterval(tik);
@@ -3869,15 +4033,10 @@ function prowadzJoge(w) {
     tlo.remove();
     document.removeEventListener('keydown', klaw);
     render();
-    // Cała joga przerobiona: stoper staje, a karta zaliczenia pokazuje czas.
-    if (sesjaKompletna('D', w)) {
-      const t = trening(w, 'D');
-      setTimeout(() => (t && t.start && !t.end ? zakonczTrening('D', w) : pokazZaliczenie('D', w)), 300);
-    }
+    if (naKoniec) naKoniec();
   };
   const klaw = e => { if (e.key === 'Escape') zamknij(); if (e.key === 'ArrowRight') dalej(); if (e.key === 'ArrowLeft') wstecz(); };
   document.addEventListener('keydown', klaw);
-  const blokPozycji = it => state.plan.mobility.blocks.find(b => b.items.some(x => x.id === it.id));
 
   const rysuj = () => {
     clearInterval(tik);
@@ -3886,7 +4045,7 @@ function prowadzJoge(w) {
     tlo.replaceChildren();
     const gora = el('div', 'prgora');
     const kreski = el('div', 'prkreski');
-    lista.forEach((x, j) => kreski.append(el('i', (mobJest(w, x.id) ? 'z' : '') + (j === i ? ' teraz' : ''))));
+    lista.forEach((x, j) => kreski.append(el('i', (jest(x.id) ? 'z' : '') + (j === i ? ' teraz' : ''))));
     const x = el('button', 'prx', '✕');
     x.setAttribute('aria-label', 'Zamknij tryb prowadzenia');
     x.onclick = zamknij;
@@ -3894,8 +4053,8 @@ function prowadzJoge(w) {
     tlo.append(gora);
 
     const tresc = el('div', 'prtresc');
-    const b = blokPozycji(it);
-    if (b) tresc.append(el('div', 'preye', b.name));
+    const b = blok && blok(it);
+    if (b) tresc.append(el('div', 'preye', b));
     tresc.append(el('h2', 'prname', it.name));
     tresc.append(el('div', 'prdawka', it.dose));
     const vid = filmPozycji(it);
@@ -3940,7 +4099,7 @@ function prowadzJoge(w) {
     wst.setAttribute('aria-label', 'Poprzednia pozycja');
     wst.disabled = i === 0;
     wst.onclick = wstecz;
-    const ok = el('button', 'prok', mobJest(w, it.id) ? (nast ? 'Dalej →' : 'Zakończ') : (nast ? 'Zrobione → dalej' : 'Zrobione — koniec'));
+    const ok = el('button', 'prok', jest(it.id) ? (nast ? 'Dalej →' : 'Zakończ') : (nast ? 'Zrobione → dalej' : 'Zrobione — koniec'));
     ok.onclick = dalej;
     przyc.append(wst, ok);
     dol.append(przyc);
@@ -3949,7 +4108,7 @@ function prowadzJoge(w) {
   };
   const dalej = () => {
     const it = lista[i];
-    if (!mobJest(w, it.id)) mobToggle(w, it.id);
+    if (!jest(it.id)) toggle(it.id);
     if (navigator.vibrate) navigator.vibrate(30);
     if (i < lista.length - 1) { i++; rysuj(); } else zamknij();
   };
@@ -4299,9 +4458,10 @@ function render() {
   const v = state.view;
   const onDay = v.startsWith('#/d/');
   const onMob = v === '#/mobilnosc' || v.startsWith('#/mobilnosc/');
-  const naGlownym = !onDay && !onMob && !['#/postep', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'].includes(v);
+  const onRozc = v === '#/rozciaganie' || v.startsWith('#/rozciaganie/');
+  const naGlownym = !onDay && !onMob && !onRozc && !['#/postep', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'].includes(v);
   if (naGlownym) app.append(weekBar());
-  document.body.classList.toggle('w-sesji', onDay || onMob);
+  document.body.classList.toggle('w-sesji', onDay || onMob || onRozc);
 
   // "#/d/A" albo "#/d/A/3" — druga forma zapisuje do wskazanego tygodnia,
   // nie ruszając tygodnia bieżącego.
@@ -4311,13 +4471,15 @@ function render() {
     if (prowadzPoRenderze && prowadzPoRenderze.day === k) { const p = prowadzPoRenderze; prowadzPoRenderze = null; setTimeout(() => prowadzSesje(p.day, p.w), 0); }
   }
   else if (onMob) app.append(mobilityView(tydzienZAdresu(v.split('/')[2])));
+  // "#/rozciaganie/wt" albo "#/rozciaganie/cz/3"
+  else if (onRozc) { const [, , k, t] = v.split('/'); app.append(rozcView(k, tydzienZAdresu(t))); }
   else if (v === '#/postep' || v === '#/tabela' || v === '#/raport') app.append(postepView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
   else if (v === '#/ustawienia') app.append(settingsView());
   else app.append(homeView());
 
-  keepAwake(onDay || onMob);
+  keepAwake(onDay || onMob || onRozc);
   renderTimer();
   if (v !== ostatniWidok) odliczLiczby(app);
   ostatniWidok = v;
@@ -4331,7 +4493,7 @@ window.addEventListener('hashchange', () => { state.view = location.hash || '#/'
    prosto do pamięci, bez wysyłki — drugie urządzenie mogło już zacząć nowy cykl,
    a pusta paczka nadpisałaby jego stan. */
 const LS_CYKL = 'trening.cykl.v1', LS_ARCH = 'trening.archiwum.v1';
-const ZBIORY_CYKLU = { log: [LS_LOG, {}], kgw: [LS_KGW, {}], mob: [LS_MOB, {}], rekal: [LS_REK, {}], adjust: [LS_ADJ, {}],
+const ZBIORY_CYKLU = { log: [LS_LOG, {}], kgw: [LS_KGW, {}], mob: [LS_MOB, {}], rozc: [LS_ROZC, {}], rekal: [LS_REK, {}], adjust: [LS_ADJ, {}],
   treningi: [LS_TRN, {}], czasy: [LS_CZASY, {}], moves: [LS_MOV, []], queue: [LS_Q, []], pominiete: [LS_POM, {}] };
 function przejdzNaCykl(p) {
   const nowy = p.cykl || 1;
@@ -4350,8 +4512,19 @@ function przejdzNaCykl(p) {
     state[k] = Array.isArray(pusty) ? [] : {};
     localStorage.setItem(ls, JSON.stringify(state[k]));
   }
+  // Maksy: z planu albo — gdy plan tak mówi — te, z którymi kończy się poprzedni
+  // cykl. Samoregulacja i rekalibracje wiedzą o sztandze więcej niż liczba
+  // wpisana w plan tygodnie wcześniej.
+  const poprz = state.e1rm || {};
   state.week = 1;
   state.e1rm = { ...p.e1rm };
+  for (const L of p.e1rmZPoprzedniego || []) if (poprz[L] > 0) state.e1rm[L] = poprz[L];
+  // Cykl zaczęty w środku tygodnia: sesje tygodnia 1, których dzień już minął,
+  // są pominięte — nie wiszą jako „do wpisania" i nie psują serii tygodni.
+  // Pierwsza zapisana seria i tak odwołuje pominięcie. Bez wysyłki, jak wyżej.
+  const dzis = pozycjaDzis();
+  for (const k of ['A', 'B', 'C']) if (POZYCJA_DNIA[k] < dzis) state.pominiete[kluczPominiecia(k, 1)] = true;
+  localStorage.setItem(LS_POM, JSON.stringify(state.pominiete));
   zapiszLokalnie();
   localStorage.setItem(LS_CYKL, String(nowy));
   return true;
@@ -4376,7 +4549,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=83`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=84`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4429,7 +4602,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=83')
+fetch('plan.json?v=84')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

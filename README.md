@@ -43,7 +43,7 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   identyfikatory, więc drugie urządzenie ich nie powtarza; pełny cel blokuje ruch.
   Ruch jednego dnia jest zapisany polami `w`/`na`/`day` zamiast `from`/`to`, żeby
   starsza wersja aplikacji nie wykonała go jako przeniesienia całego tygodnia.
-  Po zakończeniu cyklu ten blok można usunąć
+  Działa wyłącznie w cyklu 2 — świeża instalacja w cyklu 3 jej nie wykona
 - **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
   (kolory wg standardu IPF)
 - **Postęp** — wykres trzech bojów przez 12 tygodni (jedna oś, krzyżyk i dymek pod
@@ -134,11 +134,35 @@ się bezpiecznych marginesów.
   krótka wersja 9 pozycji. Każde ćwiczenie ma opis (filmy tylko w jodze); przy
   hantlach i maszynie jest suwak ciężaru z wartością startową (`kgStart`). Sufit RPE 7
   na dole, bez testu maksa — tydzień 12 to sprawdzian
+- **Cykl 3 — kolana i biodra** (plan.json, generator `tools/cykl3.py`): każdy dzień zaczyna
+  się jednym bojem ze sztangą, a resztę godziny wypełniają trzy superserie pod kolano
+  i biodro. Pn A **Kolana** (front squat; bułgarski + podciąganie; prostowanie + uginanie
+  na maszynach; piszczelowy + łydka siedząc), śr B **Biodra** (wyciskanie; hip thrust +
+  face pull; przysiad hiszpański + plank kopenhaski; odwodzenie w pochyleniu + marsz
+  biodrowy z gumą), pt C **Zawias** (martwy ciąg z podłogi z pełną drabinką; skrzynia
+  z wolnym zejściem + wiosłowanie; ciąg jednonóż + deska boczna z odwodzeniem; łydka
+  stojąc + spacer farmera). Joga bez zmian. Ćwiczenia z cyklu 2 mają te same nazwy, więc
+  suwak pamięta ich ciężar. Test w `tools/test-widoki.mjs` liczy budżet każdej sesji
+  (rozgrzewka, drabinka, praca z tempem, przerwy z opisu) — mieści się w godzinie
+- **Rozciąganie we wtorek i czwartek** (`plan.rozciaganie`, `#/rozciaganie/wt|cz`): sześć
+  pozycji statycznych na ~12 min w domu — przód bioder, tył uda, przywodziciele, pośladek,
+  łydka, oddech. Te same karty, minutnik i „Prowadź mnie" co w jodze (wspólne
+  `mobCard` i `prowadzPozycje`), odhaczenia per tydzień i dzień w `trening.rozc.v1`,
+  w paczce stanu, w kopii zapasowej i w archiwum cyklu. Nie wchodzi do pierścieni,
+  serii tygodni ani werdyktów — to dodatek. Na Dziś we wtorek i czwartek kafel stoi pod
+  kartą sesji, w inne dni pod listą tygodnia; raport cyklu ma linię „Rozciąganie"
+- **Boje dnia z planu**: karta Dziś i tabela serii dojściowych biorą boje z pozycji
+  w planie (`bojeDnia`), a nie z tabelki dni. Pierwszy bój dnia dostaje pełną drabinkę,
+  drugi w tej samej sesji (ciąg po przysiadzie w cyklach 1 i 2) — skróconą
 - **Przejście między cyklami**: plan z wyższym `cykl` zamyka poprzedni — dziennik idzie do
   archiwum na urządzeniu (Dziennik → Archiwum, z raportem do skopiowania), nowy cykl
-  startuje od tygodnia 1 z maksami z planu. W bazie każdy cykl ma osobny klucz
-  (kod planu + `-C2`), żeby tygodnie nowego cyklu nie mieszały się ze starymi.
-  Plan cyklu 1 zostaje w `plan-cykl1.json` i na nim działają testy logiki
+  startuje od tygodnia 1. Maksy: z planu, a gdy plan ma `e1rmZPoprzedniego` (cykl 3) —
+  te, z którymi kończy się poprzedni cykl po samoregulacji. Sesje tygodnia 1, których
+  dzień już minął w chwili przejścia, są oznaczone jako pominięte (pierwsza zapisana seria
+  i tak to odwołuje). W bazie każdy cykl ma osobny klucz (kod planu + `-C2`, `-C3`), żeby
+  tygodnie nowego cyklu nie mieszały się ze starymi. Plany zamkniętych cykli zostają
+  w `plan-cykl1.json` i `plan-cykl2.json` (generator `tools/cykl2.py` pisze już tylko tam);
+  na cyklu 1 działają testy logiki
 - **Samoczynna aktualizacja**: przy starcie i przy każdym powrocie do aplikacji pobiera
   świeży index.html i porównuje numer wersji (`?v=`) z działającym. Nowsza wersja =
   przeładowanie od razu; w trakcie sesji, jogi albo przerwy — pasek „Nowa wersja
@@ -347,8 +371,10 @@ albo service worker poda starą wersję:
 index.html      struktura + style (wszystko inline, zero CDN)
 app.js          router, przeliczenia, timer, kalkulator talerzy
 ruch.js         warstwa efektów: przejścia, fale, konfetti, paralaksa, sztanga 3D (bez dostępu do danych)
-plan.json       dane planu
+plan.json       dane planu (bieżący cykl)
+plan-cykl1.json, plan-cykl2.json   plany zamkniętych cykli (raport z archiwum)
 sw.js           cache offline
+tools/cykl3.py          generator plan.json (cykl 3), joga z tools/joga2.py
 tools/xlsx.mjs          czytnik XLSX bez zależności
 tools/xlsx-to-json.mjs  konwersja arkusz → plan.json + filtr treści
 tools/make-icons.mjs    generator ikon PNG

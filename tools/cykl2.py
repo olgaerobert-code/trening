@@ -1,5 +1,5 @@
-# Generator planu cyklu 2 (plan.json). Cykl 1 zostaje w plan-cykl1.json.
-# Uruchom: python3 tools/cykl2.py
+# Generator planu cyklu 2 (plan-cykl2.json, archiwum). Bieżący plan robi tools/cykl3.py.
+# Uruchom: python3 tools/cykl2.py  (nadpisuje tylko plan-cykl2.json)
 # Tresc wylacznie treningowa — repozytorium jest publiczne.
 import json, os
 ROOT = os.path.join(os.path.dirname(__file__), '..')
@@ -193,5 +193,5 @@ plan = {
   'deloadTekst': 'Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar. Mobilność i oddech bez zmian.',
   'tydzien12Tekst': 'Bez testu maksa. Dół: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Zanotuj zejście ze stopnia i plank kopenhaski.',
 }
-json.dump(plan, open(os.path.join(ROOT, 'plan.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-print('plan.json: cykl', plan['cykl'], '·', sum(len(d['items']) for d in plan['days'].values()), 'ćwiczeń')
+json.dump(plan, open(os.path.join(ROOT, 'plan-cykl2.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+print('plan-cykl2.json: cykl', plan['cykl'], '·', sum(len(d['items']) for d in plan['days'].values()), 'ćwiczeń')
