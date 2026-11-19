@@ -42,27 +42,33 @@ w `tools/test-widoki.mjs` pilnuje listy słów, które nie mają prawa się w ni
 
 ## Co jest w aplikacji
 
-- **Dziś** — data i tydzień cyklu (12 kresek; tapnięcie w inny tydzień pyta o potwierdzenie, zanim przestawi plan), pasek
-  siedmiu dni (siłownia: pełny kwadrat z literą, dni w domu: obrys, wolne: kropka),
-  żółta karta sesji z ciężarem boju, przyrostem od zeszłego tygodnia i tym, ile
-  serii dostanie każdy staw, **mapa stawów** tygodnia (noga z boku: biodro, kolano,
-  kostka) oraz lista tygodnia. W dzień rozciągania kartą jest rozciąganie.
-- **Sesja** — karty ćwiczeń ze światłami serii (zapalają się przy odhaczeniu, jak
-  białe światła sędziów), znaczkiem stawu i opisem wykonania. Wiersz serii: liczba
-  i ✓. Tapnięcie w liczbę albo przytrzymanie ✓ otwiera arkusz z dużymi przyciskami
-  (powtórzenia, ciężar, cofnięcie); tap w odhaczoną serię niczego nie cofa.
-  „Odhacz wszystkie serie" odhacza ćwiczenie jednym tapnięciem. Ciężar ćwiczenia
-  ustawia się przyciskami − / + albo z klawiatury. Skończone ćwiczenie zwija się.
-- **Prowadzenie** („Prowadź sesję") — jedna seria na cały ekran: załadowany gryf
-  przy boju, duże liczby, „Zaliczona" pod kciukiem, superseria przeplatana. Po serii
-  ekran przerwy z odliczaniem i następną serią.
+- **Dziś** — kartka z kalendarza (dzień miesiąca dużą cyfrą) i pierścień tygodnia
+  cyklu; tap w pierścień rozwija 12 tygodni, a zmiana tygodnia wymaga potwierdzenia.
+  Tydzień to **karuzela siedmiu plakatów** przesuwana palcem: siłownia, dni w domu,
+  joga i dzień wolny. Plakat w fokusie (sesja dzisiejsza, zaległa albo najbliższa)
+  jest żółty i ma figurkę boju, ciężar, przyrost od zeszłego tygodnia i serie na
+  staw. Kropki dni pod spodem pokazują stan i przewijają do dnia. Niżej **mapa
+  stawów** tygodnia (noga z boku: biodro, kolano, kostka).
+- **Sesja** — scena i kolejka zamiast listy formularzy. **Scena** pokazuje jedną
+  serię: animowaną figurkę ćwiczenia ze znakami stawów, ciężar i powtórzenia
+  (− / + albo klawiatura), schemat, sufit RPE i talerze na stronę. Na dole ekranu
+  jest **jeden duży przycisk**: „Zrobione" zapisuje serię i puszcza przerwę,
+  „Start · 25 s" rusza serię na czas, w przerwie „Pomiń przerwę" i „+30 s".
+  Zegar gra na scenie: przerwa to czarna scena z żółtym odliczaniem, seria na
+  czas — żółta. Po przerwie scena sama wraca do następnej serii.
+- **Kolejka** pod sceną — każde ćwiczenie jako wiersz ze światłami serii. Tap
+  przenosi scenę na to ćwiczenie i rozwija jego serie do poprawek: ✓, arkusz
+  z powtórzeniami i ciężarem, cofnięcie, „Odhacz wszystkie serie".
+- **Figurki** (`figury.js`) — parametryczny ludzik: każde ćwiczenie to dwie pozy
+  opisane kątami, z których powstaje animacja SVG; pozycje rozciągania i jogi
+  mają pozy nieruchome. Widać je na scenie, plakatach, kartach pozycji
+  i w trybie „Prowadź mnie".
 - **Minutnik serii na czas** — izometria i rundy: 5 s na ustawienie, praca, przy
   ćwiczeniach na stronę 5 s na zmianę i druga strona; po ostatnim sygnale seria
-  odhacza się sama i rusza przerwa. Rundy na worku mają gong na start i koniec
-  oraz stuknięcie 10 s przed końcem. Działa w prowadzeniu i z listy (ikona zegara).
-- **Dolny pasek** — cztery zakładki (Dziś, Plan, Postęp, Więcej); w sesji zamienia
-  się w zegar przerwy: presety 60 s / 90 s / 2 min / 3 min, w trakcie „+30 s"
-  i „Pomiń".
+  zapisuje się sama i rusza przerwa. Rundy na worku mają gong na start i koniec
+  oraz stuknięcie 10 s przed końcem.
+- **Dolny pasek** — cztery zakładki (Dziś, Plan, Postęp, Więcej); na ekranie sesji
+  jego miejsce zajmuje przycisk sceny.
 - **Rozciąganie i test zakresów** (śr, pt) oraz **joga** (nd) — karty z krokami,
   częstym błędem i minutnikiem, tryb „Prowadź mnie"; w jodze filmy w kartach.
 - **Plan** — fazy cyklu, tydzień dzień po dniu (po rozwinięciu ćwiczenia ze
@@ -170,7 +176,7 @@ tygodniu, przerwy, fazy minutnika, bilans stawów i **budżet godziny** każdej 
 GitHub Pages z gałęzi `main`, katalog główny. Po każdej zmianie plików podbij
 znaczniki wersji, inaczej przeglądarka albo service worker poda starą wersję:
 
-- `?v=N` w `index.html` (`app.css`, `app.js`, `progresja.js`, krój w `preload`),
+- `?v=N` w `index.html` (`app.css`, `app.js`, `progresja.js`, `figury.js`, krój w `preload`),
   w `app.css` (adresy krojów), w `app.js` (`plan.json`, `plan-cykl${n}.json`)
   i na liście `ASSETS` w `sw.js`,
 - `CACHE` w `sw.js`.
@@ -185,6 +191,7 @@ index.html        powłoka: nagłówek, #app, dolny pasek
 app.css           tokeny, kroje, wszystkie style
 app.js            plan, dziennik, synchronizacja, zegar, widoki
 progresja.js      czyste funkcje oceny sesji i korekt (wspólne z testami)
+figury.js         figurki ćwiczeń: pozy z kątów → animowane SVG
 plan.json         bieżący plan (cykl 4)
 plan-cykl*.json   plany zamkniętych cykli
 sw.js             cache offline

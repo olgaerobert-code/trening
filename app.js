@@ -1907,6 +1907,8 @@ function mobCard(it, w, ctx = ctxJogi(w)) {
     ctx.po(nowe, it);
   };
   h.append(tick);
+  const rysPoz = figuraHtml(it.id, [], false);
+  if (rysPoz) { const f = el('div', 'mob-fig'); f.innerHTML = rysPoz; h.append(f); }
   h.append(el('div', 'exname', it.name));
   const chips = el('div', 'chips');
   if (it.core) chips.append(el('div', 'chip ss', 'krótka'));
@@ -5121,6 +5123,8 @@ function prowadzPozycje({ lista, jest, toggle, blok, naKoniec, extra }) {
     const b = blok && blok(it);
     if (b) tresc.append(el('div', 'preye', b));
     tresc.append(el('h2', 'prname', it.name));
+    const rysPoz = figuraHtml(it.id, [], true);
+    if (rysPoz) { const f = el('div', 'pr-fig'); f.innerHTML = rysPoz; tresc.append(f); }
     tresc.append(el('div', 'prdawka', it.dose));
     const vid = filmPozycji(it);
     if (vid) tresc.append(okladkaFilmu(vid, it.name));
