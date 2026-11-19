@@ -135,8 +135,8 @@ function domknijLiczbe(v, { min = -Infinity, max = Infinity, krok = 1 } = {}) {
 }
 
 /* Tapnięcie w liczbę otwiera w tym samym miejscu pole do wpisania z klawiatury —
-   suwak zostaje do szybkich korekt, klawiatura jest od dokładnych. Enter albo
-   zejście z pola zapisuje tą samą drogą co suwak, Escape anuluje. */
+   przyciski − i + zostają do szybkich korekt, klawiatura jest od dokładnych. Enter
+   albo zejście z pola zapisuje tą samą drogą co przycisk, Escape anuluje. */
 function edycjaLiczby(el, opcje) {
   if (!el || el.querySelector && el.querySelector('.wpis')) return;
   const stare = el.childNodes ? Array.from(el.childNodes) : el.children.slice();
@@ -227,7 +227,7 @@ const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.reka
 // Filmy do pozycji jogi wybrane przez użytkownika: { y3: 'dQw4w9WgXcQ' }.
 const LS_FILMY = 'trening.filmy.v1';
 // Chwila odhaczenia każdej serii, w sekundach: { "5|A|2": [1759..., 1759..., …] }.
-// Osobno od dziennika, bo jego `ts` zmienia się przy każdej poprawce suwaka,
+// Osobno od dziennika, bo jego `ts` zmienia się przy każdej poprawce liczby,
 // a tu ma zostać moment, w którym seria naprawdę się skończyła.
 const LS_CZASY = 'trening.czasy.v1';
 const saveCzasy = () => { localStorage.setItem(LS_CZASY, JSON.stringify(state.czasy)); pushStan(); };
@@ -912,6 +912,16 @@ function wyborTygodnia(w, trasa) {
 }
 
 /* ---------- dzień treningowy ---------- */
+// Opis wykonania bez zdań, z których aplikacja czyta przerwę („Przerwy 3 min.",
+// „SUPERSERIA z … — 90 s po parze.") — to widać w układzie karty i w wierszu przerwy.
+const opisWykonaniaCw = it => String(it.note || '').replace(/^(Bój główny\.\s*)?((SUPERSERIA|Przerw[ay])[^.]*\.\s*)?/, '');
+function przerwaTekst(it, day, w) {
+  const fmtP = s => (s >= 120 && s % 60 === 0 ? s / 60 + ' min' : s + ' s');
+  if (it.superset && it.superset.endsWith('1')) return 'Bez przerwy — od razu drugie ćwiczenie pary';
+  const s = przerwaPo(it, day, w);
+  return it.superset ? `Przerwa ${fmtP(s)} po parze` : `Przerwa ${fmtP(s)}`;
+}
+
 // Światła serii: po jednym na serię, zapalają się przy odhaczeniu — jak białe
 // światła sędziów po zaliczonym boju.
 function swiatlaEl(sets, done) {
@@ -1078,7 +1088,8 @@ function exerciseCard(it, key, w) {
   }
 
   if (it.note) {
-    const note = el('div', 'exnote', it.note);
+    const note = el('div', 'exnote');
+    note.append(el('div', 'exprz', przerwaTekst(it, key, w)), el('p', null, opisWykonaniaCw(it)));
     note.hidden = true;
     const more = el('button', 'more', 'Jak to zrobić');
     more.setAttribute('aria-expanded', 'false');
@@ -1617,7 +1628,7 @@ function mobReset(w) {
 
 /* ---------- dni bez siłowni: rozciąganie i test zakresów ----------
    Kwadrans w domu (cykl 3: środa i piątek), te same pozycje oba dni: rozciąganie, test zakresów i oddech
-   na koniec. Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek
+   na koniec. Nie wchodzi do serii tygodni ani werdyktów — to dodatek
    do trzech dni na siłowni, nie czwarta sesja.
    Odhaczenia:     { "3|sr": { r1: 1 } }
    Test zakresów:  { "3|sr|z": { q1: { p: 2, o: 1 } } } — poziom (od 1) i ocena 0–1–2.
@@ -2507,7 +2518,7 @@ function plannedOf(it, w, day) {
   // a jak go nie ma, to ostatni zapisany, żeby nie przepisywać go co tydzień.
   const ostatni = day ? lastKgOf(it, w, day) : null;
   const wlasny = acc != null ? acc : ostatni != null ? ostatni : (it.kgStart != null ? it.kgStart : null);
-  // Przy boju ciężar JEST w planie, ale suwak może go nadpisać: sztanga stoi
+  // Przy boju ciężar JEST w planie, ale można go nadpisać: sztanga stoi
   // w piwnicy, a nie w arkuszu. Nadpisanie trzyma się jednego tygodnia, bo plan
   // co tydzień podaje inną liczbę i przenoszenie odchyłki na zawsze byłoby kłamstwem.
   const wlasnyBoj = day ? kgwGet(w, day, it.n) : null;
@@ -2729,7 +2740,7 @@ function logSet(w, day, n, idx, val) {
   const k = logKey(w, day, n);
   const stary = (state.log[k] || [])[idx] || null;
   const bezZmian = stary && val && stary.r === val.r && stary.kg === val.kg;
-  if (bezZmian) return;                       // suwak wrocil tam, gdzie byl
+  if (bezZmian) return;                       // liczba wróciła tam, gdzie była
   const rows = (state.log[k] || []).slice();
   while (rows.length <= idx) rows.push(null);
   rows[idx] = val;
@@ -2910,16 +2921,16 @@ const syncLabel = () => state.sync === 'ok' ? 'zsynchronizowano'
 window.addEventListener('online', () => { flushQueue(); pullAll(); });
 window.addEventListener('offline', () => setSync('off'));
 
-// Wiersze serii. Ciezar jest JEDEN na cwiczenie, nie na serie — sztange ladujesz raz,
-// wiec pieciu identycznych pol nikt nie potrzebuje. Powtorzenia na suwaku, bo w trakcie
-// serii liczy sie jeden ruch kciukiem, a nie celowanie w male przyciski.
+// Wiersze serii. Ciężar jest JEDEN na ćwiczenie, nie na serię — sztangę ładujesz raz.
+// W wierszu stoi cel z planu i ✓: w trakcie serii liczy się jeden ruch kciukiem,
+// a poprawka (inna liczba, cofnięcie) idzie przez arkusz z dużymi przyciskami.
 //
-// Nic tutaj NIE wola render(). Pelna przebudowa ekranu przy kazdym ruchu suwaka
-// gubila pozycje przewijania, odgrywala animacje wejscia od nowa i po prostu mulila.
+// Nic tutaj NIE woła render(). Pełna przebudowa ekranu przy każdym odhaczeniu
+// gubiła pozycję przewijania i odgrywała animację wejścia od nowa.
 /* Ciężar dotyczy całego ćwiczenia: przepisujemy go na już odhaczone serie
    i zapisujemy na stałe (bez tego pierwsze odświeżenie ekranu przywracało
    liczbę z planu, a kolejne serie szły ze starym ciężarem). Jedna droga dla
-   suwaka, klawiatury, arkusza korekty i trybu prowadzenia. */
+   przycisków, klawiatury, arkusza korekty i trybu prowadzenia. */
 function zapiszCiezar(it, day, w, pl, kg) {
   const r = logGet(w, day, it.n);
   for (let i = 0; i < r.length; i++) if (r[i]) logSet(w, day, it.n, i, { ...r[i], kg });
@@ -3184,7 +3195,7 @@ function podpowiedz(r, tekst, ms = 1500) {
 }
 
 /* Arkusz korekty serii: dwa duże steppery pod kciuk, zapis tą samą drogą co
-   suwak, cofnięcie odhaczenia tylko stąd — tap w ✓ nic nie cofa. */
+   odhaczenie, cofnięcie tylko stąd — tap w ✓ nic nie cofa. */
 function arkuszSerii({ nazwa, seria, serii, powt, kg, kgKrok = 2.5, jednostka, done, naZapis, naCofnij }) {
   if (!document.body || !document.body.appendChild) return null;
   const stary = document.querySelector('.arkusz-tlo');
@@ -3724,8 +3735,11 @@ const stanPrzerwy = () => ({ leci: !!tId, tLeft, tTotal, tEnd, tFired, tryb: tTr
    koniec   znacznik czasu końca, gdy liczy się go skądinąd niż „teraz + s"
    dzwiek   rodzaj sygnałów (patrz sygnaly) albo 'cicho', gdy są już zaplanowane */
 function startTimer(s, opcje = {}) {
+  const trwal = !!tId;
   clearInterval(tId);
-  if (!opcje.trzymajBieg) { cancelBeeps(); bieg = null; }
+  // Sygnały kasujemy tylko wtedy, gdy przerywamy trwające odliczanie. Przerwa
+  // ruszająca zaraz po rundzie nie może uciąć wybrzmiewającego gongu.
+  if (!opcje.trzymajBieg) { if (trwal) cancelBeeps(); bieg = null; }
   tTotal = s; tFired = false; tTresc = opcje.tresc || '';
   tTryb = opcje.tryb || 'przerwa'; tEtykieta = opcje.etykieta || ''; tPoKoncu = opcje.poKoncu || null;
   // Liczymy od godziny końca, nie odejmujemy sekund: iPhone dławi liczniki
@@ -4327,7 +4341,7 @@ function pasekTreningu(day, w) {
   return box;
 }
 
-// Stoper chodzi sam — bez przebudowy ekranu, żeby suwak nie uciekał spod palca.
+// Stoper chodzi sam — bez przebudowy ekranu, żeby nic nie uciekało spod palca.
 setInterval(() => {
   const n = document.getElementById('trn-czas');
   if (!n) return;
@@ -4400,7 +4414,7 @@ function zegarekCard() {
   return box;
 }
 
-/* ---------- tydzień w pierścieniach, zaliczenie, karta do udostępnienia ---------- */
+/* ---------- tydzień, zaliczenie, karta do udostępnienia ---------- */
 const SESJE = ['A', 'B', 'C', 'D'];
 const SKROT_DNIA = { A: 'Pn', B: 'Śr', C: 'Pt', D: 'Nd' };
 
@@ -4423,8 +4437,6 @@ function seriaTygodni(w = state.week) {
 }
 const fmtTys = n => Math.round(n).toLocaleString('pl-PL');
 
-// Cztery koncentryczne pierścienie: zewnętrzny A, wewnętrzny D. Tor to ta sama
-// barwa na ~22%, łuk startuje z godziny dwunastej.
 
 /* Zaliczenie sesji: jeden moment na cały trening, kiedy aplikacja mówi
    „zrobione" głośno — i daje od razu kartę do pokazania. */
@@ -4905,7 +4917,7 @@ function prowadzSesje(day, w) {
     tresc.append(el('h2', 'prname', it.name));
     const rpe = resolve(it.rpe, w);
     const cel = pl.target != null ? `cel ${pl.target} ${jedn || 'powt.'}` : '';
-    tresc.append(el('div', 'prdawka', [`Seria ${k.i + 1} z ${pl.sets}`, cel, rpe != null && rpe !== '—' ? 'RPE ' + fmt(rpe) : ''].filter(Boolean).join(' · ')));
+    tresc.append(el('div', 'prdawka', [`${pl.unit === 'min' ? 'Runda' : 'Seria'} ${k.i + 1} z ${pl.sets}`, cel, rpe != null && rpe !== '—' ? 'RPE ' + fmt(rpe) : ''].filter(Boolean).join(' · ')));
     const swiatla = swiatlaEl(pl.sets, logGet(w, day, it.n).filter(Boolean).length);
     tresc.append(swiatla);
     if (k.i === pl.sets - 1) tresc.append(el('div', 'pr-ost', 'Ostatnia seria'));
@@ -4980,7 +4992,7 @@ function prowadzSesje(day, w) {
     if (cele) tresc.append(cele);
     if (it.note) {
       const d = el('details', 'pr-opis');
-      d.append(el('summary', null, 'Jak to zrobić'), el('p', 'pr-uwaga', it.note));
+      d.append(el('summary', null, 'Jak to zrobić'), el('p', 'pr-uwaga', opisWykonaniaCw(it)));
       // Pierwsza seria ćwiczenia: opis od razu na wierzchu.
       if (k.i === 0 && !zapis) d.open = true;
       tresc.append(d);
@@ -5163,7 +5175,7 @@ let ostatniWidok = null;
 const klasaWejscia = () => (state.view !== ostatniWidok ? 'stagger' : '');
 
 // Nie przebudowujemy ekranu, gdy ktos wlasnie go dotyka. Odswiezenie z bazy
-// poczeka kilka sekund zamiast wyrywac suwak spod palca.
+// poczeka kilka sekund zamiast wyrywać ekran spod palca.
 let ostatniDotyk = 0;
 ['pointerdown', 'input'].forEach(z =>
   document.addEventListener(z, () => { ostatniDotyk = Date.now(); }, true));
@@ -5248,7 +5260,7 @@ function przejdzNaCykl(p) {
 }
 
 /* Ciężary ćwiczeń dodatkowych przechodzą z zamkniętego cyklu po nazwie: ostatni
-   ciężar zapisany w dzienniku staje się ustawieniem suwaka, o ile ten nie jest
+   ciężar zapisany w dzienniku staje się ustawionym ciężarem ćwiczenia, o ile ten nie jest
    już ustawiony. Dziennik zna tylko pozycje („tydzień|dzień|numer"), więc
    potrzebny jest plan tamtego cyklu — doczytujemy plan-cyklN.json. Zapis bez
    wysyłki, jak całe przejście; pójdzie z najbliższą paczką stanu. */
@@ -5292,7 +5304,9 @@ async function ciezaryZPoprzedniego(n) {
       rows.slice(0, sets).forEach((r, i) => { if (r) { logSet(1, day, cel.n, i, { r: r.r, kg: r.kg, pr: r.pr, pk: r.pk }); zDnia++; } });
     }
     const t = a.treningi && a.treningi[`${a.week}|${day}`];
-    if (zDnia && t && t.start && !state.treningi[trnKey(1, day)]) { state.treningi[trnKey(1, day)] = { ...t }; saveTreningi(true); }
+    // Czas treningu idzie razem z seriami tylko wtedy, gdy trening został zakończony —
+    // niedomknięty stoper liczyłby dalej od zeszłego razu.
+    if (zDnia && t && t.start && t.end && !state.treningi[trnKey(1, day)]) { state.treningi[trnKey(1, day)] = { ...t }; saveTreningi(true); }
     przeniesione += zDnia;
   }
   return ile + przeniesione;

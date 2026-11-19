@@ -1462,7 +1462,8 @@ console.log('Ciezar po przeniesieniu');
   localStorage.setItem('trening.acc.v1', '{}');
   // stary plan B: 1 skrzynia, 3 hip thrust jednonóż (w cyklu 4 go nie ma), 6 deska boczna
   localStorage.setItem('trening.log.v1', JSON.stringify({ '1|B|1': trzy(8, 10), '1|B|3': trzy(10, 10), '1|B|6': [{ r: 8, ts }, { r: 8, ts }, { r: 15, ts }] }));
-  localStorage.setItem('trening.treningi.v1', JSON.stringify({ '1|B': { start: ts, end: null } }));
+  // B zakończony (czas przechodzi), A z niedomkniętym stoperem (nie przechodzi).
+  localStorage.setItem('trening.treningi.v1', JSON.stringify({ '1|B': { start: ts, end: ts }, '1|A': { start: ts, end: null } }));
   app.children = []; timer.children = [];
   const sb4 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl3') ? planCykl3 : planBiezacy) }) };
   delete sb4.API;
@@ -1488,7 +1489,8 @@ console.log('Ciezar po przeniesieniu');
     && B4.logGet(1, 'B', deska.n).map(r => r.r).join() === '8,8,15');
   test('cwiczenie, ktorego nie ma w nowym planie, zostaje tylko w archiwum',
     Object.keys(S4.log).length === 2 && !D.B.items.some(x => /^Hip thrust/.test(x.name)));
-  test('czwartek z przeniesionymi seriami nie jest pominiety i ma start treningu', !B4.sesjaPominieta('B', 1) && !!B4.trening(1, 'B'));
+  test('czwartek z przeniesionymi seriami nie jest pominiety, zakonczony trening niesie swoj czas', !B4.sesjaPominieta('B', 1) && !!B4.trening(1, 'B') && !!B4.trening(1, 'B').end);
+  test('niedomkniety stoper nie przechodzi do nowego cyklu', !B4.trening(1, 'A'));
   test('ciezar hantli z dziennika cyklu 3 trafia do nowego planu', B4.plannedOf(skrzynia, 2, 'B').kg === 10);
   test('dni sprzed startu bez zapisu sa pominiete', ['A', 'C'].every(k => B4.sesjaPominieta(k, 1) === (B4.POZYCJA_DNIA[k] < B4.pozycjaDzis())));
 
