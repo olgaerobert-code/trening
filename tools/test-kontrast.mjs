@@ -36,14 +36,22 @@ const kontrast = (a, b) => {
   return (x + 0.05) / (y + 0.05);
 };
 
-/* Paleta czytana wprost z index.html, zeby test nie rozjechal sie z kodem. */
-const css = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+/* Paleta czytana wprost z app.css, zeby test nie rozjechal sie z kodem. Jasny
+   motyw stoi w golym :root (pierwsze wystapienie tokenu), ciemny w bloku
+   :root[data-theme="dark"] — sprawdzamy oba. */
+const plik = fs.readFileSync(path.join(ROOT, 'app.css'), 'utf8');
+const ciemnyOd = plik.indexOf(':root[data-theme="dark"]');
+const motywy = { jasny: plik.slice(0, plik.indexOf('@media (prefers-color-scheme: dark)')), ciemny: plik.slice(ciemnyOd, plik.indexOf('}', ciemnyOd)) };
+let css = motywy.jasny;
 const tok = nazwa => {
   const m = css.match(new RegExp('--' + nazwa + ':\\s*(#[0-9a-fA-F]{6})'));
-  if (!m) throw new Error('brak tokenu --' + nazwa + ' w index.html');
+  if (!m) throw new Error('brak tokenu --' + nazwa + ' w app.css');
   return m[1];
 };
 
+for (const MOTYW of ['jasny', 'ciemny']) {
+css = motywy[MOTYW];
+console.log('\n══ motyw ' + MOTYW + ' ══');
 const bg = tok('bg'), s1 = tok('s1'), s2 = tok('s2'), s3 = tok('s3');
 const ink = tok('ink'), ink2 = tok('ink-2'), ink3 = tok('ink-3');
 const serie = { 'seria 1 (wyciskanie)': tok('series-1'), 'seria 2 (front squat)': tok('series-2'), 'seria 3 (ciag)': tok('series-3') };
@@ -67,16 +75,24 @@ test('pomocniczy', kontrast(ink3, s2), 3);
 console.log('\nEtykieta ostrzegawcza (Czesty blad) na karcie');
 test('warn ' + tok('warn'), kontrast(tok('warn'), s1), 4.5);
 
-console.log('\nGlowny przycisk (czarna pigulka)');
+console.log('\nZolta karta i glowne przyciski (' + tok('acc') + ')');
+test('druk on-acc na zoltym', kontrast(tok('on-acc'), tok('acc')), 7);
+test('zolty jako obiekt na tle strony albo z obwodka atramentu', Math.max(kontrast(tok('acc'), bg), kontrast(ink, tok('acc'))), 3);
+test('bialy napis na czarnej pigulce w zoltej karcie', kontrast('#ffffff', tok('on-acc')), 7);
+
+console.log('\nPrzycisk i pasek w kolorze atramentu');
 test('napis on-ink na ink', kontrast(tok('on-ink'), ink), 7);
 
 console.log('\nZielony „zapisane" ' + tok('good'));
 test('good jako tekst na karcie', kontrast(tok('good'), s1), 4.5);
-test('good jako tekst na tle „zapisane"', kontrast(tok('good'), tok('good-bg')), 4.5);
-test('bialy ✓ na zielonym', kontrast('#ffffff', tok('good')), 4.5);
-
-console.log('\nOstrzezenie na swoim tle');
-test('warn na warn-bg', kontrast(tok('warn'), tok('warn-bg')), 4.5);
+if (MOTYW === 'jasny') {
+  test('good jako tekst na tle „zapisane"', kontrast(tok('good'), tok('good-bg')), 4.5);
+  console.log('\nOstrzezenie i blad na swoim tle');
+  test('warn na warn-bg', kontrast(tok('warn'), tok('warn-bg')), 4.5);
+  test('bad na bad-bg', kontrast(tok('bad'), tok('bad-bg')), 4.5);
+}
+test('bad jako tekst na karcie', kontrast(tok('bad'), s1), 4.5);
+test('ptaszek on-good na zielonym', kontrast(tok('on-good'), tok('good')), 4.5);
 
 console.log('\nKolory serii na karcie (s1) — obiekty graficzne');
 for (const [n, h] of Object.entries(serie)) test(n + ' ' + h, kontrast(h, s1), 3);
@@ -88,6 +104,8 @@ console.log('\nRozroznialnosc powierzchni miedzy soba');
 test('bg vs s1', kontrast(bg, s1), 1.08);
 test('s1 vs s2', kontrast(s1, s2), 1.08);
 test('s2 vs s3', kontrast(s2, s3), 1.08);
+
+}
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} pomiarow w normie`));
 process.exit(zle ? 1 : 0);

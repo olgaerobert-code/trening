@@ -1,4 +1,4 @@
-// Generuje icon-192.png i icon-512.png — sztanga na ciemnym tle.
+// Generuje icon-192.png i icon-512.png — znak stawów na żółtym polu.
 // Zero zaleznosci: wlasny enkoder PNG na zlib z Node.
 //   node tools/make-icons.mjs
 
@@ -47,18 +47,40 @@ function png(size, draw) {
   ]);
 }
 
-const BG = [11, 12, 14];
-const FG = [244, 245, 247];   // --ink ciemnego motywu
+const ZOLTY = [255, 210, 31];   // --acc
+const CZARNY = [16, 16, 17];    // --ink jasnego motywu
 
-// Sztanga: gryf przez srodek + po dwa talerze z kazdej strony.
+// Znak aplikacji: noga z boku — biodro, kolano, kostka — jako trzy pierścienie
+// połączone kością. Ten sam rysunek co mapa stawów na ekranie Dziś.
+// Wszystko mieści się w środkowych 80% pola, więc ikona maskowalna nic nie traci.
+const STAWY = [[11.5, 7.5], [20.5, 16], [13.5, 24.5]];
+const PALCE = [21.5, 26.5];
+const doOdcinka = (px, py, [ax, ay], [bx, by]) => {
+  const dx = bx - ax, dy = by - ay;
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+};
+function kolor(gx, gy) {
+  // pierścień stawu: czarny krąg z żółtym środkiem
+  for (const [sx, sy] of STAWY) {
+    const d = Math.hypot(gx - sx, gy - sy);
+    if (d <= 1.7) return ZOLTY;
+    if (d <= 3.9) return CZARNY;
+  }
+  const kosci = [[STAWY[0], STAWY[1]], [STAWY[1], STAWY[2]], [STAWY[2], PALCE]];
+  if (kosci.some(([a, b]) => doOdcinka(gx, gy, a, b) <= 1.45)) return CZARNY;
+  return ZOLTY;
+}
+// Wygładzanie krawędzi: 4 × 4 próbki na piksel.
 function draw(size) {
-  const u = size / 32;                       // jednostka siatki 32×32
-  const inRect = (x, y, a, b, c, d) => x >= a * u && x < c * u && y >= b * u && y < d * u;
+  const u = size / 32, N = 4;
   return (x, y) => {
-    const bar = inRect(x, y, 4, 15, 28, 17);
-    const inner = inRect(x, y, 6, 11, 9, 21) || inRect(x, y, 23, 11, 26, 21);
-    const outer = inRect(x, y, 3, 13, 5.5, 19) || inRect(x, y, 26.5, 13, 29, 19);
-    return bar || inner || outer ? FG : BG;
+    let r = 0, g = 0, b = 0;
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+      const c = kolor((x + (i + 0.5) / N) / u, (y + (j + 0.5) / N) / u);
+      r += c[0]; g += c[1]; b += c[2];
+    }
+    return [Math.round(r / (N * N)), Math.round(g / (N * N)), Math.round(b / (N * N))];
   };
 }
 
