@@ -35,7 +35,8 @@ const DAY_COLOR = { A: 'var(--a)', B: 'var(--b)', C: 'var(--c)', D: 'var(--d)' }
 const PLATE_COLOR = { 25: '#c0392b', 20: '#2a6fc4', 15: '#d9b016', 10: '#1f8f4e', 5: '#e8e8e8', 2.5: '#1a1a1a', 1.25: '#9aa5b1' };
 
 /* ---------- dziś ---------- */
-// getDay(): 0 = niedziela. Wtorek, czwartek i sobota są wolne i zwracają null.
+// getDay(): 0 = niedziela. Dni bez sesji zwracają null. Wartości startowe to
+// pn/śr/pt/nd z cykli 1 i 2 — ustawDniTygodnia() nadpisuje je według planu.
 const DZIEN_TYG = { 1: 'A', 3: 'B', 5: 'C', 0: 'D' };
 const NAZWA_DNIA = ['niedziela', 'poniedziałek', 'wtorek', 'środa', 'czwartek', 'piątek', 'sobota'];
 const dzisiaj = () => DZIEN_TYG[new Date().getDay()] || null;
@@ -64,6 +65,19 @@ function najblizszaSesja() {
  * wszystko jest kompletne, wraca stara zasada: dzisiejszy dzien albo nic.
  */
 const POZYCJA_DNIA = { A: 0, B: 2, C: 4, D: 6 };        // poniedzialek 0 … niedziela 6
+
+// Dni tygodnia sesji z planu: `dzien` przy dniu A/B/C i przy jodze (getDay,
+// 0 = niedziela). Plany cykli 1 i 2 tego pola nie mają — zostaje pn/śr/pt/nd.
+// Cykl 3: wt/czw/sob, bo tak naprawdę wyglądał tydzień w dzienniku cyklu 2.
+const SKROT_TYG = ['Nd', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'];
+function ustawDniTygodnia(p) {
+  const domyslne = { A: 1, B: 3, C: 5 };
+  const dni = {};
+  for (const k of ['A', 'B', 'C']) dni[k] = p.days[k] && p.days[k].dzien != null ? p.days[k].dzien : domyslne[k];
+  dni.D = p.mobility && p.mobility.dzien != null ? p.mobility.dzien : 0;
+  for (const g of Object.keys(DZIEN_TYG)) delete DZIEN_TYG[g];
+  for (const [k, g] of Object.entries(dni)) { DZIEN_TYG[g] = k; POZYCJA_DNIA[k] = (g + 6) % 7; SKROT_DNIA[k] = SKROT_TYG[g]; }
+}
 const pozycjaDzis = () => (new Date().getDay() + 6) % 7;
 
 function sesjaKompletna(key, w) {
@@ -206,7 +220,7 @@ const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
 const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
-// Wtorek i czwartek: odhaczone pozycje rozciągania, { "3|wt": { r1: 1 } }. Ten sam
+// Dni bez siłowni: odhaczone pozycje rozciągania, { "3|sr": { r1: 1 } }. Ten sam
 // kanał co niedziela — paczka stanu.
 const LS_ROZC = 'trening.rozc.v1';
 const saveRozc = () => { localStorage.setItem(LS_ROZC, JSON.stringify(state.rozc)); pushStan(); };
@@ -384,7 +398,7 @@ function homeView() {
     : POZYCJA_DNIA[heroKey] <= pozycjaDzis() ? 'Do wpisania'
     : 'Następny · ' + nast.dzien;
   body.append(kartaDzis(heroKey, w, etykieta));
-  // Wtorek i czwartek: rozciąganie zaraz pod kartą, dopóki nie jest odhaczone.
+  // Dzień rozciągania: kafel zaraz pod kartą, dopóki nie jest odhaczony.
   const rozcTeraz = rozcDzisiaj();
   const rozcNaGorze = rozcTeraz && !rozcKomplet(w, rozcTeraz.k);
   if (rozcNaGorze) body.append(kafelRozc(w));
@@ -1397,12 +1411,12 @@ function mobReset(w) {
   return box;
 }
 
-/* ---------- wtorek i czwartek: rozciąganie i test zakresów ----------
-   Kwadrans w domu, te same pozycje oba dni: rozciąganie, test zakresów i oddech
+/* ---------- dni bez siłowni: rozciąganie i test zakresów ----------
+   Kwadrans w domu (cykl 3: środa i piątek), te same pozycje oba dni: rozciąganie, test zakresów i oddech
    na koniec. Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek
    do trzech dni na siłowni, nie czwarta sesja.
-   Odhaczenia:     { "3|wt": { r1: 1 } }
-   Test zakresów:  { "3|wt|z": { q1: { p: 2, o: 1 } } } — poziom (od 1) i ocena 0–1–2.
+   Odhaczenia:     { "3|sr": { r1: 1 } }
+   Test zakresów:  { "3|sr|z": { q1: { p: 2, o: 1 } } } — poziom (od 1) i ocena 0–1–2.
    Jeden magazyn, więc synchronizacja, kopia, archiwum cyklu i przeniesienie
    tygodnia obejmują oba bez osobnej obsługi. */
 const rozcPlan = () => (state.plan && state.plan.rozciaganie) || null;
@@ -2588,7 +2602,7 @@ function setRows(it, day, w, pl, onKg) {
     const kgBox = el('div', 'kgslider');
     const lab = el('div', 'kglab');
     const val = el('b', null, fmt(kgTeraz));
-    lab.append(el('span', null, pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar (hantel, maszyna)'), val, el('i', null, 'kg'));
+    lab.append(el('span', null, pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar (hantle)'), val, el('i', null, 'kg'));
     const sl = el('input', 'suwak');
     sl.type = 'range'; sl.min = min; sl.max = max; sl.step = 2.5; sl.value = kgTeraz;
     sl.setAttribute('aria-label', 'Ciężar w kilogramach');
@@ -3284,7 +3298,7 @@ document.addEventListener('visibilitychange', () => {
 function przeniesCard() {
   const box = el('div', 'card');
   let z = null, na = null, pewny = false, dzien = null;   // dzien = null: cały tydzień
-  const ZAKRES = [[null, 'Cały tydzień'], ['A', 'Pn · A'], ['B', 'Śr · B'], ['C', 'Pt · C'], ['D', 'Nd · joga']];
+  const ZAKRES = [[null, 'Cały tydzień'], ['A', `${SKROT_DNIA.A} · A`], ['B', `${SKROT_DNIA.B} · B`], ['C', `${SKROT_DNIA.C} · C`], ['D', `${SKROT_DNIA.D} · joga`]];
   const nazwaZakresu = () => (dzien ? ZAKRES.find(x => x[0] === dzien)[1].replace(' · ', ' ') : 'tydzień');
 
   // Kropka na kafelku tygodnia mówi, gdzie cokolwiek jest zapisane — bez tego
@@ -3739,6 +3753,41 @@ function migracjaPoniedzialku(final) {
   }
   if (!tydzienMaDane(1, 'A') && !sesjaPominieta('A', 1)) { pominSesje('A', 1, true); zm = true; }
   if (final) { mig.pn2na3 = true; localStorage.setItem(LS_MIG, JSON.stringify(mig)); }
+  return zm;
+}
+
+/* Cykl 3, jednorazowo: siłownia przeszła z pn/śr/pt na wt/czw/sob, a rozciąganie
+   z wt/czw na śr/pt. Urządzenie, które zaczęło cykl jeszcze ze starym układem,
+   oznaczyło sesje tygodnia 1 jako pominięte według starych dni — zdejmujemy
+   pominięcie z dni, które według nowego układu jeszcze nie minęły (o ile sesja
+   jest pusta), i przepinamy rozciąganie na nowe klucze. Jak migracja poniedziałku:
+   raz na danych z urządzenia, drugi raz po pobraniu z bazy, i dopiero wtedy na stałe. */
+function migracjaDniCyklu3(final) {
+  if (!state.plan || state.plan.cykl !== 3) return false;
+  const mig = readJSON(LS_MIG, {});
+  if (mig.c3dni) return false;
+  let zm = false;
+  if (state.week === 1) {
+    const dzis = pozycjaDzis();
+    for (const k of ['A', 'B', 'C']) {
+      const kl = kluczPominiecia(k, 1);
+      if (state.pominiete[kl] && POZYCJA_DNIA[k] >= dzis && postepDnia(1, k).done === 0) { delete state.pominiete[kl]; zm = true; }
+    }
+    if (zm) savePominiete();
+  }
+  const nowe = { wt: 'sr', cz: 'pt' };
+  let przepiete = false;
+  for (const k of Object.keys(state.rozc)) {
+    const cz = k.split('|');
+    if (!nowe[cz[1]]) continue;
+    cz[1] = nowe[cz[1]];
+    const nk = cz.join('|');
+    if (!state.rozc[nk]) state.rozc[nk] = state.rozc[k];
+    delete state.rozc[k];
+    przepiete = true;
+  }
+  if (przepiete) { saveRozc(); zm = true; }
+  if (final) { mig.c3dni = true; localStorage.setItem(LS_MIG, JSON.stringify(mig)); }
   return zm;
 }
 
@@ -4725,7 +4774,7 @@ async function ciezaryZPoprzedniego(n) {
   const a = archiwum()[n];
   if (!a || !a.log) return 0;
   let stary;
-  try { stary = await (await fetch(`plan-cykl${n}.json?v=85`)).json(); } catch { return 0; }
+  try { stary = await (await fetch(`plan-cykl${n}.json?v=87`)).json(); } catch { return 0; }
   let ile = 0;
   for (const [day, d] of Object.entries((stary && stary.days) || {})) for (const it of d.items) {
     if (it.load && it.load.ref) continue;        // boje mają swoje E1RM
@@ -4760,7 +4809,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=85`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=87`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4813,10 +4862,11 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=85')
+fetch('plan.json?v=87')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
+    ustawDniTygodnia(p);
     loadState();
     loadStores();
     const zamkniety = przejdzNaCykl(p);
@@ -4829,6 +4879,7 @@ fetch('plan.json?v=85')
     // się odbudować z bazy, zanim wysyłka kolejki zdążyła go tam wyzerować.
     sprzatnijPoPrzeniesieniach();
     migracjaPoniedzialku(false);               // na danych z urządzenia; po pobraniu z bazy jeszcze raz
+    migracjaDniCyklu3(false);
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     calc.kg = state.e1rm.bench ? round25(state.e1rm.bench * 0.85) : 100;
     // Zimny start bez hasha: wchodzimy prosto w niedokończoną sesję. Wejście
@@ -4845,6 +4896,7 @@ fetch('plan.json?v=85')
       render();
       await pullAll();
       if (migracjaPoniedzialku(navigator.onLine && state.sync !== 'off')) render();
+      if (migracjaDniCyklu3(navigator.onLine && state.sync !== 'off')) render();
       flushQueue();
     });
     sprawdzWersje();
