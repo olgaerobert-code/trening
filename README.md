@@ -144,23 +144,38 @@ się bezpiecznych marginesów.
   stojąc + spacer farmera). Joga bez zmian. Ćwiczenia z cyklu 2 mają te same nazwy, więc
   suwak pamięta ich ciężar. Test w `tools/test-widoki.mjs` liczy budżet każdej sesji
   (rozgrzewka, drabinka, praca z tempem, przerwy z opisu) — mieści się w godzinie
-- **Rozciąganie we wtorek i czwartek** (`plan.rozciaganie`, `#/rozciaganie/wt|cz`): sześć
-  pozycji statycznych na ~12 min w domu — przód bioder, tył uda, przywodziciele, pośladek,
-  łydka, oddech. Te same karty, minutnik i „Prowadź mnie" co w jodze (wspólne
-  `mobCard` i `prowadzPozycje`), odhaczenia per tydzień i dzień w `trening.rozc.v1`,
-  w paczce stanu, w kopii zapasowej i w archiwum cyklu. Nie wchodzi do pierścieni,
-  serii tygodni ani werdyktów — to dodatek. Na Dziś we wtorek i czwartek kafel stoi pod
-  kartą sesji, w inne dni pod listą tygodnia; raport cyklu ma linię „Rozciąganie"
+- **Rozciąganie i test zakresów we wtorek i czwartek** (`plan.rozciaganie`,
+  `#/rozciaganie/wt|cz`, ~16 min w domu): pięć pozycji statycznych (przód bioder, tył uda,
+  przywodziciele, pośladek, łydka), potem **test zakresów**, na koniec oddech. Te same
+  karty, minutnik i „Prowadź mnie" co w jodze (wspólne `mobCard` i `prowadzPozycje`).
+  Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek. Na Dziś we wtorek
+  i czwartek kafel stoi pod kartą sesji, w inne dni pod listą tygodnia
+- **Test zakresów** (`plan.rozciaganie.zakresy`): końcowe zakresy wracają stopniowo —
+  siad na piętach z podkładką, głęboki przysiad z trzymaniem framugi, siad 90/90 i czwórka
+  leżąc. Każda pozycja ma 4–5 poziomów (ostatnie to już aktywna kontrola w zakresie),
+  a na karcie i w trybie prowadzenia jest panel: poziom strzałkami i ocena 0 spokojnie /
+  1 ciągnie w mięśniu / 2 coś w stawie. Podpowiedź poziomu (`zakresPodpowiedz`): start od 1,
+  po ocenie 2 poziom niżej, po dwóch sesjach na tym samym poziomie z oceną 0–1 — o jeden
+  wyżej (przy dwóch sesjach w tygodniu najwyżej poziom na tydzień). Pod listą historia
+  „Zakresy tydzień po tygodniu", w raporcie cyklu linie „Zakresy Wt/Cz". ✓ bez oceny
+  zapisuje 0 na podpowiadanym poziomie. Siłownia i joga zostają bez końcowych zakresów
+- Zapis wtorku i czwartku siedzi w jednym magazynie `trening.rozc.v1`: odhaczenia
+  `{ "3|wt": { r1: 1 } }`, test zakresów `{ "3|wt|z": { q1: { p: 2, o: 1 } } }` — więc
+  paczka stanu, kopia zapasowa, archiwum cyklu i przeniesienie całego tygodnia obejmują oba
 - **Boje dnia z planu**: karta Dziś i tabela serii dojściowych biorą boje z pozycji
   w planie (`bojeDnia`), a nie z tabelki dni. Pierwszy bój dnia dostaje pełną drabinkę,
   drugi w tej samej sesji (ciąg po przysiadzie w cyklach 1 i 2) — skróconą
 - **Przejście między cyklami**: plan z wyższym `cykl` zamyka poprzedni — dziennik idzie do
   archiwum na urządzeniu (Dziennik → Archiwum, z raportem do skopiowania), nowy cykl
   startuje od tygodnia 1. Maksy: z planu, a gdy plan ma `e1rmZPoprzedniego` (cykl 3) —
-  te, z którymi kończy się poprzedni cykl po samoregulacji. Sesje tygodnia 1, których
+  te, z którymi kończy się poprzedni cykl po samoregulacji. Ćwiczenia dodatkowe o tej samej
+  nazwie dostają ostatni ciężar z dziennika zamkniętego cyklu (`ciezaryZPoprzedniego`,
+  doczytuje `plan-cyklN.json`, bo dziennik zna tylko pozycje), o ile suwak nie jest ustawiony. Sesje tygodnia 1, których
   dzień już minął w chwili przejścia, są oznaczone jako pominięte (pierwsza zapisana seria
-  i tak to odwołuje). W bazie każdy cykl ma osobny klucz (kod planu + `-C2`, `-C3`), żeby
-  tygodnie nowego cyklu nie mieszały się ze starymi. Plany zamkniętych cykli zostają
+  i tak to odwołuje). W bazie każdy cykl ma osobny klucz (kod planu + `-C2`; plan może podać
+  własny dopisek w `kluczCyklu` — cykl 3 używa `-C3b`, bo pod `-C3` zapisały się testy
+  z przeglądarki przed startem cyklu i ten wiersz nie jest czytany), żeby tygodnie nowego
+  cyklu nie mieszały się ze starymi. Plany zamkniętych cykli zostają
   w `plan-cykl1.json` i `plan-cykl2.json` (generator `tools/cykl2.py` pisze już tylko tam);
   na cyklu 1 działają testy logiki
 - **Samoczynna aktualizacja**: przy starcie i przy każdym powrocie do aplikacji pobiera
@@ -265,6 +280,11 @@ python -m http.server 8080
 ```
 
 Potem `http://localhost:8080`. Na telefonie w tej samej sieci: `http://<IP-komputera>:8080`.
+
+**Uwaga przy testach w przeglądarce (Playwright itp.):** lokalna kopia synchronizuje się
+z tym samym wspólnym dziennikiem co telefon. Zrzuty i testy klikane rób z zablokowanym
+ruchem do bazy, np. `context.route(/supabase\.co/, r => r.abort())`, albo z własnym kodem
+planu — inaczej testowe kliknięcia trafią do prawdziwego dziennika.
 
 ## Dane
 

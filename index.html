@@ -19,7 +19,7 @@
    i ciężki na liczby i tytuły, pełnej szerokości na tekst. */
 @font-face{
   font-family:'Archivo';
-  src:url(fonts/Archivo.woff2?v=84) format('woff2');
+  src:url(fonts/Archivo.woff2?v=85) format('woff2');
   font-weight:500 900;font-stretch:75% 100%;font-style:normal;font-display:swap;
 }
 
@@ -493,6 +493,35 @@ details.acc[open]>summary+*{animation:rozwin .26s var(--ease)}
 .mbt{flex:1;min-width:0}
 .mbname{font-weight:800;font-size:15.5px}
 .mbwhy{font-size:13px;color:var(--ink-3);line-height:1.5;margin-top:2px}
+/* ══ test zakresów: poziom strzałkami, ocena trzema przyciskami ══ */
+.zakres{margin-top:14px;padding:12px;border-radius:var(--r-s);background:var(--s2)}
+.zpoz{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
+.zstr{width:44px;height:44px;border-radius:50%;background:var(--s1);font:900 22px/1 var(--disp);color:var(--ink)}
+.zstr:disabled{opacity:.3}
+.zopis{text-align:center;min-width:0}
+.zopis b{display:block;font:800 12.5px/1.2 var(--sans);color:var(--ink-3)}
+.zopis span{display:block;font-size:14px;font-weight:600;line-height:1.35;color:var(--ink);margin-top:3px}
+.zoceny{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.zoc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:9px 4px;min-height:58px;border-radius:12px;
+  background:var(--s1);border:1.5px solid transparent;font-size:12px;font-weight:600;line-height:1.2;color:var(--ink-2);text-align:center}
+.zoc b{font:900 18px/1 var(--disp);color:var(--ink)}
+.zoc:active{transform:scale(.96)}
+.zoc.on.z0{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.zoc.on.z1{border-color:var(--ink);color:var(--ink)}
+.zoc.on.z2{border-color:var(--warn);background:var(--warn-bg);color:var(--warn)}
+.zoc.on.z0 b{color:var(--good)} .zoc.on.z2 b{color:var(--warn)}
+.zkinfo{margin-top:10px;font-size:12.5px;line-height:1.45;color:var(--ink-3)}
+.zkinfo.uwaga{color:var(--warn);font-weight:700}
+.prtresc .zakres{margin:14px 0 4px}
+.zhleg{font-size:12.5px;color:var(--ink-3)}
+.zhrow{padding:12px 0 2px;border-top:1px solid var(--line);margin-top:10px}
+.zhn{font-weight:700;font-size:14px}
+.zhch{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.zh{display:flex;flex-direction:column;align-items:center;min-width:44px;padding:5px 6px;border-radius:9px;background:var(--s2);color:var(--ink);font:900 16px/1 var(--disp)}
+.zh small{font:600 10.5px/1.2 var(--sans);color:var(--ink-3);margin-bottom:3px}
+.zh.z0{background:var(--good-bg);color:var(--good)}
+.zh.z2{background:var(--warn-bg);color:var(--warn)}
+.zhbrak{font-size:12.5px;color:var(--ink-3)}
 .mbmin{font:500 12.5px/1.5 var(--sans);color:var(--ink-3);padding-top:4px;white-space:nowrap}
 .ex.mob .exhead{align-items:center}
 .ex.mob .tick{font-size:16px}
@@ -981,8 +1010,8 @@ table.tprzerw td:first-child,table.tprzerw th:first-child{text-align:left}
 <body>
 <div class="wrap" id="app"></div>
 <div class="timer" id="timer"></div>
-<script src="progresja.js?v=84"></script>
-<script src="app.js?v=84"></script>
-<script src="ruch.js?v=84"></script>
+<script src="progresja.js?v=85"></script>
+<script src="app.js?v=85"></script>
+<script src="ruch.js?v=85"></script>
 </body>
 </html>

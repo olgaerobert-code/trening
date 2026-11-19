@@ -128,9 +128,9 @@ warmup = {
 rules = [
   {'heading': 'Układ tygodnia', 'lines': [
     'Poniedziałek — Dzień A: KOLANA. Front squat, przysiad bułgarski, przód i tył uda na maszynach, golenie.',
-    'Wtorek — rozciąganie w domu, ~12 min.',
+    'Wtorek — rozciąganie i test zakresów w domu, ~16 min.',
     'Środa — Dzień B: BIODRA. Wyciskanie, hip thrust, przysiad hiszpański, przywodziciele, pośladek średni, zginacze biodra.',
-    'Czwartek — rozciąganie, to samo co we wtorek.',
+    'Czwartek — rozciąganie i test zakresów, to samo co we wtorek.',
     'Piątek — Dzień C: ZAWIAS. Martwy ciąg, wejście na skrzynię, ciąg jednonóż, łydki, spacer farmera.',
     'Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas.',
     'Przysiad i ciąg nie stoją już w jednej sesji: każdy bój ma swój dzień i świeże nogi, a po nim zostaje ~35 min na pracę pod kolano i biodro.']},
@@ -146,10 +146,11 @@ rules = [
     'Kontrola jednonóż: bułgarski, skrzynia, ciąg jednonóż — kolano w osi pod ciężarem, a nie tylko bez niego.',
     'Golenie: piszczelowy przedni i obie części łydki (siedząc — płaszczkowaty, stojąc — brzuchaty), bo to one amortyzują kolano przy każdym kroku w dół.',
     'Zakres: rozciąganie we wtorek i czwartek plus joga w niedzielę. Trzy razy w tygodniu, bo przy rozciąganiu liczy się częstotliwość, nie długość jednej sesji.',
+    'Końcowe zakresy wracają we wtorek i czwartek: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną 0–1–2. Siłownia i joga zostają bez nich, dopóki test nie pokaże, jak kolana reagują.',
     'Góra na utrzymanie: wyciskanie raz w tygodniu, ciągnięcie trzy razy (podciąganie, face pull, wiosłowanie).']},
   {'heading': 'Ciężary', 'lines': [
     'Maksy przechodzą z cyklu 2 tak, jak zostawiła je samoregulacja — nic nie wpisujesz ręcznie. Tydzień 1 to 67,5% tych maksów: lżej niż końcówka cyklu 2, bo nogi dostają dużo nowej pracy.',
-    'Ćwiczenia, które zostały z cyklu 2 pod tą samą nazwą (bułgarski, wiosłowanie, ciąg jednonóż, piszczelowy, przysiad hiszpański, spacer farmera), startują z ciężarem ustawionym wtedy suwakiem.',
+    'Ćwiczenia, które zostały z cyklu 2 pod tą samą nazwą (bułgarski, wiosłowanie, ciąg jednonóż, piszczelowy, przysiad hiszpański, spacer farmera, face pull), startują z ostatnim ciężarem zapisanym w dzienniku cyklu 2.',
     'Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.',
     'Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak w cyklu 2. Każdą da się cofnąć.']},
   {'heading': 'Progresja ćwiczeń dodatkowych', 'lines': [
@@ -177,18 +178,95 @@ rules = [
 ]
 
 # Wtorek i czwartek: krótkie rozciąganie statyczne w domu. Te same pozycje oba dni.
-def r(id_, name, dose, sec, steps, blad, note, film):
-    return {'id': id_, 'name': name, 'dose': dose, 'sec': sec, 'steps': steps, 'blad': blad, 'note': note, 'film': film}
+def r(id_, name, dose, sec, steps, blad, note, film, **extra):
+    return {'id': id_, 'name': name, 'dose': dose, 'sec': sec, 'steps': steps, 'blad': blad, 'note': note, 'film': film, **extra}
+
+# Test zakresów: końcowe zakresy wracają poziom po poziomie, z oceną po każdej
+# pozycji (0 spokojnie, 1 ciągnie w mięśniu, 2 coś w stawie). Ostatnie poziomy
+# to już aktywna kontrola w zakresie, nie samo trzymanie. Siłownia i joga bez zmian.
+def z(id_, name, dose, sec, poziomy, steps, blad, note, film):
+    return r(id_, name, dose, sec, steps, blad, note, film, poziomy=poziomy)
+
+ZAKRESY = {
+  'title': 'Test zakresów', 'minutes': 5,
+  'why': 'Głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną po każdej pozycji. Ostatnie poziomy to już aktywna kontrola w zakresie, nie samo trzymanie.',
+  'oceny': [
+    {'v': 0, 'k': 'spokojnie', 'opis': 'lekkie rozciąganie albo nic'},
+    {'v': 1, 'k': 'ciągnie w mięśniu', 'opis': 'tak ma być'},
+    {'v': 2, 'k': 'coś w stawie', 'opis': 'ucisk albo kłucie — wyjdź z pozycji'},
+  ],
+  'rules': [
+    'Tydzień 1 to test: w każdej pozycji zaczynasz od poziomu 1 i idziesz w górę tylko tak daleko, jak ocena zostaje 0 albo 1. Zapisujesz poziom, na którym kończysz.',
+    'Ocena: 0 — spokojnie, 1 — ciągnie w mięśniu (tak ma być), 2 — coś w stawie, ucisk albo kłucie. Przy 2 wychodzisz z pozycji od razu.',
+    'Zasada 24 godzin: jeśli dzień po kolano i biodro zachowują się normalnie — bez większej sztywności, bez puchnięcia — zostajesz na poziomie albo idziesz o jeden wyżej. Jeśli coś się odezwało, następnym razem poziom niżej, a nie rezygnacja.',
+    'Najwyżej jeden poziom w górę na tydzień w każdej pozycji. Aplikacja podpowiada poziom z ostatnich zapisów: po dwóch spokojnych razach — o jeden wyżej, po ocenie 2 — o jeden niżej.',
+    'Końcowe zakresy są tylko tutaj. W jodze i przed sztangą dalej ich nie ma, a plan na siłowni zostaje bez zmian, dopóki test nie pokaże, jak kolana na to reagują.',
+    'Lotos, pełny gołąb i siad między piętami nie wracają — łączą końcowy zakres ze skrętem w kolanie i do niczego nie są potrzebne.',
+  ],
+  'items': [
+    z('q1', 'Siad na piętach z podkładką', '30 s', 30,
+      ['Gruba podkładka (zwinięty koc) między udami a łydkami, dłonie na podłodze',
+       'Cienka poduszka, dłonie na udach',
+       'Złożony ręcznik',
+       'Bez podkładki, część ciężaru na dłoniach',
+       'Bez podkładki, pełny siad, 60 s'],
+      ['Klęknij na kocu, kolana na szerokość bioder, stopy prosto do tyłu — pięty pod pośladkami, nie po bokach.',
+       'Wsuń podkładkę z twojego poziomu między uda a łydki, tuż za kolanami.',
+       'Powoli opuść pośladki na podkładkę, dłonie asekurują.',
+       'Trzymaj 30 s, oddychając spokojnie. Wychodzisz przez klęk podparty, bez gwałtownego wstawania.'],
+      'Stopy rozjeżdżające się na boki i pośladki między piętami. Taki siad daje skręt w kolanie — stopy zostają prosto pod pośladkami.',
+      'Głębokie zgięcie kolana bez skrętu: zakres, w którym kolano bywa przy klęknięciu i w dole przysiadu. Oswojony przestaje być niewiadomą.',
+      'kneeling heel sit cushion knee flexion progression'),
+    z('q2', 'Głęboki przysiad z trzymaniem framugi', '30 s', 30,
+      ['Siad na niskim stołku (~30 cm), chwila w dole i powrót',
+       'Stołek ~15 cm albo stos książek',
+       'Pełny przysiad, pięty na podkładce 2–3 cm',
+       'Pełny przysiad, pięty na podłodze',
+       'Pełny przysiad, dłonie tylko asekurują; 3 razy wejście i wyjście z dołu'],
+      ['Stań przodem do otwartych drzwi, stopy na szerokość bioder albo trochę szerzej, palce lekko na zewnątrz.',
+       'Złap framugę obiema rękami na wysokości klatki.',
+       'Zjedź w dół do swojego poziomu, kolana nad stopami, ręce przejmują tyle ciężaru, ile trzeba.',
+       'Trzymaj 30 s w dole, oddychając. Wychodzisz siłą nóg, ręce pomagają.'],
+      'Kolana uciekające do środka w dole. Rozepchnij je nad małe palce stóp, a jeśli się nie da — poziom niżej.',
+      'Pełny przysiad to zwykła codzienność: kucanie, podnoszenie czegoś z podłogi. Z rękami na framudze uczysz kolana i biodra dołu bez ciężaru na plecach.',
+      'assisted deep squat hold doorframe'),
+    z('q3', 'Siad 90/90 (rotacja biodra)', '30 s / stronę', 30,
+      ['Pośladki na poduszce, dłonie za plecami, poduszka pod tylnym kolanem',
+       'Bez poduszki pod pośladkami, dłonie za plecami',
+       'Tułów pionowo, dłonie lekko na podłodze',
+       'Tułów pochylony nad przednią goleń, plecy długie',
+       'Tułów pionowo, 5 razy uniesienie tylnego kolana na 2 s'],
+      ['Usiądź na macie. Przednia noga zgięta 90° przed tobą, goleń w poprzek; tylna noga zgięta 90° z boku, stopa do tyłu.',
+       'Przednie kolano i stopa leżą na podłodze, tylne kolano — tak nisko, jak pozwala biodro.',
+       'Ustaw się według poziomu, ciężar możliwie równo na obu pośladkach.',
+       'Trzymaj 30 s. Zmiana strony: dłonie za plecami, oba kolana przechodzą na drugą stronę.'],
+      'Ciągnięcie po wewnętrznej stronie tylnego kolana. Odsuń tylną stopę dalej od pośladka albo podłóż poduszkę pod to kolano — rotacja ma być w biodrze.',
+      'Przednia noga to rotacja zewnętrzna biodra, tylna — wewnętrzna. Biodro, które ma obie, nie oddaje ruchu kolanu przy zmianie kierunku i na schodach.',
+      '90 90 hip stretch beginner hands behind'),
+    z('q4', 'Czwórka leżąc (rotacja zewnętrzna biodra)', '30 s / stronę', 30,
+      ['Stopa dolnej nogi na ścianie, pośladki daleko od ściany',
+       'Stopa na ścianie, pośladki bliżej ściany',
+       'Bez ściany, dłonie przyciągają udo dolnej nogi do klatki',
+       'Bez ściany, dłonie przyciągają udo, 60 s'],
+      ['Leżysz na plecach, oba kolana zgięte.',
+       'Połóż kostkę prawej nogi na lewym udzie tuż nad kolanem, prawa stopa zgięta — palce do siebie.',
+       'Ustaw się według poziomu, aż poczujesz rozciąganie w prawym pośladku i z boku biodra.',
+       'Trzymaj 30 s, zmień stronę.'],
+      'Luźna, opadająca stopa górnej nogi. Stopa zgięta (palce do siebie) trzyma kolano stabilnie — wtedy ruch zostaje w biodrze.',
+      'Łagodniejszy krewny gołębia: ta sama rotacja zewnętrzna biodra, ale z plecami na podłodze i bez ciężaru na kolanie.',
+      'supine figure four stretch'),
+  ],
+}
 
 ROZCIAGANIE = {
-  'key': 'R', 'title': 'Rozciąganie', 'minutes': 12,
+  'key': 'R', 'title': 'Rozciąganie', 'minutes': 16,
   'dni': [{'k': 'wt', 'dzien': 2, 'nazwa': 'Wtorek', 'skrot': 'Wt'},
           {'k': 'cz', 'dzien': 4, 'nazwa': 'Czwartek', 'skrot': 'Cz'}],
-  'intro': 'Dwanaście minut w domu, najlepiej wieczorem po pracy. Każda pozycja to rozciąganie statyczne: wchodzisz łagodnie, oddychasz i trzymasz. Przód bioder, tył i wewnętrzna strona uda, pośladek i łydki — to, co siedzenie skraca, a przysiad i ciąg potrzebują długie. Kolano nigdy nie dostaje skrętu, a gdy na nim klęczysz, leży na kocu. Potrzebne: mata, koc, pasek albo ręcznik, ściana i krzesło.',
+  'intro': 'Kwadrans w domu, najlepiej wieczorem po pracy. Najpierw pięć pozycji rozciągania statycznego: wchodzisz łagodnie, oddychasz i trzymasz. Przód bioder, tył i wewnętrzna strona uda, pośladek i łydki — to, co siedzenie skraca, a przysiad i ciąg potrzebują długie. Potem test zakresów: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną zapisywaną w aplikacji. Na koniec oddech. Gdy klęczysz, kolano leży na kocu. Potrzebne: mata, koc, poduszka, pasek albo ręcznik, ściana, framuga i krzesło.',
   'rules': [
     'Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.',
     'Bez sprężynowania. Wejdź do 6–7 na 10 i trzymaj; z każdym wydechem pozwól sobie zejść odrobinę dalej.',
-    'Liczy się częstotliwość: dwa razy po 12 minut plus niedzielna joga dają więcej niż jedna długa sesja w tygodniu.',
+    'Liczy się częstotliwość: dwa razy w tygodniu po kwadransie plus niedzielna joga dają więcej niż jedna długa sesja.',
     'Nie przed sztangą. Rozciąganie statyczne zostaje na dni bez treningu siłowego.',
     'Zginacz biodra możesz dorzucić w każdy dzień pracy — 2 minuty po wstaniu od biurka.',
   ],
@@ -240,12 +318,16 @@ ROZCIAGANIE = {
        'Zostań minutę, 5–6 spokojnych oddechów.'],
       'Oddychanie górą klatki z unoszeniem barków. Ruch ma być w dolnych żebrach i brzuchu.',
       'Po rozciąganiu przód bioder i lędźwie puszczają, a miednica wraca do neutralnego ustawienia — tego samego, od którego zaczynasz przysiad.',
-      '90 90 breathing feet on chair'),
+      '90 90 breathing feet on chair', naKoniec=True),
   ],
+  'zakresy': ZAKRESY,
 }
 
 plan = {
   'cykl': 3,
+  # Klucz w bazie: kod planu + „-C3b". Pod „-C3" zapisały się testy z przeglądarki,
+  # zanim cykl wystartował — ten wiersz nigdy nie jest czytany.
+  'kluczCyklu': 'C3b',
   'title': 'Cykl 3 · kolana i biodra',
   'schedule': 'pon A · wt rozciąganie · śr B · czw rozciąganie · pt C · nd joga',
   'bar': stary['bar'], 'plates': stary['plates'],
