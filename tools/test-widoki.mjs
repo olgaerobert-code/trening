@@ -336,11 +336,14 @@ console.log('Ciezar na sztandze');
     'jest: ' + A.plannedOf(bojA, W, 'A').kg);
   test('i trafia do localStorage', (magazyn.get('trening.kgw.v1') || '').includes(W + '|A|' + bojA.n));
   test('plan zostaje planem', A.plannedOf(bojA, W, 'A').planKg === planKg);
+  test('wiersze serii od razu pokazuja nowy ciezar', kartaBoju().querySelectorAll('.setkg').length > 0
+    && kartaBoju().querySelectorAll('.setkg').every(x => x.textContent.includes(fmtPl(nowy))),
+    'jest: ' + kartaBoju().querySelectorAll('.setkg').map(x => x.textContent).join(' | '));
   test('jedzie do synchronizacji', 'kgw' in A.stanLokalny());
 
   A.render();                                     // pelna przebudowa, jak po odswiezeniu z bazy
   test('po przebudowie ekranu ciezar zostaje', pokazany().includes(fmtPl(nowy)), 'jest: ' + pokazany());
-  test('karta pokazuje nowy ciezar', kartaBoju().querySelector('.kgbtn').textContent.includes(fmtPl(nowy)));
+  test('karta pokazuje nowy ciezar', kartaBoju().querySelector('.kg-v').textContent.includes(fmtPl(nowy)));
 
   // Kolejna seria idzie z nowym ciezarem, a nie ze starym z planu.
   const wiersze = kartaBoju().querySelector('.sets');
@@ -359,7 +362,7 @@ console.log('Ciezar na sztandze');
 console.log('\nTrening: start i koniec');
 {
   S.week = 4; S.view = '#/d/B'; S.treningi = {}; A.render();
-  test('przed startem jest przycisk Rozpocznij', app.textContent.includes('Rozpocznij trening'));
+  test('przed startem jest przycisk Rozpocznij', app.textContent.includes('Włącz stoper'));
   app.querySelector('.trn-start').click();
   const t = A.trening(4, 'B');
   test('start zapisuje godzine rozpoczecia', t && t.start && !t.end);
@@ -372,7 +375,7 @@ console.log('\nTrening: start i koniec');
   test('czas treningu liczy sie z startu i konca', Math.abs(A.czasTreningu(A.trening(4, 'B')) - 47 * 60) < 5);
   test('podsumowanie zna czas', A.statySesji('B', 4).czas === '47 min');
   S.view = '#/d/B'; A.render();
-  test('po koncu widac czas zamiast przycisku', app.textContent.includes('Trening zakończony') && !app.textContent.includes('Rozpocznij trening'));
+  test('po koncu widac czas zamiast przycisku', app.textContent.includes('Trening zakończony') && !app.textContent.includes('Włącz stoper'));
   const st = A.statySesji('B', 4);
   test('podsumowanie bez tetna i kalorii', !('hrAvg' in st) && !('kcal' in st));
   S.view = '#/'; A.render();
@@ -901,7 +904,7 @@ console.log('Prowadzenie sesji');
   S.view = '#/'; A.render();
   Date.prototype.getDay = realny;
   const hero = app.querySelector('.dzis-k');
-  test('karta Dzis w trakcie sesji prowadzi dalej', !!hero && hero.textContent.includes('Prowadź dalej') && hero.textContent.includes('następna: ' + kA[1].it.name));
+  test('karta Dzis w trakcie sesji prowadzi dalej', !!hero && hero.textContent.includes('Prowadź dalej') && hero.textContent.includes('Następne: ' + kA[1].it.name));
   czysc();
 }
 
@@ -1058,7 +1061,7 @@ console.log('Ciezar po przeniesieniu');
   S.week = NA; S.view = '#/d/C'; A.render();
   const karta = app.querySelectorAll('.ex').find(k => k.textContent.includes(it.name));
   test('pole ciezaru startuje na dzwiganym ciezarze', karta.querySelector('.kg-v').textContent.includes(String(planZ).replace('.', ',')));
-  test('karta pokazuje ten sam ciezar', karta.querySelector('.kgbtn').textContent.includes(String(planZ).replace('.', ',')));
+  test('karta pokazuje ten sam ciezar', karta.querySelector('.kg-v').textContent.includes(String(planZ).replace('.', ',')));
   test('i widac, ile mowil plan', karta.textContent.includes('Plan: ' + String(planNa).replace('.', ',') + ' kg'));
 
   // Bez zapisu nic sie nie zmienia: plan zostaje planem.

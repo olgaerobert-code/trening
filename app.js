@@ -419,10 +419,11 @@ function kartaHero({ k, eb, tytul, pod, liczba, jedn, opis, dodatek, pg, pgEt, p
   }
   if (opis) b.append(el('div', 'dk-opis', opis));
   if (dodatek) b.append(dodatek);
+  if (pgDod) b.append(el('div', 'dk-nast', pgDod));
   const ile = pg && pg.total ? Math.min(1, pg.done / pg.total) : 0;
   const dol = el('div', 'dk-dol');
   const lewo = el('div', 'dk-pg');
-  lewo.append(el('span', null, pg && pg.total ? `${pg.done}/${pg.total} ${pgEt}` + (pgDod || '') : ''));
+  lewo.append(el('span', null, pg && pg.total ? `${pg.done}/${pg.total} ${pgEt}` : ''));
   const pas = el('i'), f = el('u');
   f.style.width = (ile * 100) + '%';
   pas.append(f); lewo.append(pas);
@@ -537,7 +538,20 @@ function weekBar() {
   g.append(lewa, prawa);
   bar.append(g);
 
-  // Dwanaście tygodni jedną linią: kreska i numer. Tapnięcie przestawia tydzień.
+  // Dwanaście tygodni jedną linią: kreska i numer. Przyciski są wąskie, a numer
+  // tygodnia rządzi ciężarami i zapisem — więc tapnięcie tylko pyta, przestawia
+  // dopiero potwierdzenie pod paskiem.
+  const potw = el('div', 'tyg-potw');
+  potw.hidden = true;
+  const zapytaj = i => {
+    if (i === w) { potw.hidden = true; return; }
+    const tak = el('button', 'tp-tak', 'Przestaw na tydzień ' + i);
+    tak.onclick = () => setWeek(i);
+    const nie = el('button', 'tp-nie', 'Zostaw ' + w);
+    nie.onclick = () => { potw.hidden = true; };
+    potw.replaceChildren(tak, nie);
+    potw.hidden = false;
+  };
   const strip = el('div', 'tyg');
   strip.setAttribute('role', 'group');
   strip.setAttribute('aria-label', 'Tydzień cyklu');
@@ -548,10 +562,10 @@ function weekBar() {
     if (i < w) p.classList.add('done');
     if (i === w) { p.classList.add('now'); p.setAttribute('aria-current', 'true'); }
     p.setAttribute('aria-label', 'Tydzień ' + i + (isDeload(i) ? ', lżejszy' : ''));
-    p.onclick = () => setWeek(i);
+    p.onclick = () => zapytaj(i);
     strip.append(p);
   }
-  bar.append(strip);
+  bar.append(strip, potw);
   return bar;
 }
 
@@ -626,7 +640,7 @@ function homeView() {
   }
   body.append(lista);
 
-  body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
+  body.append(el('div', 'foot', 'Tydzień przestawiasz ręcznie — dopiero gdy sesje zmieściły się w suficie RPE.'));
   frag.append(body);
   return frag;
 }
@@ -818,7 +832,7 @@ function kartaDzis(k, w, etykieta) {
   }
   // Sesja w trakcie: mówimy, które ćwiczenie jest następne — przycisk prowadzi prosto do niego.
   let pgDod = '';
-  if (wTrakcie) { const q = kolejkaSesji(k, w), n = nastepnyKrok(q, k, w); if (n >= 0) pgDod = ' · następna: ' + q[n].it.name; }
+  if (wTrakcie) { const q = kolejkaSesji(k, w), n = nastepnyKrok(q, k, w); if (n >= 0) pgDod = 'Następne: ' + q[n].it.name; }
   return kartaHero({ k, eb: `${etykieta} · dzień ${k} · ~${d.minutes} min`, tytul: dane.krotki, pod: dane.reszta, liczba, jedn, opis, dodatek,
     pg, pgEt: 'serii', pgDod, cta, klik, zrobione: ile >= 1 });
 }
@@ -958,7 +972,7 @@ function dayView(key, wArg) {
     const nr = nastepnyKrok(kroki, key, w);
     const ico = el('span', 'pico'); ico.innerHTML = ikona('play', 22);
     prow.append(ico, el('span', 'pt', done ? 'Prowadź dalej' : 'Prowadź sesję'),
-      el('span', 'prs', nr >= 0 ? (done ? 'od: ' : 'seria po serii, od: ') + opisKroku(kroki[nr]) : 'seria po serii, z przerwą i minutnikiem'));
+      el('span', 'prs', nr >= 0 ? `od: ${kroki[nr].it.name} · seria ${kroki[nr].i + 1}` : 'seria po serii, z przerwą i minutnikiem'));
     prow.onclick = () => prowadzSesje(key, w);
     wrapper.append(prow);
   }
@@ -1040,24 +1054,14 @@ function exerciseCard(it, key, w) {
   box.append(opis);
 
   const metrics = el('div', 'metrics');
-  const mSchemat = metric('Serie × powt.', scheme, 'mv');
-  if (!isKg(load)) metrics.append(mSchemat);
+  metrics.append(metric('Serie × powt.', scheme, 'mv'));
   let platesRow = null, odswiezKg = null;
   if (isKg(load)) {
-    // Liczba na karcie i talerze na gryfie pokazuja ciezar, ktory naprawde stoi
-    // na stojaku — czyli z wlasna poprawka, jesli ktos ja wprowadzil.
-    const m = metric('Na sztandze', fmt(pl.kg), 'mv kg', 'kg');
-    const v = $('.mv', m);
-    v.classList.add('kgbtn');
-    v.setAttribute('role', 'button');
-    v.title = 'Pokaż albo schowaj talerze';
+    // Załadowany gryf pokazuje ciężar, który naprawdę stoi na stojaku — czyli
+    // z własną poprawką, jeśli ktoś ją wprowadził. Liczba stoi niżej, między − i +.
     platesRow = platesEl(pl.kg);
     platesRow.classList.add('on');
-    v.onclick = () => platesRow.classList.toggle('on');
-    metrics.append(m, mSchemat);
     odswiezKg = kg => {
-      v.textContent = fmt(kg);
-      v.append(el('u', null, 'kg'));
       platesRow.innerHTML = '';
       platesRow.append(...[...platesEl(kg).children]);
     };
@@ -1202,9 +1206,10 @@ function platesEl(total) {
 function podsumowanieSesji(day, w) {
   const teraz = tonazDnia(w, day);
   const box = el('div', 'card podsum');
+  box.id = 'podsum';
   box.append(el('h3', null, 'Podsumowanie sesji'));
   if (!teraz.serie) {
-    box.append(el('p', null, 'Jeszcze nic nie odklikane w tym tygodniu.'));
+    box.append(el('p', null, 'Jeszcze żadnej odhaczonej serii w tym tygodniu.'));
     return box;
   }
   const grid = el('div', 'psgrid');
@@ -1230,7 +1235,7 @@ function podsumowanieSesji(day, w) {
   box.append(el('p', null, 'Tonaż liczy tylko ćwiczenia z ciężarem w kilogramach — guma i masa ciała do niego nie wchodzą.'));
   const an = analizaSesji(day, w);
   if (an) box.append(kartaPrzerw(an));
-  const pochwal = el('button', 'btn primary', 'Karta na story');
+  const pochwal = el('button', 'btn ' + (teraz.serie >= total ? 'primary' : 'ghost'), 'Karta na story');
   pochwal.style.marginTop = '12px';
   pochwal.onclick = () => pokazZaliczenie(day, w);
   box.append(pochwal);
@@ -1436,7 +1441,7 @@ function mobilityView(wArg) {
 
   const body = el('div');
   body.append(head('Joga',
-    `Dzień ${m.key} · ${m.day} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true, m.key));
+    `Dzień ${m.key} · ${m.day.toLowerCase()} · ~${state.mobShort ? m.shortMinutes : m.minutes} min`, true, m.key));
   body.append(wyborTygodnia(w, x => '#/mobilnosc/' + x));
   body.append(pasekTreningu('D', w));
   body.append(pominiecieBox('D', w));
@@ -1465,7 +1470,7 @@ function mobilityView(wArg) {
   const nastepna = widoczne.find(i => !mobJest(w, i.id));
   const pico = el('span', 'pico'); pico.innerHTML = ikona('play', 22);
   prow.append(pico, el('span', 'pt', done && nastepna ? 'Prowadź dalej' : 'Prowadź mnie'),
-    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z filmem i minutnikiem') : 'wszystko odhaczone — przejdź jeszcze raz'));
+    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z minutnikiem') : 'wszystko odhaczone — przejdź jeszcze raz'));
   prow.onclick = () => prowadzJoge(w);
   body.append(prow);
 
@@ -1556,11 +1561,11 @@ function mobCard(it, w, ctx = ctxJogi(w)) {
   }
   // Film instruktażowy: wyszukiwanie na YouTube po nazwie pozycji. Wyszukiwanie,
   // a nie jeden link, bo pojedyncze filmy znikają, a wyniki zostają.
+  let dodajFilm = null;
   if (it.film && !filmPozycji(it)) {
-    const f = el('button', 'film nowy', 'Dodaj film');
-    f.setAttribute('aria-label', 'Dodaj film instruktażowy: ' + it.name);
-    f.onclick = () => pokazFilm(it);
-    metrics.append(f);
+    dodajFilm = el('button', 'film nowy', 'Dodaj film instruktażowy');
+    dodajFilm.setAttribute('aria-label', 'Dodaj film instruktażowy: ' + it.name);
+    dodajFilm.onclick = () => pokazFilm(it);
   }
   box.append(metrics);
   // Dodatek pod metrykami (panel testu zakresów) — tylko gdy kontekst go daje.
@@ -1589,6 +1594,7 @@ function mobCard(it, w, ctx = ctxJogi(w)) {
     n.append(el('span', null, ctx.etykietaNote || 'Pod sztangę'), el('p', null, it.note));
     opis.append(n);
   }
+  if (dodajFilm) opis.append(dodajFilm);
   opis.hidden = true;
   const more = el('button', 'more', 'Jak to zrobić');
   more.onclick = () => {
@@ -1811,7 +1817,12 @@ function rozcView(k, wArg) {
   sp.append(el('span', 'proc', Math.round(done / total * 100) + '%'));
   body.append(sp);
 
-  const pasek = () => odswiezPasek(rozcDone(w, dz.k), total);
+  // Pasek postępu i historia zakresów pod listą żyją z tych samych zapisów.
+  const pasek = () => {
+    odswiezPasek(rozcDone(w, dz.k), total);
+    const hist = $('.zhist');
+    if (hist && hist.replaceWith && zakresyPlan()) hist.replaceWith(zakresyHistoriaCard());
+  };
   const panele = {};
   const ctx = {
     jest: id => rozcJest(w, dz.k, id),
@@ -1828,7 +1839,7 @@ function rozcView(k, wArg) {
   const nastepna = pozycje.find(i => !ctx.jest(i.id));
   const pico = el('span', 'pico'); pico.innerHTML = ikona('play', 22);
   prow.append(pico, el('span', 'pt', done && nastepna ? 'Prowadź dalej' : 'Prowadź mnie'),
-    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z minutnikiem i oceną zakresów') : 'wszystko odhaczone — przejdź jeszcze raz'));
+    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'z minutnikiem, na końcu ocena zakresów') : 'wszystko odhaczone — przejdź jeszcze raz'));
   prow.onclick = () => prowadzPozycje({
     lista: pozycje, jest: ctx.jest, toggle: ctx.toggle,
     blok: it => (czyZakres(it) ? Z.title : r.title) + ' · ' + dz.nazwa,
@@ -2079,8 +2090,8 @@ function postepView() {
   body.append(chartCard);
 
   body.append(noteBox('Skąd te werdykty:',
-    ' aplikacja porównuje zapisane serie z tym, co plan przewidywał W CHWILI ZAPISU. ' +
-    'Odczucia z sufitu RPE zna tylko Twoja głowa — jeśli sesja weszła w powtórzenia, ale kosztowała więcej niż powinna, ostatnie słowo należy do Ciebie.'));
+    ' aplikacja porównuje zapisane serie z tym, co plan przewidywał w chwili zapisu. ' +
+    'Odczucia z sufitu RPE znasz tylko ty — jeśli sesja weszła w powtórzenia, ale kosztowała więcej, niż powinna, ostatnie słowo jest twoje.'));
 
   for (const blok of [...BLOKI].reverse()) {
     if (!blokZakonczony(blok) && !blokTrwa(blok)) continue;
@@ -2121,7 +2132,7 @@ function postepView() {
     };
     grid.append(kafel('Sesje', `${sesjeZapisane}/${doTeraz.length * 3}`, 'zapisane w dzienniku'));
     grid.append(kafel('Serie', String(serie), 'zapisane w bloku'));
-    grid.append(kafel('Niedziele', `${niedziele}/${doTeraz.length}`, 'z odklikaną jogą'));
+    grid.append(kafel('Niedziele', `${niedziele}/${doTeraz.length}`, 'z odhaczoną jogą'));
     card.append(grid);
 
     card.append(rekalibracjaHistoria(blok));
@@ -2257,14 +2268,22 @@ function progressChart() {
   const hit = add('line', { x1: 0, y1: MT, x2: 0, y2: H - MB }, 'hitline');
 
   // linie serii + etykiety końcowe
+  const konce = [];
   for (const s of series) {
     const d = s.pts.map((pt, i) => (i ? 'L' : 'M') + px(pt.w).toFixed(1) + ' ' + py(pt.kg).toFixed(1)).join(' ');
     add('path', { d, stroke: s.color }, 'serie');
     const last = s.pts[s.pts.length - 1];
     add('circle', { cx: px(last.w), cy: py(last.kg), r: 4, fill: s.color, stroke: 'var(--s1)', 'stroke-width': 2 });
-    const lab = add('text', { x: px(last.w) + 8, y: py(last.kg) + 3 }, 'endlab');
-    lab.textContent = fmt(last.kg);
+    konce.push({ x: px(last.w) + 8, y: py(last.kg) + 3, kg: last.kg });
   }
+  // Etykiety końcowe: ta sama wartość raz, a bliskie sobie rozsunięte w pionie.
+  const etyk = konce.filter((k, i) => konce.findIndex(z => z.kg === k.kg && z.x === k.x) === i).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < etyk.length; i++) if (etyk[i].y - etyk[i - 1].y < 13) etyk[i].y = etyk[i - 1].y + 13;
+  for (let i = etyk.length - 1; i >= 0; i--) {
+    const sufit = i === etyk.length - 1 ? H - MB : etyk[i + 1].y - 13;
+    if (etyk[i].y > sufit) etyk[i].y = sufit;
+  }
+  for (const k of etyk) { const lab = add('text', { x: k.x, y: k.y }, 'endlab'); lab.textContent = fmt(k.kg); }
   // kropki aktualnego tygodnia
   const marks = [];
   for (const s of series) {
@@ -2419,8 +2438,13 @@ function planDnia(x, w) {
     const nazwa = el('span', 'pl-nazwa', r.nazwa);
     const stawy = (r.cel || []).filter(c => STAWY.some(s => s.k === c));
     const opis = el('span', 'pl-opis');
-    if (stawy.length) { const z = el('span', 'pl-staw'); z.innerHTML = znakStawu(stawy); z.setAttribute('aria-label', stawy.map(c => NAZWA_CELU[c]).join(', ')); opis.append(z); }
     opis.append(el('span', null, r.opis));
+    if (stawy.length) {
+      const z = el('span', 'pl-staw');
+      z.innerHTML = znakStawu(stawy);
+      z.append(el('span', null, stawy.map(c => NAZWA_CELU[c]).join(' · ')));
+      opis.append(z);
+    }
     li.append(el('span', 'pl-n', r.n), nazwa, opis);
     lista.append(li);
   }
@@ -2604,7 +2628,7 @@ function kgwSet(w, day, n, kg, planKg) {
 /* ---------- przenoszenie tygodnia ---------- */
 // Numer tygodnia ustawia się ręcznie, więc sesja potrafi trafić pod numer, który
 // został z poprzedniego razu. Przeniesienie przepina cały tydzień: dziennik serii,
-// własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.
+// własne ciężary bojów i odhaczoną jogę. Ten sam ruch w drugą stronę cofa zmianę.
 
 // Ruch całego tygodnia ma pola from/to. Ruch JEDNEGO DNIA ma w/na/day — celowo
 // inne nazwy: starsza wersja aplikacji na drugim urządzeniu sprawdza `m.from >= 1`,
@@ -2976,7 +3000,8 @@ function setRows(it, day, w, pl, onKg) {
       val.textContent = fmt(kgTeraz);
       if (plan) plan.hidden = kgTeraz === pl.planKg;
       zapiszCiezar(it, day, w, pl, kgTeraz);
-      if (onKg) onKg(kgTeraz);            // liczba na karcie i talerze na gryfie
+      if (onKg) onKg(kgTeraz);            // talerze na gryfie
+      wiersze.forEach(x => x.pokazKg());  // i „× kg" w każdym wierszu serii
     };
     minus.onclick = () => zatwierdzKg(kgTeraz - krokKg);
     plus.onclick = () => zatwierdzKg(kgTeraz + krokKg);
@@ -3068,7 +3093,7 @@ function setRows(it, day, w, pl, onKg) {
     const arkusz = () => arkuszSerii({
       nazwa: it.name, seria: i + 1, serii: pl.sets, powt, kg: pl.kg != null ? kgTeraz : null, kgKrok: krokKg,
       jednostka: jedn, done: r.classList.contains('done'),
-      naZapis: (np, nk) => { if (nk != null && zatwierdzKg && nk !== kgTeraz) { zatwierdzKg(nk); wiersze.forEach(x => x.pokazKg()); } zatwierdzPowt(np); },
+      naZapis: (np, nk) => { if (nk != null && zatwierdzKg && nk !== kgTeraz) zatwierdzKg(nk); zatwierdzPowt(np); },
       naCofnij: cofnij,
     });
     tick._hold = przytrzymanie(tick, { hold: arkusz });
@@ -3103,7 +3128,7 @@ function setRows(it, day, w, pl, onKg) {
   }
   // Jedno tapnięcie na całe ćwiczenie — dla dziennika uzupełnianego po serii albo po treningu.
   if (pl.sets > 1) {
-    wszystkie = el('button', 'wszystkie', 'Zalicz wszystkie serie');
+    wszystkie = el('button', 'wszystkie', 'Odhacz wszystkie serie');
     wszystkie.onclick = () => {
       const zostaly = wiersze.filter(x => !x.zrobiona());
       zostaly.forEach(x => x.zalicz(true));
@@ -3136,6 +3161,9 @@ function odswiezPostep(day, w) {
   const komplet = total > 0 && done >= total;
   if (komplet && !sp.classList.contains('komplet')) { blysk(sp, 1400); setTimeout(() => pokazZaliczenie(day, w), 450); }
   sp.classList.toggle('komplet', komplet);
+  // Podsumowanie pod listą liczy te same serie — nie może zostać przy „jeszcze nic".
+  const ps = document.getElementById('podsum');
+  if (ps && ps.replaceWith) ps.replaceWith(podsumowanieSesji(day, w));
 }
 
 /* ---------- ruch ---------- */
@@ -3643,7 +3671,9 @@ function renderTimer() {
   const box = $('#timer');
   box.innerHTML = '';
   const v = state.view || '#/';
-  const wSesji = v.startsWith('#/d/') || v.startsWith('#/mobilnosc') || v.startsWith('#/rozciaganie');
+  // Presety przerw mają sens tylko przy sztandze. Joga i rozciąganie nie mają
+  // przerw — tam pasek pokazuje minutnik dopiero, gdy ten chodzi.
+  const wSesji = v.startsWith('#/d/');
   if (!wSesji && !tId) {
     box.className = 'timer tabs';
     const nav = el('nav', 'in');
@@ -3819,7 +3849,7 @@ function przeniesCard() {
   function odswiez() {
     box.innerHTML = '';
     box.append(el('h3', null, 'Przenieś dziennik między tygodniami'));
-    box.append(el('p', null, 'Numer tygodnia ustawiasz ręcznie, więc sesja potrafi trafić pod numer, który został z poprzedniego razu. Tutaj przepinasz cały tydzień naraz albo jeden dzień: serie, własne ciężary bojów i odklikaną jogę. Ten sam ruch w drugą stronę cofa zmianę.'));
+    box.append(el('p', null, 'Numer tygodnia ustawiasz ręcznie, więc sesja potrafi trafić pod numer, który został z poprzedniego razu. Tutaj przepinasz cały tydzień naraz albo jeden dzień: serie, własne ciężary bojów i odhaczoną jogę. Ten sam ruch w drugą stronę cofa zmianę.'));
     // Zakres: cały tydzień albo jeden dzień — np. sam poniedziałek, gdy plan
     // zaczął się w środę i sesja A trafiła pod zły numer.
     const zak = el('div', 'przenrzad');
@@ -4305,7 +4335,7 @@ function pasekTreningu(day, w) {
   const t = t0 && (t0.start || t0.end) ? t0 : null;
   if (!t) {
     const b = el('button', 'trn-start');
-    b.append(el('span', 'trn-ico'), el('span', null, 'Rozpocznij trening'));
+    b.append(el('span', 'trn-ico'), el('span', null, 'Włącz stoper'));
     b.onclick = () => { rozpocznijTrening(day, w); render(); };
     box.append(b);
     box.append(el('div', 'trn-pod', day === 'D'
@@ -4500,7 +4530,7 @@ function pokazZaliczenie(day, w) {
     karta.append(zst);
   }
   const seria = seriaTygodni(w);
-  karta.append(el('div', 'zro', seria ? `${seria} ${odmiana(seria, 'tydzień', 'tygodnie', 'tygodni')} z kompletem z rzędu` : 'Komplet A, B i C zaczyna serię tygodni'));
+  karta.append(el('div', 'zro', seria ? `${seria} ${odmiana(seria, 'tydzień', 'tygodnie', 'tygodni')} z kompletem z rzędu` : 'Komplet A, B i C zaczyna passę tygodni'));
   const dziel = el('button', 'btn primary', 'Udostępnij na story');
   const info = el('div', 'zinfo');
   dziel.onclick = async () => { dziel.disabled = true; info.textContent = await udostepnij(day, w); dziel.disabled = false; };
@@ -4831,6 +4861,8 @@ function kolejkaSesji(day, w) {
 }
 // Pierwszy krok bez zapisu w dzienniku, licząc od `od`; -1, gdy wszystko zrobione.
 const nastepnyKrok = (kroki, day, w, od = 0) => kroki.findIndex((k, idx) => idx >= od && !logGet(w, day, k.it.n)[k.i]);
+const potemKrok = k => `${k.it.name} · ${k.i + 1}/${k.pl.sets}` +
+  (k.pl.kg != null ? ` · ${fmt(k.pl.kg)} kg × ${k.pl.target}` : k.pl.target != null && k.pl.unit !== 'min' ? ` · ${k.pl.target}${jednostka(k.pl) ? ' ' + jednostka(k.pl) : ''}` : '');
 const opisKroku = k => `${k.it.name} · seria ${k.i + 1} z ${k.pl.sets}` + (k.pl.kg != null ? ` · ${fmt(k.pl.kg)} kg` : '') + (k.pl.target != null ? ` × ${k.pl.target}${jednostka(k.pl) ? ' ' + jednostka(k.pl) : ''}` : '');
 
 // Wejście w tryb prowadzenia po następnym renderze dnia (karta Dziś → „Prowadź dalej").
@@ -4943,7 +4975,7 @@ function prowadzSesje(day, w) {
         kroki = kroki.map(q => (q.it === it ? { ...q, pl: k.pl } : q));
         pokaz();
         const nast = tlo.querySelector && tlo.querySelector('.prnast');          // „Potem: …" też z nowym ciężarem
-        if (nast && kroki[i + 1]) nast.textContent = 'Potem: ' + opisKroku(kroki[i + 1]);
+        if (nast && kroki[i + 1]) nast.textContent = 'Potem: ' + potemKrok(kroki[i + 1]);
       };
       s.minus.onclick = () => ustawKg(kg - krokKg);
       s.plus.onclick = () => ustawKg(kg + krokKg);
@@ -5001,7 +5033,7 @@ function prowadzSesje(day, w) {
 
     const dol = el('div', 'prdol');
     const nast = kroki[i + 1];
-    dol.append(el('div', 'prnast', nast ? 'Potem: ' + opisKroku(nast) : 'To ostatnia seria sesji'));
+    dol.append(el('div', 'prnast', nast ? 'Potem: ' + potemKrok(nast) : 'To ostatnia seria sesji'));
     const przyc = el('div', 'prprzyc');
     const wst = el('button', 'prwstecz');
     wst.innerHTML = ikona('wlewo', 22);
@@ -5053,17 +5085,14 @@ function prowadzSesje(day, w) {
     tresc.append(pas);
     const pod = el('div', 'pr-pod', 'Oddychaj. Następna seria zaraz.');
     tresc.append(pod);
-    const rz = el('div', 'pr-przyciski');
-    const plus = el('button', 'btn ghost', '+30 s');
+    const plus = el('button', 'pr-plus', '+30 s');
+    plus.setAttribute('aria-label', 'Przedłuż przerwę o 30 sekund');
     plus.onclick = () => {
       przedluzPrzerwe(30);
       odl.classList.remove('koniec'); pod.textContent = 'Oddychaj. Następna seria zaraz.';
       clearInterval(tik); tik = setInterval(odswiez, 250); odswiez();
     };
-    const pomin = el('button', 'btn ghost', 'Pomiń przerwę');
-    pomin.onclick = dalej;
-    rz.append(plus, pomin);
-    tresc.append(rz);
+    tresc.append(plus);
     // Co dalej: nazwa, cel i ciężar następnej serii — żeby w przerwie przełożyć talerze.
     const nast = kroki[i + 1];
     const karta = el('div', 'pr-nast');
@@ -5073,15 +5102,21 @@ function prowadzSesje(day, w) {
     tlo.append(tresc);
     const dol = el('div', 'prdol');
     const przyc = el('div', 'prprzyc');
-    const ok = el('button', 'prok');
-    ok.append(el('span', null, 'Dalej'));
+    const ok = el('button', 'prok cicho');
+    const okTxt = el('span', null, 'Pomiń przerwę');
+    ok.append(okTxt);
     const ic = el('span', 'iko'); ic.innerHTML = ikona('dalej', 22); ok.append(ic);
     ok.onclick = dalej;
     przyc.append(ok);
     dol.append(przyc);
     tlo.append(dol);
     const odswiez = () => {
-      if (tId) { odl.textContent = fmtS(tLeft); fill.style.width = (tTotal ? tLeft / tTotal * 100 : 0) + '%'; return; }
+      if (tId) {
+        odl.textContent = fmtS(tLeft); fill.style.width = (tTotal ? tLeft / tTotal * 100 : 0) + '%';
+        ok.classList.add('cicho'); okTxt.textContent = 'Pomiń przerwę';
+        return;
+      }
+      ok.classList.remove('cicho'); okTxt.textContent = 'Dalej';
       // Koniec przerwy: wibracja i powiadomienie poszły z timera. Ekran zostaje,
       // bo telefon może leżeć na ławce — „Dalej" jest pod kciukiem.
       clearInterval(tik);

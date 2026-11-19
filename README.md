@@ -42,7 +42,7 @@ w `tools/test-widoki.mjs` pilnuje listy słów, które nie mają prawa się w ni
 
 ## Co jest w aplikacji
 
-- **Dziś** — data i tydzień cyklu (12 kresek, tapnięcie przestawia tydzień), pasek
+- **Dziś** — data i tydzień cyklu (12 kresek; tapnięcie w inny tydzień pyta o potwierdzenie, zanim przestawi plan), pasek
   siedmiu dni (siłownia: pełny kwadrat z literą, dni w domu: obrys, wolne: kropka),
   żółta karta sesji z ciężarem boju, przyrostem od zeszłego tygodnia i tym, ile
   serii dostanie każdy staw, **mapa stawów** tygodnia (noga z boku: biodro, kolano,
@@ -51,7 +51,7 @@ w `tools/test-widoki.mjs` pilnuje listy słów, które nie mają prawa się w ni
   białe światła sędziów), znaczkiem stawu i opisem wykonania. Wiersz serii: liczba
   i ✓. Tapnięcie w liczbę albo przytrzymanie ✓ otwiera arkusz z dużymi przyciskami
   (powtórzenia, ciężar, cofnięcie); tap w odhaczoną serię niczego nie cofa.
-  „Zalicz wszystkie serie" odhacza ćwiczenie jednym tapnięciem. Ciężar ćwiczenia
+  „Odhacz wszystkie serie" odhacza ćwiczenie jednym tapnięciem. Ciężar ćwiczenia
   ustawia się przyciskami − / + albo z klawiatury. Skończone ćwiczenie zwija się.
 - **Prowadzenie** („Prowadź sesję") — jedna seria na cały ekran: załadowany gryf
   przy boju, duże liczby, „Zaliczona" pod kciukiem, superseria przeplatana. Po serii
