@@ -2,7 +2,7 @@
  "cykl": 3,
  "kluczCyklu": "C3b",
  "title": "Cykl 3 · kolana i biodra",
- "schedule": "pon A · wt rozciąganie · śr B · czw rozciąganie · pt C · nd joga",
+ "schedule": "wt A · śr rozciąganie · czw B · pt rozciąganie · sob C · nd joga",
  "bar": 20,
  "plates": [
   25,
@@ -249,7 +249,8 @@
   "A": {
    "key": "A",
    "title": "KOLANA · przysiad i czworogłowe",
-   "day": "Poniedziałek",
+   "day": "Wtorek",
+   "dzien": 2,
    "minutes": 55,
    "items": [
     {
@@ -345,7 +346,8 @@
   "B": {
    "key": "B",
    "title": "BIODRA · pośladki i przywodziciele",
-   "day": "Środa",
+   "day": "Czwartek",
+   "dzien": 4,
    "minutes": 50,
    "items": [
     {
@@ -439,7 +441,8 @@
   "C": {
    "key": "C",
    "title": "ZAWIAS · ciąg i jednonóż",
-   "day": "Piątek",
+   "day": "Sobota",
+   "dzien": 6,
    "minutes": 55,
    "items": [
     {
@@ -514,7 +517,7 @@
      "scheme": "3 × 12",
      "load": "podwójna progresja",
      "rpe": 7,
-     "note": "SUPERSERIA ze spacerem farmera — 60 s po parze. Na maszynie, w suwnicy Smitha albo na stopniu z hantlem w dłoni. Kolana proste, ale nie zablokowane. Pięta nisko w dół, 1 s na górze, 3 s w dół. Przy prostym kolanie pracuje brzuchaty łydki — druga połowa łydki obok płaszczkowatego z poniedziałku.",
+     "note": "SUPERSERIA ze spacerem farmera — 60 s po parze. Na maszynie, w suwnicy Smitha albo na stopniu z hantlem w dłoni. Kolana proste, ale nie zablokowane. Pięta nisko w dół, 1 s na górze, 3 s w dół. Przy prostym kolanie pracuje brzuchaty łydki — druga połowa łydki obok płaszczkowatego z wtorku.",
      "noCut": false,
      "kgStart": 40
     },
@@ -558,7 +561,7 @@
    ]
   },
   "skip": [
-   "Rozciągania statycznego przed sztangą — zostaje na wtorek, czwartek i niedzielę.",
+   "Rozciągania statycznego przed sztangą — zostaje na środę, piątek i niedzielę.",
    "Długiego rolowania — 1–2 minuty na miejsce, które naprawdę tego potrzebuje, wystarczą.",
    "Krążeń bioder, skrętów kolana i pracy w końcowych zakresach.",
    "Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć."
@@ -664,11 +667,11 @@
   {
    "heading": "Układ tygodnia",
    "lines": [
-    "Poniedziałek — Dzień A: KOLANA. Front squat, przysiad bułgarski, przód i tył uda na maszynach, golenie.",
-    "Wtorek — rozciąganie i test zakresów w domu, ~16 min.",
-    "Środa — Dzień B: BIODRA. Wyciskanie, hip thrust, przysiad hiszpański, przywodziciele, pośladek średni, zginacze biodra.",
-    "Czwartek — rozciąganie i test zakresów, to samo co we wtorek.",
-    "Piątek — Dzień C: ZAWIAS. Martwy ciąg, wejście na skrzynię, ciąg jednonóż, łydki, spacer farmera.",
+    "Wtorek — Dzień A: KOLANA. Front squat, przysiad bułgarski, przód i tył uda na maszynach, golenie.",
+    "Środa — rozciąganie i test zakresów w domu, ~16 min.",
+    "Czwartek — Dzień B: BIODRA. Wyciskanie, hip thrust, przysiad hiszpański, przywodziciele, pośladek średni, zginacze biodra.",
+    "Piątek — rozciąganie i test zakresów, to samo co w środę.",
+    "Sobota — Dzień C: ZAWIAS. Martwy ciąg, wejście na skrzynię, ciąg jednonóż, łydki, spacer farmera.",
     "Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas.",
     "Przysiad i ciąg nie stoją już w jednej sesji: każdy bój ma swój dzień i świeże nogi, a po nim zostaje ~35 min na pracę pod kolano i biodro."
    ]
@@ -690,8 +693,8 @@
     "Biodra: pośladek wielki (hip thrust, ciąg), pośladek średni (odwodzenie, deska boczna, spacer farmera), przywodziciele (kopenhaski) i zginacze biodra (marsz z gumą).",
     "Kontrola jednonóż: bułgarski, skrzynia, ciąg jednonóż — kolano w osi pod ciężarem, a nie tylko bez niego.",
     "Golenie: piszczelowy przedni i obie części łydki (siedząc — płaszczkowaty, stojąc — brzuchaty), bo to one amortyzują kolano przy każdym kroku w dół.",
-    "Zakres: rozciąganie we wtorek i czwartek plus joga w niedzielę. Trzy razy w tygodniu, bo przy rozciąganiu liczy się częstotliwość, nie długość jednej sesji.",
-    "Końcowe zakresy wracają we wtorek i czwartek: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną 0–1–2. Siłownia i joga zostają bez nich, dopóki test nie pokaże, jak kolana reagują.",
+    "Zakres: rozciąganie w środę i piątek plus joga w niedzielę. Trzy razy w tygodniu, bo przy rozciąganiu liczy się częstotliwość, nie długość jednej sesji.",
+    "Końcowe zakresy wracają w środę i piątek: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną 0–1–2. Siłownia i joga zostają bez nich, dopóki test nie pokaże, jak kolana reagują.",
     "Góra na utrzymanie: wyciskanie raz w tygodniu, ciągnięcie trzy razy (podciąganie, face pull, wiosłowanie)."
    ]
   },
@@ -719,7 +722,7 @@
    "heading": "Zasada złego dnia",
    "lines": [
     "Rozgrzewka idzie wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.",
-    "Plecy sztywne rano w piątek: ciąg lżej o 10% albo zamień piątek ze środą. Kolejność da się przestawić w obrębie tygodnia.",
+    "Plecy sztywne rano w sobotę: ciąg lżej o 10% albo zamień sobotę z czwartkiem. Kolejność da się przestawić w obrębie tygodnia.",
     "Ćwiczenie, w którym coś nie gra w stawie (nie zmęczenie mięśnia) — najpierw mniejszy zakres, potem mniejszy ciężar, a jeśli dalej nie gra, pomiń je w tej sesji i zanotuj."
    ]
   },
@@ -762,7 +765,7 @@
    "Jeśli coś w pozycji kłuje albo promieniuje w nogę, wyjdź z niej i przejdź do następnej. Rozciąganie ma ciągnąć, nie kłuć.",
    "Równowagi rób przy ścianie albo krześle, dopóki nie trzymasz ich spokojnie. Podpórka to nie oszustwo, tylko ustawienie.",
    "Krótka wersja (~20 min) to pozycje oznaczone kropką: po jednej albo dwie z każdego bloku.",
-   "Po ciężkim piątku zrób bloki 1, 5 i 6. Reszta poczeka do następnej niedzieli."
+   "Po ciężkiej sobocie zrób bloki 1, 5 i 6. Reszta poczeka do następnej niedzieli."
   ],
   "blocks": [
    {
@@ -1154,7 +1157,8 @@
      }
     ]
    }
-  ]
+  ],
+  "dzien": 0
  },
  "rozciaganie": {
   "key": "R",
@@ -1162,16 +1166,16 @@
   "minutes": 16,
   "dni": [
    {
-    "k": "wt",
-    "dzien": 2,
-    "nazwa": "Wtorek",
-    "skrot": "Wt"
+    "k": "sr",
+    "dzien": 3,
+    "nazwa": "Środa",
+    "skrot": "Śr"
    },
    {
-    "k": "cz",
-    "dzien": 4,
-    "nazwa": "Czwartek",
-    "skrot": "Cz"
+    "k": "pt",
+    "dzien": 5,
+    "nazwa": "Piątek",
+    "skrot": "Pt"
    }
   ],
   "intro": "Kwadrans w domu, najlepiej wieczorem po pracy. Najpierw pięć pozycji rozciągania statycznego: wchodzisz łagodnie, oddychasz i trzymasz. Przód bioder, tył i wewnętrzna strona uda, pośladek i łydki — to, co siedzenie skraca, a przysiad i ciąg potrzebują długie. Potem test zakresów: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną zapisywaną w aplikacji. Na koniec oddech. Gdy klęczysz, kolano leży na kocu. Potrzebne: mata, koc, poduszka, pasek albo ręcznik, ściana, framuga i krzesło.",

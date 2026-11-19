@@ -27,7 +27,7 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
 - **Przeniesienie tygodnia albo jednego dnia** — sesja zapisana pod złym numerem
   przepina się w ustawieniach jednym ruchem: cały tydzień albo sam wybrany dzień
-  (Pn A, Śr B, Pt C, Nd joga): serie, własne ciężary bojów i odklikana joga. Cel
+  (w cyklu 3: Wt A, Cz B, So C, Nd joga): serie, własne ciężary bojów i odklikana joga. Cel
   musi być pusty, ruch w drugą stronę cofa zmianę, a drugie urządzenie powtarza
   go u siebie
 - **Pominięta sesja** — plan zaczęty w środę nie ma poniedziałku w tygodniu 1.
@@ -69,7 +69,7 @@ Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
   jeszcze zapisana w całości**: dziennik uzupełnia się po treningu, często dopiero
   następnego dnia, więc w sobotę otwiera piątkowy dzień C, a nie ekran główny.
   Sesji z przyszłości nie proponuje. Przy komplecie wraca do dzisiejszego dnia
-  (pon → A, śr → B, pt → C, nd → joga), oznacza jego kafel i w dzień wolny mówi,
+  (dni z planu — w cyklu 3 wt → A, czw → B, sob → C, nd → joga), oznacza jego kafel i w dzień wolny mówi,
   kiedy następna. Do wyłączenia w ustawieniach
 - **Raport bloków** — werdykt każdej sesji tydzień po tygodniu, frekwencja, tonaż
   i odklikane niedziele. Po bloku 1 i 2 sprawdza warunek z arkusza („KAŻDA sesja
@@ -136,20 +136,23 @@ się bezpiecznych marginesów.
   na dole, bez testu maksa — tydzień 12 to sprawdzian
 - **Cykl 3 — kolana i biodra** (plan.json, generator `tools/cykl3.py`): każdy dzień zaczyna
   się jednym bojem ze sztangą, a resztę godziny wypełniają trzy superserie pod kolano
-  i biodro. Pn A **Kolana** (front squat; bułgarski + podciąganie; prostowanie + uginanie
-  na maszynach; piszczelowy + łydka siedząc), śr B **Biodra** (wyciskanie; hip thrust +
+  i biodro. Wt A **Kolana** (front squat; bułgarski + podciąganie; prostowanie + uginanie
+  na maszynach; piszczelowy + łydka siedząc), czw B **Biodra** (wyciskanie; hip thrust +
   face pull; przysiad hiszpański + plank kopenhaski; odwodzenie w pochyleniu + marsz
-  biodrowy z gumą), pt C **Zawias** (martwy ciąg z podłogi z pełną drabinką; skrzynia
+  biodrowy z gumą), sob C **Zawias** (martwy ciąg z podłogi z pełną drabinką; skrzynia
   z wolnym zejściem + wiosłowanie; ciąg jednonóż + deska boczna z odwodzeniem; łydka
-  stojąc + spacer farmera). Joga bez zmian. Ćwiczenia z cyklu 2 mają te same nazwy, więc
-  suwak pamięta ich ciężar. Test w `tools/test-widoki.mjs` liczy budżet każdej sesji
+  stojąc + spacer farmera). Joga bez zmian w pozycjach. Dni tygodnia siedzą w planie
+  (`dzien` przy A/B/C i jodze, `ustawDniTygodnia`) — wt/czw/sob, bo tak wyglądał tydzień
+  w dzienniku cyklu 2; plany bez tego pola zostają przy pn/śr/pt. Jednorazowa
+  `migracjaDniCyklu3` zdejmuje pominięcia tygodnia 1 nadane jeszcze według starych dni
+  i przepina rozciąganie z wt/czw na śr/pt. Test w `tools/test-widoki.mjs` liczy budżet każdej sesji
   (rozgrzewka, drabinka, praca z tempem, przerwy z opisu) — mieści się w godzinie
-- **Rozciąganie i test zakresów we wtorek i czwartek** (`plan.rozciaganie`,
-  `#/rozciaganie/wt|cz`, ~16 min w domu): pięć pozycji statycznych (przód bioder, tył uda,
+- **Rozciąganie i test zakresów w środę i piątek** (`plan.rozciaganie`,
+  `#/rozciaganie/sr|pt`, ~16 min w domu): pięć pozycji statycznych (przód bioder, tył uda,
   przywodziciele, pośladek, łydka), potem **test zakresów**, na koniec oddech. Te same
   karty, minutnik i „Prowadź mnie" co w jodze (wspólne `mobCard` i `prowadzPozycje`).
-  Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek. Na Dziś we wtorek
-  i czwartek kafel stoi pod kartą sesji, w inne dni pod listą tygodnia
+  Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek. Na Dziś w środę
+  i piątek kafel stoi pod kartą sesji, w inne dni pod listą tygodnia
 - **Test zakresów** (`plan.rozciaganie.zakresy`): końcowe zakresy wracają stopniowo —
   siad na piętach z podkładką, głęboki przysiad z trzymaniem framugi, siad 90/90 i czwórka
   leżąc. Każda pozycja ma 4–5 poziomów (ostatnie to już aktywna kontrola w zakresie),
@@ -157,10 +160,10 @@ się bezpiecznych marginesów.
   1 ciągnie w mięśniu / 2 coś w stawie. Podpowiedź poziomu (`zakresPodpowiedz`): start od 1,
   po ocenie 2 poziom niżej, po dwóch sesjach na tym samym poziomie z oceną 0–1 — o jeden
   wyżej (przy dwóch sesjach w tygodniu najwyżej poziom na tydzień). Pod listą historia
-  „Zakresy tydzień po tygodniu", w raporcie cyklu linie „Zakresy Wt/Cz". ✓ bez oceny
+  „Zakresy tydzień po tygodniu", w raporcie cyklu linie „Zakresy Śr/Pt". ✓ bez oceny
   zapisuje 0 na podpowiadanym poziomie. Siłownia i joga zostają bez końcowych zakresów
-- Zapis wtorku i czwartku siedzi w jednym magazynie `trening.rozc.v1`: odhaczenia
-  `{ "3|wt": { r1: 1 } }`, test zakresów `{ "3|wt|z": { q1: { p: 2, o: 1 } } }` — więc
+- Zapis środy i piątku siedzi w jednym magazynie `trening.rozc.v1`: odhaczenia
+  `{ "3|sr": { r1: 1 } }`, test zakresów `{ "3|sr|z": { q1: { p: 2, o: 1 } } }` — więc
   paczka stanu, kopia zapasowa, archiwum cyklu i przeniesienie całego tygodnia obejmują oba
 - **Boje dnia z planu**: karta Dziś i tabela serii dojściowych biorą boje z pozycji
   w planie (`bojeDnia`), a nie z tabelki dni. Pierwszy bój dnia dostaje pełną drabinkę,

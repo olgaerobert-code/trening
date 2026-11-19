@@ -4,7 +4,8 @@
 #
 # Cel cyklu: kolana i biodra. Każdy dzień zaczyna się jednym bojem ze sztangą
 # (pn front squat, śr wyciskanie, pt martwy ciąg), a resztę godziny wypełniają
-# superserie pod kolano i biodro. Wtorek i czwartek: 12 minut rozciągania w domu.
+# superserie pod kolano i biodro. Tydzień jak w dzienniku cyklu 2: wt A, czw B, sob C;
+# środa i piątek: kwadrans rozciągania i testu zakresów w domu, niedziela joga.
 import json, os, sys
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 sys.path.insert(0, os.path.dirname(__file__))
@@ -67,7 +68,7 @@ C = [
   it(5, 'c3c5', 'Deska boczna z odwodzeniem nogi', '3 × 8 / stronę', 'masa ciała', '—',
      'Deska boczna na przedramieniu: łatwiej z dolnym kolanem na macie, trudniej na prostych nogach. Biodra w górze, w jednej linii z barkami. Górną, prostą nogę unosisz na 30–40 cm, 1 s pauzy, 2 s w dół. Pracuje pośladek średni obu nóg naraz — górnej w ruchu, dolnej w podporze — i boczna taśma tułowia.', superset='B2'),
   it(6, 'c3c6', 'Wspięcia na palce stojąc na maszynie', '3 × 12', 'podwójna progresja', 7,
-     'SUPERSERIA ze spacerem farmera — 60 s po parze. Na maszynie, w suwnicy Smitha albo na stopniu z hantlem w dłoni. Kolana proste, ale nie zablokowane. Pięta nisko w dół, 1 s na górze, 3 s w dół. Przy prostym kolanie pracuje brzuchaty łydki — druga połowa łydki obok płaszczkowatego z poniedziałku.', superset='C1', kgStart=40),
+     'SUPERSERIA ze spacerem farmera — 60 s po parze. Na maszynie, w suwnicy Smitha albo na stopniu z hantlem w dłoni. Kolana proste, ale nie zablokowane. Pięta nisko w dół, 1 s na górze, 3 s w dół. Przy prostym kolanie pracuje brzuchaty łydki — druga połowa łydki obok płaszczkowatego z wtorku.', superset='C1', kgStart=40),
   it(7, 'c3c7', 'Spacer farmera jednorącz', '3 × 30 m / stronę', 'podwójna progresja', 7,
      'Ciężki hantel w jednej ręce, druga ręka swobodnie. Barki na jednym poziomie, tułów pionowo — nie przechylaj się w żadną stronę. Krótkie, spokojne kroki, kolana w linii stóp. Pośladek średni po przeciwnej stronie trzyma miednicę poziomo przy każdym kroku.', superset='C2', kgStart=24),
 ]
@@ -97,7 +98,7 @@ weeks = {
 warmup = {
   'ramp': {'steps': ['Gryf 2 × 8', '50% × 5', '70% × 3', '85% × 2', 'Ciężar roboczy'],
            'lifts': [{'lift': 'front', 'name': 'Front squat'}, {'lift': 'bench', 'name': 'Wyciskanie leżąc'}, {'lift': 'dl', 'name': 'Martwy ciąg'}]},
-  'skip': ['Rozciągania statycznego przed sztangą — zostaje na wtorek, czwartek i niedzielę.',
+  'skip': ['Rozciągania statycznego przed sztangą — zostaje na środę, piątek i niedzielę.',
            'Długiego rolowania — 1–2 minuty na miejsce, które naprawdę tego potrzebuje, wystarczą.',
            'Krążeń bioder, skrętów kolana i pracy w końcowych zakresach.',
            'Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć.'],
@@ -127,11 +128,11 @@ warmup = {
 
 rules = [
   {'heading': 'Układ tygodnia', 'lines': [
-    'Poniedziałek — Dzień A: KOLANA. Front squat, przysiad bułgarski, przód i tył uda na maszynach, golenie.',
-    'Wtorek — rozciąganie i test zakresów w domu, ~16 min.',
-    'Środa — Dzień B: BIODRA. Wyciskanie, hip thrust, przysiad hiszpański, przywodziciele, pośladek średni, zginacze biodra.',
-    'Czwartek — rozciąganie i test zakresów, to samo co we wtorek.',
-    'Piątek — Dzień C: ZAWIAS. Martwy ciąg, wejście na skrzynię, ciąg jednonóż, łydki, spacer farmera.',
+    'Wtorek — Dzień A: KOLANA. Front squat, przysiad bułgarski, przód i tył uda na maszynach, golenie.',
+    'Środa — rozciąganie i test zakresów w domu, ~16 min.',
+    'Czwartek — Dzień B: BIODRA. Wyciskanie, hip thrust, przysiad hiszpański, przywodziciele, pośladek średni, zginacze biodra.',
+    'Piątek — rozciąganie i test zakresów, to samo co w środę.',
+    'Sobota — Dzień C: ZAWIAS. Martwy ciąg, wejście na skrzynię, ciąg jednonóż, łydki, spacer farmera.',
     'Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas.',
     'Przysiad i ciąg nie stoją już w jednej sesji: każdy bój ma swój dzień i świeże nogi, a po nim zostaje ~35 min na pracę pod kolano i biodro.']},
   {'heading': 'Czas trwania', 'lines': [
@@ -145,8 +146,8 @@ rules = [
     'Biodra: pośladek wielki (hip thrust, ciąg), pośladek średni (odwodzenie, deska boczna, spacer farmera), przywodziciele (kopenhaski) i zginacze biodra (marsz z gumą).',
     'Kontrola jednonóż: bułgarski, skrzynia, ciąg jednonóż — kolano w osi pod ciężarem, a nie tylko bez niego.',
     'Golenie: piszczelowy przedni i obie części łydki (siedząc — płaszczkowaty, stojąc — brzuchaty), bo to one amortyzują kolano przy każdym kroku w dół.',
-    'Zakres: rozciąganie we wtorek i czwartek plus joga w niedzielę. Trzy razy w tygodniu, bo przy rozciąganiu liczy się częstotliwość, nie długość jednej sesji.',
-    'Końcowe zakresy wracają we wtorek i czwartek: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną 0–1–2. Siłownia i joga zostają bez nich, dopóki test nie pokaże, jak kolana reagują.',
+    'Zakres: rozciąganie w środę i piątek plus joga w niedzielę. Trzy razy w tygodniu, bo przy rozciąganiu liczy się częstotliwość, nie długość jednej sesji.',
+    'Końcowe zakresy wracają w środę i piątek: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną 0–1–2. Siłownia i joga zostają bez nich, dopóki test nie pokaże, jak kolana reagują.',
     'Góra na utrzymanie: wyciskanie raz w tygodniu, ciągnięcie trzy razy (podciąganie, face pull, wiosłowanie).']},
   {'heading': 'Ciężary', 'lines': [
     'Maksy przechodzą z cyklu 2 tak, jak zostawiła je samoregulacja — nic nie wpisujesz ręcznie. Tydzień 1 to 67,5% tych maksów: lżej niż końcówka cyklu 2, bo nogi dostają dużo nowej pracy.',
@@ -162,7 +163,7 @@ rules = [
     'Przy gumach: najpierw pełny zakres i pauza, dopiero potem grubsza guma.']},
   {'heading': 'Zasada złego dnia', 'lines': [
     'Rozgrzewka idzie wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.',
-    'Plecy sztywne rano w piątek: ciąg lżej o 10% albo zamień piątek ze środą. Kolejność da się przestawić w obrębie tygodnia.',
+    'Plecy sztywne rano w sobotę: ciąg lżej o 10% albo zamień sobotę z czwartkiem. Kolejność da się przestawić w obrębie tygodnia.',
     'Ćwiczenie, w którym coś nie gra w stawie (nie zmęczenie mięśnia) — najpierw mniejszy zakres, potem mniejszy ciężar, a jeśli dalej nie gra, pomiń je w tej sesji i zanotuj.']},
   {'heading': 'Tydzień 7 — lżejszy (nie jest opcjonalny)', 'lines': [
     'Boje: 2 × 6 przy 55% (dół) i 62,5% (góra), RPE 5.',
@@ -177,7 +178,7 @@ rules = [
     'Jeśli nie — powtarzasz ten sam tydzień z tym samym ciężarem. To nie jest opóźnienie planu.']},
 ]
 
-# Wtorek i czwartek: krótkie rozciąganie statyczne w domu. Te same pozycje oba dni.
+# Środa i piątek (dni bez siłowni): rozciąganie i test zakresów w domu. Te same pozycje oba dni.
 def r(id_, name, dose, sec, steps, blad, note, film, **extra):
     return {'id': id_, 'name': name, 'dose': dose, 'sec': sec, 'steps': steps, 'blad': blad, 'note': note, 'film': film, **extra}
 
@@ -260,8 +261,8 @@ ZAKRESY = {
 
 ROZCIAGANIE = {
   'key': 'R', 'title': 'Rozciąganie', 'minutes': 16,
-  'dni': [{'k': 'wt', 'dzien': 2, 'nazwa': 'Wtorek', 'skrot': 'Wt'},
-          {'k': 'cz', 'dzien': 4, 'nazwa': 'Czwartek', 'skrot': 'Cz'}],
+  'dni': [{'k': 'sr', 'dzien': 3, 'nazwa': 'Środa', 'skrot': 'Śr'},
+          {'k': 'pt', 'dzien': 5, 'nazwa': 'Piątek', 'skrot': 'Pt'}],
   'intro': 'Kwadrans w domu, najlepiej wieczorem po pracy. Najpierw pięć pozycji rozciągania statycznego: wchodzisz łagodnie, oddychasz i trzymasz. Przód bioder, tył i wewnętrzna strona uda, pośladek i łydki — to, co siedzenie skraca, a przysiad i ciąg potrzebują długie. Potem test zakresów: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną zapisywaną w aplikacji. Na koniec oddech. Gdy klęczysz, kolano leży na kocu. Potrzebne: mata, koc, poduszka, pasek albo ręcznik, ściana, framuga i krzesło.',
   'rules': [
     'Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.',
@@ -323,26 +324,34 @@ ROZCIAGANIE = {
   'zakresy': ZAKRESY,
 }
 
+# Joga bez zmian w pozycjach. Ciężki dzień wypada teraz w sobotę, tuż przed nią.
+import copy
+JOGA_C3 = copy.deepcopy(JOGA)
+JOGA_C3['dzien'] = 0
+JOGA_C3['rules'] = [l.replace('Po ciężkim piątku', 'Po ciężkiej sobocie') for l in JOGA_C3['rules']]
+assert any('Po ciężkiej sobocie' in l for l in JOGA_C3['rules'])
+
 plan = {
   'cykl': 3,
   # Klucz w bazie: kod planu + „-C3b". Pod „-C3" zapisały się testy z przeglądarki,
   # zanim cykl wystartował — ten wiersz nigdy nie jest czytany.
   'kluczCyklu': 'C3b',
   'title': 'Cykl 3 · kolana i biodra',
-  'schedule': 'pon A · wt rozciąganie · śr B · czw rozciąganie · pt C · nd joga',
+  'schedule': 'wt A · śr rozciąganie · czw B · pt rozciąganie · sob C · nd joga',
   'bar': stary['bar'], 'plates': stary['plates'],
   # Wartości awaryjne — na urządzeniu z cyklem 2 maksy przechodzą z niego (niżej).
   'e1rm': dict(stary['e1rm']),
   'e1rmZPoprzedniego': ['bench', 'front', 'dl'],
   'weeks': weeks,
   'days': {
-    'A': {'key': 'A', 'title': 'KOLANA · przysiad i czworogłowe', 'day': 'Poniedziałek', 'minutes': 55, 'items': A},
-    'B': {'key': 'B', 'title': 'BIODRA · pośladki i przywodziciele', 'day': 'Środa', 'minutes': 50, 'items': B},
-    'C': {'key': 'C', 'title': 'ZAWIAS · ciąg i jednonóż', 'day': 'Piątek', 'minutes': 55, 'items': C},
+    # `dzien` = getDay (0 niedziela): aplikacja bierze z niego Dziś, pasek tygodnia i pominięcia.
+    'A': {'key': 'A', 'title': 'KOLANA · przysiad i czworogłowe', 'day': 'Wtorek', 'dzien': 2, 'minutes': 55, 'items': A},
+    'B': {'key': 'B', 'title': 'BIODRA · pośladki i przywodziciele', 'day': 'Czwartek', 'dzien': 4, 'minutes': 50, 'items': B},
+    'C': {'key': 'C', 'title': 'ZAWIAS · ciąg i jednonóż', 'day': 'Sobota', 'dzien': 6, 'minutes': 55, 'items': C},
   },
   'warmup': warmup,
   'rules': rules,
-  'mobility': JOGA,
+  'mobility': JOGA_C3,
   'rozciaganie': ROZCIAGANIE,
   'deloadTekst': 'Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar. Rozciąganie i joga bez zmian.',
   'tydzien12Tekst': 'Bez testu maksa. Front squat: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Kolana i biodra: porównaj z tygodniem 2 ciężary w bułgarskim, na skrzyni, w przysiadzie hiszpańskim i hip thruście oraz czas w planku kopenhaskim.',
