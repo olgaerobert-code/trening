@@ -833,7 +833,9 @@ function kartaDzis(k, w, etykieta) {
   // Sesja w trakcie: mówimy, które ćwiczenie jest następne — przycisk prowadzi prosto do niego.
   let pgDod = '';
   if (wTrakcie) { const q = kolejkaSesji(k, w), n = nastepnyKrok(q, k, w); if (n >= 0) pgDod = 'Następne: ' + q[n].it.name; }
-  return kartaHero({ k, eb: `${etykieta} · dzień ${k} · ~${d.minutes} min`, tytul: dane.krotki, pod: dane.reszta, liczba, jedn, opis, dodatek,
+  // „Następny · czwartek" już mówi, który to dzień — litera stoi w pasku tygodnia wyżej.
+  const eb = etykieta.includes('·') ? `${etykieta} · ~${d.minutes} min` : `${etykieta} · dzień ${k} · ~${d.minutes} min`;
+  return kartaHero({ k, eb, tytul: dane.krotki, pod: dane.reszta, liczba, jedn, opis, dodatek,
     pg, pgEt: 'serii', pgDod, cta, klik, zrobione: ile >= 1 });
 }
 
