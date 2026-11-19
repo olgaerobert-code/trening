@@ -1,9 +1,10 @@
 /* Cache-first: po pierwszym wejściu aplikacja działa bez zasięgu.
    Zmiana CACHE unieważnia stary komplet plików. */
-const CACHE = 'plan12-v88';
+const CACHE = 'trening-v89';
 const ASSETS = [
-  './', './index.html', './app.js?v=87', './progresja.js?v=87', './ruch.js?v=87', './plan.json?v=87', './plan-cykl1.json?v=87', './plan-cykl2.json?v=87',
-  './fonts/Archivo.woff2?v=87',
+  './', './index.html', './app.css?v=88', './app.js?v=88', './progresja.js?v=88', './plan.json?v=88',
+  './plan-cykl1.json?v=88', './plan-cykl2.json?v=88', './plan-cykl3.json?v=88',
+  './fonts/Grotesk.woff2?v=88', './fonts/Grotesk-pl.woff2?v=88', './fonts/Mono.woff2?v=88', './fonts/Mono-pl.woff2?v=88',
   './manifest.webmanifest', './icon-192.png', './icon-512.png',
 ];
 

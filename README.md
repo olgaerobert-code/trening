@@ -1,404 +1,195 @@
-# Plan 12 tygodni
+# Trening
 
-Statyczna aplikacja (PWA) z 12-tygodniowym planem treningowym. Ustawiasz numer tygodnia
-na górze ekranu i wszystko poniżej przelicza się samo: ciężary bojów, schematy serii,
-sufity RPE i serie dojściowe w rozgrzewce.
+Statyczna aplikacja (PWA) z 12-tygodniowym planem treningowym pod **zdrowe kolana,
+kostki i biodra**. Prowadzi przez sesję seria po serii, odlicza przerwy i rundy na
+worku, liczy ciężary bojów z numeru tygodnia i pokazuje, ile pracy dostał w tygodniu
+każdy z trzech stawów.
 
-Bez kont, bez bazy danych, bez backendu. Po pierwszym otwarciu działa offline.
+Bez kont, bez backendu poza opcjonalną synchronizacją dziennika. Po pierwszym
+otwarciu działa offline.
 
-## Co jest w środku
+## Plan (cykl 4)
 
-- **Dni A / B / C** — ćwiczenia z ciężarem na wybrany tydzień, superserie sparowane
-  wizualnie, opisy wykonania i pasek postępu sesji
-- **Dziennik serii** — powtórzenia na suwaku przy każdej serii, ciężar **jeden na
-  ćwiczenie** (sztangę ładujesz raz). Wszystko wypełnione z planu, ruszasz tylko przy
-  odchyłce. Zmiany trafiają prosto do DOM-u, bez przebudowy ekranu — ~3 ms na ruch
-- **Własny ciężar boju** — zjechanie suwakiem z liczby, którą podał plan, zostaje
-  zapisane: na ten jeden tydzień to jest ciężar tego ćwiczenia. Karta i gryf pokazują
-  go od razu, kolejne serie idą z nim, a pod suwakiem stoi liczba z planu i przycisk
-  **Wróć do planu**. Zapisana sesja pokazuje ciężar z dziennika, nie z planu:
-  po przeniesieniu tygodnia albo po wczytaniu kopii na ekranie stoi to, co
-  naprawdę było na sztandze. Ocena sesji liczy się dalej wobec planu — zjazd
-  w dół to niedowóz, bo tym właśnie jest
-- **Samoregulacja** — dwa ostatnie tygodnie treningowe sterują E1RM na kolejny:
-  +5% / +2,5% / 0% / −5%, limit ±10%, z przyciskiem Cofnij. Nic nie pyta o zgodę:
-  plan przelicza się przy wejściu, a decyzje zostają do cofnięcia, nie do podjęcia
-- **Synchronizacja** — dziennik między telefonem a laptopem przez kod planu (Supabase),
-  offline first: wpis zawsze ląduje lokalnie i dosyła się, gdy wróci zasięg
-- **Przeniesienie tygodnia albo jednego dnia** — sesja zapisana pod złym numerem
-  przepina się w ustawieniach jednym ruchem: cały tydzień albo sam wybrany dzień
-  (w cyklu 3: Wt A, Cz B, So C, Nd joga): serie, własne ciężary bojów i odklikana joga. Cel
-  musi być pusty, ruch w drugą stronę cofa zmianę, a drugie urządzenie powtarza
-  go u siebie
-- **Pominięta sesja** — plan zaczęty w środę nie ma poniedziałku w tygodniu 1.
-  W pustej sesji jest przycisk „Nie było tej sesji — pomiń": aplikacja przestaje
-  ją proponować na starcie i na karcie Dziś, tydzień ze środą i piątkiem liczy
-  się do serii tygodni z kompletem, a werdykt bloku pomija ten tydzień dla tego
-  boju. Pierwsza zapisana seria sama odwołuje pominięcie; „Przywróć sesję" też.
-  Zapis synchronizuje się z drugim urządzeniem
-- **Jednorazowa migracja cyklu 2** (`migracjaPoniedzialku` w `app.js`): plan zaczął
-  się w środę, więc przy pierwszym otwarciu każde urządzenie samo przesuwa
-  poniedziałek z tygodnia 2 na 3 (a gdy coś siedzi pod tygodniem 1, także 1 → 2)
-  i oznacza pusty poniedziałek tygodnia 1 jako pominięty. Ruchy mają stałe
-  identyfikatory, więc drugie urządzenie ich nie powtarza; pełny cel blokuje ruch.
-  Ruch jednego dnia jest zapisany polami `w`/`na`/`day` zamiast `from`/`to`, żeby
-  starsza wersja aplikacji nie wykonała go jako przeniesienia całego tygodnia.
-  Działa wyłącznie w cyklu 2 — świeża instalacja w cyklu 3 jej nie wykona
-- **Kalkulator talerzy** — tapnięcie w ciężar pokazuje, co założyć na gryf
-  (kolory wg standardu IPF)
-- **Postęp** — wykres trzech bojów przez 12 tygodni (jedna oś, krzyżyk i dymek pod
-  palcem), pod nim bloki z werdyktami sesji i rekalibracją, a na dole zwinięte tabele
-  tygodni. Kalkulator 1RM siedzi pod kartą E1RM na ekranie głównym — używa się go
-  dwa razy na cykl, więc nie zajmuje kafla
-- **Timer przerwy** — pierścień odliczający, 60 / 90 / 120 / 180 s, sygnał dźwiękowy
-  (odliczanie 3-2-1 i trójdźwięk na koniec) plus wibracja; przełącznik wyciszenia
-- **Niedziela — joga** pod ruchomość odcinka lędźwiowego oraz kolana, biodra
-  i kostki pracujące bez skrętu i bez końcowych zakresów (~44 min, sześć bloków:
-  oddech i miednica, kręgosłup w ruchu, stopy i kostki, biodra i kolana,
-  stabilizacja, tył nogi i wyciszenie). Pozycje ze skrętem w kolanie (lotos,
-  pełny gołąb, siad między piętami) są usunięte, kolana zawsze na kocu. Wersja
-  krótka ~20 min, odklikiwanie liczone per tydzień, minutnik przy pozycjach
-  z czasem. Każda z 20 pozycji ma **wejście krok po kroku**, częsty błąd, zdanie
-  o tym, co daje pod sztangą, i **film z instruktażem w samej karcie** —
-  widać go podczas przewijania, a odtwarza się po tapnięciu (YouTube bez
-  ciasteczek). Do tapnięcia ładuje się tylko okładka. Ikona ⤢ w rogu powiększa
-  film na cały ekran (w pionie obraca go w poziom). „Zmień film” pod ramką
-  pozwala wkleić inny link; plan zapamiętuje go przy pozycji i synchronizuje
-  z drugim urządzeniem
-- **Dziś** — aplikacja startuje na **najświeższej sesji tygodnia, która nie jest
-  jeszcze zapisana w całości**: dziennik uzupełnia się po treningu, często dopiero
-  następnego dnia, więc w sobotę otwiera piątkowy dzień C, a nie ekran główny.
-  Sesji z przyszłości nie proponuje. Przy komplecie wraca do dzisiejszego dnia
-  (dni z planu — w cyklu 3 wt → A, czw → B, sob → C, nd → joga), oznacza jego kafel i w dzień wolny mówi,
-  kiedy następna. Do wyłączenia w ustawieniach
-- **Raport bloków** — werdykt każdej sesji tydzień po tygodniu, frekwencja, tonaż
-  i odklikane niedziele. Po bloku 1 i 2 sprawdza warunek z arkusza („KAŻDA sesja
-  w suficie RPE") i sama podnosi ciężary dołu o 10%, a karta na ekranie głównym
-  mówi, co się zmieniło, i zostawia „Cofnij". Blok bez kompletu **nie jest
-  zamykany**: dziennik uzupełnia się po fakcie, więc podwyżka wejdzie później,
-  jeśli brakujące sesje się znajdą. W tygodniu z rekalibracją korekta z dwóch
-  tygodni omija podniesione boje — „nigdy więcej niż 10% naraz"
-- **Zasady** prowadzenia cyklu
+Sprzęt: sztanga ze stojakiem, ławka, hantle, drążek, gumy, skrzynia albo stopień
+i worek treningowy. Żadnych maszyn.
+
+| Dzień | Sesja |
+|---|---|
+| wt | **A · Góra** — wyciskanie (w parze z piszczelowym), bułgarski + podciąganie, goblet z piętami w górze + Nordic, rundy na worku |
+| śr | rozciąganie i test zakresów w domu, ~17 min |
+| czw | **B · Biodra**, bez sztangi — skrzynia + wiosłowanie, ciąg jednonóż + plank kopenhaski, przysiad hiszpański + deska boczna, łydka + strzałkowe, rundy na worku |
+| pt | rozciąganie i test zakresów |
+| sob | **C · Dół** — front squat, martwy ciąg, łydka stojąc + spacer farmera |
+| nd | joga (20 pozycji statycznych, wersja krótka ~20 min) |
+
+- **Trzy stawy.** Każde ćwiczenie ma w planie pole `cel` (`kolano`, `kostka`,
+  `biodro`, `gora`, `tulow`, `kondycja`). Z niego aplikacja rysuje znaczek stawu na
+  karcie ćwiczenia i liczy bilans tygodnia (`bilansStawow`).
+- **Bloki.** Schemat ćwiczeń dodatkowych jest zapisany na każdy tydzień
+  (`scheme.tyg`): blok 1 (tyg. 1–3), blok 2 (4–6), tydzień 7 lżej (2 serie),
+  blok 3 (8–11), tydzień 12 sprawdzian. Boje idą procentami E1RM jak dotąd.
+- **Worek.** Rundy to zwykłe ćwiczenie ze schematem `3 × 2 min`; aplikacja odlicza
+  rundę i przerwę sama.
+- **Test zakresów.** Głębokie zgięcie kolana i rotacja biodra wracają poziom po
+  poziomie, z oceną 0–1–2 po każdej pozycji; aplikacja podpowiada poziom.
+
+Plan robi generator `tools/cykl4.py` → `plan.json`. Zamknięte cykle leżą
+w `plan-cykl1.json` … `plan-cykl3.json` (potrzebne do raportu z archiwum; generatory
+`tools/cykl2.py` i `tools/cykl3.py` piszą już tylko tam). Joga: `tools/joga2.py`.
+
+Treść planu jest wyłącznie treningowa — repozytorium jest publiczne. Test
+w `tools/test-widoki.mjs` pilnuje listy słów, które nie mają prawa się w nim znaleźć.
+
+## Co jest w aplikacji
+
+- **Dziś** — data i tydzień cyklu (12 kresek, tapnięcie przestawia tydzień), pasek
+  siedmiu dni (siłownia: pełny kwadrat z literą, dni w domu: obrys, wolne: kropka),
+  żółta karta sesji z ciężarem boju, przyrostem od zeszłego tygodnia i tym, ile
+  serii dostanie każdy staw, **mapa stawów** tygodnia (noga z boku: biodro, kolano,
+  kostka) oraz lista tygodnia. W dzień rozciągania kartą jest rozciąganie.
+- **Sesja** — karty ćwiczeń ze światłami serii (zapalają się przy odhaczeniu, jak
+  białe światła sędziów), znaczkiem stawu i opisem wykonania. Wiersz serii: liczba
+  i ✓. Tapnięcie w liczbę albo przytrzymanie ✓ otwiera arkusz z dużymi przyciskami
+  (powtórzenia, ciężar, cofnięcie); tap w odhaczoną serię niczego nie cofa.
+  „Zalicz wszystkie serie" odhacza ćwiczenie jednym tapnięciem. Ciężar ćwiczenia
+  ustawia się przyciskami − / + albo z klawiatury. Skończone ćwiczenie zwija się.
+- **Prowadzenie** („Prowadź sesję") — jedna seria na cały ekran: załadowany gryf
+  przy boju, duże liczby, „Zaliczona" pod kciukiem, superseria przeplatana. Po serii
+  ekran przerwy z odliczaniem i następną serią.
+- **Minutnik serii na czas** — izometria i rundy: 5 s na ustawienie, praca, przy
+  ćwiczeniach na stronę 5 s na zmianę i druga strona; po ostatnim sygnale seria
+  odhacza się sama i rusza przerwa. Rundy na worku mają gong na start i koniec
+  oraz stuknięcie 10 s przed końcem. Działa w prowadzeniu i z listy (ikona zegara).
+- **Dolny pasek** — cztery zakładki (Dziś, Plan, Postęp, Więcej); w sesji zamienia
+  się w zegar przerwy: presety 60 s / 90 s / 2 min / 3 min, w trakcie „+30 s"
+  i „Pomiń".
+- **Rozciąganie i test zakresów** (śr, pt) oraz **joga** (nd) — karty z krokami,
+  częstym błędem i minutnikiem, tryb „Prowadź mnie"; w jodze filmy w kartach.
+- **Plan** — fazy cyklu, tydzień dzień po dniu (po rozwinięciu ćwiczenia ze
+  schematem na bieżący tydzień) i zasady prowadzenia cyklu.
+- **Postęp** — liczby cyklu, stawy tydzień po tygodniu, poziomy testu zakresów,
+  przerwy między seriami, maksy (E1RM) z kalkulatorem, tonaż, wykres ciężarów
+  trzech bojów, werdykty bloków i tabele tygodni.
+- **Więcej** — synchronizacja i kod planu, ustawienia sesji, zegarek, przeniesienie
+  tygodnia albo dnia, kopia zapasowa, archiwum cykli, raport cyklu do skopiowania.
+- **Karta zaliczenia** — trzy światła, tonaż, stan stawów po sesji i obrazek
+  1080 × 1920 do udostępnienia.
 
 ## Wygląd
 
-Kierunek: **tablica wyników na stadionie nocą**, ściszona. Ciemny granat,
-płaskie kolory dni (A niebieski, B zielony, C pomarańczowy, joga fioletowa),
-jeden krój (Archivo): zwężony i ciężki na liczby i tytuły, pełnej szerokości
-na tekst. Podpisy to zwykłe pismo 12–13 px, wielkie litery zostają tylko
-w tytułach. Numer tygodnia zajmuje pół ekranu, tygodnie leżą na wstędze
-przewijanej palcem, dolny pasek jest pływającą kapsułą, a karta sesji to
-plakat z literą dnia w paralaksie. Nic nie gra w tle: żadnych plam, zorzy,
-pulsowania ani pasów — jedyną gwiazdą jest sztanga 3D. Jasny motyw to ta
-sama konstrukcja na białym tle; ciemny włącza się sam według ustawienia
-telefonu. Aplikacja jest robiona pod telefon na siłowni: każdy cel dotyku ma
-co najmniej 44 px, pasek stanu iPhone'a jest przezroczysty, a ekrany trzymają
-się bezpiecznych marginesów.
+Kierunek: siłownia w piwnicy w dniu startu. Grafit i papier, jedna turniejowa żółć
+na kartę „Dziś" i główne przyciski, a kolory talerzy IPF tylko na narysowanym gryfie
+i w seriach wykresu. Staw rozpoznaje się po miejscu na nodze, nie po kolorze.
+Hierarchia idzie z wielkości pisma, nie z ramek.
 
-- **Ekran Dziś**: duży tytuł z datą i numerem tygodnia, pod nim dwanaście
-  tygodni jednym rzędem (deload na bursztynowo), pasek dni Pn–Nd z literą
-  sesji i jej stanem (łuk = w trakcie, zielone ✓ = zapisane), a potem karta
-  sesji z tym, po co się otwiera aplikację: ciężar boju dużą cyfrą, schemat
-  i sufit RPE, postęp i czarna pigułka „Zacznij trening"
-- **Panel tygodnia** jak widżet aktywności: cztery koncentryczne pierścienie
-  (A, B, C, joga), tonaż tygodnia, ile tygodni z rzędu z kompletem A, B i C
-  i miejsce w cyklu. Zawsze ciemny, w obu motywach
-- **Sesja zaliczona**: po odhaczeniu ostatniej serii (albo ostatniej pozycji
-  jogi) wjeżdża karta z tonażem, bojem i pierścieniami tygodnia, a przycisk
-  **Udostępnij na story** rysuje z tych danych obraz 1080 × 1920 i otwiera
-  systemowe menu udostępniania (Instagram, WhatsApp…). Gdzie przeglądarka
-  tego nie umie, plik ląduje w pobranych. Ta sama karta jest pod
-  podsumowaniem każdej sesji
-- **Postęp**: rząd trzech liczb (tonaż cyklu, sesje, tygodnie z rzędu),
-  kolumny tonażu tydzień po tygodniu i wykres ciężarów według zasad skilla
-  dataviz — linie 2 px, kropki końcowe z obwódką, etykiety w kolorze tekstu
-- **Przerwa po ✓**: odhaczenie serii samo włącza timer przerwy z czasem z opisu
-  ćwiczenia (3 min przy bojach, od bloku 3 4 min przy wyciskaniu, 90/60 s przy
-  dodatkowych; w superserii dopiero po drugim ćwiczeniu pary). Ostatnia seria
-  sesji przerwy nie włącza. Wyłącznik: Dziennik → W trakcie sesji. Timer liczy
-  od godziny końca, więc nie rozjeżdża się, gdy telefon schowa aplikację w tle
-- **Przerwy między seriami**: chwila odhaczenia każdej serii jest zapisywana
-  (osobno od dziennika, synchronizowana z drugim urządzeniem). Przerwa = odstęp
-  między odhaczeniami minus szacowany czas serii (~3 s na powtórzenie, ćwiczenia na
-  czas — ich czas, obie strony razem; w superserii obrót to cała para). Ocena wobec
-  planu: za krótko < 75%, za długo > 150% (i co najmniej 45 s ponad plan). Widać ją
-  w karcie ćwiczenia (pastylka przy każdej przerwie), w zwiniętej karcie, w
-  podsumowaniu sesji (średnia, rozkład, ćwiczenia odstające), na karcie zaliczenia
-  i w Postępie (8 ostatnich sesji). Odstępy krótsze niż 20 s (dziennik dopisywany
-  po fakcie) i dłuższe niż 15 min są pomijane
-- **Cykl 2 — kolana, biodra, postawa** (plan.json, generator `tools/cykl2.py`): 3 dni
-  (pn A góra i postawa, śr B kolana, kostki i mięśnie głębokie bez sztangi, pt C front
-  squat i martwy ciąg) + joga w niedzielę, domyślnie krótka. Na każde ćwiczenie
-  pchające co najmniej dwa ciągnące. Joga nowa (`tools/joga2.py`): 20 pozycji statycznych
-  w 6 blokach (ustawienie, równowaga, wojownicy, plecy i postawa, biodra, wyciszenie),
-  krótka wersja 9 pozycji. Każde ćwiczenie ma opis (filmy tylko w jodze); przy
-  hantlach i maszynie jest suwak ciężaru z wartością startową (`kgStart`). Sufit RPE 7
-  na dole, bez testu maksa — tydzień 12 to sprawdzian
-- **Cykl 3 — kolana i biodra** (plan.json, generator `tools/cykl3.py`): boje stoją tam,
-  gdzie w cyklu 2 — wt A **Góra** (wyciskanie; bułgarski + podciąganie; goblet z piętami
-  w górze + Nordic; piszczelowy przy ścianie + łydka siedząc z hantlami), czw B
-  **Jednonóż** bez sztangi (skrzynia z wolnym zejściem + wiosłowanie; hip thrust jednonóż
-  + face pull; ciąg jednonóż + deska boczna z odwodzeniem; przysiad hiszpański + plank
-  kopenhaski; marsz biodrowy z gumą), sob C **Dół** (front squat, martwy ciąg ze skróconą
-  drabinką; łydka stojąc + spacer farmera). Bez maszyn: sztanga ze stojakiem, ławka,
-  hantle, drążek, gumy i skrzynia; rozgrzewka bez roweru i bieżni. Joga bez zmian w pozycjach. Dni tygodnia siedzą w planie
-  (`dzien` przy A/B/C i jodze, `ustawDniTygodnia`) — wt/czw/sob, bo tak wyglądał tydzień
-  w dzienniku cyklu 2; plany bez tego pola zostają przy pn/śr/pt. Jednorazowa
-  `migracjaDniCyklu3` zdejmuje pominięcia tygodnia 1 nadane jeszcze według starych dni
-  i przepina rozciąganie z wt/czw na śr/pt. Test w `tools/test-widoki.mjs` liczy budżet każdej sesji
-  (rozgrzewka, drabinka, praca z tempem, przerwy z opisu) — mieści się w godzinie
-- **Rozciąganie i test zakresów w środę i piątek** (`plan.rozciaganie`,
-  `#/rozciaganie/sr|pt`, ~16 min w domu): pięć pozycji statycznych (przód bioder, tył uda,
-  przywodziciele, pośladek, łydka), potem **test zakresów**, na koniec oddech. Te same
-  karty, minutnik i „Prowadź mnie" co w jodze (wspólne `mobCard` i `prowadzPozycje`).
-  Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek. Na Dziś w środę
-  i piątek kafel stoi pod kartą sesji, w inne dni pod listą tygodnia
-- **Test zakresów** (`plan.rozciaganie.zakresy`): końcowe zakresy wracają stopniowo —
-  siad na piętach z podkładką, głęboki przysiad z trzymaniem framugi, siad 90/90 i czwórka
-  leżąc. Każda pozycja ma 4–5 poziomów (ostatnie to już aktywna kontrola w zakresie),
-  a na karcie i w trybie prowadzenia jest panel: poziom strzałkami i ocena 0 spokojnie /
-  1 ciągnie w mięśniu / 2 coś w stawie. Podpowiedź poziomu (`zakresPodpowiedz`): start od 1,
-  po ocenie 2 poziom niżej, po dwóch sesjach na tym samym poziomie z oceną 0–1 — o jeden
-  wyżej (przy dwóch sesjach w tygodniu najwyżej poziom na tydzień). Pod listą historia
-  „Zakresy tydzień po tygodniu", w raporcie cyklu linie „Zakresy Śr/Pt". ✓ bez oceny
-  zapisuje 0 na podpowiadanym poziomie. Siłownia i joga zostają bez końcowych zakresów
-- Zapis środy i piątku siedzi w jednym magazynie `trening.rozc.v1`: odhaczenia
-  `{ "3|sr": { r1: 1 } }`, test zakresów `{ "3|sr|z": { q1: { p: 2, o: 1 } } }` — więc
-  paczka stanu, kopia zapasowa, archiwum cyklu i przeniesienie całego tygodnia obejmują oba
-- **Boje dnia z planu**: karta Dziś i tabela serii dojściowych biorą boje z pozycji
-  w planie (`bojeDnia`), a nie z tabelki dni. Pierwszy bój dnia dostaje pełną drabinkę,
-  drugi w tej samej sesji (ciąg po przysiadzie w cyklach 1 i 2) — skróconą
-- **Przejście między cyklami**: plan z wyższym `cykl` zamyka poprzedni — dziennik idzie do
-  archiwum na urządzeniu (Dziennik → Archiwum, z raportem do skopiowania), nowy cykl
-  startuje od tygodnia 1. Maksy: z planu, a gdy plan ma `e1rmZPoprzedniego` (cykl 3) —
-  te, z którymi kończy się poprzedni cykl po samoregulacji. Ćwiczenia dodatkowe o tej samej
-  nazwie dostają ostatni ciężar z dziennika zamkniętego cyklu (`ciezaryZPoprzedniego`,
-  doczytuje `plan-cyklN.json`, bo dziennik zna tylko pozycje), o ile suwak nie jest ustawiony. Sesje tygodnia 1, których
-  dzień już minął w chwili przejścia, są oznaczone jako pominięte (pierwsza zapisana seria
-  i tak to odwołuje). W bazie każdy cykl ma osobny klucz (kod planu + `-C2`; plan może podać
-  własny dopisek w `kluczCyklu` — cykl 3 używa `-C3b`, bo pod `-C3` zapisały się testy
-  z przeglądarki przed startem cyklu i ten wiersz nie jest czytany), żeby tygodnie nowego
-  cyklu nie mieszały się ze starymi. Plany zamkniętych cykli zostają
-  w `plan-cykl1.json` i `plan-cykl2.json` (generator `tools/cykl2.py` pisze już tylko tam);
-  na cyklu 1 działają testy logiki
-- **Samoczynna aktualizacja**: przy starcie i przy każdym powrocie do aplikacji pobiera
-  świeży index.html i porównuje numer wersji (`?v=`) z działającym. Nowsza wersja =
-  przeładowanie od razu; w trakcie sesji, jogi albo przerwy — pasek „Nowa wersja
-  aplikacji" do tapnięcia. To samo po przejęciu strony przez nowy service worker.
-  Dziennik → Wersja aplikacji pokazuje numer i ma „Sprawdź teraz"
-- **Raport cyklu** (Dziennik → Raport cyklu → „Kopiuj raport cyklu"): cały dziennik
-  jako zwykły tekst — każda seria z ciężarem, oceny tygodni, korekty, rekalibracje,
-  czasy sesji, przerwy i joga — do wklejenia w rozmowę i analizy cyklu. Bez kodu planu
-- **Skończone ćwiczenie zwija się** do jednego wiersza z ✓ i tym, co zrobione
-  („4 × 6 @ 112,5 kg"); tapnięcie w nagłówek rozwija je z powrotem
-- **Ekran Dziś** to tylko pierścienie tygodnia, karta dzisiejszej sesji i lista
-  tygodnia. Korekty i podwyżki ciężarów siedzą w jednym zwiniętym pasku, a ciężary
-  tygodnia i edycja maksów (E1RM) przeszły do Postępu
-- **Joga — tryb prowadzenia** („Prowadź mnie"): jedna pozycja na cały ekran z filmem,
-  dawką, minutnikiem i krokami; „Zrobione → dalej" odhacza i przechodzi do następnej.
-  Startuje od pierwszej nieodhaczonej pozycji i włącza stoper treningu, a po ostatniej
-  pozycji go zatrzymuje. W niedzielę karta Dziś ma w tle okładkę filmu pierwszej pozycji
-- **Rozpocznij / Zakończ trening**: trening startuje przyciskiem albo sam przy
-  pierwszej odhaczonej serii (pozycji jogi) w bieżącym tygodniu, gdy sesja była
-  pusta; „Anuluj start" usuwa stoper, serie zostają. W sesji duży przycisk startu, potem
-  przyklejony pasek ze stoperem i „Zakończ". Koniec zapisuje czas
-  przy tej sesji, synchronizuje go z drugim
-  urządzeniem i pokazuje na karcie zaliczenia oraz na story. Start jest
-  opcjonalny — dziennik uzupełniany po fakcie działa jak wcześniej
-- **Zegarek** (Dziennik → Zegarek), rozpisany krok po kroku:
-  - **iPhone**: plan trzeba dodać do ekranu początkowego z Safari — tylko
-    wtedy iOS pozwala stronie wysyłać powiadomienia. Aplikacja wykrywa
-    iPhone'a i pokazuje baner z instrukcją, dopóki plan nie działa z ikony
-  - koniec przerwy przychodzi jako powiadomienie, które Huawei Health
-    przekazuje na zegarek; przycisk „Wyślij próbne" sprawdza całą drogę
-- **Sesja**: wiersze serii jak w dzienniku siłowni — numer, suwak powtórzeń,
-  wartość, odhaczenie po prawej. Odhaczona seria robi się zielona. Tapnięcie
-  w liczbę (ciężar albo powtórzenia) otwiera w tym samym miejscu pole
-  liczbowe z klawiaturą telefonu; Enter albo zejście z pola zapisuje tą samą
-  drogą co suwak, Escape anuluje
-- **Przytrzymanie ✓**: tap odhacza serię (z krótką wibracją), tap w odhaczoną
-  serię nic nie cofa — spocony kciuk trafia w ✓ przez pomyłkę. Przytrzymanie
-  ✓ przez pół sekundy otwiera arkusz korekty: duże steppery powtórzeń
-  i ciężaru (co 2,5 kg), „Zapisz", „Cofnij odhaczenie", „Anuluj"
-- **Prowadź sesję** (dni A, B, C): jedna seria na cały ekran, jak „Prowadź mnie"
-  w jodze. Kreski postępu na górze, nazwa ćwiczenia, „Seria 2 z 4 · cel 8
-  powt. · RPE 7", przy boju sztanga 3D załadowana na bieżący ciężar, steppery
-  ciężaru i powtórzeń, wielki przycisk „Zaliczona ✓". Superseria przeplata
-  serie pary (A1, A2, A1, A2…). Po serii ekran przerwy z wielkim odliczaniem,
-  „+30 s", „Pomiń przerwę" i zapowiedzią następnej serii; ekran nie przeskakuje
-  sam, „Dalej →" czeka pod kciukiem. Ostatnia seria zamyka trening i pokazuje
-  kartę zaliczenia. ✕ wychodzi do listy, serie zostają. Wejście: przycisk na
-  ekranie sesji, a karta Dziś w trakcie sesji pokazuje następne ćwiczenie
-  i „Prowadź dalej"
-- **Powiadomienie o końcu przerwy** (Dziennik → W trakcie sesji): niezależne od
-  zegarka, domyślnie włączone. Gdy timer dojdzie do zera przy zgaszonym ekranie,
-  telefon wibruje i pokazuje „Koniec przerwy" z opisem następnej serii.
-  W kapsule w czasie przerwy są „+30 s" i „Pomiń" zamiast presetów
-- **Dolny pasek** to zakładki (Dziś, Postęp, Zasady, Dziennik); w trakcie
-  sesji zamienia się w timer przerwy
-- **Archivo** w zwężonej, ciężkiej odmianie na liczby i tytuły — tak wygląda
-  tablica z ciężarami. Przycięty do polskiej łaciny (49 KB, `fonts/`, OFL),
-  siedzi w cache service workera. Tekst do czytania idzie krojem systemowym
-- Jedyny kolor poza kolorami dni i serii to zieleń „zapisane" i bursztyn
-  ostrzeżeń. Główny przycisk jest czarny (w ciemnym motywie biały)
-- **Plakaty sesji** na Dziś: każda sesja z listy to karta w kolorze dnia
-  (najwyżej 42% wysokości ekranu) z literą w paralaksie, a karta „Dziś" ma
-  sztangę 3D z ciężarem boju. W sesji karty ćwiczeń mają naturalną wysokość,
-  skończone ćwiczenie zwija się do jednego wiersza
-- **Sztanga 3D** (`ruch.js`, płótno bez bibliotek): gryf, kołnierze, tuleje
-  i talerze w kolorach IPF. W spoczynku stoi nieruchomo; rysuje się tylko wtedy,
-  gdy talerze wjeżdżają na gryf po zmianie ciężaru (suwak, klawiatura, stepper
-  w trybie prowadzenia) albo gdy palec ją obraca. Pod spodem rozkład na stronę
-- **Ruch** (`ruch.js` — tylko obserwuje DOM, nic nie zapisuje): duch poprzedniego
-  ekranu odsuwa się 220 ms, gdy wjeżdża nowy, elementy wjeżdżają jeden po drugim
-  (260 ms), fala po tapnięciu (320 ms), konfetti tylko na karcie zaliczenia,
-  paralaksa litery dnia i numeru tygodnia przy przewijaniu, dolna kapsuła
-  wypełnia się w czasie przerwy, wstęga tygodni sama przewija się do bieżącego,
-  liczby liczą się od zera, pierścienie i wykresy wypełniają się przy wejściu.
-  Wszystko ≤ 300 ms, ease-out, tylko `transform` i `opacity`; nic nie animuje się
-  w nieskończoność; `prefers-reduced-motion` wyłącza wszystko
+- Kroje: **Trening Grotesk** (Mona Sans, OFL; szeroki i ciężki na liczby i tytuły,
+  zwykły na tekst) i **Trening Mono** (Martian Mono, OFL; dane i podpisy). Pliki
+  w `fonts/` są przycięte do polskiej łaciny (76 KB razem) i mają zmienioną nazwę
+  wewnętrzną — tego wymaga licencja przy modyfikacji. Licencje leżą obok.
+- Jasny i ciemny motyw według ustawienia telefonu; tokeny na górze `app.css`.
+- Cele dotyku co najmniej 44 px, ruch do 300 ms i tylko po akcji,
+  `prefers-reduced-motion` wyłącza animacje.
+- Ikony aplikacji rysuje `node tools/make-icons.mjs` (znak trzech stawów).
 
-Element rozpoznawczy to **narysowany załadowany gryf** pod każdym ciężarem z tabeli:
-kolory wg standardu IPF, talerze ciężkie przy kołnierzu, lekkie na zewnątrz, średnice
-i grubości w proporcji do prawdziwych krążków.
+## Logika, która się nie zmieniła
 
-Zmiana palety unieważnia pomiar kontrastu, więc paleta ma własny test:
+- `ciężar = floor(E1RM × % / 2,5) × 2,5`; serie dojściowe gryf → 50% → 70% → 85%;
+  drugi bój w tej samej sesji (ciąg po przysiadzie) dostaje skróconą drabinkę.
+- **Samoregulacja**: dwa ostatnie tygodnie sterują E1RM (+5% / +2,5% / 0% / −5%,
+  limit ±10%, „Cofnij"). Po bloku 1 i 2 komplet sesji w suficie RPE podnosi dół
+  o 10%. Czyste funkcje w `progresja.js`.
+- Nie liczymy E1RM z wykonanej serii (sufit RPE znaczy „zostaw zapas"), a przy
+  każdej serii zapisujemy też plan z chwili zapisu — korekta w górę nie przerabia
+  dawnego „czysto" na „niedowóz".
+- **Przerwy**: czas stoi w opisie ćwiczenia („Przerwy 3 min", „90 s po parze
+  (od bloku 3: 120 s)"); chwile odhaczeń dają ocenę przerw wobec planu.
+- **Dni tygodnia** siedzą w planie (`dzien` przy dniach i jodze, `rozciaganie.dni`).
 
-```bash
-node tools/test-kontrast.mjs
-```
+## Przejście między cyklami
 
-Czyta tokeny jasnego motywu wprost z `index.html` i sprawdza 23 pary: tekst na trzech
-powierzchniach (progi AAA/AA), napis na czarnym przycisku, zieleń i bursztyn na swoich
-tłach, kolory serii jako obiekty graficzne (≥ 3:1) i rozróżnialność powierzchni.
+Plan z wyższym `cykl` zamyka poprzedni: dziennik idzie do archiwum na urządzeniu,
+nowy cykl startuje od tygodnia 1. Przy przejściu:
+
+- maksy przechodzą z poprzedniego cyklu (`e1rmZPoprzedniego`),
+- ćwiczenia dodatkowe o tej samej nazwie dostają ostatni ciężar z dziennika,
+- **serie z bieżącego tygodnia kalendarzowego** przechodzą do tygodnia 1 dla
+  ćwiczeń, które w nowym planie stoją tego samego dnia pod tą samą nazwą,
+- sesje tygodnia 1, których dzień minął bez zapisu, są oznaczone jako pominięte.
+
+Dziennik zna tylko pozycje (`tydzień|dzień|numer ćwiczenia`), więc zmiana ćwiczeń
+w planie zawsze idzie przez nowy cykl — inaczej stare serie trafiłyby pod nowe
+ćwiczenia. W bazie każdy cykl ma osobny klucz (kod planu + `-C4`).
+
+## Dane i synchronizacja
+
+`localStorage`: stan (`trening.v1`), dziennik serii (`trening.log.v1`), korekty,
+własne ciężary, joga (`trening.mob.v1`), rozciąganie i test zakresów
+(`trening.rozc.v1`: odhaczenia `{ "3|sr": { r1: 1 } }`, zakresy
+`{ "3|sr|z": { q1: { p: 2, o: 1 } } }`), czasy serii, treningi, pominięcia,
+archiwum cykli, kolejka wysyłkowa i kod planu.
+
+Supabase (opcjonalnie): wyłącznie liczby — kod planu, tydzień, dzień, ćwiczenie,
+seria, powtórzenia, kilogramy, znacznik czasu — plus jedna paczka stanu. Tabele są
+zamknięte dla klucza publikowalnego, ruch idzie przez funkcje wymagające kodu planu
+(`tools/supabase.sql`). Offline first: wpis ląduje lokalnie i dosyła się, gdy wróci
+zasięg.
 
 ## Uruchomienie lokalnie
 
-Aplikacja czyta `plan.json` przez `fetch`, więc otwarcie pliku `index.html` bezpośrednio
-z dysku nie zadziała. Potrzebny serwer:
-
 ```bash
-python -m http.server 8080
-# albo:  npx serve .
+python -m http.server 8080      # albo: npx serve .
 ```
 
-Potem `http://localhost:8080`. Na telefonie w tej samej sieci: `http://<IP-komputera>:8080`.
+Potem `http://localhost:8080`.
 
-**Uwaga przy testach w przeglądarce (Playwright itp.):** lokalna kopia synchronizuje się
-z tym samym wspólnym dziennikiem co telefon. Zrzuty i testy klikane rób z zablokowanym
-ruchem do bazy, np. `context.route(/supabase\.co/, r => r.abort())`, albo z własnym kodem
-planu — inaczej testowe kliknięcia trafią do prawdziwego dziennika.
+**Testy w przeglądarce (Playwright itp.):** lokalna kopia synchronizuje się z tym
+samym wspólnym dziennikiem co telefon. Zawsze odcinaj bazę i ustaw testowy kod
+planu, zanim strona się załaduje:
 
-## Dane
-
-`plan.json` to jedyne źródło treści. Powstaje z arkusza `plan-12-tygodni.xlsx`:
-
-```bash
-node tools/xlsx-to-json.mjs "C:/ścieżka/do/plan-12-tygodni.xlsx"
+```js
+await context.route(/supabase\.co/, r => r.abort());
+// i w skrypcie startowym: localStorage.setItem('trening.key.v1', 'TEST-FABL-0001')
 ```
 
-Konwerter nie ma żadnych zależności — czyta ZIP i XML sam (`tools/xlsx.mjs`).
-Skoroszyt był tworzony przez openpyxl, więc komórki z formułami nie mają zapisanych
-wyników. Dlatego `plan.json` przechowuje **wejścia** (procenty E1RM, schematy serii,
-sufity RPE), a `app.js` odtwarza reguły:
-
-- `ciężar = floor(E1RM × % / 2,5) × 2,5` — zaokrąglenie zawsze w dół do 2,5 kg
-- korekta ciągu −5% w tygodniach obniżenia podwyższenia (5 i 9)
-- serie dojściowe: gryf → 50% → 70% → 85% → ciężar roboczy (przed ciągiem w dniu C: 50% → 75%)
-
-E1RM zapisane w `plan.json` to wartości startowe. W aplikacji można je podnieść lub obniżyć
-o 10% (rekalibracja przewidziana po tygodniu 3 i 7) — zmiana siedzi w `localStorage`
-i nie rusza pliku.
-
-### Filtr treści
-
-Konwerter przepuszcza wyłącznie treść treningową. Ma wbudowany bezpiecznik: jeśli
-w wyniku znajdzie się cokolwiek z listy `SENSITIVE`, skrypt **przerywa pracę** zamiast
-zapisać `plan.json`. Nazwy części ciała są dozwolone (bez nich nie da się opisać techniki),
-opisy stanu zdrowia i historii — nie.
-
-Skoroszyt `.xlsx` jest w `.gitignore` i nie trafia do repozytorium.
-
-## Dźwięk
-
-Sygnał jest syntezowany przez Web Audio — zero plików do pobrania, więc offline działa
-tak samo. Piknięcia są **planowane w zegarze Web Audio w chwili startu**, nie odpalane
-z `setInterval`: przeglądarki na telefonie dławią liczniki, gdy karta jest w tle albo
-ekran zgaszony, a harmonogram Web Audio idzie dalej. Dzięki temu dźwięk trafia w sekundę
-nawet wtedy, gdy odliczanie na ekranie zwolni. Przerwanie przerwy anuluje zaplanowane tony.
-
-Ograniczenie, na które strona nie ma wpływu: na iPhonie przełącznik ciszy wycisza także
-dźwięk ze stron. Wtedy zostaje wibracja.
-
-## Co się zapisuje
-
-W `localStorage`: numer tygodnia, trzy E1RM, przełączniki dźwięku, automatycznej
-przerwy i powiadomienia o końcu przerwy (`trening.v1`),
-dziennik serii (`trening.log.v1`), historia korekt (`trening.adjust.v1`), własne
-ciężary ćwiczeń dodatkowych (`trening.acc.v1`), kolejka wysyłkowa (`trening.queue.v1`),
-pominięte sesje (`trening.pominiete.v1`) i kod planu (`trening.key.v1`).
-
-W Supabase: wyłącznie liczby — kod planu, tydzień, dzień, ćwiczenie, seria,
-powtórzenia, kilogramy, znacznik czasu. Tabela jest zamknięta dla klucza publikowalnego,
-cały ruch idzie przez funkcje wymagające kodu planu (`tools/supabase.sql`).
-
-Link `?t=9` otwiera aplikację od razu na konkretnym tygodniu. Kod planu **nigdy** nie
-trafia do adresu — przepisujesz go ręcznie w ustawieniach.
-
-## Logika progresji
-
-`progresja.js` to czyste funkcje bez DOM-u, wspólne dla przeglądarki i testów:
+## Testy
 
 ```bash
 node tools/test-progresja.mjs   # czysta logika: ocena sesji, korekty, rekalibracja
-node tools/test-widoki.mjs      # render wszystkich widoków na atrapie DOM-u
+node tools/test-widoki.mjs      # app.js na atrapie DOM-u: widoki, dziennik, przejścia cykli, plan
+node tools/test-kontrast.mjs    # kontrast tokenów z app.css w obu motywach
 ```
 
-`tools/test-widoki.mjs` uruchamia `app.js` w `node:vm` na atrapie DOM-u — tyle, ile
-aplikacja naprawdę używa. `navigator.onLine` jest tam na stałe `false`, więc test
-nie ma jak dotknąć Supabase. Złapał już błąd, który wywalał aplikację przy tygodniu 1.
+`test-widoki.mjs` uruchamia `app.js` w `node:vm` z `navigator.onLine = false`, więc
+nie ma jak dotknąć bazy. Logika jest sprawdzana na planie cyklu 1, przejścia na
+planach cykli 2 i 3, a bieżący plan ma własną sekcję: komplet serii w każdym
+tygodniu, przerwy, fazy minutnika, bilans stawów i **budżet godziny** każdej sesji
+(rozgrzewka, drabinka, praca z tempem, przerwy z opisu).
 
-Dwie pułapki, które te testy pilnują:
+## Wydanie
 
-- **Nie liczymy E1RM z wykonanej serii.** Sufit RPE znaczy „zostaw co najmniej N
-  w zapasie", więc wzór zaniżałby plan u kogoś, kto sufitu pilnuje. Oceniamy odchyłkę
-  od prescription, nie wartość bezwzględną maksa.
-- **Zaokrąglenie w dół nie może zjeść korekty.** +2,5% z 80 kg to 82 kg, co po
-  zaokrągleniu w dół wraca do 80. Wymuszamy minimum jeden krok 2,5 kg.
+GitHub Pages z gałęzi `main`, katalog główny. Po każdej zmianie plików podbij
+znaczniki wersji, inaczej przeglądarka albo service worker poda starą wersję:
 
-Trzecia, pilnowana w aplikacji: przy każdej serii zapisujemy też **planowane** wartości
-z chwili zapisu. Bez tego korekta w górę przerabiałaby dawne „czysto" na „niedowóz"
-i napędzała korektę w dół.
+- `?v=N` w `index.html` (`app.css`, `app.js`, `progresja.js`, krój w `preload`),
+  w `app.css` (adresy krojów), w `app.js` (`plan.json`, `plan-cykl${n}.json`)
+  i na liście `ASSETS` w `sw.js`,
+- `CACHE` w `sw.js`.
 
-## Ikony
-
-```bash
-node tools/make-icons.mjs
-```
-
-## Deploy na GitHub Pages
-
-Repozytorium → Settings → Pages → Source: `main`, katalog `/ (root)`.
-Adres: `https://<login>.github.io/<repo>/`. Na telefonie: menu przeglądarki →
-„Dodaj do ekranu głównego".
-
-Po każdej zmianie plików podbij **oba** znaczniki wersji, inaczej przeglądarka
-albo service worker poda starą wersję:
-
-- `?v=N` przy `app.js`, `progresja.js` i `ruch.js` w `index.html`, przy `plan.json` w `app.js` i w liście `ASSETS` w `sw.js`
-- `CACHE` w `sw.js`
+Aplikacja sama sprawdza numer wersji przy starcie i powrocie na ekran; w trakcie
+sesji pokazuje pasek „Nowa wersja" zamiast przeładowywać.
 
 ## Struktura
 
 ```
-index.html      struktura + style (wszystko inline, zero CDN)
-app.js          router, przeliczenia, timer, kalkulator talerzy
-ruch.js         warstwa efektów: przejścia, fale, konfetti, paralaksa, sztanga 3D (bez dostępu do danych)
-plan.json       dane planu (bieżący cykl)
-plan-cykl1.json, plan-cykl2.json   plany zamkniętych cykli (raport z archiwum)
-sw.js           cache offline
-tools/cykl3.py          generator plan.json (cykl 3), joga z tools/joga2.py
-tools/xlsx.mjs          czytnik XLSX bez zależności
-tools/xlsx-to-json.mjs  konwersja arkusz → plan.json + filtr treści
-tools/make-icons.mjs    generator ikon PNG
+index.html        powłoka: nagłówek, #app, dolny pasek
+app.css           tokeny, kroje, wszystkie style
+app.js            plan, dziennik, synchronizacja, zegar, widoki
+progresja.js      czyste funkcje oceny sesji i korekt (wspólne z testami)
+plan.json         bieżący plan (cykl 4)
+plan-cykl*.json   plany zamkniętych cykli
+sw.js             cache offline
+fonts/            kroje i ich licencje
+tools/cykl4.py    generator planu; cykl2.py, cykl3.py, joga2.py
+tools/*.mjs       testy, ikony, konwerter arkusza cyklu 1
+tools/supabase.sql
 ```
