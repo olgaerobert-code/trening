@@ -405,12 +405,78 @@ function stawySesji(k, w) {
 }
 
 // Karta „Dziś": żółty blok z tym, po co się otwiera aplikację.
-function kartaHero({ k, eb, tytul, pod, liczba, jedn, opis, dodatek, pg, pgEt, pgDod, cta, klik, zrobione }) {
-  const b = el('button', 'dzis-k' + (zrobione ? ' zrobione' : ''));
+// Figurka na plakat dnia: nieruchoma na kartach poza fokusem, żeby siedem animacji nie grało naraz.
+const figuraHtml = (klucz, cele, ruch) => (typeof Figury !== 'undefined' && klucz && Figury.ma(klucz) ? Figury.svg(klucz, { cele, bezRuchu: !ruch, klatka: ruch ? null : 1 }) : '');
+
+// Plakat dnia: jedna karta karuzeli tygodnia. Fokus (dzień, o który teraz chodzi) jest żółty.
+// Dzień bez planu: plakat mówi, co jest następne.
+function kartaWolna(poz, w, fokus) {
+  const nast = najblizszaSesja();
+  return kartaHero({ eb: (poz === pozycjaDzis() ? 'Dziś · ' : '') + NAZWY_POZ[poz].toLowerCase(), tytul: 'Wolne', pod: 'Regeneracja jest częścią planu',
+    figura: figuraHtml('lezenie', [], false), rodzaj: 'wolne', fokus,
+    opis: nast && nast.key ? `Następny trening: ${nast.dzien.toLowerCase()} — ${nazwaSesji(nast.key)}` : '' });
+}
+
+const NAZWY_POZ = ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'];
+
+/* Tydzień jako karuzela siedmiu plakatów. Przesuwasz palcem dzień po dniu;
+   kropki dni pod spodem pokazują stan i przewijają do wybranego dnia. */
+function karuzelaTygodnia(w) {
+  const sek = el('section', 'tydz7');
+  const pager = el('div', 'pager');
+  const uklad = Object.fromEntries(ukladTygodnia().map(x => [x.poz, x]));
+  const dzisPoz = pozycjaDzis();
+  // Fokus: sesja zaległa albo dzisiejsza; w dzień rozciągania — rozciąganie; inaczej najbliższa.
+  const dzis = dzisiaj(), nast = najblizszaSesja(), zalegla = domyslnaSesja(), rozcTeraz = rozcDzisiaj();
+  const heroRozc = !zalegla && rozcTeraz && !rozcKomplet(w, rozcTeraz.k) ? rozcTeraz : null;
+  const heroKey = heroRozc ? null : zalegla || nast.key;
+  let fokusPoz = dzisPoz;
+  const karty = [];
+  for (let i = 0; i < 7; i++) {
+    const x = uklad[i];
+    let karta;
+    const kiedy = i === dzisPoz ? 'Dziś' : NAZWY_POZ[i];
+    if (x && x.k) {
+      const fokus = x.k === heroKey;
+      const etykieta = fokus ? (x.k === dzis ? 'Dziś' : POZYCJA_DNIA[x.k] <= dzisPoz ? 'Do wpisania · ' + NAZWY_POZ[i].toLowerCase() : 'Następny · ' + nast.dzien) : kiedy;
+      karta = kartaDzis(x.k, w, etykieta, fokus);
+      if (fokus) fokusPoz = i;
+    } else if (x) {
+      const fokus = !!heroRozc && heroRozc.k === x.rozc.k;
+      karta = kartaRozc(x.rozc, w, kiedy, fokus);
+      if (fokus) fokusPoz = i;
+    } else karta = kartaWolna(i, w, false);
+    karta.dataset.poz = String(i);
+    karty.push(karta);
+    pager.append(karta);
+  }
+  const przewin = (i, gladko) => {
+    const k = karty[i];
+    if (!k || !pager.scrollTo) return;
+    pager.scrollTo({ left: k.offsetLeft - (pager.clientWidth - k.offsetWidth) / 2, behavior: gladko ? 'smooth' : 'auto' });
+  };
+  const kropki = dniTygodnia(w, i => przewin(i, true));
+  const zaznacz = i => Array.from(kropki.children).forEach((b, j) => b.classList.toggle('wid', j === i));
+  zaznacz(fokusPoz);
+  pager.addEventListener('scroll', () => {
+    const srodek = pager.scrollLeft + pager.clientWidth / 2;
+    let naj = 0, odl = Infinity;
+    karty.forEach((k, i) => { const d = Math.abs(k.offsetLeft + k.offsetWidth / 2 - srodek); if (d < odl) { odl = d; naj = i; } });
+    zaznacz(naj);
+  }, { passive: true });
+  sek.append(pager, kropki);
+  // Po wstawieniu do dokumentu: karuzela staje na dniu, o który chodzi.
+  setTimeout(() => przewin(fokusPoz, false), 0);
+  return sek;
+}
+
+function kartaHero({ k, eb, tytul, pod, liczba, jedn, opis, dodatek, pg, pgEt, pgDod, cta, klik, zrobione, fokus = true, figura, rodzaj }) {
+  const b = el(klik ? 'button' : 'div', 'plakat' + (fokus ? ' dzis-k' : '') + (zrobione ? ' zrobione' : '') + (rodzaj ? ' ' + rodzaj : ''));
   if (k) b.dataset.k = k;
   b.append(el('div', 'dk-eb', eb));
   b.append(el('div', 'dk-t', tytul));
   if (pod) b.append(el('div', 'dk-s', pod));
+  if (figura) { const f = el('div', 'dk-fig'); f.innerHTML = figura; b.append(f); }
   if (liczba != null) {
     const l = el('div', 'dk-liczba');
     const v = el('b', null, String(liczba));
@@ -420,28 +486,30 @@ function kartaHero({ k, eb, tytul, pod, liczba, jedn, opis, dodatek, pg, pgEt, p
   if (opis) b.append(el('div', 'dk-opis', opis));
   if (dodatek) b.append(dodatek);
   if (pgDod) b.append(el('div', 'dk-nast', pgDod));
-  const ile = pg && pg.total ? Math.min(1, pg.done / pg.total) : 0;
-  const dol = el('div', 'dk-dol');
-  const lewo = el('div', 'dk-pg');
-  lewo.append(el('span', null, pg && pg.total ? `${pg.done}/${pg.total} ${pgEt}` : ''));
-  const pas = el('i'), f = el('u');
-  f.style.width = (ile * 100) + '%';
-  pas.append(f); lewo.append(pas);
-  const c = el('span', 'dk-cta');
-  c.append(el('span', null, cta));
-  const strz = el('span', 'iko'); strz.innerHTML = ikona('dalej', 20); c.append(strz);
-  dol.append(lewo, c);
-  b.append(dol);
-  b.onclick = klik;
+  if (cta) {
+    const ile = pg && pg.total ? Math.min(1, pg.done / pg.total) : 0;
+    const dol = el('div', 'dk-dol');
+    const lewo = el('div', 'dk-pg');
+    lewo.append(el('span', null, pg && pg.total ? `${pg.done}/${pg.total} ${pgEt}` : ''));
+    const pas = el('i'), f = el('u');
+    f.style.width = (ile * 100) + '%';
+    pas.append(f); lewo.append(pas);
+    const c = el('span', 'dk-cta');
+    c.append(el('span', null, cta));
+    const strz = el('span', 'iko'); strz.innerHTML = ikona('dalej', 20); c.append(strz);
+    dol.append(lewo, c);
+    b.append(dol);
+  }
+  if (klik) b.onclick = klik;
   return b;
 }
 
-function kartaRozc(x, w) {
+function kartaRozc(x, w, etykieta = 'Dziś', fokus = true) {
   const r = rozcPlan(), n = rozcPozycje().length, done = rozcDone(w, x.k);
-  return kartaHero({ eb: `Dziś · ${x.nazwa.toLowerCase()} · w domu`, tytul: zakresyPlan() ? 'Rozciąganie i zakresy' : r.title,
+  return kartaHero({ eb: `${etykieta === 'Dziś' ? 'Dziś · ' + x.nazwa.toLowerCase() : x.nazwa} · w domu`, tytul: zakresyPlan() ? 'Rozciąganie i zakresy' : r.title,
     pod: 'Mata, koc, ściana — bez sprzętu z siłowni', liczba: r.minutes, jedn: 'min',
-    opis: `${n} pozycji` + (zakresyPlan() ? ' · w tym test zakresów z oceną' : ''),
-    pg: { done, total: n }, pgEt: 'pozycji', cta: done ? 'Kontynuuj' : 'Zacznij', klik: () => go('#/rozciaganie/' + x.k) });
+    opis: `${n} pozycji` + (zakresyPlan() ? ' · w tym test zakresów z oceną' : ''), figura: figuraHtml('polklek', ['biodro'], false), rodzaj: 'dom',
+    pg: { done, total: n }, pgEt: 'pozycji', cta: done >= n ? 'Zobacz' : done ? 'Kontynuuj' : 'Zacznij', klik: () => go('#/rozciaganie/' + x.k), zrobione: n > 0 && done >= n, fokus });
 }
 
 // Wiersz listy tygodnia: znak dnia, nazwa, stan.
@@ -529,18 +597,30 @@ function weekBar() {
   const w = state.week, d = new Date();
   const bar = el('header', 'nag');
   const g = el('div', 'nag-g');
+  // Data jak kartka z kalendarza: dzień miesiąca dużą cyfrą, obok dzień tygodnia i miesiąc.
   const lewa = el('div', 'nag-l');
-  lewa.append(el('div', 'nag-data', `${NAZWA_DNIA[d.getDay()]}, ${d.getDate()} ${MIESIAC[d.getMonth()]}`), el('h1', 'nag-t', 'Dziś'));
+  const opis = el('div', 'nag-data');
+  opis.append(el('span', null, NAZWA_DNIA[d.getDay()]), el('span', null, MIESIAC[d.getMonth()]));
+  lewa.append(el('b', 'nag-dz', String(d.getDate())), opis);
+  // Tydzień cyklu jako pierścień: ile z dwunastu za nami. Tap otwiera pasek tygodni.
   const blok = isDeload(w) ? 'lżejszy' : w === 12 ? 'sprawdzian' : 'blok ' + (BLOKI.find(b => b.weeks.includes(w)) || {}).n;
-  const prawa = el('div', 'nag-tydz' + (kierunekTygodnia ? ' ' + kierunekTygodnia : ''));
-  prawa.append(el('span', 'nt-l', 'tydzień'), el('b', null, String(w)), el('span', 'nt-z', 'z 12 · ' + blok));
+  const prawa = el('button', 'nag-tydz' + (kierunekTygodnia ? ' ' + kierunekTygodnia : ''));
   kierunekTygodnia = '';
+  const kolo = el('span', 'nag-kolo');
+  const obw = 2 * Math.PI * 17;
+  kolo.innerHTML = `<svg viewBox="0 0 40 40" width="46" height="46" aria-hidden="true"><circle cx="20" cy="20" r="17" class="nk-t"/><circle cx="20" cy="20" r="17" class="nk-p" stroke-dasharray="${(obw * w / 12).toFixed(1)} ${obw.toFixed(1)}" transform="rotate(-90 20 20)"/></svg>`;
+  kolo.append(el('b', null, String(w)));
+  const et = el('span', 'nag-te');
+  et.append(el('span', null, 'tydzień'), el('span', null, 'z 12 · ' + blok));
+  prawa.append(et, kolo);
+  prawa.setAttribute('aria-label', `Tydzień ${w} z 12, ${blok}. Zmień tydzień`);
   g.append(lewa, prawa);
   bar.append(g);
 
-  // Dwanaście tygodni jedną linią: kreska i numer. Przyciski są wąskie, a numer
-  // tygodnia rządzi ciężarami i zapisem — więc tapnięcie tylko pyta, przestawia
-  // dopiero potwierdzenie pod paskiem.
+  // Dwanaście tygodni: schowane pod pierścieniem. Tapnięcie w tydzień tylko pyta,
+  // przestawia dopiero potwierdzenie — numer tygodnia rządzi ciężarami i zapisem.
+  const panel = el('div', 'tyg-panel');
+  panel.hidden = true;
   const potw = el('div', 'tyg-potw');
   potw.hidden = true;
   const zapytaj = i => {
@@ -565,7 +645,9 @@ function weekBar() {
     p.onclick = () => zapytaj(i);
     strip.append(p);
   }
-  bar.append(strip, potw);
+  panel.append(strip, potw, el('p', 'tyg-opis', 'Tydzień przestawiasz ręcznie — dopiero gdy sesje zmieściły się w suficie RPE.'));
+  prawa.onclick = () => { panel.hidden = !panel.hidden; prawa.classList.toggle('otw', !panel.hidden); };
+  bar.append(panel);
   return bar;
 }
 
@@ -591,24 +673,11 @@ function homeView() {
     b.append(r);
     body.append(b);
   }
-  body.append(dniTygodnia(w));
+  if (deload) body.append(noteBox('Tydzień 7 — lżejszy.', ' ' + (p.deloadTekst || 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół.'), 'uwaga'));
+  if (w === 12) body.append(noteBox('Tydzień 12 — sprawdzian.', ' ' + (p.tydzien12Tekst || 'Bez testu maksa, boje lżej.'), 'uwaga'));
 
-  // Karta „Dziś": sesja, o którą teraz chodzi — dzisiejsza, zaległa do wpisania,
-  // a w dzień wolny najbliższa. W dzień rozciągania, gdy nic nie zalega, kartą
-  // jest rozciąganie.
-  const dzis = dzisiaj();
-  const nast = najblizszaSesja();
-  const zalegla = domyslnaSesja();
-  const rozcTeraz = rozcDzisiaj();
-  const heroRozc = !zalegla && rozcTeraz && !rozcKomplet(w, rozcTeraz.k) ? rozcTeraz : null;
-  const heroKey = heroRozc ? null : zalegla || nast.key;
-  if (heroRozc) body.append(kartaRozc(heroRozc, w));
-  else {
-    const etykieta = heroKey === dzis ? 'Dziś'
-      : POZYCJA_DNIA[heroKey] <= pozycjaDzis() ? 'Do wpisania'
-      : 'Następny · ' + nast.dzien;
-    body.append(kartaDzis(heroKey, w, etykieta));
-  }
+  // Tydzień: siedem plakatów do przesuwania, fokus na dniu, o który teraz chodzi.
+  body.append(karuzelaTygodnia(w));
 
   const ostatni = kartaOstatniego();
   if (ostatni) body.append(ostatni);
@@ -627,20 +696,6 @@ function homeView() {
     d.append(sm, ...zmiany);
     body.append(d);
   }
-  if (deload) body.append(noteBox('Tydzień 7 — lżejszy.', ' ' + (p.deloadTekst || 'Nie jest opcjonalny. Dwie serie zamiast czterech, ciężar w dół.'), 'uwaga'));
-  if (w === 12) body.append(noteBox('Tydzień 12 — sprawdzian.', ' ' + (p.tydzien12Tekst || 'Bez testu maksa, boje lżej.'), 'uwaga'));
-
-  // Cały tydzień po kolei, dzień po dniu — bez sesji, która jest już na karcie wyżej.
-  body.append(el('h2', 'sekcja', 'Ten tydzień'));
-  const lista = el('div', 'lista');
-  for (const x of ukladTygodnia()) {
-    if (x.k && x.k === heroKey) continue;
-    if (x.rozc && heroRozc && x.rozc.k === heroRozc.k) continue;
-    lista.append(x.k ? wierszSesji(x.k, w) : wierszRozc(x.rozc, w));
-  }
-  body.append(lista);
-
-  body.append(el('div', 'foot', 'Tydzień przestawiasz ręcznie — dopiero gdy sesje zmieściły się w suficie RPE.'));
   frag.append(body);
   return frag;
 }
@@ -756,14 +811,14 @@ const tytulDnia = t => String(t).split(' · ').map((c, i) => (i === 0 ? c.charAt
 // Stan widać bez czytania: pełne kółko = zapisane w całości, łuk = w trakcie.
 // Pasek tygodnia: siedem dni, w każdym znak sesji i jej stan. Siłownia to pełny
 // kwadrat z literą, dni w domu (rozciąganie, joga) — obrys, dzień wolny — kropka.
-function dniTygodnia(w) {
+function dniTygodnia(w, naKlik) {
   const box = el('div', 'dni7');
   const skrot = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
   const uklad = Object.fromEntries(ukladTygodnia().map(x => [x.poz, x]));
   const dzis = pozycjaDzis(), ileRozc = rozcPozycje().length;
   for (let i = 0; i < 7; i++) {
     const x = uklad[i];
-    const b = el(x ? 'button' : 'div', 'd7' + (i === dzis ? ' dzis' : ''));
+    const b = el(x || naKlik ? 'button' : 'div', 'd7' + (i === dzis ? ' dzis' : ''));
     b.append(el('span', 'd7-n', skrot[i]));
     let ile = 0, znak = '', rodzaj = 'wolne', pom = false, opis = 'dzień wolny';
     if (x && x.k) {
@@ -784,21 +839,24 @@ function dniTygodnia(w) {
     pas.append(f);
     b.append(pas);
     if (x) b.setAttribute('aria-label', `${skrot[i]}: ${opis}` + (ile >= 1 ? ', zrobione' : pom ? ', pominięta' : ''));
+    // W karuzeli kropka dnia przewija do jego plakatu; samo przejście do sesji jest na plakacie.
+    if (naKlik) b.onclick = () => naKlik(i);
     box.append(b);
   }
   return box;
 }
 
-function kartaDzis(k, w, etykieta) {
+function kartaDzis(k, w, etykieta, fokus = true) {
   const dane = daneSesji(k, w), pg = dane.progress;
   const ile = pg.total ? Math.min(1, pg.done / pg.total) : 0;
   const wTrakcie = k !== 'D' && pg.done > 0 && ile < 1 && w === state.week;
-  const cta = ile >= 1 ? 'Zobacz sesję' : wTrakcie ? 'Prowadź dalej' : pg.done ? 'Kontynuuj' : 'Zacznij trening';
-  const klik = () => { if (wTrakcie) prowadzPoRenderze = { day: k, w }; go(dane.href); };
+  const cta = ile >= 1 ? 'Zobacz' : pg.done ? 'Dalej' : 'Zacznij';
+  const klik = () => go(dane.href);
   if (k === 'D') {
     const m = state.plan.mobility;
-    return kartaHero({ k, eb: `${etykieta} · ${m.day.toLowerCase()}`, tytul: 'Joga', pod: 'Pozycje statyczne, bez obciążenia',
+    return kartaHero({ k, eb: (etykieta === 'Dziś' ? 'Dziś · ' + m.day.toLowerCase() : etykieta.includes('·') ? etykieta : m.day) + (sesjaPominieta('D', w) ? ' · pominięta' : ''), tytul: 'Joga', pod: 'Pozycje statyczne, bez obciążenia',
       liczba: state.mobShort ? m.shortMinutes : m.minutes, jedn: 'min', opis: `${mobWidoczne().length} pozycji · wersja ${state.mobShort ? 'krótka' : 'pełna'}`,
+      figura: figuraHtml('drzewo', [], false), rodzaj: 'joga', fokus,
       pg, pgEt: 'pozycji', cta: ile >= 1 ? 'Zobacz' : pg.done ? 'Kontynuuj' : 'Zacznij', klik, zrobione: ile >= 1 });
   }
   const d = state.plan.days[k], boje = bojeDnia(k);
@@ -834,8 +892,11 @@ function kartaDzis(k, w, etykieta) {
   let pgDod = '';
   if (wTrakcie) { const q = kolejkaSesji(k, w), n = nastepnyKrok(q, k, w); if (n >= 0) pgDod = 'Następne: ' + q[n].it.name; }
   // „Następny · czwartek" już mówi, który to dzień — litera stoi w pasku tygodnia wyżej.
-  const eb = etykieta.includes('·') ? `${etykieta} · ~${d.minutes} min` : `${etykieta} · dzień ${k} · ~${d.minutes} min`;
+  const eb = (etykieta.includes('·') ? `${etykieta} · ~${d.minutes} min` : `${etykieta} · dzień ${k} · ~${d.minutes} min`) + (sesjaPominieta(k, w) ? ' · pominięta' : '');
+  // Figurka boju dnia (albo pierwszego ćwiczenia); rusza się tylko na plakacie w fokusie.
+  const itFig = boje.length ? pozycjaBoju(boje[0]).it : d.items[0];
   return kartaHero({ k, eb, tytul: dane.krotki, pod: dane.reszta, liczba, jedn, opis, dodatek,
+    figura: itFig ? figuraHtml(itFig.id, itFig.cel, fokus && ile < 1) : '', rodzaj: 'sila', fokus,
     pg, pgEt: 'serii', pgDod, cta, klik, zrobione: ile >= 1 });
 }
 
@@ -947,37 +1008,326 @@ function swiatlaEl(sets, done) {
   return box;
 }
 
+/* ---------- scena: sesja jako odtwarzacz ----------
+   Ekran sesji to jedna scena z bieżącą serią (figurka ćwiczenia, ciężar,
+   powtórzenia) i jeden duży przycisk na dole ekranu. Zegar przerwy i minutnik
+   serii grają na scenie, nie w pasku. Pod sceną kolejka ćwiczeń — tap w wiersz
+   przenosi scenę na to ćwiczenie i rozwija jego serie do poprawek. */
+let scenaTeraz = null;
+
+function scenaSesji(day, w, { naZmiane } = {}) {
+  const box = el('section', 'scena');
+  let kroki = kolejkaSesji(day, w);
+  let i = nastepnyKrok(kroki, day, w);
+  let powt = null, kg = null, opisOtwarty = false, zeg = null, bylKoniec = i < 0;
+  const fmtS = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
+  const items = state.plan.days[day].items;
+  const kod = it => it.superset || String(items.indexOf(it) + 1);
+  const podpis = k => `${k.it.name} · ${k.i + 1}/${k.pl.sets}`;
+
+  // Pasek sesji: grupa kresek na ćwiczenie, kreska na serię.
+  const pasek = () => {
+    const p = el('div', 'sc-pasek');
+    const k = i >= 0 ? kroki[i] : null;
+    for (const it of items) {
+      const pl = plannedOf(it, w, day), log = logGet(w, day, it.n);
+      const g = el('span', 'sc-g' + (k && k.it === it ? ' teraz' : ''));
+      g.style.flex = String(pl.sets);
+      for (let s = 0; s < pl.sets; s++) g.append(el('i', (log[s] ? 'z' : '') + (k && k.it === it && k.i === s ? ' t' : '')));
+      p.append(g);
+    }
+    p.setAttribute('role', 'img');
+    const pg = postepDnia(w, day);
+    p.setAttribute('aria-label', `${pg.done} z ${pg.total} serii`);
+    return p;
+  };
+
+  const koniecSesji = () => {
+    const t = trening(w, day);
+    if (t && t.start && !t.end) zakonczTrening(day, w); else pokazZaliczenie(day, w);
+  };
+
+  const rysujKoniec = () => {
+    const st = statySesji(day, w);
+    box.classList.add('koniec');
+    const lampy = el('div', 'zswiatla');
+    lampy.append(el('i'), el('i'), el('i'));
+    box.append(lampy, el('h2', 'sc-nazwa', 'Komplet'));
+    const pg = postepDnia(w, day);
+    box.append(el('p', 'sc-kon', `${pg.done} ${odmiana(pg.done, 'seria', 'serie', 'serii')} zapisane` + (st && st.ton ? ` · ${Math.round(st.ton).toLocaleString('pl-PL')} kg tonażu` : '') + '.'));
+  };
+
+  const rysuj = () => {
+    box.replaceChildren();
+    box.className = 'scena';
+    zeg = null;
+    kroki = kolejkaSesji(day, w);
+    if (i >= kroki.length) i = -1;
+    box.append(pasek());
+    if (i < 0) { rysujKoniec(); return; }
+    const k = kroki[i], it = k.it, pl = k.pl, zapis = logGet(w, day, it.n)[k.i];
+    const czasowa = naCzas(pl), jedn = jednostka(pl);
+    powt = zapis ? zapis.r : pl.target;
+    kg = pl.kg;
+
+    const gl = el('div', 'sc-gl');
+    gl.append(el('span', 'sc-kod', kod(it)),
+      el('span', 'sc-seria', `${pl.unit === 'min' ? 'runda' : 'seria'} ${k.i + 1} z ${pl.sets}` + (k.para ? ' · superseria' : '') + (zapis ? ' · zapisana' : '')));
+    const jak = el('button', 'sc-jak', 'Jak?');
+    jak.setAttribute('aria-label', 'Jak wykonać ćwiczenie');
+    gl.append(jak);
+    box.append(gl, el('h2', 'sc-nazwa', it.name));
+
+    // Środek sceny: figurka ćwiczenia, a gdy chodzi zegar — odliczanie.
+    const srodek = el('div', 'sc-srodek');
+    const fig = el('div', 'sc-fig');
+    const rys = typeof Figury !== 'undefined' && it.id ? Figury.svg(it.id, { cele: it.cel }) : '';
+    if (rys) fig.innerHTML = rys; else fig.classList.add('pusta');
+    const z = el('div', 'sc-zegar');
+    z.hidden = true;
+    const zet = el('span', 'sc-zet'), zcz = el('b', 'sc-zcz'), zpas = el('i', 'sc-zpas'), zf = el('u');
+    zpas.append(zf);
+    z.append(zet, zcz, zpas);
+    srodek.append(fig, z);
+    box.append(srodek);
+    zeg = { z, zet, zcz, zf };
+
+    const liczby = el('div', 'sc-liczby');
+    const stepper = (klasa, opisM, opisP) => {
+      const r = el('div', 'sc-st ' + klasa);
+      const m = el('button', 'sc-b'); m.innerHTML = ikona('minus', 22); m.setAttribute('aria-label', opisM);
+      const v = el('button', 'sc-v');
+      const p = el('button', 'sc-b'); p.innerHTML = ikona('plus', 22); p.setAttribute('aria-label', opisP);
+      r.append(m, v, p);
+      return { r, m, v, p };
+    };
+    const info = el('div', 'sc-info');
+    let talerze = null;
+    if (pl.kg != null) {
+      const krokKg = pl.planKg != null ? 2.5 : 1;
+      const s = stepper('sc-kg', `Ciężar: mniej o ${fmt(krokKg)} kg`, `Ciężar: więcej o ${fmt(krokKg)} kg`);
+      const pokaz = () => {
+        s.v.replaceChildren(el('b', null, fmt(kg)), el('u', null, 'kg'));
+        if (talerze) {
+          const { pairs, note } = plateList(kg);
+          talerze.textContent = pairs.length ? `${note}: ${pairs.map(x => (x.n > 1 ? x.n + '×' : '') + fmt(x.kg)).join(' + ')}` : 'sam gryf';
+        }
+      };
+      const ustawKg = x => {
+        kg = Math.max(0.5, Math.round(x * 100) / 100);
+        zapiszCiezar(it, day, w, pl, kg);
+        kroki = kolejkaSesji(day, w);
+        pokaz();
+        if (naZmiane) naZmiane(it);
+        renderTimer();
+      };
+      s.m.onclick = () => ustawKg(kg - krokKg);
+      s.p.onclick = () => ustawKg(kg + krokKg);
+      s.v.setAttribute('aria-label', 'Wpisz ciężar z klawiatury');
+      s.v.onclick = () => edycjaLiczby(s.v, { wartosc: kg, krok: pl.planKg != null ? 2.5 : 0.5, min: 0.5, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: ustawKg });
+      if (pl.planKg != null) talerze = el('span', 'sc-chip talerze');
+      pokaz();
+      liczby.append(s.r);
+    }
+    if (czasowa) {
+      const c = el('div', 'sc-czas');
+      c.append(el('b', null, String(pl.target)), el('u', null, jedn));
+      liczby.append(c);
+    } else if (pl.target != null) {
+      const s = stepper('sc-powt' + (pl.kg == null ? ' glowna' : ''), 'Mniej', 'Więcej');
+      const pokaz = () => { s.v.replaceChildren(el('b', null, String(powt)), el('u', null, jedn || 'powt.')); renderTimer(); };
+      s.m.onclick = () => { powt = Math.max(0, powt - 1); pokaz(); };
+      s.p.onclick = () => { powt += 1; pokaz(); };
+      s.v.setAttribute('aria-label', 'Wpisz liczbę z klawiatury');
+      s.v.onclick = () => edycjaLiczby(s.v, { wartosc: powt, krok: 1, min: 0, max: 999, calk: true, etykieta: pl.unit === 'm' ? 'Metry' : 'Powtórzenia', naZapis: x => { powt = x; pokaz(); } });
+      s.v.replaceChildren(el('b', null, String(powt)), el('u', null, jedn || 'powt.'));
+      liczby.append(s.r);
+    } else liczby.append(el('div', 'sc-dawka', it.dose || String(resolve(it.scheme, w))));
+    box.append(liczby);
+
+    // Pod liczbami: schemat, sufit RPE, talerze na stronę, cel ćwiczenia.
+    info.append(el('span', 'sc-chip', String(resolve(it.scheme, w))));
+    const rpe = resolve(it.rpe, w);
+    if (rpe != null && rpe !== '—') info.append(el('span', 'sc-chip', 'RPE ' + fmt(rpe)));
+    if (pl.kg == null && it.load) info.append(el('span', 'sc-chip', String(resolve(it.load, w))));
+    if (talerze) info.append(talerze);
+    if (k.i === pl.sets - 1) info.append(el('span', 'sc-chip ost', 'ostatnia seria'));
+    box.append(info);
+    const cele = celeEl(it);
+    if (cele) box.append(cele);
+
+    const opis = el('div', 'sc-opis');
+    opis.append(el('b', null, przerwaTekst(it, day, w)), el('p', null, opisWykonaniaCw(it)));
+    opis.hidden = !opisOtwarty;
+    jak.classList.toggle('on', opisOtwarty);
+    jak.onclick = () => { opisOtwarty = !opisOtwarty; opis.hidden = !opisOtwarty; jak.classList.toggle('on', opisOtwarty); };
+    box.append(opis);
+
+    const j = nastepnyKrok(kroki, day, w, i + 1);
+    box.append(el('div', 'sc-nast', j >= 0 ? 'Potem: ' + potemKrok(kroki[j]) : 'To ostatnia seria sesji'));
+    zegar();
+  };
+
+  // Zegar na scenie idzie za globalnym minutnikiem — także tym puszczonym z karty w kolejce.
+  const zegar = () => {
+    if (!zeg) return;
+    const leci = !!tId;
+    box.classList.toggle('leci', leci);
+    box.classList.toggle('przerwa', leci && tTryb === 'przerwa');
+    box.classList.toggle('bieg', leci && tTryb !== 'przerwa');
+    zeg.z.hidden = !leci;
+    if (!leci) return;
+    zeg.zet.textContent = tTryb === 'przerwa' ? 'Przerwa' : (tEtykieta || 'Praca');
+    zeg.zcz.textContent = fmtS(tLeft);
+    zeg.zf.style.width = (tTotal ? Math.max(0, tLeft / tTotal) * 100 : 0) + '%';
+  };
+
+  const zrobione = () => {
+    if (i < 0) return;
+    const k = kroki[i], it = k.it, pl = k.pl;
+    if (bieg) stopTimer();                       // ręczne ✓ w trakcie minutnika kończy go
+    const bylo = !!logGet(w, day, it.n)[k.i];
+    logSet(w, day, it.n, k.i, { r: powt, kg: pl.kg != null ? kg : null, pr: pl.target, pk: pl.planKg });
+    if (!bylo) zapiszCzasSerii(w, day, it.n, k.i);
+    if (navigator.vibrate) navigator.vibrate(12);
+    startPrzyPierwszejSerii(day, w);
+    let n = nastepnyKrok(kroki, day, w, i + 1);
+    if (n < 0) n = nastepnyKrok(kroki, day, w);
+    i = n;
+    const sek = n >= 0 && state.autoPrzerwa ? przerwaPo(it, day, w) : 0;
+    if (sek > 0) startTimer(sek, { tresc: 'Następna: ' + opisKroku(kroki[n]) });
+    else if (tId) stopTimer();
+    if (naZmiane) naZmiane(it);
+    rysuj();
+    // Ekran mógł się w międzyczasie przebudować (synchronizacja) — żywa scena idzie za dziennikiem.
+    if (scenaTeraz && scenaTeraz.el !== box) scenaTeraz.zDziennika();
+    renderTimer();
+    if (i < 0 && !bylKoniec) { bylKoniec = true; setTimeout(koniecSesji, 450); }
+  };
+
+  const startCzas = () => {
+    if (i < 0) return;
+    const k = kroki[i];
+    biegSerii(k.it, k.pl, w, day, { naKoniec: () => { if (i >= 0 && kroki[i] && kroki[i].it === k.it && kroki[i].i === k.i) zrobione(); } });
+    zegar();
+  };
+
+  /* Co robi duży przycisk na dole. Jedna rzecz naraz: zapisz serię, wystartuj
+     minutnik, przerwij go albo pomiń przerwę. */
+  const akcja = () => {
+    if (tId && tTryb === 'przerwa') return { tekst: 'Pomiń przerwę', ikona: 'dalej', klasa: 'przerwa', plus: true, pod: i >= 0 ? 'Potem: ' + potemKrok(kroki[i]) : '', fn: () => stopTimer() };
+    if (tId) return { tekst: 'Przerwij', ikona: 'x', klasa: 'bieg', pod: tEtykieta || '', fn: () => stopTimer() };
+    if (i < 0) {
+      const t = trening(w, day), trwa = t && t.start && !t.end;
+      return { tekst: trwa ? 'Zakończ trening' : 'Karta sesji', ikona: 'ok', klasa: 'koniec', pod: 'wszystkie serie zapisane', fn: koniecSesji };
+    }
+    const k = kroki[i];
+    if (naCzas(k.pl)) {
+      const s = sekundySerii(k.pl);
+      return { tekst: 'Start · ' + (s >= 60 && s % 60 === 0 ? s / 60 + ' min' : s + ' s'), ikona: 'play', klasa: 'start', pod: podpis(k), fn: startCzas };
+    }
+    return { tekst: 'Zrobione', ikona: 'ok', klasa: '', pod: podpis(k) + (k.pl.kg != null ? ` · ${fmt(kg != null ? kg : k.pl.kg)} kg × ${powt}` : powt != null ? ` · ${powt} ${jednostka(k.pl) || 'powt.'}` : ''), fn: zrobione };
+  };
+
+  // Dziennik zmienił się poza sceną (✓ w karcie, cofnięcie, nowy ciężar).
+  const zDziennika = () => {
+    kroki = kolejkaSesji(day, w);
+    const biezacyZrobiony = i >= 0 && kroki[i] && !!logGet(w, day, kroki[i].it.n)[kroki[i].i];
+    if (i < 0 || biezacyZrobiony || i >= kroki.length) i = nastepnyKrok(kroki, day, w);
+    rysuj();
+    if (i < 0 && !bylKoniec) { bylKoniec = true; setTimeout(koniecSesji, 450); }
+    if (i >= 0) bylKoniec = false;
+  };
+
+  // Tap w ćwiczenie w kolejce: scena przechodzi na jego pierwszą niezrobioną serię.
+  const skocz = it => {
+    let n = kroki.findIndex(k => k.it === it && !logGet(w, day, it.n)[k.i]);
+    if (n < 0) return;
+    if (tId && tTryb !== 'przerwa') stopTimer();
+    i = n;
+    rysuj();
+    renderTimer();
+  };
+
+  rysuj();
+  keepAwake(true);
+  return { el: box, day, w, akcja, zegar, zDziennika, skocz, rysuj, krok: () => (i >= 0 ? kroki[i] : null), zrobione };
+}
+
+// Dolny pasek na ekranie sesji: jeden duży przycisk sceny (+ „+30 s" w przerwie).
+function rysujAkcje(box) {
+  const a = scenaTeraz.akcja();
+  box.className = 'timer akcja' + (a.klasa ? ' ' + a.klasa : '');
+  const inner = el('div', 'in');
+  if (a.plus) {
+    const p = el('button', 'ak-plus', '+30 s');
+    p.setAttribute('aria-label', 'Przedłuż przerwę o 30 sekund');
+    p.onclick = () => przedluzPrzerwe(30);
+    inner.append(p);
+  }
+  const b = el('button', 'ak-gl');
+  const t = el('span', 'ak-t');
+  t.append(el('b', null, a.tekst));
+  const ic = el('span', 'iko'); ic.innerHTML = ikona(a.ikona, 22); t.append(ic);
+  b.append(t);
+  if (a.pod) b.append(el('span', 'ak-pod', a.pod));
+  b.onclick = a.fn;
+  inner.append(b);
+  box.append(inner);
+  scenaTeraz.zegar();
+}
+
 function dayView(key, wArg) {
   const p = state.plan, d = p.days[key], w = wArg || state.week;
   const frag = document.createDocumentFragment();
-  frag.append(backLink());
-
   const wrapper = el('div', 'sesja');
   const dane = daneSesji(key, w);
-  wrapper.append(head(dane.krotki, `Dzień ${d.key} · ${d.day.toLowerCase()} · ~${d.minutes} min`, true, d.key, dane.reszta));
-  // Tydzień i start stopera w jednym rzędzie; trwający trening to już osobny,
-  // przyklejony pasek na całą szerokość.
-  const t0 = trening(w, key), trwa = !!(t0 && (t0.start || t0.end));
-  const rz = el('div', 'sg-rz');
-  rz.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
-  if (!trwa) rz.append(pasekTreningu(key, w));
-  wrapper.append(rz);
-  if (trwa) wrapper.append(pasekTreningu(key, w));
+
+  // Wąski pasek u góry: powrót, dzień, stoper. Tytułem ekranu jest ćwiczenie na scenie.
+  const gora = el('div', 'ses-gora');
+  const wstecz = el('button', 'ses-wstecz');
+  wstecz.innerHTML = ikona('wlewo', 20);
+  wstecz.setAttribute('aria-label', 'Wróć na Dziś');
+  wstecz.onclick = () => go('#/');
+  const tyt = el('div', 'ses-tyt');
+  tyt.append(el('b', null, `${d.key} · ${dane.title}`), el('span', null, `${d.day.toLowerCase()} · tydzień ${w} z 12`));
+  const t0 = trening(w, key);
+  const czas = el('span', 'ses-czas', t0 && t0.start ? (t0.end ? fmtMin(czasTreningu(t0)) : fmtCzas(czasTreningu(t0))) : '');
+  if (t0 && t0.start && !t0.end) czas.id = 'ses-czas';
+  gora.append(wstecz, tyt, czas);
+  wrapper.append(gora);
+
+  // Zapis do innego tygodnia niż bieżący musi być widać od razu.
+  if (w !== state.week) wrapper.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
   const pominieta = sesjaPominieta(key, w);
   if (pominieta) wrapper.append(pominiecieBox(key, w));
 
+  const karty = new Map();
   const { done, total } = postepDnia(w, key);
-  // Tryb prowadzenia: jedna seria na cały ekran. Startuje od pierwszej nieodhaczonej.
-  if (total && done < total && !sesjaPominieta(key, w)) {
-    const prow = el('button', 'prowstart');
-    const kroki = kolejkaSesji(key, w);
-    const nr = nastepnyKrok(kroki, key, w);
-    const ico = el('span', 'pico'); ico.innerHTML = ikona('play', 22);
-    prow.append(ico, el('span', 'pt', done ? 'Prowadź dalej' : 'Prowadź sesję'),
-      el('span', 'prs', nr >= 0 ? `od: ${kroki[nr].it.name} · seria ${kroki[nr].i + 1}` : 'seria po serii, z przerwą i minutnikiem'));
-    prow.onclick = () => prowadzSesje(key, w);
-    wrapper.append(prow);
+  let podsum = null;
+  // Zmiana zrobiona na scenie: karta ćwiczenia w kolejce, pasek i podsumowanie idą za dziennikiem.
+  const naZmiane = it => {
+    const stara = karty.get(it.n);
+    if (stara && stara.replaceWith) {
+      const nowa = exerciseCard(it, key, w);
+      for (const c of ['ss-top', 'ss-mid']) if (stara.classList.contains(c)) nowa.classList.add(c);
+      zwinKarte(nowa, it, key, w, true);
+      if (stara.classList.contains('otwarty')) nowa.classList.add('otwarty');
+      stara.replaceWith(nowa);
+      karty.set(it.n, nowa);
+    }
+    odswiezPostep(key, w, true);
+  };
+  scenaTeraz = null;
+  if (total && !pominieta) {
+    scenaTeraz = scenaSesji(key, w, { naZmiane });
+    wrapper.append(scenaTeraz.el);
   }
+
+  // Kolejka: wszystkie ćwiczenia dnia, zwinięte do wiersza. Rozwinięcie pokazuje serie.
+  const kol = el('section', 'kolejka');
+  const kg = el('div', 'kol-g');
+  kg.append(el('h2', null, 'Kolejka'));
   if (total) {
     const sp = el('div', 'sprog');
     sp.id = 'sprog';
@@ -987,20 +1337,22 @@ function dayView(key, wArg) {
     bar.append(fill); sp.append(bar);
     sp.append(el('span', 'proc', Math.round(done / total * 100) + '%'));
     if (done >= total) sp.classList.add('komplet');
-    wrapper.append(sp);
+    kg.append(sp);
   }
-
-  wrapper.append(warmupAcc(key, w));
+  kol.append(kg);
+  kol.append(warmupAcc(key, w));
 
   // Wysokość gryfu ma znaczenie tylko wtedy, gdy ciąg nie idzie z podłogi (cykl 1).
   const bh = bojeDnia(key).includes('dl') ? lowerRow(w).barHeight : null;
-  if (bh && bh !== 'z podłogi') wrapper.append(noteBox('Wysokość gryfu w ciągu:', ' ' + bh + '.'));
+  if (bh && bh !== 'z podłogi') kol.append(noteBox('Wysokość gryfu w ciągu:', ' ' + bh + '.'));
 
   const list = el('div', 'cwiczenia ' + klasaWejscia());
   let ssBox = null;
   d.items.forEach((it, i) => {
     const prevSS = i > 0 ? d.items[i - 1].superset : null;
     const card = exerciseCard(it, key, w);
+    zwinKarte(card, it, key, w, true);
+    karty.set(it.n, card);
     if (it.superset) {
       const isTop = !prevSS || prevSS[0] !== it.superset[0];
       card.classList.add(isTop ? 'ss-top' : 'ss-mid');
@@ -1015,10 +1367,15 @@ function dayView(key, wArg) {
       list.append(card);
     }
   });
-  wrapper.append(list);
+  kol.append(list);
+  wrapper.append(kol);
 
-  wrapper.append(podsumowanieSesji(key, w));
-
+  // Reszta sesji: podsumowanie, stoper, tydzień zapisu, rzadkie ruchy.
+  const reszta = el('section', 'ses-reszta');
+  podsum = podsumowanieSesji(key, w);
+  reszta.append(podsum);
+  reszta.append(pasekTreningu(key, w));
+  if (w === state.week) reszta.append(wyborTygodnia(w, x => '#/d/' + key + '/' + x));
   const cuts = p.rules.find(r => r.heading === 'Czas trwania');
   if (cuts) {
     const acc = el('details', 'acc');
@@ -1026,10 +1383,11 @@ function dayView(key, wArg) {
     const b = el('div', 'accbody');
     cuts.lines.slice(-2).forEach(l => b.append(el('p', null, l)));
     acc.append(b);
-    wrapper.append(acc);
+    reszta.append(acc);
   }
   // „Nie było tej sesji" to rzadki ruch — stoi na samym dole, nie nad ćwiczeniami.
-  if (!pominieta) wrapper.append(pominiecieBox(key, w));
+  if (!pominieta) reszta.append(pominiecieBox(key, w));
+  wrapper.append(reszta);
   frag.append(wrapper);
   return frag;
 }
@@ -1075,7 +1433,11 @@ function exerciseCard(it, key, w) {
   if (platesRow) box.append(platesRow);
 
   if (pl.sets) box.append(setRows(it, key, w, pl, odswiezKg));
-  h.onclick = () => { if (box.classList.contains('zwiniety')) box.classList.toggle('otwarty'); };
+  h.onclick = () => {
+    if (!box.classList.contains('zwiniety')) return;
+    box.classList.toggle('otwarty');
+    if (box.classList.contains('otwarty') && scenaTeraz) scenaTeraz.skocz(it);
+  };
   if (pl.sets && logGet(w, key, it.n).filter(Boolean).length >= pl.sets) zwinKarte(box, it, key, w, true);
 
   const hist = ostatnieWykonanie(it, key, w);
@@ -3004,6 +3366,7 @@ function setRows(it, day, w, pl, onKg) {
       zapiszCiezar(it, day, w, pl, kgTeraz);
       if (onKg) onKg(kgTeraz);            // talerze na gryfie
       wiersze.forEach(x => x.pokazKg());  // i „× kg" w każdym wierszu serii
+      if (scenaTeraz && scenaTeraz.day === day && scenaTeraz.w === w) { scenaTeraz.rysuj(); renderTimer(); }
     };
     minus.onclick = () => zatwierdzKg(kgTeraz - krokKg);
     plus.onclick = () => zatwierdzKg(kgTeraz + krokKg);
@@ -3148,21 +3511,21 @@ function setRows(it, day, w, pl, onKg) {
 }
 
 // Pasek postepu aktualizowany w miejscu — bez dotykania reszty ekranu.
-function odswiezPostep(day, w) {
+function odswiezPostep(day, w, zeSceny) {
   const sp = document.getElementById('sprog');
-  if (!sp) return;
-  const d = state.plan.days[day];
-  let total = 0, done = 0;
-  d.items.forEach(it => {
-    total += plannedOf(it, w, day).sets;
-    done += logGet(w, day, it.n).filter(Boolean).length;
-  });
-  sp.querySelector('.ile').textContent = done + '/' + total + ' serii';
-  sp.querySelector('.fill').style.width = (total ? done / total * 100 : 0) + '%';
-  sp.querySelector('.proc').textContent = (total ? Math.round(done / total * 100) : 0) + '%';
-  const komplet = total > 0 && done >= total;
-  if (komplet && !sp.classList.contains('komplet')) { blysk(sp, 1400); setTimeout(() => pokazZaliczenie(day, w), 450); }
-  sp.classList.toggle('komplet', komplet);
+  const naScenie = !!scenaTeraz && scenaTeraz.day === day && scenaTeraz.w === w;
+  if (sp) {
+    const { done, total } = postepDnia(w, day);
+    sp.querySelector('.ile').textContent = done + '/' + total + ' serii';
+    sp.querySelector('.fill').style.width = (total ? done / total * 100 : 0) + '%';
+    sp.querySelector('.proc').textContent = (total ? Math.round(done / total * 100) : 0) + '%';
+    const komplet = total > 0 && done >= total;
+    // Koniec sesji ogłasza scena; bez niej (stare archiwa, testy) — pasek.
+    if (komplet && !sp.classList.contains('komplet')) { blysk(sp, 1400); if (!naScenie) setTimeout(() => pokazZaliczenie(day, w), 450); }
+    sp.classList.toggle('komplet', komplet);
+  }
+  // Seria odhaczona w karcie kolejki: scena przechodzi na następną niezrobioną.
+  if (naScenie && !zeSceny) { scenaTeraz.zDziennika(); renderTimer(); }
   // Podsumowanie pod listą liczy te same serie — nie może zostać przy „jeszcze nic".
   const ps = document.getElementById('podsum');
   if (ps && ps.replaceWith) ps.replaceWith(podsumowanieSesji(day, w));
@@ -3675,8 +4038,8 @@ function renderTimer() {
   const v = state.view || '#/';
   // Presety przerw mają sens tylko przy sztandze. Joga i rozciąganie nie mają
   // przerw — tam pasek pokazuje minutnik dopiero, gdy ten chodzi.
-  const wSesji = v.startsWith('#/d/');
-  if (!wSesji && !tId) {
+  if (v.startsWith('#/d/') && scenaTeraz) { rysujAkcje(box); return; }
+  if (!tId) {
     box.className = 'timer tabs';
     const nav = el('nav', 'in');
     nav.setAttribute('aria-label', 'Główne ekrany');
@@ -3720,13 +4083,6 @@ function renderTimer() {
     pomin.setAttribute('aria-label', 'Zakończ przerwę teraz');
     pomin.onclick = () => stopTimer();
     przyciski.append(plus, pomin);
-  } else {
-    [60, 90, 120, 180].forEach(s => {
-      const b = el('button', 'tbtn', s < 120 ? s + ' s' : (s / 60) + ' min');
-      b.setAttribute('aria-label', 'Przerwa ' + (s < 120 ? s + ' sekund' : (s / 60) + ' minuty'));
-      b.onclick = () => startTimer(s);
-      przyciski.append(b);
-    });
   }
   const snd = el('button', 'tbtn snd' + (state.sound ? '' : ' off'));
   snd.setAttribute('aria-label', state.sound ? 'Wycisz sygnał' : 'Włącz sygnał');
@@ -4375,13 +4731,13 @@ function pasekTreningu(day, w) {
 
 // Stoper chodzi sam — bez przebudowy ekranu, żeby nic nie uciekało spod palca.
 setInterval(() => {
-  const n = document.getElementById('trn-czas');
-  if (!n) return;
+  const n = document.getElementById('trn-czas'), g = document.getElementById('ses-czas');
+  if (!n && !g) return;
   const m = (state.view || '').match(/^#\/(?:d\/([A-C])|mobilnosc)(?:\/(\d+))?/);
   if (!m) return;
   const day = m[1] || 'D', w = tydzienZAdresu(m[2]) || state.week;
   const t = trening(w, day);
-  if (t && !t.end) n.textContent = fmtCzas(czasTreningu(t));
+  if (t && !t.end) { const c = fmtCzas(czasTreningu(t)); if (n) n.textContent = c; if (g) g.textContent = c; }
 }, 1000);
 
 /* Koniec przerwy jako powiadomienie. Aplikacja Huawei Health przekazuje
@@ -4868,274 +5224,6 @@ const potemKrok = k => `${k.it.name} · ${k.i + 1}/${k.pl.sets}` +
 const opisKroku = k => `${k.it.name} · seria ${k.i + 1} z ${k.pl.sets}` + (k.pl.kg != null ? ` · ${fmt(k.pl.kg)} kg` : '') + (k.pl.target != null ? ` × ${k.pl.target}${jednostka(k.pl) ? ' ' + jednostka(k.pl) : ''}` : '');
 
 // Wejście w tryb prowadzenia po następnym renderze dnia (karta Dziś → „Prowadź dalej").
-let prowadzPoRenderze = null;
-let zamknijProwadzenie = null;                 // uchwyt otwartej instancji (sprzątanie przy ponownym otwarciu)
-
-function prowadzSesje(day, w) {
-  if (!document.body || !document.body.appendChild) return null;
-  if (zamknijProwadzenie) zamknijProwadzenie(true);
-  const stary = document.querySelector('.prow');
-  if (stary && stary.remove) stary.remove();
-  let kroki = kolejkaSesji(day, w);
-  if (!kroki.length) return null;
-  let i = nastepnyKrok(kroki, day, w);
-  if (i < 0) i = 0;
-  keepAwake(true);
-
-  const tlo = el('div', 'prow prow-sila');
-  let tik = null, ekran = 'seria';
-  const sprzatnij = () => {
-    clearInterval(tik);
-    if (bieg) stopTimer();                       // minutnik serii nie ma prawa odhaczyć czegoś po wyjściu
-    tlo.remove();
-    document.removeEventListener('keydown', klaw);
-    zamknijProwadzenie = null;
-  };
-  const zamknij = cicho => { sprzatnij(); if (cicho !== true) render(); };
-  zamknijProwadzenie = zamknij;
-  const koniecSesji = () => {
-    sprzatnij();
-    if (tId) stopTimer();
-    render();
-    const t = trening(w, day);
-    setTimeout(() => (t && t.start && !t.end ? zakonczTrening(day, w) : pokazZaliczenie(day, w)), 250);
-  };
-  const klaw = e => {
-    if (e.target && e.target.tagName === 'INPUT') return;    // pole liczbowe ma własne klawisze
-    if (e.key === 'Escape') zamknij();
-    else if (e.key === 'ArrowRight') { if (ekran === 'przerwa') dalej(); }
-    else if (e.key === 'Enter' && ekran === 'seria') zalicz();
-  };
-  document.addEventListener('keydown', klaw);
-
-  const gora = () => {
-    const g = el('div', 'prgora');
-    const kreski = el('div', 'prkreski');
-    kroki.forEach((k, j) => kreski.append(el('i', (logGet(w, day, k.it.n)[k.i] ? 'z' : '') + (j === i ? ' teraz' : ''))));
-    const x = el('button', 'prx');
-    x.innerHTML = ikona('x', 20);
-    x.setAttribute('aria-label', 'Zamknij prowadzenie — serie zostają zapisane');
-    x.onclick = () => zamknij();
-    g.append(el('span', 'prnr', `${i + 1}/${kroki.length}`), kreski, x);
-    return g;
-  };
-  const fmtS = n => Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0');
-  const stepper = (klasa, etykieta, opisMinus, opisPlus) => {
-    const box = el('div', 'krok3 ' + klasa);
-    box.append(el('div', 'krok3-l', etykieta));
-    const row = el('div', 'krok3-r');
-    const minus = el('button', 'krok3-b'); minus.innerHTML = ikona('minus', 22); minus.setAttribute('aria-label', opisMinus);
-    const v = el('div', 'krok3-v');
-    const plus = el('button', 'krok3-b'); plus.innerHTML = ikona('plus', 22); plus.setAttribute('aria-label', opisPlus);
-    row.append(minus, v, plus);
-    box.append(row);
-    return { box, minus, plus, v };
-  };
-
-  // Stan serii: powtórzenia i ciężar ustawione przed ✓.
-  let powt = null, kg = null;
-  const rysujSerie = () => {
-    clearInterval(tik);
-    ekran = 'seria';
-    const k = kroki[i], it = k.it, pl = k.pl;
-    const zapis = logGet(w, day, it.n)[k.i];
-    const czasowa = naCzas(pl), jedn = jednostka(pl);
-    powt = zapis ? zapis.r : pl.target;
-    kg = pl.kg;
-    tlo.replaceChildren();
-    tlo.append(gora());
-
-    const tresc = el('div', 'prtresc');
-    const nrCw = state.plan.days[day].items.indexOf(it) + 1;
-    tresc.append(el('div', 'preye', `Ćwiczenie ${nrCw} z ${state.plan.days[day].items.length}${k.para ? ' · superseria ' + it.superset[0] : ''}`));
-    tresc.append(el('h2', 'prname', it.name));
-    const rpe = resolve(it.rpe, w);
-    const cel = pl.target != null ? `cel ${pl.target} ${jedn || 'powt.'}` : '';
-    tresc.append(el('div', 'prdawka', [`${pl.unit === 'min' ? 'Runda' : 'Seria'} ${k.i + 1} z ${pl.sets}`, cel, rpe != null && rpe !== '—' ? 'RPE ' + fmt(rpe) : ''].filter(Boolean).join(' · ')));
-    const swiatla = swiatlaEl(pl.sets, logGet(w, day, it.n).filter(Boolean).length);
-    tresc.append(swiatla);
-    if (k.i === pl.sets - 1) tresc.append(el('div', 'pr-ost', 'Ostatnia seria'));
-
-    // Załadowany gryf przy boju: co założyć, zanim podejdziesz.
-    let gryf = null;
-    if (isMainItem(it) && pl.kg != null) {
-      gryf = platesEl(pl.kg);
-      gryf.classList.add('on', 'pr-gryf');
-      tresc.append(gryf);
-    }
-    if (pl.kg != null) {
-      const krokKg = pl.planKg != null ? 2.5 : 1;
-      const s = stepper('pr-kg', pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar', `Ciężar: mniej o ${fmt(krokKg)} kg`, `Ciężar: więcej o ${fmt(krokKg)} kg`);
-      const pokaz = () => {
-        s.v.textContent = ''; s.v.append(el('b', null, fmt(kg)), el('u', null, 'kg'));
-        if (gryf) { gryf.innerHTML = ''; gryf.append(...[...platesEl(kg).children]); }
-      };
-      const ustawKg = x => {
-        kg = Math.max(0.5, Math.round(x * 100) / 100);
-        zapiszCiezar(it, day, w, pl, kg);
-        k.pl = pl.kg === kg ? pl : { ...pl, kg };
-        kroki = kroki.map(q => (q.it === it ? { ...q, pl: k.pl } : q));
-        pokaz();
-        const nast = tlo.querySelector && tlo.querySelector('.prnast');          // „Potem: …" też z nowym ciężarem
-        if (nast && kroki[i + 1]) nast.textContent = 'Potem: ' + potemKrok(kroki[i + 1]);
-      };
-      s.minus.onclick = () => ustawKg(kg - krokKg);
-      s.plus.onclick = () => ustawKg(kg + krokKg);
-      s.v.onclick = () => edycjaLiczby(s.v, { wartosc: kg, krok: pl.planKg != null ? 2.5 : 0.5, min: 0.5, max: 500, etykieta: 'Ciężar w kilogramach', naZapis: ustawKg });
-      pokaz();
-      tresc.append(s.box);
-    } else if (pl.target == null) {
-      tresc.append(el('div', 'pr-dawka', it.dose || ''));
-    }
-
-    if (czasowa) {
-      // Seria na czas: minutnik prowadzi przez ustawienie, pracę i zmianę strony,
-      // a po ostatnim sygnale sam zalicza serię.
-      const fazy = fazySerii(it, pl, w).filter(f => f.tryb === 'praca');
-      const czas = el('div', 'pr-czas');
-      const odl = el('b', 'pr-zegar', fmtS(sekundySerii(pl)));
-      const et = el('span', 'pr-faza', pl.unit === 'min' ? `Runda ${k.i + 1} z ${pl.sets}` : fazy.length > 1 ? 'Na każdą stronę' : 'Trzymanie');
-      const start = el('button', 'pr-startczas');
-      const ustawStart = leci => { start.innerHTML = ikona(leci ? 'x' : 'play', 20); start.append(el('span', null, leci ? 'Przerwij' : 'Start')); };
-      ustawStart(false);
-      const odswiez = () => {
-        if (bieg && tId) {
-          czas.className = 'pr-czas leci ' + (tTryb === 'start' ? 'start' : 'praca');
-          odl.textContent = fmtS(tLeft);
-          et.textContent = tEtykieta + (bieg.faza.tryb === 'praca' && fazy.length > 1 ? '' : '');
-        }
-      };
-      start.onclick = () => {
-        if (bieg) { stopTimer(); clearInterval(tik); czas.className = 'pr-czas'; odl.textContent = fmtS(sekundySerii(pl)); et.textContent = 'Przerwane'; ustawStart(false); return; }
-        ustawStart(true);
-        biegSerii(it, pl, w, day, { naKoniec: () => { clearInterval(tik); if (ekran === 'seria' && kroki[i] === k) zalicz(); } });
-        clearInterval(tik); tik = setInterval(odswiez, 200); odswiez();
-      };
-      czas.append(et, odl, start);
-      tresc.append(czas);
-    } else if (pl.target != null) {
-      const s = stepper('pr-powt', pl.unit === 'm' ? 'Metry' : 'Powtórzenia', 'Mniej', 'Więcej');
-      const pokaz = () => { s.v.textContent = ''; s.v.append(el('b', null, String(powt)), el('u', null, jedn)); };
-      s.minus.onclick = () => { powt = Math.max(0, powt - 1); pokaz(); };
-      s.plus.onclick = () => { powt += 1; pokaz(); };
-      s.v.onclick = () => edycjaLiczby(s.v, { wartosc: powt, krok: 1, min: 0, max: 999, calk: true, etykieta: 'Powtórzenia', naZapis: x => { powt = x; pokaz(); } });
-      pokaz();
-      tresc.append(s.box);
-    }
-    const cele = celeEl(it);
-    if (cele) tresc.append(cele);
-    if (it.note) {
-      const d = el('details', 'pr-opis');
-      d.append(el('summary', null, 'Jak to zrobić'), el('p', 'pr-uwaga', opisWykonaniaCw(it)));
-      // Pierwsza seria ćwiczenia: opis od razu na wierzchu.
-      if (k.i === 0 && !zapis) d.open = true;
-      tresc.append(d);
-    }
-    tlo.append(tresc);
-
-    const dol = el('div', 'prdol');
-    const nast = kroki[i + 1];
-    dol.append(el('div', 'prnast', nast ? 'Potem: ' + potemKrok(nast) : 'To ostatnia seria sesji'));
-    const przyc = el('div', 'prprzyc');
-    const wst = el('button', 'prwstecz');
-    wst.innerHTML = ikona('wlewo', 22);
-    wst.setAttribute('aria-label', 'Poprzednia seria');
-    wst.disabled = i === 0;
-    wst.onclick = () => { if (ekran === 'seria' && i > 0) { if (bieg) stopTimer(); i--; rysujSerie(); } };
-    const ok = el('button', 'prok pr-zalicz');
-    ok.append(el('span', null, zapis ? 'Zapisz ponownie' : 'Zaliczona'));
-    const ic = el('span', 'iko'); ic.innerHTML = ikona('ok', 22); ok.append(ic);
-    ok.onclick = zalicz;
-    przyc.append(wst, ok);
-    dol.append(przyc);
-    tlo.append(dol);
-    tresc.scrollTop = 0;
-  };
-
-  const zalicz = () => {
-    if (ekran !== 'seria') return;
-    const k = kroki[i], it = k.it, pl = k.pl;
-    if (bieg) stopTimer();                       // ręczne ✓ w trakcie minutnika kończy go
-    clearInterval(tik);
-    const bylo = !!logGet(w, day, it.n)[k.i];
-    logSet(w, day, it.n, k.i, { r: powt, kg: pl.kg != null ? kg : null, pr: pl.target, pk: pl.planKg });
-    if (!bylo) zapiszCzasSerii(w, day, it.n, k.i);
-    if (navigator.vibrate) navigator.vibrate(12);
-    startPrzyPierwszejSerii(day, w);
-    const nast = kroki[i + 1];
-    if (!nast) { koniecSesji(); return; }
-    const sek = state.autoPrzerwa ? przerwaPo(it, day, w) : 0;
-    if (sek > 0) { startTimer(sek, { tresc: 'Następna: ' + opisKroku(nast) }); rysujPrzerwe(); }
-    else dalej();
-  };
-  const dalej = () => {
-    clearInterval(tik);
-    if (tId) stopTimer();
-    if (i < kroki.length - 1) { i++; rysujSerie(); } else koniecSesji();
-  };
-
-  const rysujPrzerwe = () => {
-    ekran = 'przerwa';
-    tlo.replaceChildren();
-    tlo.append(gora());
-    const tresc = el('div', 'prtresc pr-przerwa');
-    tresc.append(el('div', 'preye', 'Przerwa'));
-    const odl = el('div', 'pr-odl', fmtS(tLeft));
-    tresc.append(odl);
-    const pas = el('div', 'pr-pas'), fill = el('i');
-    pas.append(fill);
-    tresc.append(pas);
-    const pod = el('div', 'pr-pod', 'Oddychaj. Następna seria zaraz.');
-    tresc.append(pod);
-    const plus = el('button', 'pr-plus', '+30 s');
-    plus.setAttribute('aria-label', 'Przedłuż przerwę o 30 sekund');
-    plus.onclick = () => {
-      przedluzPrzerwe(30);
-      odl.classList.remove('koniec'); pod.textContent = 'Oddychaj. Następna seria zaraz.';
-      clearInterval(tik); tik = setInterval(odswiez, 250); odswiez();
-    };
-    tresc.append(plus);
-    // Co dalej: nazwa, cel i ciężar następnej serii — żeby w przerwie przełożyć talerze.
-    const nast = kroki[i + 1];
-    const karta = el('div', 'pr-nast');
-    karta.append(el('span', null, 'Następna'), el('b', null, nast.it.name),
-      el('i', null, [`seria ${nast.i + 1} z ${nast.pl.sets}`, nast.pl.target != null ? `${nast.pl.target} ${jednostka(nast.pl) || 'powt.'}` : '', nast.pl.kg != null ? fmt(nast.pl.kg) + ' kg' : ''].filter(Boolean).join(' · ')));
-    tresc.append(karta);
-    tlo.append(tresc);
-    const dol = el('div', 'prdol');
-    const przyc = el('div', 'prprzyc');
-    const ok = el('button', 'prok cicho');
-    const okTxt = el('span', null, 'Pomiń przerwę');
-    ok.append(okTxt);
-    const ic = el('span', 'iko'); ic.innerHTML = ikona('dalej', 22); ok.append(ic);
-    ok.onclick = dalej;
-    przyc.append(ok);
-    dol.append(przyc);
-    tlo.append(dol);
-    const odswiez = () => {
-      if (tId) {
-        odl.textContent = fmtS(tLeft); fill.style.width = (tTotal ? tLeft / tTotal * 100 : 0) + '%';
-        ok.classList.add('cicho'); okTxt.textContent = 'Pomiń przerwę';
-        return;
-      }
-      ok.classList.remove('cicho'); okTxt.textContent = 'Dalej';
-      // Koniec przerwy: wibracja i powiadomienie poszły z timera. Ekran zostaje,
-      // bo telefon może leżeć na ławce — „Dalej" jest pod kciukiem.
-      clearInterval(tik);
-      odl.textContent = '0:00';
-      fill.style.width = '0%';
-      odl.classList.add('koniec');
-      pod.textContent = 'Czas! Następna seria.';
-    };
-    clearInterval(tik);
-    tik = setInterval(odswiez, 250);
-    odswiez();
-  };
-
-  rysujSerie();
-  document.body.appendChild(tlo);
-  return tlo;
-}
 
 /* ---------- wybór filmu ----------
    Okienko do wklejenia innego linku z YouTube. Plan zapamiętuje go per pozycja
@@ -5221,6 +5309,9 @@ const renderJesliSpokojnie = () => { if (Date.now() - ostatniDotyk > 6000) rende
 function render() {
   const app = $('#app');
   app.innerHTML = '';
+  scenaTeraz = null;
+  // Minutnik serii puszczony ze sceny nie ma prawa zapisać czegoś po wyjściu z sesji.
+  if (bieg && !state.view.startsWith('#/d/')) stopTimer();
   const v = state.view;
   const onDay = v.startsWith('#/d/');
   const onMob = v === '#/mobilnosc' || v.startsWith('#/mobilnosc/');
@@ -5234,7 +5325,6 @@ function render() {
   if (onDay) {
     const [k, t] = v.slice(4).split('/');
     app.append(dayView(k, tydzienZAdresu(t)));
-    if (prowadzPoRenderze && prowadzPoRenderze.day === k) { const p = prowadzPoRenderze; prowadzPoRenderze = null; setTimeout(() => prowadzSesje(p.day, p.w), 0); }
   }
   else if (onMob) app.append(mobilityView(tydzienZAdresu(v.split('/')[2])));
   // "#/rozciaganie/wt" albo "#/rozciaganie/cz/3"
@@ -5305,7 +5395,7 @@ async function ciezaryZPoprzedniego(n) {
   const a = archiwum()[n];
   if (!a || !a.log) return 0;
   let stary;
-  try { stary = await (await fetch(`plan-cykl${n}.json?v=88`)).json(); } catch { return 0; }
+  try { stary = await (await fetch(`plan-cykl${n}.json?v=89`)).json(); } catch { return 0; }
   let ile = 0;
   for (const [day, d] of Object.entries((stary && stary.days) || {})) for (const it of d.items) {
     if (it.load && it.load.ref) continue;        // boje mają swoje E1RM
@@ -5368,7 +5458,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=88`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=89`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -5421,7 +5511,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=88')
+fetch('plan.json?v=89')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

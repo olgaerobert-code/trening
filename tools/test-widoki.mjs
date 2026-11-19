@@ -49,6 +49,7 @@ class El {
   append(...n) { for (const x of n) { const c = typeof x === 'object' ? x : txt(String(x)); c.parentNode = this; this.children.push(c); } }
   remove() { if (this.parentNode) this.parentNode.children = this.parentNode.children.filter(c => c !== this); this.parentNode = null; }
   replaceChildren(...n) { this.children = []; this.append(...n); }
+  replaceWith(n) { const p = this.parentNode; if (!p) return; const i = p.children.indexOf(this); n.parentNode = p; p.children[i] = n; this.parentNode = null; }
   closest(sel) { let n = this; while (n && n.tagName) { if (n.tagName !== '#TEXT' && pasuje(n, sel)) return n; n = n.parentNode; } return null; }
   appendChild(n) { this.append(n); return n; }
   setAttribute(k, v) { this.attrs[k] = String(v); }
@@ -124,7 +125,7 @@ const sandbox = {
 };
 sandbox.window.location = sandbox.location;
 vm.createContext(sandbox);
-for (const plik of ['progresja.js', 'app.js']) {
+for (const plik of ['progresja.js', 'figury.js', 'app.js']) {
   vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sandbox, { filename: plik });
 }
 // `const` na szczycie skryptu ląduje w leksykalnym zasiegu kontekstu, a nie na
@@ -135,7 +136,7 @@ vm.runInContext(`globalThis.API = {
   postepDnia, platesEl, plateList, maybeRekalibruj, maybeAdjust, przeliczPlan,
   przeniesTydzien, zastosujZdalnePrzeniesienia, zawartoscTygodnia, tydzienMaDane,
   domyslnaSesja, sesjaKompletna, mobWidoczne, sesjaPominieta, pominSesje, tydzienZaliczony, seriaTygodni, ocenaBojuWBloku, migracjaPoniedzialku,
-  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie, kolejkaSesji, nastepnyKrok, prowadzSesje, przerwaPo, zapiszCiezar, rozwinKarte,
+  parsujLiczbe, domknijLiczbe, edycjaLiczby, przytrzymanie, arkuszSerii, startTimer, stopTimer, przedluzPrzerwe, stanPrzerwy, renderTimer, zapiszLokalnie, kolejkaSesji, nastepnyKrok, scenaSesji, scena: () => scenaTeraz, przerwaPo, zapiszCiezar, rozwinKarte,
   scalZdalneWiersze, sprzatnijPoPrzeniesieniach, poPrzeniesieniu, logGet,
   DZIEN_TYG, SKROT_DNIA, migracjaDniCyklu3,
   rozpocznijTrening, zakonczTrening, trening, czasTreningu, statySesji, idFilmu, zapiszFilm, przerwaPo, prowadzJoge, startPrzyPierwszejSerii, cofnijStart, przerwyCwiczenia, analizaSesji, czasSerii, raportCyklu,
@@ -265,8 +266,8 @@ S.adjust = {};
 console.log('');
 console.log('Odchudzanie');
 S.week = 4; S.view = '#/'; A.render();
-test('karta dzis i trzy pozostale sesje', app.querySelectorAll('.dzis-k').length === 1 && app.querySelectorAll('.wiersz').length === 3,
-  'karta: ' + app.querySelectorAll('.dzis-k').length + ', wiersze: ' + app.querySelectorAll('.wiersz').length);
+test('tydzien to siedem plakatow, jeden w fokusie', app.querySelectorAll('.dzis-k').length === 1 && app.querySelectorAll('.plakat').length === 7,
+  'fokus: ' + app.querySelectorAll('.dzis-k').length + ', plakaty: ' + app.querySelectorAll('.plakat').length);
 test('pasek tygodnia: siedem dni', app.querySelectorAll('.d7').length === 7);
 test('zakladki Dzis, Plan, Postep i Wiecej w dolnym pasku', ['Dziś', 'Plan', 'Postęp', 'Więcej'].every(t => timer.textContent.includes(t)));
 test('nie ma juz osobnego kafla 1RM', !app.textContent.includes('Kalkulator 1RM'));
@@ -801,17 +802,19 @@ console.log('Przerwa i powiadomienie');
   test('ustawienia maja przelacznik powiadomienia o koncu przerwy', app.textContent.includes('Powiadomienie o końcu przerwy'));
 
   S.view = '#/d/A'; A.render();
+  test('na ekranie sesji dolny pasek to jeden przycisk sceny', timer.className.includes('akcja') && timer.querySelectorAll('.ak-gl').length === 1 && timer.querySelectorAll('.tbtn').length === 0);
   A.startTimer(60);
   const przed = A.stanPrzerwy();
   test('timer rusza na 60 s', przed.leci && przed.tTotal === 60);
-  const przyciski = timer.querySelectorAll('.tbtn').map(b => b.textContent);
-  test('w czasie przerwy kapsula ma +30 s i Pomin, bez presetow', przyciski.includes('+30 s') && przyciski.includes('Pomiń') && !przyciski.includes('60 s'));
+  test('w czasie przerwy pasek ma +30 s i Pomin przerwe', !!timer.querySelector('.ak-plus') && timer.querySelector('.ak-gl').textContent.includes('Pomiń przerwę'));
+  test('zegar przerwy gra na scenie', app.querySelector('.scena').classList.contains('przerwa') && app.querySelector('.sc-zcz').textContent === '1:00' && !app.querySelector('.sc-zegar').hidden);
   A.przedluzPrzerwe(30);
   const po = A.stanPrzerwy();
   test('+30 s wydluza koniec przerwy o pol minuty', po.tTotal === 90 && po.tEnd - przed.tEnd === 30000 && po.tLeft >= 89);
-  timer.querySelectorAll('.tbtn').find(b => b.textContent === 'Pomiń').click();
+  timer.querySelector('.ak-gl').click();
   const stop = A.stanPrzerwy();
-  test('Pomin konczy przerwe, wracaja presety', !stop.leci && stop.tTotal === 0 && timer.querySelectorAll('.tbtn').map(b => b.textContent).includes('60 s'));
+  test('Pomin konczy przerwe, wraca przycisk serii', !stop.leci && stop.tTotal === 0 && !timer.querySelector('.ak-plus') && !timer.querySelector('.ak-gl').textContent.includes('Pomiń')
+    && app.querySelector('.sc-zegar').hidden && !app.querySelector('.scena').classList.contains('przerwa'));
   test('+30 s bez trwajacej przerwy nic nie robi', (A.przedluzPrzerwe(30), A.stanPrzerwy().tTotal === 0));
   test('ciezar z klawiatury nie schodzi ponizej 2,5 kg', A.domknijLiczbe(0, { krok: 2.5, min: 2.5, max: 500 }) === 2.5);
 }
@@ -838,64 +841,69 @@ console.log('Prowadzenie sesji');
   test('po zapisie pierwszej serii nastepny to drugi krok', A.nastepnyKrok(kB, 'B', W) === 1);
   czysc();
 
-  // Ekran: pierwsza seria dnia A, Zaliczona → zapis, czas serii, przerwa z opisu cwiczenia.
+  // Scena: pierwsza seria dnia A, Zrobione → zapis, czas serii, przerwa z opisu cwiczenia.
   S.view = '#/d/A'; A.render();
-  test('ekran sesji ma przycisk Prowadz sesje', app.querySelectorAll('.prowstart').length === 1 && app.textContent.includes('Prowadź sesję'));
-  const prow = A.prowadzSesje('A', W);
   const kA = A.kolejkaSesji('A', W);
-  test('tryb prowadzenia otwiera sie na pierwszej serii', !!prow && prow.querySelector('.prnr').textContent === '1/' + kA.length && prow.textContent.includes(kA[0].it.name));
-  const okBtn = () => prow.querySelectorAll('.prok')[0];
-  prow.querySelector('.pr-powt').querySelectorAll('.krok3-b')[1].click();      // + jedno powtorzenie
-  okBtn().click();
+  const scena = () => app.querySelector('.scena');
+  const glowny = () => timer.querySelector('.ak-gl');
+  test('ekran sesji otwiera sie na scenie z pierwsza seria, bez osobnego trybu prowadzenia',
+    !!scena() && scena().querySelector('.sc-nazwa').textContent === kA[0].it.name && !app.querySelector('.prowstart') && glowny().textContent.includes(kA[0].it.name));
+  test('pod scena kolejka: kazde cwiczenie zwiniete do wiersza', app.querySelectorAll('.ex').length === S.plan.days.A.items.length
+    && app.querySelectorAll('.ex').every(k => k.classList.contains('zwiniety')));
+  scena().querySelector('.sc-powt').querySelectorAll('.sc-b')[1].click();      // + jedno powtorzenie
+  glowny().click();
   const z0 = A.logGet(W, 'A', kA[0].it.n)[0];
-  test('Zaliczona zapisuje serie z ustawiona liczba powtorzen', !!z0 && z0.r === kA[0].pl.target + 1 && z0.pr === kA[0].pl.target);
+  test('Zrobione zapisuje serie z ustawiona liczba powtorzen', !!z0 && z0.r === kA[0].pl.target + 1 && z0.pr === kA[0].pl.target);
   test('czas serii zapisany', Array.isArray(S.czasy[W + '|A|' + kA[0].it.n]) && !!S.czasy[W + '|A|' + kA[0].it.n][0]);
   test('trening wystartowal przy pierwszej serii', !!S.treningi[W + '|A'] && !!S.treningi[W + '|A'].start);
   const sek = A.przerwaPo(kA[0].it, 'A', W);
   const st = A.stanPrzerwy();
-  test('po serii ekran przerwy z odliczaniem z opisu cwiczenia', st.leci && st.tTotal === sek && !!prow.querySelector('.pr-odl') && !!prow.querySelector('.pr-nast') && prow.querySelector('.pr-nast').textContent.includes(kA[1].it.name));
-  prow.querySelectorAll('.prok')[0].click();                   // Dalej →
-  test('Dalej konczy przerwe i pokazuje druga serie', !A.stanPrzerwy().leci && prow.querySelector('.prnr').textContent === '2/' + kA.length);
-  // Ponowne otwarcie prowadzenia sprzata poprzednia instancje (jeden .prow, stary uchwyt zamkniety).
-  const prowBis = A.prowadzSesje('A', W);
-  test('ponowne otwarcie zostawia jedna instancje', document.querySelectorAll('.prow').length === 1 && prowBis !== prow);
-  prowBis.querySelector('.prx').click();
-  const prow3 = A.prowadzSesje('A', W);
-  // dalej testujemy na swiezej instancji
-  test('po zamknieciu da sie otworzyc znowu', !!prow3 && document.querySelectorAll('.prow').length === 1);
-  // Enter w polu liczbowym nie zalicza serii — tylko zapisuje liczbe w stepperze.
-  const vPowt = prow3.querySelector('.pr-powt').querySelector('.krok3-v');
+  test('po serii przerwa z opisu cwiczenia, a scena pokazuje juz nastepna serie', (sek > 0 ? st.leci && st.tTotal === sek : !st.leci)
+    && scena().querySelector('.sc-nazwa').textContent === kA[1].it.name, JSON.stringify({ sek, leci: st.leci, t: st.tTotal }));
+  test('karta zrobionego cwiczenia w kolejce pokazuje zapalone swiatlo', app.querySelectorAll('.ex').find(k => k.textContent.includes(kA[0].it.name)).querySelectorAll('.swiatla')[0].querySelectorAll('i')[0].classList.contains('on'));
+  if (A.stanPrzerwy().leci) glowny().click();                   // Pomiń przerwę
+  test('Pomin przerwe konczy ja, scena zostaje na drugiej serii', !A.stanPrzerwy().leci && scena().querySelector('.sc-nazwa').textContent === kA[1].it.name && !glowny().textContent.includes('Pomiń'));
+  // Enter w polu liczbowym nie zapisuje serii — tylko ustawia liczbe.
+  const vPowt = scena().querySelector('.sc-powt').querySelector('.sc-v');
   vPowt.click();
   const polePowt = vPowt.querySelector('.wpis');
   polePowt.value = '9';
   polePowt.onkeydown({ key: 'Enter', preventDefault() {}, stopPropagation() {} });
-  test('Enter w polu powtorzen ustawia liczbe bez zaliczania serii', vPowt.textContent.startsWith('9') && !A.logGet(W, 'A', kA[1].it.n)[kA[1].i] && prow3.querySelector('.prnr').textContent === '2/' + kA.length);
+  test('Enter w polu powtorzen ustawia liczbe bez zapisu serii', vPowt.textContent.startsWith('9') && !A.logGet(W, 'A', kA[1].it.n)[kA[1].i]);
   vPowt.click();
   const polePowt2 = vPowt.querySelector('.wpis');
   polePowt2.onkeydown({ key: 'Escape', preventDefault() {}, stopPropagation() {} });
-  test('Escape przywraca liczbe ze stepperem (b i jednostka), nie goly tekst', !!vPowt.querySelector('b') && vPowt.querySelector('b').textContent === '9');
-  test('kreski postepu: pierwsza zaliczona, druga biezaca', prow3.querySelector('.prkreski').querySelectorAll('i')[0].classList.contains('z') && prow3.querySelector('.prkreski').querySelectorAll('i')[1].classList.contains('teraz'));
-  // Ciezar boju w trybie prowadzenia idzie ta sama droga co suwak (kgw).
-  const glowny = kA.findIndex(k => k.pl.planKg != null);
-  if (glowny >= 0) {
-    while (prow3.querySelector('.prnr').textContent.split('/')[0] !== String(glowny + 1)) prow3.querySelectorAll('.prok')[0].click(), (A.stanPrzerwy().leci && prow3.querySelectorAll('.prok')[0].click());
-    const kgPrzed = kA[glowny].pl.kg;
-    prow3.querySelector('.pr-kg').querySelectorAll('.krok3-b')[1].click();       // +2,5 kg
-    test('plus przy ciezarze zapisuje wlasny ciezar boju', A.plannedOf(kA[glowny].it, W, 'A').kg === kgPrzed + 2.5 && S.kgw[W + '|A|' + kA[glowny].it.n] === kgPrzed + 2.5);
-    test('ekran pokazuje zaladowany gryf i aktualny ciezar', !!prow3.querySelector('.pr-gryf') && prow3.querySelector('.pr-kg').textContent.includes(fmtPl(kgPrzed + 2.5)));
+  test('Escape przywraca liczbe (b i jednostka), nie goly tekst', !!vPowt.querySelector('b') && vPowt.querySelector('b').textContent === '9');
+  test('pasek sceny: zrobiona seria i jedna biezaca', (() => { const kr = scena().querySelector('.sc-pasek').querySelectorAll('i'); return kr.filter(x => x.classList.contains('z')).length === 1 && kr.filter(x => x.classList.contains('t')).length === 1; })());
+  // Ciezar boju na scenie idzie ta sama droga co w karcie (kgw), a karta w kolejce pokazuje to samo.
+  const glownyKrok = kA.findIndex(k => k.pl.planKg != null && !A.logGet(W, 'A', k.it.n)[k.i]);
+  if (glownyKrok >= 0) {
+    A.scena().skocz(kA[glownyKrok].it);
+    const kgPrzed = kA[glownyKrok].pl.kg;
+    scena().querySelector('.sc-kg').querySelectorAll('.sc-b')[1].click();       // +2,5 kg
+    test('plus przy ciezarze zapisuje wlasny ciezar boju', A.plannedOf(kA[glownyKrok].it, W, 'A').kg === kgPrzed + 2.5 && S.kgw[W + '|A|' + kA[glownyKrok].it.n] === kgPrzed + 2.5);
+    test('scena pokazuje nowy ciezar i talerze na strone', scena().querySelector('.sc-kg').textContent.includes(fmtPl(kgPrzed + 2.5)) && !!scena().querySelector('.talerze'));
+    test('karta w kolejce pokazuje ten sam ciezar', app.querySelectorAll('.ex').find(k => k.textContent.includes(kA[glownyKrok].it.name)).querySelector('.kg-v').textContent.includes(fmtPl(kgPrzed + 2.5)));
   }
-  prow3.querySelector('.prx').click();
-  test('zamkniecie zostawia zapisane serie', !document.querySelector('.prow') && !!A.logGet(W, 'A', kA[0].it.n)[0]);
+  // Tap w wiersz kolejki przenosi scene na to cwiczenie i rozwija jego serie.
+  const ostatnie = S.plan.days.A.items[S.plan.days.A.items.length - 1];
+  const wierszOst = app.querySelectorAll('.ex').find(k => k.textContent.includes(ostatnie.name));
+  wierszOst.querySelector('.exhead').onclick();
+  test('tap w wiersz kolejki: scena na tym cwiczeniu, serie rozwiniete', scena().querySelector('.sc-nazwa').textContent === ostatnie.name && wierszOst.classList.contains('otwarty'));
+  // ✓ w rozwinietej karcie: scena idzie dalej za dziennikiem.
+  wierszOst.querySelectorAll('.tick')[0].click();
+  test('seria odhaczona w karcie kolejki jest w dzienniku, a scena nie stoi na zrobionej', !!A.logGet(W, 'A', ostatnie.n)[0]
+    && !(A.scena().krok() && A.scena().krok().it === ostatnie && A.scena().krok().i === 0));
   if (A.stanPrzerwy().leci) A.stopTimer();
 
   // Ostatnia seria: bez przerwy, karta zaliczenia.
   czysc();
   kA.slice(0, -1).forEach(k => A.logSet(W, 'A', k.it.n, k.i, { r: k.pl.target, kg: k.pl.kg, pr: k.pl.target, pk: k.pl.planKg }));
-  const prow2 = A.prowadzSesje('A', W);
-  test('tryb prowadzenia startuje od ostatniej nieodhaczonej serii', prow2.querySelector('.prnr').textContent === kA.length + '/' + kA.length && !!prow2.querySelector('.pr-ost'));
-  prow2.querySelectorAll('.prok')[0].click();
-  await new Promise(r => setTimeout(r, 320));
-  test('ostatnia seria: bez przerwy, prowadzenie zamkniete, karta zaliczenia', !A.stanPrzerwy().leci && !document.querySelector('.prow') && !!document.querySelector('.zal') && A.sesjaKompletna('A', W));
+  S.view = '#/d/A'; A.render();
+  test('scena startuje od ostatniej niezrobionej serii', scena().querySelector('.sc-nazwa').textContent === kA[kA.length - 1].it.name && scena().textContent.includes('ostatnia seria'));
+  A.scena().zrobione();
+  await new Promise(r => setTimeout(r, 520));
+  test('ostatnia seria: bez przerwy, karta zaliczenia, scena z kompletem', !A.stanPrzerwy().leci && !!document.querySelector('.zal') && A.sesjaKompletna('A', W) && scena().classList.contains('koniec'));
   const zal = document.querySelector('.zal'); if (zal) zal.remove();
   // Karta Dzis: sesja w trakcie → „Prowadź dalej" i nazwa nastepnego cwiczenia.
   czysc();
@@ -904,7 +912,7 @@ console.log('Prowadzenie sesji');
   S.view = '#/'; A.render();
   Date.prototype.getDay = realny;
   const hero = app.querySelector('.dzis-k');
-  test('karta Dzis w trakcie sesji prowadzi dalej', !!hero && hero.textContent.includes('Prowadź dalej') && hero.textContent.includes('Następne: ' + kA[1].it.name));
+  test('karta Dzis w trakcie sesji prowadzi dalej', !!hero && hero.textContent.includes('Dalej') && hero.textContent.includes('Następne: ' + kA[1].it.name));
   czysc();
 }
 
@@ -1092,7 +1100,7 @@ console.log('Ciezar po przeniesieniu');
   test('zwinieta karta mowi, co zrobione', /\d+ × \d+/.test(karta.querySelector('.exsum').textContent)
     && karta.querySelectorAll('.swiatla')[0].children.every(x => x.classList.contains('on')));
   const inna = app.querySelectorAll('.ex').find(k => k.textContent.includes(it('A', 7).name));
-  test('niezrobione cwiczenie zostaje rozwiniete', !inna.className.includes('zwiniety'));
+  test('niezrobione cwiczenie tez jest wierszem kolejki, z planem zamiast wyniku', inna.className.includes('zwiniety') && inna.querySelector('.exsum').textContent.includes('×'));
 
   console.log('\nJoga: tryb prowadzenia');
   S.view = '#/mobilnosc'; A.render();
@@ -1168,7 +1176,7 @@ console.log('Ciezar po przeniesieniu');
   const sb2 = { ...sandbox, fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planCykl2) }) };
   delete sb2.API;
   vm.createContext(sb2);
-  for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb2, { filename: plik });
+  for (const plik of ['progresja.js', 'figury.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb2, { filename: plik });
   vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, judgeWeek, kgOf, raportCyklu, pozycjaBoju, resolve, korektaMaksow, stanLokalny, pullStan };`, sb2);
   const B2 = sb2.API;
   await new Promise(r => setTimeout(r, 20));
@@ -1270,7 +1278,7 @@ console.log('Ciezar po przeniesieniu');
   const sb3 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl2') ? planCykl2 : planCykl3) }) };
   delete sb3.API;
   vm.createContext(sb3);
-  for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb3, { filename: plik });
+  for (const plik of ['progresja.js', 'figury.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb3, { filename: plik });
   vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, kgOf, raportCyklu, pozycjaBoju,
     resolve, stanLokalny, bojeDnia, glownyBoj, migracjaPoniedzialku, sesjaPominieta, kolejkaSesji, czasSerii, rozcToggle, rozcDone, rozcKomplet,
     rozcNaDzis, pozycjaDzis, POZYCJA_DNIA, przeniesTydzien, mobItems, zawartoscTygodnia, rozcPozycje, zakresGet, zakresSet, zakresPodpowiedz, zakresHistoria, DZIEN_TYG, SKROT_DNIA, migracjaDniCyklu3, dzisiaj };`, sb3);
@@ -1414,7 +1422,7 @@ console.log('Ciezar po przeniesieniu');
   test('komplet czwartku wymaga tez testu zakresow', B3.rozcKomplet(1, 'pt') && !B3.rozcKomplet(1, 'sr') && B3.rozcDone(1, 'pt') === N);
   S3.view = '#/'; B3.render();
   test('Dzis: rozciaganie i zakresy w tygodniu, piatek zrobiony', app.textContent.includes('Rozciąganie i zakresy')
-    && app.querySelectorAll('.wiersz').some(r => r.textContent.includes('Piątek') && r.querySelectorAll('.wstan')[0].classList.contains('ok')));
+    && app.querySelectorAll('.plakat').some(r => r.textContent.includes('Piątek') && r.classList.contains('zrobione') && r.classList.contains('dom')));
   test('raport cyklu liczy rozciaganie', B3.raportCyklu().includes(`Rozciąganie — Pt ${N}/${N}`));
   test('rozciaganie nie zmienia zawartosci tygodnia dla dni A–D', B3.zawartoscTygodnia(1).serie === 0 && B3.zawartoscTygodnia(1).mob === 0);
   B3.przeniesTydzien(1, 4);
@@ -1471,10 +1479,10 @@ console.log('Ciezar po przeniesieniu');
   const sb4 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl3') ? planCykl3 : planBiezacy) }) };
   delete sb4.API;
   vm.createContext(sb4);
-  for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb4, { filename: plik });
+  for (const plik of ['progresja.js', 'figury.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb4, { filename: plik });
   vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, kgOf, raportCyklu, resolve, bojeDnia,
     sesjaPominieta, kolejkaSesji, czasSerii, rozcPozycje, bilansStawow, fazySerii, biegSerii, startTimer, stopTimer, stanPrzerwy, jednostka, naCzas,
-    pozycjaDzis, POZYCJA_DNIA, DZIEN_TYG, trening, prowadzSesje, STAWY, ukladTygodnia, mobItems };`, sb4);
+    pozycjaDzis, POZYCJA_DNIA, DZIEN_TYG, trening, scenaSesji, scena: () => scenaTeraz, STAWY, ukladTygodnia, mobItems };`, sb4);
   const B4 = sb4.API;
   await new Promise(r => setTimeout(r, 60));
   const S4 = B4.state, D = S4.plan.days;
@@ -1529,7 +1537,7 @@ console.log('Ciezar po przeniesieniu');
   B4.biegSerii(hiszp, B4.plannedOf(hiszp, 1, 'B'), 1, 'B', { naKoniec: () => { koniec++; } });
   const stB = B4.stanPrzerwy();
   test('minutnik serii rusza od przygotowania', stB.leci && stB.tryb === 'start' && stB.etykieta === 'Przygotuj się' && stB.tTotal === 5);
-  test('pasek zegara w trybie serii ma przycisk Przerwij', timer.querySelectorAll('.tbtn').some(b => b.textContent === 'Przerwij'));
+  test('dolny pasek w trybie serii ma przycisk Przerwij', timer.textContent.includes('Przerwij'));
   B4.stopTimer();
   test('przerwanie minutnika nie zalicza serii', koniec === 0 && !B4.stanPrzerwy().leci && B4.stanPrzerwy().tryb === 'przerwa');
 
@@ -1574,7 +1582,8 @@ console.log('Ciezar po przeniesieniu');
   S4.view = '#/'; B4.render();
   test('Dzis: karta sesji, mapa stawow z trzema stawami, pasek 7 dni',
     app.querySelectorAll('.dzis-k').length === 1 && app.querySelectorAll('.st-w').length === 3 && app.querySelectorAll('.d7').length === 7);
-  test('Dzis: wiersze tygodnia w kolejnosci dni', app.querySelectorAll('.wiersz').length === 5);
+  test('Dzis: plakaty w kolejnosci dni tygodnia, poniedzialek wolny', app.querySelectorAll('.plakat').map(x => x.dataset.poz).join('') === '0123456' && app.querySelectorAll('.plakat')[0].classList.contains('wolne')
+    && app.querySelectorAll('.plakat').filter(x => x.classList.contains('sila')).length === 3);
   S4.view = '#/d/A'; B4.render();
   const karty = app.querySelectorAll('.ex');
   test('sesja: kazda karta ma swiatla serii i znaczek celu', karty.length === D.A.items.length && karty.every(k => k.querySelectorAll('.swiatla').length === 1 && k.querySelectorAll('.cele').length === 1));
@@ -1587,16 +1596,19 @@ console.log('Ciezar po przeniesieniu');
   test('zakladka Plan jest aktywna', timer.querySelectorAll('.tab').find(t => t.classList.contains('on')).textContent.includes('Plan'));
   S4.view = '#/postep'; B4.render();
   test('Postep: stawy tydzien po tygodniu i zakresy', app.textContent.includes('Stawy tydzień po tygodniu') && app.querySelectorAll('.sth-rz').length === 3 && app.textContent.includes('Zakresy tydzień po tygodniu'));
-  // Prowadzenie: seria na czas pokazuje minutnik zamiast licznika powtórzeń.
+  // Scena: seria na czas ma przycisk Start i zegar na scenie zamiast licznika powtórzeń.
   for (const k of Object.keys(S4.log)) delete S4.log[k];
   D.A.items.filter(x => x !== worek).forEach(x => { const pl = B4.plannedOf(x, 1, 'A'); for (let i = 0; i < pl.sets; i++) B4.logSet(1, 'A', x.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg }); });
-  const prow4 = B4.prowadzSesje('A', 1);
-  test('prowadzenie rundy: minutnik ze startem, bez licznika powtorzen', !!prow4.querySelector('.pr-czas') && !!prow4.querySelector('.pr-startczas') && !prow4.querySelector('.pr-powt')
-    && prow4.querySelector('.pr-zegar').textContent === '2:00');
-  prow4.querySelector('.pr-startczas').click();
-  test('start minutnika w prowadzeniu rusza serie na czas', B4.stanPrzerwy().leci && B4.stanPrzerwy().tryb === 'start');
-  prow4.querySelector('.prx').click();
-  test('wyjscie z prowadzenia zatrzymuje minutnik serii', !B4.stanPrzerwy().leci && !document.querySelector('.prow'));
+  S4.view = '#/d/A'; B4.render();
+  const sc4 = app.querySelector('.scena');
+  test('scena rundy: czas zamiast powtorzen, przycisk Start z dlugoscia rundy', sc4.querySelector('.sc-nazwa').textContent === worek.name && !!sc4.querySelector('.sc-czas') && !sc4.querySelector('.sc-powt')
+    && timer.querySelector('.ak-gl').textContent.includes('Start · 2 min'));
+  test('scena ma figurke cwiczenia z planu', sc4.querySelector('.sc-fig').innerHTML.includes('<svg class="fig"') && !sc4.querySelector('.sc-fig').classList.contains('pusta'));
+  timer.querySelector('.ak-gl').click();
+  test('Start rusza serie na czas: przygotowanie, zegar na scenie, przycisk Przerwij', B4.stanPrzerwy().leci && B4.stanPrzerwy().tryb === 'start'
+    && sc4.classList.contains('bieg') && sc4.querySelector('.sc-zet').textContent === 'Przygotuj się' && timer.querySelector('.ak-gl').textContent.includes('Przerwij'));
+  S4.view = '#/plan'; B4.render();
+  test('wyjscie z sesji zatrzymuje minutnik serii i nic nie zapisuje', !B4.stanPrzerwy().leci && !B4.logGet(1, 'A', worek.n)[0]);
   for (const k of Object.keys(S4.log)) delete S4.log[k];
 }
 
