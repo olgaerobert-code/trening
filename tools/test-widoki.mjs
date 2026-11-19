@@ -107,6 +107,7 @@ const document = {
 // opierają się asercje. Bieżący plan (plan.json) ma własną sekcję na końcu pliku.
 const planJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl1.json'), 'utf8'));
 const planBiezacy = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan.json'), 'utf8'));
+const planCykl2 = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl2.json'), 'utf8'));
 const sandbox = {
   document, localStorage, console,
   location: { hash: '', search: '', href: 'http://localhost/' },
@@ -1165,13 +1166,13 @@ console.log('Ciezar po przeniesieniu');
 {
   console.log('\nCykl 2: przejscie i plan');
   // Na tym samym localStorage zostaje dziennik cyklu 1 — nowa instancja aplikacji
-  // z plan.json ma go zarchiwizowac i zaczac od tygodnia 1.
+  // z planem cyklu 2 (dzis plan-cykl2.json) ma go zarchiwizowac i zaczac od tygodnia 1.
   const it1 = S.plan.days.A.items.find(x => x.n === 2), pl1 = A.plannedOf(it1, 4, 'A');
   A.logSet(4, 'A', 2, 0, { r: pl1.target, kg: pl1.kg, pr: pl1.target, pk: pl1.planKg });
   S.week = 11; localStorage.setItem('trening.v1', JSON.stringify({ week: 11, e1rm: { bench: 135, front: 102.5, dl: 110 } }));
   const serieC1 = Object.keys(S.log).length;
   app.children = []; timer.children = [];
-  const sb2 = { ...sandbox, fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planBiezacy) }) };
+  const sb2 = { ...sandbox, fetch: () => Promise.resolve({ ok: true, json: () => Promise.resolve(planCykl2) }) };
   delete sb2.API;
   vm.createContext(sb2);
   for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb2, { filename: plik });
@@ -1258,6 +1259,175 @@ console.log('Ciezar po przeniesieniu');
   const pa = S2.plan.days.A.items.find(x => x.n === 2), ppa = B2.plannedOf(pa, 1, 'A');
   B2.logSet(1, 'A', 2, 0, { r: ppa.target, kg: ppa.kg, pr: ppa.target, pk: ppa.planKg });
   test('raport cyklu 2 ma nowe cwiczenia', B2.raportCyklu().includes('Cykl 2') && B2.raportCyklu().includes('Wyciskanie leżąc'));
+}
+
+{
+  console.log('\nCykl 3: przejscie, plan i rozciaganie');
+  // Na localStorage zostaje cykl 2 z poprzedniej sekcji. Maksy po samoregulacji
+  // cyklu 2 maja przejsc do cyklu 3 zamiast wartosci awaryjnych z planu.
+  const C2 = { bench: 137.5, front: 112.5, dl: 127.5 };
+  localStorage.setItem('trening.v1', JSON.stringify({ week: 6, e1rm: C2, korekta: 3 }));
+  // Bułgarski w cyklu 2 (dzień A, pozycja 5) dociągnięty w dzienniku do 20 kg, suwak nieruszany.
+  const logC2 = JSON.parse(localStorage.getItem('trening.log.v1') || '{}');
+  logC2['4|A|5'] = [{ r: 8, kg: 18 }]; logC2['5|A|5'] = [{ r: 8, kg: 20 }, { r: 8, kg: 20 }];
+  localStorage.setItem('trening.log.v1', JSON.stringify(logC2));
+  localStorage.setItem('trening.acc.v1', '{}');
+  const serieC2 = Object.keys(logC2).length;
+  app.children = []; timer.children = [];
+  const sb3 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl2') ? planCykl2 : planBiezacy) }) };
+  delete sb3.API;
+  vm.createContext(sb3);
+  for (const plik of ['progresja.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb3, { filename: plik });
+  vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, kgOf, raportCyklu, pozycjaBoju,
+    resolve, stanLokalny, bojeDnia, glownyBoj, migracjaPoniedzialku, sesjaPominieta, kolejkaSesji, czasSerii, rozcToggle, rozcDone, rozcKomplet,
+    rozcNaDzis, pozycjaDzis, POZYCJA_DNIA, przeniesTydzien, mobItems, zawartoscTygodnia, rozcPozycje, zakresGet, zakresSet, zakresPodpowiedz, zakresHistoria };`, sb3);
+  const B3 = sb3.API;
+  await new Promise(r => setTimeout(r, 20));
+  const S3 = B3.state;
+  test('plan cyklu 3 wczytany', S3.plan.cykl === 3 && /kolana i biodra/.test(S3.plan.title));
+  test('cykl 3 startuje od tygodnia 1', S3.week === 1);
+  test('maksy przechodza z cyklu 2', S3.e1rm.front === C2.front && S3.e1rm.dl === C2.dl && S3.e1rm.bench === C2.bench, JSON.stringify(S3.e1rm));
+  test('cykl 2 w archiwum z dziennikiem', B3.archiwum()[2] && Object.keys(B3.archiwum()[2].log).length === serieC2);
+  test('osobny, czysty klucz synchronizacji cyklu 3', B3.kluczSync() === S3.key + '-C3b');
+  const bulg = S3.plan.days.A.items.find(i => i.name === 'Przysiad bułgarski z hantlami');
+  test('ciezar dodatkowego przechodzi z dziennika cyklu 2 po nazwie', B3.plannedOf(bulg, 1, 'A').kg === 20, String(B3.plannedOf(bulg, 1, 'A').kg));
+  const prost = S3.plan.days.A.items.find(i => i.name === 'Prostowanie nóg na maszynie');
+  test('nowe cwiczenie startuje z wartosci z planu', B3.plannedOf(prost, 1, 'A').kg === prost.kgStart);
+  test('dziennik cyklu 3 pusty', Object.keys(S3.log).length === 0 && Object.keys(S3.rozc).length === 0);
+  const dzis = B3.pozycjaDzis();
+  test('dni tygodnia 1 sprzed startu sa pominiete, reszta nie',
+    ['A', 'B', 'C'].every(k => B3.sesjaPominieta(k, 1) === (B3.POZYCJA_DNIA[k] < dzis)));
+  test('migracja poniedzialku nie dotyka cyklu 3', B3.migracjaPoniedzialku(true) === false && S3.moves.length === 0);
+
+  // Plan: jeden boj na dzien, zawsze pierwszy.
+  test('pon front squat, sr wyciskanie, pt ciag',
+    B3.glownyBoj('A') === 'front' && B3.glownyBoj('B') === 'bench' && B3.glownyBoj('C') === 'dl'
+    && ['A', 'B', 'C'].every(d => B3.bojeDnia(d).length === 1 && S3.plan.days[d].items[0].load.ref));
+  test('tydz. 1 = 67,5% maksow z cyklu 2', B3.kgOf('front', 1) === 75 && B3.kgOf('dl', 1) === 85 && B3.kgOf('bench', 1) === 92.5,
+    [B3.kgOf('front', 1), B3.kgOf('dl', 1), B3.kgOf('bench', 1)].join('/'));
+  for (let w = 1; w <= 12; w++) {
+    for (const d of ['A', 'B', 'C']) for (const it of S3.plan.days[d].items) {
+      const pl = B3.plannedOf(it, w, d);
+      if (!pl.sets || !pl.target) test(`c3 tydz. ${w} ${d}${it.n} ma serie i powtorzenia`, false, String(B3.resolve(it.scheme, w)));
+    }
+    for (const L of ['bench', 'front', 'dl']) if (!(B3.kgOf(L, w) > 0)) test(`c3 tydz. ${w} ciezar ${L}`, false);
+  }
+  test('c3: kazde cwiczenie ma serie we wszystkich tygodniach', true);
+  const it3 = (d, n) => S3.plan.days[d].items.find(x => x.n === n);
+  test('przerwy: przysiad i ciag 3 min', B3.przerwaPo(it3('A', 1), 'A', 5) === 180 && B3.przerwaPo(it3('C', 1), 'C', 5) === 180);
+  test('przerwy: wyciskanie 2 min, od bloku 3 2,5 min', B3.przerwaPo(it3('B', 1), 'B', 5) === 120 && B3.przerwaPo(it3('B', 1), 'B', 9) === 150);
+  test('przerwy: bulgarski bez przerwy, po podciaganiu 90 s, po skrzyni z wioslowaniem 75 s', B3.przerwaPo(it3('A', 2), 'A', 5) === 0 && B3.przerwaPo(it3('A', 3), 'A', 5) === 90 && B3.przerwaPo(it3('C', 3), 'C', 5) === 75);
+  for (const d of ['A', 'B', 'C']) {
+    const its = S3.plan.days[d].items;
+    for (const it of its.filter(x => x.superset && x.superset.endsWith('2')))
+      test(`c3 ${d}: superseria ${it.superset} ma pare tuz przed soba i przerwe po parze`,
+        its[its.indexOf(it) - 1].superset === it.superset[0] + '1' && B3.przerwaPo(it, d, 1) >= 45);
+    test(`c3 ${d}: kazde cwiczenie ma opis i id, bez filmow`, its.every(x => x.note && /^c3[abc]\d+$/.test(x.id) && !x.film));
+    // Budzet godziny: rozgrzewka + drabinka dojsciowa + praca + przerwy z opisu
+    // + 15 s na przejscie. Powtorzenia 1,5 × szacunek aplikacji (tempo 3 s w dol),
+    // trzymanie na czas i dystans tyle, ile trwa.
+    for (const w of [1, 6, 10]) {
+      const kroki = B3.kolejkaSesji(d, w);
+      let sek = 7 * 60 + 4 * 80;
+      kroki.forEach((k, i) => { sek += B3.czasSerii(k.it, w, d) * (k.pl.unit ? 1 : 1.5) + 15 + (i < kroki.length - 1 ? B3.przerwaPo(k.it, d, w) : 0); });
+      test(`c3 ${d} tydz. ${w} miesci sie w godzinie (~${Math.round(sek / 60)} min)`, sek <= 62 * 60);
+    }
+  }
+  const nazwyC2 = new Set(['A', 'B', 'C'].flatMap(d => planCykl2.days[d].items.map(i => i.name)));
+  test('cwiczenia z cyklu 2 maja te same nazwy (suwak pamieta ciezar)',
+    ['Przysiad bułgarski z hantlami', 'Wiosłowanie hantlem w podporze', 'Martwy ciąg rumuński jednonóż z hantlem', 'Zgięcie grzbietowe na maszynie (piszczelowy przedni)',
+     'Przysiad hiszpański z hantlem (izometria)', 'Spacer farmera jednorącz', 'Face pull z gumą'].every(n => nazwyC2.has(n)
+       && ['A', 'B', 'C'].some(d => S3.plan.days[d].items.some(i => i.name === n))));
+  const SENS = /skolioz|cobb|przodopochyl|ból|bólu|boles|dolegliw|rehabilit|fizjoterapeu|ortoped|RTG|MRI|diagnoz|leczen|chorob|kontuzj|uraz|skręc|tendinop|patolog|obrzęk|wysięk|drętwi|mrowie|przeciwbólow|specjalist|zwyrodnien|nawrot/i;
+  test('plan cyklu 3 bez tresci zdrowotnych', !SENS.test(JSON.stringify(S3.plan)));
+  test('joga bez zmian wobec cyklu 2', JSON.stringify(S3.plan.mobility) === JSON.stringify(planCykl2.mobility));
+
+  // Rozgrzewka: pelna drabinka do boju dnia, bez skroconej tabeli „Przed ciągiem".
+  S3.view = '#/d/C'; B3.render();
+  test('rozgrzewka C: pelna drabinka do ciagu', app.textContent.includes('Serie dojściowe') && app.textContent.includes('Martwy ciąg') && !app.textContent.includes('Przed ciągiem'));
+  S3.view = '#/d/A'; B3.render();
+  test('rozgrzewka A: drabinka do front squata', app.textContent.includes('Serie dojściowe') && app.textContent.includes('Front squat'));
+
+  // Rozciaganie we wtorek i czwartek.
+  const R = S3.plan.rozciaganie;
+  test('rozciaganie: wtorek i czwartek', R && R.dni.map(x => x.dzien).join() === '2,4');
+  test('rozciaganie: kazda pozycja ma kroki, blad, opis, minutnik i wyszukiwanie filmu',
+    R.items.length >= 5 && R.items.every(i => i.steps.length >= 4 && i.blad && i.note && i.film && i.sec > 0));
+  const idJogi = new Set(B3.mobItems().map(i => i.id));
+  test('rozciaganie: unikalne id, inne niz w jodze', new Set(R.items.map(i => i.id)).size === R.items.length && R.items.every(i => !idJogi.has(i.id)));
+  for (const v of ['#/rozciaganie/wt', '#/rozciaganie/cz/3', '#/rozciaganie']) {
+    S3.view = v; let blad = null;
+    try { B3.render(); } catch (e) { blad = e; }
+    test('cykl 3 renderuje ' + v, !blad && app.textContent.includes('Rozciąganie'), blad && blad.stack);
+  }
+  // Test zakresow: blok w danych, kolejnosc sesji, poziomy.
+  const ZK = R.zakresy, N = R.items.length + ZK.items.length;
+  test('test zakresow: 4 pozycje z poziomami, ocenami i opisem', ZK && ZK.items.length === 4
+    && ZK.items.every(i => i.poziomy.length >= 4 && i.steps.length >= 4 && i.blad && i.note && i.film && i.sec > 0)
+    && ZK.oceny.map(o => o.v).join() === '0,1,2');
+  test('test zakresow: id unikalne wobec rozciagania i jogi', new Set([...R.items, ...ZK.items].map(i => i.id)).size === N && ZK.items.every(i => !idJogi.has(i.id)));
+  const kolej = B3.rozcPozycje().map(i => i.id);
+  test('kolejnosc sesji: rozciaganie, zakresy, oddech na koniec', kolej.length === N && kolej[N - 1] === 'r6' && kolej.indexOf('q1') === R.items.length - 1);
+  S3.view = '#/rozciaganie/cz'; B3.render();
+  test('widok rozciagania: przelacznik dni, prowadzenie i wszystkie karty', app.querySelectorAll('.mobopt').length === 2
+    && !!app.querySelector('.prowstart') && app.querySelectorAll('.ex.mob').length === N);
+  test('karta rozciagania: etykieta „Po co", nie „Pod sztangę"', app.textContent.includes('Po co') && !app.textContent.includes('Pod sztangę'));
+  test('panel zakresu na kazdej pozycji testu: strzalki i trzy oceny', app.querySelectorAll('.zakres').length === 4
+    && app.querySelectorAll('.zoc').length === 12 && app.querySelectorAll('.zstr').length === 8);
+  test('historia i zasady testu w widoku', app.textContent.includes('Zakresy tydzień po tygodniu') && app.textContent.includes('Jak prowadzić test zakresów'));
+  test('bez zapisu: podpowiedz poziom 1', B3.zakresPodpowiedz(1, 'wt', 'q1').p === 1 && app.textContent.includes('Poziom 1 z 5'));
+
+  B3.rozcToggle(1, 'wt', 'r1');
+  test('odhaczenie liczy sie per tydzien i dzien', B3.rozcDone(1, 'wt') === 1 && B3.rozcDone(1, 'cz') === 0 && B3.rozcDone(2, 'wt') === 0);
+  test('rozciaganie jedzie w paczce stanu', B3.stanLokalny().rozc['1|wt'].r1 === 1);
+  B3.rozcToggle(1, 'wt', 'r1');
+  test('drugie tapniecie cofa i sprzata klucz', B3.rozcDone(1, 'wt') === 0 && !S3.rozc['1|wt']);
+
+  // Ocena zapisuje poziom i ocene, liczy sie jako zrobione i jedzie w paczce stanu.
+  B3.zakresSet(1, 'wt', 'q1', { p: 2, o: 1 });
+  test('ocena zapisana pod tydzien|dzien|z', B3.stanLokalny().rozc['1|wt|z'].q1.p === 2 && B3.rozcDone(1, 'wt') === 1);
+  test('jedna sesja na poziomie: ten sam poziom', B3.zakresPodpowiedz(1, 'cz', 'q1').p === 2);
+  B3.zakresSet(1, 'cz', 'q1', { p: 2, o: 0 });
+  test('dwa razy bez reakcji stawu: o poziom wyzej', B3.zakresPodpowiedz(2, 'wt', 'q1').p === 3);
+  B3.zakresSet(2, 'wt', 'q1', { p: 3, o: 2 });
+  test('po ocenie 2: poziom nizej', B3.zakresPodpowiedz(2, 'cz', 'q1').p === 2);
+  test('podpowiedz patrzy tylko wstecz', B3.zakresPodpowiedz(1, 'cz', 'q1').p === 2 && B3.zakresHistoria('q1', null).length === 3);
+  B3.zakresSet(1, 'wt', 'q4', { p: 4, o: 0 }); B3.zakresSet(1, 'cz', 'q4', { p: 4, o: 1 });
+  test('ostatni poziom nie rosnie dalej', B3.zakresPodpowiedz(2, 'wt', 'q4').p === 4);
+  S3.view = '#/rozciaganie/wt/2'; B3.render();
+  test('panel po ocenie 2 mowi, zeby wyjsc z pozycji', app.textContent.includes('Wyjdź z pozycji') && app.querySelectorAll('.zoc.on.z2').length === 1);
+  test('historia pokazuje zapisy', app.querySelectorAll('.zh').length === 5);
+  test('raport cyklu ma linie zakresow', B3.raportCyklu().includes('Zakresy Wt: Siad na piętach z podkładką poz. 2/5 · ciągnie w mięśniu'));
+  B3.przeniesTydzien(2, 5);
+  test('przeniesienie tygodnia zabiera tez test zakresow', !!B3.zakresGet(5, 'wt', 'q1') && !B3.zakresGet(2, 'wt', 'q1'));
+  B3.przeniesTydzien(5, 2);
+  // ✓ na pozycji testu bez oceny = „spokojnie" na podpowiadanym poziomie; drugi ✓ kasuje.
+  const podp = B3.zakresPodpowiedz(3, 'wt', 'q1').p;
+  B3.rozcToggle(3, 'wt', 'q1');
+  test('✓ bez oceny zapisuje 0 na podpowiadanym poziomie (po ocenie 2 na poz. 3 → 2)', podp === 2 && JSON.stringify(B3.zakresGet(3, 'wt', 'q1')) === JSON.stringify({ p: 2, o: 0 }));
+  B3.rozcToggle(3, 'wt', 'q1');
+  test('drugi ✓ kasuje zapis testu', !B3.zakresGet(3, 'wt', 'q1') && !S3.rozc['3|wt|z']);
+  for (const k of Object.keys(S3.rozc)) delete S3.rozc[k];
+
+  for (const i of B3.rozcPozycje()) B3.rozcToggle(1, 'cz', i.id);
+  test('komplet czwartku wymaga tez testu zakresow', B3.rozcKomplet(1, 'cz') && !B3.rozcKomplet(1, 'wt') && B3.rozcDone(1, 'cz') === N);
+  S3.view = '#/'; B3.render();
+  test('Dzis: kafel rozciagania i zakresow', app.textContent.includes('Rozciąganie i zakresy') && app.textContent.includes('Cz ✓'));
+  test('raport cyklu liczy rozciaganie', B3.raportCyklu().includes(`Rozciąganie — Cz ${N}/${N}`));
+  test('rozciaganie nie zmienia zawartosci tygodnia dla dni A–D', B3.zawartoscTygodnia(1).serie === 0 && B3.zawartoscTygodnia(1).mob === 0);
+  B3.przeniesTydzien(1, 4);
+  test('przeniesienie calego tygodnia zabiera rozciaganie', B3.rozcKomplet(4, 'cz') && !B3.rozcKomplet(1, 'cz'));
+  B3.przeniesTydzien(4, 1);
+
+  for (const v of ['#/', '#/d/A', '#/d/B', '#/d/C', '#/mobilnosc', '#/postep', '#/zasady', '#/1rm', '#/ustawienia']) {
+    S3.view = v; let blad = null;
+    try { B3.render(); } catch (e) { blad = e; }
+    test('cykl 3 renderuje ' + v, !blad && app.children.length > 0, blad && blad.stack);
+  }
+  S3.view = '#/ustawienia'; B3.render();
+  test('archiwum cyklu 2 w Dzienniku', app.textContent.includes('Archiwum · cykl 2') && app.textContent.includes('Kopiuj raport cyklu 2'));
+  S3.view = '#/zasady'; B3.render();
+  test('zasady mowia o wtorku i czwartku', app.textContent.includes('Wtorek — rozciąganie'));
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));

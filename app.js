@@ -5,7 +5,7 @@ const LS = 'trening.v1';
 const state = {
   week: 1, e1rm: null, plan: null, view: location.hash || '#/', sound: true,
   log: {}, adjust: {}, acc: {}, kgw: {}, queue: [], key: null, sync: 'off',
-  mob: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, powiadomPrzerwa: true, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
+  mob: {}, rozc: {}, mobShort: false, autoDzis: true, rekal: {}, moves: [], treningi: {}, pominiete: {}, zegarek: false, powiadomPrzerwa: true, filmy: {}, autoPrzerwa: true, czasy: {}, korekta: 0,
 };
 
 /* ---------- Supabase ---------- */
@@ -20,7 +20,9 @@ const KOD_WSPOLNY = 'H4TQ-9MRW-2XKD';
 // Każdy cykl ma w bazie osobny dziennik: ten sam kod planu z dopiskiem cyklu.
 // Bez tego tygodnie 1–12 nowego cyklu zlałyby się z zapisanymi tygodniami 1–12
 // poprzedniego, bo baza rozróżnia serie tylko po tygodniu, dniu i numerze.
-const kluczSync = () => (state.plan && state.plan.cykl > 1 ? state.key + '-C' + state.plan.cykl : state.key);
+// Plan może podać własny dopisek (`kluczCyklu`) — cykl 3 ma „C3b", bo pod „-C3"
+// zapisały się testy z przeglądarki, zanim cykl w ogóle wystartował.
+const kluczSync = () => (state.plan && state.plan.cykl > 1 ? state.key + '-' + (state.plan.kluczCyklu || 'C' + state.plan.cykl) : state.key);
 const calc = { lift: 'bench', kg: 100, reps: 5, rpe: 8 };
 
 const LIFTS = [
@@ -204,6 +206,10 @@ const saveQueue = () => localStorage.setItem(LS_Q, JSON.stringify(state.queue));
 // Niedziela nie ma serii ani kilogramów, więc nie idzie do tabeli `sety` — jedzie
 // razem ze stanem planu, tym samym kanałem co tydzień i E1RM.
 const saveMob = () => { localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); pushStan(); };
+// Wtorek i czwartek: odhaczone pozycje rozciągania, { "3|wt": { r1: 1 } }. Ten sam
+// kanał co niedziela — paczka stanu.
+const LS_ROZC = 'trening.rozc.v1';
+const saveRozc = () => { localStorage.setItem(LS_ROZC, JSON.stringify(state.rozc)); pushStan(); };
 const saveRekal = () => { localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); pushStan(); };
 // Filmy do pozycji jogi wybrane przez użytkownika: { y3: 'dQw4w9WgXcQ' }.
 const LS_FILMY = 'trening.filmy.v1';
@@ -223,6 +229,7 @@ function loadStores() {
   state.kgw = readJSON(LS_KGW, {});
   state.moves = readJSON(LS_MOV, []);
   state.mob = readJSON(LS_MOB, {});
+  state.rozc = readJSON(LS_ROZC, {});
   state.rekal = readJSON(LS_REK, {});
   state.treningi = readJSON(LS_TRN, {});
   state.pominiete = readJSON(LS_POM, {});
@@ -377,6 +384,10 @@ function homeView() {
     : POZYCJA_DNIA[heroKey] <= pozycjaDzis() ? 'Do wpisania'
     : 'Następny · ' + nast.dzien;
   body.append(kartaDzis(heroKey, w, etykieta));
+  // Wtorek i czwartek: rozciąganie zaraz pod kartą, dopóki nie jest odhaczone.
+  const rozcTeraz = rozcDzisiaj();
+  const rozcNaGorze = rozcTeraz && !rozcKomplet(w, rozcTeraz.k);
+  if (rozcNaGorze) body.append(kafelRozc(w));
 
   const ostatni = kartaOstatniego();
   if (ostatni) body.append(ostatni);
@@ -400,6 +411,8 @@ function homeView() {
   const lista = el('div', 'lista');
   for (const k of ['A', 'B', 'C', 'D'].filter(x => x !== heroKey)) lista.append(tile(daneSesji(k, w)));
   body.append(lista);
+  // Poza listą plakatów: dwanaście minut w domu to niski wiersz, nie pół ekranu.
+  if (rozcPlan() && !rozcNaGorze) body.append(kafelRozc(w));
 
   body.append(el('div', 'foot', 'Tydzień podbijasz tylko po sesji zmieszczonej w suficie RPE.'));
   frag.append(body);
@@ -484,7 +497,13 @@ function ciezaryIMaksy(body) {
 
 }
 
-const MAIN_OF = { A: 'bench', B: null, C: 'front' };
+// Boje dnia w kolejności z planu. Cykl 1 i 2 trzymały przysiad i ciąg w piątek,
+// cykl 3 daje każdemu bojowi osobny dzień — dlatego bierzemy to z planu, a nie z tabelki.
+function bojeDnia(k) {
+  const items = (state.plan.days[k] || { items: [] }).items;
+  return items.map(it => Object.keys(REF_BOJU).find(L => it.load && it.load.ref === REF_BOJU[L])).filter(Boolean);
+}
+const glownyBoj = k => bojeDnia(k)[0] || null;
 
 function daneSesji(k, w) {
   const p = state.plan;
@@ -544,7 +563,7 @@ function kartaDzis(k, w, etykieta) {
   tyt.append(el('span', 'hk', k), el('span', 'tt', dane.title));
   b.append(tyt);
 
-  const lift = MAIN_OF[k];
+  const lift = glownyBoj(k);
   if (lift) {
     const it = (pozycjaBoju(lift) || {}).it;
     const pl = it ? plannedOf(it, w, k) : null;
@@ -1045,19 +1064,22 @@ function warmupAcc(key, wArg) {
     b.append(wrap);
   };
 
-  const full = key === 'A' ? ['bench'] : key === 'C' ? ['front'] : [];
+  // Pierwszy bój dnia dostaje pełną drabinkę. Drugi w tej samej sesji (ciąg po
+  // przysiadzie w cyklu 1 i 2) idzie skrótem — nogi są już rozgrzane.
+  const boje = bojeDnia(key);
+  const full = boje.slice(0, 1), krotkie = boje.slice(1);
   if (full.length) {
     mkTable(['Serie dojściowe', ...p.warmup.ramp.steps], full.map(lift => {
       const kg = kgOf(lift, w);
       return [names[lift], ...(kg == null ? ['—', '—', '—', '—', '—'] : ramp(kg).map(v => fmt(v) + ' kg'))];
     }));
   }
-  if (key === 'C') {
-    const kg = kgOf('dl', w);
-    mkTable(['Przed ciągiem', '50% × 5', '75% × 3', 'Ciężar roboczy'],
-      [[names.dl, ...(kg == null ? ['—', '—', '—'] : [fmt(floor25(kg * 0.5)) + ' kg', fmt(floor25(kg * 0.75)) + ' kg', fmt(kg) + ' kg'])]]);
+  for (const lift of krotkie) {
+    const kg = kgOf(lift, w);
+    mkTable([lift === 'dl' ? 'Przed ciągiem' : 'Przed bojem', '50% × 5', '75% × 3', 'Ciężar roboczy'],
+      [[names[lift], ...(kg == null ? ['—', '—', '—'] : [fmt(floor25(kg * 0.5)) + ' kg', fmt(floor25(kg * 0.75)) + ' kg', fmt(kg) + ' kg'])]]);
   }
-  if (full.length || key === 'C') {
+  if (boje.length) {
     p.warmup.notes.forEach(n => { const x = el('p', null, n); x.style.fontSize = '12.5px'; x.style.marginTop = '9px'; b.append(x); });
   }
   acc.append(b);
@@ -1255,25 +1277,39 @@ function mobilityView(wArg) {
   return frag;
 }
 
-function mobCard(it, w) {
+// Kontekst odhaczania karty: joga (niedziela) albo rozciąganie (wtorek, czwartek).
+// Karta i tryb prowadzenia są wspólne, różni je tylko to, gdzie zapisują ✓.
+const ctxJogi = w => ({
+  jest: id => mobJest(w, id),
+  toggle: id => mobToggle(w, id),
+  po: nowe => {
+    if (nowe) startPrzyPierwszejSerii('D', w);
+    if (nowe && sesjaKompletna('D', w)) setTimeout(() => pokazZaliczenie('D', w), 450);
+    odswiezPasekMob(w);
+  },
+});
+
+function mobCard(it, w, ctx = ctxJogi(w)) {
   const box = el('div', 'ex mob');
-  const zrobione = mobJest(w, it.id);
+  const zrobione = ctx.jest(it.id);
   if (zrobione) box.classList.add('zrobione');
 
   const h = el('div', 'exhead');
   const tick = el('button', 'tick', zrobione ? '✓' : '');
   tick.setAttribute('aria-label', zrobione ? 'Cofnij' : 'Odhacz jako zrobione');
-  tick.onclick = () => {
-    mobToggle(w, it.id);
-    // Sama pozycja i pasek postępu — bez przebudowy całego ekranu, żeby lista
-    // nie skakała pod palcem przy odklikiwaniu.
-    const nowe = mobJest(w, it.id);
+  const ustawTick = nowe => {
     box.classList.toggle('zrobione', nowe);
-    if (nowe) { blysk(tick); startPrzyPierwszejSerii('D', w); }
-    if (nowe && sesjaKompletna('D', w)) setTimeout(() => pokazZaliczenie('D', w), 450);
     tick.textContent = nowe ? '✓' : '';
     tick.setAttribute('aria-label', nowe ? 'Cofnij' : 'Odhacz jako zrobione');
-    odswiezPasekMob(w);
+  };
+  tick.onclick = () => {
+    ctx.toggle(it.id);
+    // Sama pozycja i pasek postępu — bez przebudowy całego ekranu, żeby lista
+    // nie skakała pod palcem przy odklikiwaniu.
+    const nowe = ctx.jest(it.id);
+    ustawTick(nowe);
+    if (nowe) blysk(tick);
+    ctx.po(nowe, it);
   };
   h.append(tick);
   h.append(el('div', 'exname', it.name));
@@ -1285,7 +1321,7 @@ function mobCard(it, w) {
   const metrics = el('div', 'metrics');
   metrics.append(metric('Dawka', it.dose, 'mv txt'));
   if (it.sec) {
-    const b = el('button', 'timebtn', '⏱ ' + (it.sec >= 60 ? it.sec / 60 + ' min' : it.sec + ' s'));
+    const b = el('button', 'timebtn', '⏱ ' + (it.sec >= 60 && it.sec % 60 === 0 ? it.sec / 60 + ' min' : it.sec + ' s'));
     b.onclick = () => startTimer(it.sec);
     metrics.append(b);
   }
@@ -1298,6 +1334,9 @@ function mobCard(it, w) {
     metrics.append(f);
   }
   box.append(metrics);
+  // Dodatek pod metrykami (panel testu zakresów) — tylko gdy kontekst go daje.
+  const dod = ctx.dodatek ? ctx.dodatek(it, () => ustawTick(ctx.jest(it.id))) : null;
+  if (dod) box.append(dod);
   if (filmPozycji(it)) box.append(filmWKarcie(it));
 
   // Instrukcja pozycji. Wcześniej pod „Jak to zrobić" siedziała sama wskazówka
@@ -1318,7 +1357,7 @@ function mobCard(it, w) {
   }
   if (it.note) {
     const n = el('div', 'posztange');
-    n.append(el('span', null, 'Pod sztangę'), el('p', null, it.note));
+    n.append(el('span', null, ctx.etykietaNote || 'Pod sztangę'), el('p', null, it.note));
     opis.append(n);
   }
   opis.hidden = true;
@@ -1331,14 +1370,15 @@ function mobCard(it, w) {
   return box;
 }
 
-function odswiezPasekMob(w) {
+function odswiezPasekMob(w) { odswiezPasek(mobDone(w), mobWidoczne().length); }
+function odswiezPasek(done, total) {
   const sp = $('.sprog');
   if (!sp) return;
-  const total = mobWidoczne().length, done = mobDone(w);
   const proc = total ? done / total * 100 : 0;
   $('.ile', sp).textContent = `${done}/${total} pozycji`;
   $('.fill', sp).style.width = proc + '%';
   $('.proc', sp).textContent = Math.round(proc) + '%';
+  sp.classList.toggle('komplet', total > 0 && done >= total);
 }
 
 // Kasowanie zawsze przez potwierdzenie i tylko w obrębie jednego tygodnia —
@@ -1355,6 +1395,273 @@ function mobReset(w) {
   };
   box.append(b);
   return box;
+}
+
+/* ---------- wtorek i czwartek: rozciąganie i test zakresów ----------
+   Kwadrans w domu, te same pozycje oba dni: rozciąganie, test zakresów i oddech
+   na koniec. Nie wchodzi do pierścieni, serii tygodni ani werdyktów — to dodatek
+   do trzech dni na siłowni, nie czwarta sesja.
+   Odhaczenia:     { "3|wt": { r1: 1 } }
+   Test zakresów:  { "3|wt|z": { q1: { p: 2, o: 1 } } } — poziom (od 1) i ocena 0–1–2.
+   Jeden magazyn, więc synchronizacja, kopia, archiwum cyklu i przeniesienie
+   tygodnia obejmują oba bez osobnej obsługi. */
+const rozcPlan = () => (state.plan && state.plan.rozciaganie) || null;
+const zakresyPlan = () => (rozcPlan() && rozcPlan().zakresy) || null;
+const zakresyItems = () => (zakresyPlan() ? zakresyPlan().items : []);
+const czyZakres = it => !!(it && it.poziomy);
+const rozcKlucz = (w, d) => w + '|' + d;
+const zakresKlucz = (w, d) => w + '|' + d + '|z';
+// Kolejność sesji: rozciąganie, test zakresów (tkanki już ciepłe), na koniec oddech.
+function rozcPozycje() {
+  const r = rozcPlan();
+  if (!r) return [];
+  return [...r.items.filter(i => !i.naKoniec), ...zakresyItems(), ...r.items.filter(i => i.naKoniec)];
+}
+const zakresGet = (w, d, id) => (state.rozc[zakresKlucz(w, d)] || {})[id] || null;
+function zakresSet(w, d, id, wpis) {
+  const k = zakresKlucz(w, d), t = state.rozc[k] || (state.rozc[k] = {});
+  if (wpis) t[id] = wpis; else delete t[id];
+  if (!Object.keys(t).length) delete state.rozc[k];
+  saveRozc();
+}
+const jestZakresem = id => zakresyItems().some(i => i.id === id);
+const rozcJest = (w, d, id) => (jestZakresem(id) ? !!zakresGet(w, d, id) : !!(state.rozc[rozcKlucz(w, d)] || {})[id]);
+const rozcDone = (w, d) => rozcPozycje().filter(i => rozcJest(w, d, i.id)).length;
+const rozcKomplet = (w, d) => rozcPozycje().length > 0 && rozcDone(w, d) >= rozcPozycje().length;
+
+// Poziom wybrany strzałkami, zanim padła ocena — żyje tylko na ekranie.
+const zakresWybor = {};
+function rozcToggle(w, d, id) {
+  // Pozycja testu zakresów: ✓ bez oceny to „spokojnie" na wybranym albo podpowiadanym poziomie.
+  if (jestZakresem(id)) {
+    const p = zakresWybor[`${w}|${d}|${id}`] || zakresPodpowiedz(w, d, id).p;
+    zakresSet(w, d, id, zakresGet(w, d, id) ? null : { p, o: 0 });
+    return;
+  }
+  const k = rozcKlucz(w, d), t = state.rozc[k] || (state.rozc[k] = {});
+  if (t[id]) delete t[id]; else t[id] = 1;
+  if (!Object.keys(t).length) delete state.rozc[k];
+  saveRozc();
+}
+
+// Zapisy jednej pozycji testu w kolejności sesji (wt, cz, wt…); z `przed` — tylko wcześniejsze.
+function zakresHistoria(id, przed) {
+  const dni = rozcPlan().dni.map(x => x.k), out = [];
+  for (let w = 1; w <= 12; w++) for (const d of dni) {
+    if (przed && (w > przed.w || (w === przed.w && dni.indexOf(d) >= dni.indexOf(przed.d)))) return out;
+    const z = zakresGet(w, d, id);
+    if (z) out.push({ w, d, ...z });
+  }
+  return out;
+}
+/* Podpowiedź poziomu z zasad testu: start od 1; po ocenie 2 — poziom niżej;
+   po dwóch kolejnych sesjach na tym samym poziomie bez reakcji stawu (0 albo 1)
+   — o jeden wyżej. Przy dwóch sesjach w tygodniu daje to najwyżej poziom na tydzień. */
+function zakresPodpowiedz(w, d, id) {
+  const it = zakresyItems().find(i => i.id === id), max = it.poziomy.length;
+  const h = zakresHistoria(id, { w, d });
+  if (!h.length) return { p: 1, powod: 'zacznij od poziomu 1 i idź w górę, dopóki ocena zostaje 0 albo 1' };
+  const ost = h[h.length - 1], wcz = h[h.length - 2];
+  if (ost.o === 2) return { p: Math.max(1, ost.p - 1), powod: 'ostatnio coś w stawie — poziom niżej' };
+  if (wcz && wcz.p === ost.p && wcz.o <= 1 && ost.o <= 1 && ost.p < max)
+    return { p: ost.p + 1, powod: 'dwa razy bez reakcji stawu — o poziom wyżej, jeśli dzień po było normalnie' };
+  return { p: ost.p, powod: ost.p >= max ? 'ostatni poziom — trzymaj go' : 'ten sam poziom co ostatnio' };
+}
+const skrotDniaRozc = d => (rozcPlan().dni.find(x => x.k === d) || { skrot: d }).skrot;
+
+/* Panel pozycji testu: poziom strzałkami i ocena trzema przyciskami. Ocena
+   zapisuje pozycję jako zrobioną; `poZmianie` odświeża ✓ i pasek postępu. */
+function zakresPanel(it, w, d, poZmianie) {
+  const Z = zakresyPlan(), box = el('div', 'zakres'), kl = `${w}|${d}|${it.id}`;
+  const rysuj = () => {
+    box.replaceChildren();
+    const wpis = zakresGet(w, d, it.id), pod = zakresPodpowiedz(w, d, it.id), max = it.poziomy.length;
+    const p = wpis ? wpis.p : (zakresWybor[kl] || pod.p);
+    const ustaw = np => {
+      if (wpis) zakresSet(w, d, it.id, { ...wpis, p: np }); else zakresWybor[kl] = np;
+      rysuj();
+      if (poZmianie) poZmianie();
+    };
+    const poz = el('div', 'zpoz');
+    const minus = el('button', 'zstr', '‹'), plus = el('button', 'zstr', '›');
+    minus.setAttribute('aria-label', 'Poziom niżej');
+    plus.setAttribute('aria-label', 'Poziom wyżej');
+    minus.disabled = p <= 1;
+    plus.disabled = p >= max;
+    minus.onclick = () => ustaw(p - 1);
+    plus.onclick = () => ustaw(p + 1);
+    const opis = el('div', 'zopis');
+    opis.append(el('b', null, `Poziom ${p} z ${max}`), el('span', null, it.poziomy[p - 1]));
+    poz.append(minus, opis, plus);
+    box.append(poz);
+
+    const oc = el('div', 'zoceny');
+    for (const o of Z.oceny) {
+      const wybrana = !!wpis && wpis.o === o.v;
+      const b = el('button', `zoc z${o.v}` + (wybrana ? ' on' : ''));
+      b.append(el('b', null, String(o.v)), el('span', null, o.k));
+      b.setAttribute('aria-pressed', wybrana ? 'true' : 'false');
+      b.onclick = () => { zakresSet(w, d, it.id, { p, o: o.v }); rysuj(); if (poZmianie) poZmianie(); };
+      oc.append(b);
+    }
+    box.append(oc);
+
+    const h = zakresHistoria(it.id, { w, d }), ost = h[h.length - 1];
+    let info;
+    if (wpis && wpis.o === 2) info = 'Wyjdź z pozycji. Następnym razem aplikacja podpowie poziom niżej.';
+    else if (wpis) info = `Zapisane: poziom ${wpis.p}, ${Z.oceny[wpis.o].k}.` + (ost ? ` Poprzednio: poziom ${ost.p} (tydz. ${ost.w}, ${skrotDniaRozc(ost.d)}).` : '');
+    else info = (ost ? `Ostatnio: poziom ${ost.p}, ${Z.oceny[ost.o].k} (tydz. ${ost.w}, ${skrotDniaRozc(ost.d)}). ` : '') + `Podpowiedź: ${pod.powod}.`;
+    box.append(el('p', 'zkinfo' + (wpis && wpis.o === 2 ? ' uwaga' : ''), info));
+  };
+  rysuj();
+  box.odswiez = rysuj;
+  return box;
+}
+
+// Historia testu: każda sesja to kafelek z poziomem, kolor mówi o ocenie.
+function zakresyHistoriaCard() {
+  const Z = zakresyPlan();
+  const karta = el('div', 'card zhist');
+  karta.append(el('h3', null, 'Zakresy tydzień po tygodniu'));
+  karta.append(el('p', 'zhleg', 'Liczba to poziom. Zielony — spokojnie, szary — ciągnie w mięśniu, bursztyn — coś w stawie.'));
+  for (const it of Z.items) {
+    const h = zakresHistoria(it.id, null);
+    const row = el('div', 'zhrow');
+    row.append(el('div', 'zhn', `${it.name} · najwyżej ${it.poziomy.length}`));
+    const ch = el('div', 'zhch');
+    if (!h.length) ch.append(el('span', 'zhbrak', 'jeszcze bez zapisu'));
+    for (const x of h.slice(-10)) {
+      const c = el('span', 'zh z' + x.o);
+      c.append(el('small', null, `t${x.w} ${skrotDniaRozc(x.d)}`), el('b', null, String(x.p)));
+      c.setAttribute('aria-label', `tydzień ${x.w}, ${skrotDniaRozc(x.d)}: poziom ${x.p}, ${Z.oceny[x.o].k}`);
+      ch.append(c);
+    }
+    row.append(ch);
+    karta.append(row);
+  }
+  return karta;
+}
+
+const pozDnia = getDay => (getDay + 6) % 7;      // poniedziałek 0 … niedziela 6, jak POZYCJA_DNIA
+// Dzień rozciągania, o który teraz chodzi: dzisiejszy, potem najbliższy w tym
+// tygodniu, a pod koniec tygodnia ostatni — do odhaczenia po fakcie.
+function rozcNaDzis() {
+  const r = rozcPlan(), dzis = pozycjaDzis();
+  return r.dni.find(x => pozDnia(x.dzien) === dzis) || r.dni.find(x => pozDnia(x.dzien) > dzis) || r.dni[r.dni.length - 1];
+}
+const rozcDzisiaj = () => { const r = rozcPlan(); return r ? r.dni.find(x => pozDnia(x.dzien) === pozycjaDzis()) || null : null; };
+
+function kafelRozc(w) {
+  const r = rozcPlan();
+  if (!r) return null;
+  const n = rozcPozycje().length;
+  const done = r.dni.reduce((a, x) => a + rozcDone(w, x.k), 0);
+  const stan = done
+    ? r.dni.map(x => x.skrot + (rozcKomplet(w, x.k) ? ' ✓' : rozcDone(w, x.k) ? ` ${rozcDone(w, x.k)}/${n}` : ' —')).join(' · ')
+    : r.dni.map(x => x.skrot).join(' i ');
+  const t = tile({ k: r.key, color: DAY_COLOR.D, title: zakresyPlan() ? r.title + ' i zakresy' : r.title, sub: `${stan} · ~${r.minutes} min w domu`,
+    href: '#/rozciaganie/' + rozcNaDzis().k, progress: { done, total: n * r.dni.length } });
+  t.classList.add('rozc');
+  return t;
+}
+
+function rozcView(k, wArg) {
+  const r = rozcPlan(), w = wArg || state.week;
+  const frag = document.createDocumentFragment();
+  frag.append(backLink());
+  if (!r) { frag.append(noteBox('Brak rozciągania w tym planie.', ' Bieżący cykl go nie przewiduje.')); return frag; }
+  const dz = r.dni.find(x => x.k === k) || rozcNaDzis();
+  const Z = zakresyPlan(), pozycje = rozcPozycje(), total = pozycje.length;
+
+  const body = el('div');
+  body.style.setProperty('--dc', DAY_COLOR.D);
+  body.append(head(Z ? r.title + ' i zakresy' : r.title, `${dz.nazwa} · ~${r.minutes} min · w domu`, true, r.key));
+  body.append(wyborTygodnia(w, x => `#/rozciaganie/${dz.k}/${x}`));
+
+  // Wtorek albo czwartek — te same pozycje, osobne odhaczenia.
+  const sw = el('div', 'mobsw');
+  for (const x of r.dni) {
+    const b = el('button', 'mobopt' + (x.k === dz.k ? ' on' : ''), x.nazwa + (rozcKomplet(w, x.k) ? ' ✓' : ''));
+    b.onclick = () => go(`#/rozciaganie/${x.k}` + (w !== state.week ? '/' + w : ''));
+    sw.append(b);
+  }
+  body.append(sw);
+
+  const done = rozcDone(w, dz.k);
+  const sp = el('div', 'sprog' + (done >= total ? ' komplet' : ''));
+  sp.append(el('span', 'ile', `${done}/${total} pozycji`));
+  const bar = el('div', 'bar'), fill = el('div', 'fill');
+  fill.style.width = (done / total * 100) + '%';
+  bar.append(fill); sp.append(bar);
+  sp.append(el('span', 'proc', Math.round(done / total * 100) + '%'));
+  body.append(sp);
+
+  const pasek = () => odswiezPasek(rozcDone(w, dz.k), total);
+  const panele = {};
+  const ctx = {
+    jest: id => rozcJest(w, dz.k, id),
+    toggle: id => rozcToggle(w, dz.k, id),
+    po: (nowe, it) => { pasek(); if (it && panele[it.id]) panele[it.id].odswiez(); },
+    etykietaNote: 'Po co',
+    dodatek: (it, odswiezTick) => {
+      if (!czyZakres(it)) return null;
+      panele[it.id] = zakresPanel(it, w, dz.k, () => { odswiezTick(); pasek(); });
+      return panele[it.id];
+    },
+  };
+  const prow = el('button', 'prowstart');
+  const nastepna = pozycje.find(i => !ctx.jest(i.id));
+  prow.append(el('span', 'pico'), el('span', 'pt', done && nastepna ? 'Prowadź dalej' : 'Prowadź mnie'),
+    el('span', 'prs', nastepna ? (done ? 'od: ' + nastepna.name : 'pozycja po pozycji, z minutnikiem i oceną zakresów') : 'wszystko odhaczone — przejdź jeszcze raz'));
+  prow.onclick = () => prowadzPozycje({
+    lista: pozycje, jest: ctx.jest, toggle: ctx.toggle, kolor: DAY_COLOR.D,
+    blok: it => (czyZakres(it) ? Z.title : r.title) + ' · ' + dz.nazwa,
+    extra: (it, odswiezStan) => (czyZakres(it) ? zakresPanel(it, w, dz.k, odswiezStan) : null),
+  });
+  body.append(prow);
+
+  const wstep = noteBox('Po co to jest:', ' ' + r.intro, 'zwiniety');
+  const wiecej = el('button', 'wiecej', 'więcej ▾');
+  wiecej.onclick = () => { const z = wstep.classList.toggle('zwiniety'); wiecej.textContent = z ? 'więcej ▾' : 'mniej ▴'; };
+  const wstepBox = el('div', 'wstep');
+  wstepBox.append(wstep, wiecej);
+  body.append(wstepBox);
+
+  // Trzy bloki w kolejności sesji: rozciąganie, test zakresów, na koniec.
+  const list = el('div', klasaWejscia());
+  const blok = (n, nazwa, why, minuty, items) => {
+    if (!items.length) return;
+    const hdr = el('div', 'mobblock');
+    hdr.append(el('div', 'mbn', String(n)));
+    const mid = el('div', 'mbt');
+    mid.append(el('div', 'mbname', nazwa));
+    if (why) mid.append(el('div', 'mbwhy', why));
+    hdr.append(mid);
+    if (minuty) hdr.append(el('div', 'mbmin', '~' + minuty + ' min'));
+    list.append(hdr);
+    items.forEach(it => list.append(mobCard(it, w, ctx)));
+  };
+  const rozc = r.items.filter(i => !i.naKoniec), koniec = r.items.filter(i => i.naKoniec);
+  if (Z) {
+    blok(1, r.title, 'Pozycje statyczne na to, co siedzenie skraca.', null, rozc);
+    blok(2, Z.title, Z.why, Z.minutes, Z.items);
+    blok(3, 'Na koniec', null, null, koniec);
+  } else rozc.concat(koniec).forEach(it => list.append(mobCard(it, w, ctx)));
+  body.append(list);
+
+  if (Z) {
+    body.append(zakresyHistoriaCard());
+    const zz = el('div', 'card');
+    zz.append(el('h3', null, 'Jak prowadzić test zakresów'));
+    Z.rules.forEach(l => zz.append(el('p', null, l)));
+    body.append(zz);
+  }
+  const zas = el('div', 'card');
+  zas.append(el('h3', null, 'Jak rozciągać'));
+  r.rules.forEach(l => zas.append(el('p', null, l)));
+  body.append(zas);
+  frag.append(body);
+  return frag;
 }
 
 /* ---------- raport bloków i rekalibracja ---------- */
@@ -1989,6 +2296,13 @@ function przeniesTydzien(from, to, opcje = {}) {
 
   if ((!day || day === 'D') && state.mob[from]) { state.mob[to] = state.mob[from]; delete state.mob[from]; }
   saveMob();
+  // Rozciąganie jedzie tylko z całym tygodniem — nie należy do żadnego z dni A–D.
+  if (!day) {
+    for (const k of Object.keys(state.rozc).filter(k => +k.split('|')[0] === from)) {
+      state.rozc[to + '|' + k.split('|').slice(1).join('|')] = state.rozc[k]; delete state.rozc[k];
+    }
+    saveRozc();
+  }
 
   for (const k of kluczeTygodnia(state.czasy, from, day)) {
     const [, d, n] = k.split('|');
@@ -2153,7 +2467,7 @@ async function pullAll() {
    w całości; wygrywa nowszy znacznik czasu. Brak tabeli = cichy powrót do trybu
    lokalnego, dokładnie jak brak zasięgu. */
 let stanTs = null, stanTimer = null;
-const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta, pominiete: state.pominiete });
+const stanLokalny = () => ({ week: state.week, e1rm: state.e1rm, adjust: state.adjust, acc: state.acc, kgw: state.kgw, sound: state.sound, mob: state.mob, rozc: state.rozc, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy, korekta: state.korekta, pominiete: state.pominiete });
 
 function pushStan() {
   clearTimeout(stanTimer);
@@ -2192,6 +2506,7 @@ async function pullStan() {
     // Brak pola `mob` w paczce znaczy „starsza wersja aplikacji", a nie „nic nie
     // odklikane" — wtedy zostawiamy to, co jest na tym urządzeniu.
     if (d.mob && inny(d.mob, state.mob)) { state.mob = d.mob; localStorage.setItem(LS_MOB, JSON.stringify(state.mob)); zm = true; }
+    if (d.rozc && inny(d.rozc, state.rozc)) { state.rozc = d.rozc; localStorage.setItem(LS_ROZC, JSON.stringify(state.rozc)); zm = true; }
     if (d.rekal && inny(d.rekal, state.rekal)) { state.rekal = d.rekal; localStorage.setItem(LS_REK, JSON.stringify(state.rekal)); zm = true; }
     // Czasy serii: każde urządzenie dopisuje swoje, a przy tej samej serii
     // wygrywa to, co jest tutaj — tu ją odhaczono.
@@ -3171,7 +3486,7 @@ function settingsView() {
   kop.append(el('p', null, 'Plik JSON z dziennikiem, E1RM i historią korekt. Działa niezależnie od synchronizacji.'));
   const exp = el('button', 'btn ghost', 'Zapisz do pliku');
   exp.onclick = () => {
-    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy , pominiete: state.pominiete };
+    const dane = { v: 3, key: state.key, e1rm: state.e1rm, log: state.log, adjust: state.adjust, acc: state.acc, kgw: state.kgw, mob: state.mob, rozc: state.rozc, rekal: state.rekal, moves: state.moves, treningi: state.treningi, filmy: state.filmy, czasy: state.czasy , pominiete: state.pominiete };
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(dane, null, 1)], { type: 'application/json' }));
     a.download = 'dziennik-treningowy.json';
@@ -3193,6 +3508,7 @@ function settingsView() {
       if (d.acc) { state.acc = d.acc; saveAcc(); }
       if (d.kgw) { state.kgw = d.kgw; saveKgw(); }
       if (d.mob) { state.mob = d.mob; saveMob(); }
+      if (d.rozc) { state.rozc = d.rozc; saveRozc(); }
       if (d.rekal) { state.rekal = d.rekal; saveRekal(); }
       if (Array.isArray(d.moves)) { state.moves = d.moves; saveMoves(); }
       if (d.treningi) { state.treningi = d.treningi; saveTreningi(); }
@@ -3282,7 +3598,8 @@ function raportCyklu() {
   for (let w = 1; w <= 12; w++) {
     const dni = ['A', 'B', 'C'].filter(d => postepDnia(w, d).done);
     const mob = mobDone(w);
-    if (!dni.length && !mob) continue;
+    const rz = rozcPlan() ? rozcPlan().dni.map(x => [x, rozcDone(w, x.k)]).filter(([, n]) => n) : [];
+    if (!dni.length && !mob && !rz.length) continue;
     L.push('');
     L.push(`== Tydzień ${w}${isDeload(w) ? ' (deload)' : ''} ==`);
     const oceny = LIFTS.map(x => `${x.short}: ${SLOWNIK_OCEN[judgeWeek(x.key, w)] || '—'}`).join(' · ');
@@ -3310,6 +3627,11 @@ function raportCyklu() {
       }
     }
     if (mob) L.push(`D Joga — ${mob}/${mobItems().length} pozycji`);
+    if (rz.length) L.push('Rozciąganie — ' + rz.map(([x, n]) => `${x.skrot} ${n}/${rozcPozycje().length}`).join(', '));
+    for (const [x] of rz) {
+      const zap = zakresyItems().map(it => [it, zakresGet(w, x.k, it.id)]).filter(([, z]) => z);
+      if (zap.length) L.push(`  Zakresy ${x.skrot}: ` + zap.map(([it, z]) => `${it.name.split(' (')[0]} poz. ${z.p}/${it.poziomy.length} · ${zakresyPlan().oceny[z.o].k}`).join('; '));
+    }
   }
   return L.join('\n');
 }
@@ -3402,7 +3724,9 @@ function startPrzyPierwszejSerii(day, w) {
    ruch idzie tylko w pusty cel. */
 const LS_MIG = 'trening.migracja.v1';
 function migracjaPoniedzialku(final) {
-  if (!state.plan || !(state.plan.cykl >= 2)) return false;
+  // Tylko cykl 2. Urządzenie, które nigdy jej nie wykonało (świeża instalacja
+  // w cyklu 3), przestawiłoby inaczej poniedziałki nowego cyklu.
+  if (!state.plan || state.plan.cykl !== 2) return false;
   const mig = readJSON(LS_MIG, {});
   if (mig.pn2na3) return false;
   const znane = new Set(state.moves.map(m => m.id));
@@ -3634,7 +3958,7 @@ function statySesji(day, w) {
   }
   const t = tonazDnia(w, day), pg = postepDnia(w, day);
   let glowny = `${state.plan.days[day].items.length} ćwiczeń`;
-  const lift = MAIN_OF[day];
+  const lift = glownyBoj(day);
   if (lift) {
     const it = (pozycjaBoju(lift) || {}).it;
     const rows = logGet(w, day, it.n);
@@ -3855,13 +4179,30 @@ function prowadzJoge(w) {
   if (!document.body || !document.body.appendChild) return;
   const lista = mobWidoczne();
   if (!lista.length) return;
-  let i = Math.max(0, lista.findIndex(x => !mobJest(w, x.id)));
-  const t0 = trening(w, 'D');
-  if (!t0) rozpocznijTrening('D', w);            // stoper rusza razem z pierwszą pozycją
+  if (!trening(w, 'D')) rozpocznijTrening('D', w);   // stoper rusza razem z pierwszą pozycją
+  prowadzPozycje({
+    lista, kolor: DAY_COLOR.D,
+    jest: id => mobJest(w, id),
+    toggle: id => mobToggle(w, id),
+    blok: it => (state.plan.mobility.blocks.find(b => b.items.some(x => x.id === it.id)) || {}).name,
+    // Cała joga przerobiona: stoper staje, a karta zaliczenia pokazuje czas.
+    naKoniec: () => {
+      if (!sesjaKompletna('D', w)) return;
+      const t = trening(w, 'D');
+      setTimeout(() => (t && t.start && !t.end ? zakonczTrening('D', w) : pokazZaliczenie('D', w)), 300);
+    },
+  });
+}
+
+/* Wspólny ekran prowadzenia pozycji: joga w niedzielę, rozciąganie we wtorek
+   i czwartek. Zna tylko listę i to, jak odhaczyć pozycję — resztę daje wołający. */
+function prowadzPozycje({ lista, jest, toggle, blok, kolor, naKoniec, extra }) {
+  if (!document.body || !document.body.appendChild || !lista.length) return;
+  let i = Math.max(0, lista.findIndex(x => !jest(x.id)));
   keepAwake(true);
 
   const tlo = el('div', 'prow');
-  tlo.style.setProperty('--dc', DAY_COLOR.D);
+  tlo.style.setProperty('--dc', kolor);
   let tik = null;
   const zamknij = () => {
     clearInterval(tik);
@@ -3869,24 +4210,20 @@ function prowadzJoge(w) {
     tlo.remove();
     document.removeEventListener('keydown', klaw);
     render();
-    // Cała joga przerobiona: stoper staje, a karta zaliczenia pokazuje czas.
-    if (sesjaKompletna('D', w)) {
-      const t = trening(w, 'D');
-      setTimeout(() => (t && t.start && !t.end ? zakonczTrening('D', w) : pokazZaliczenie('D', w)), 300);
-    }
+    if (naKoniec) naKoniec();
   };
   const klaw = e => { if (e.key === 'Escape') zamknij(); if (e.key === 'ArrowRight') dalej(); if (e.key === 'ArrowLeft') wstecz(); };
   document.addEventListener('keydown', klaw);
-  const blokPozycji = it => state.plan.mobility.blocks.find(b => b.items.some(x => x.id === it.id));
 
   const rysuj = () => {
     clearInterval(tik);
     if (tId) stopTimer();
     const it = lista[i];
+    let ok = null;
     tlo.replaceChildren();
     const gora = el('div', 'prgora');
     const kreski = el('div', 'prkreski');
-    lista.forEach((x, j) => kreski.append(el('i', (mobJest(w, x.id) ? 'z' : '') + (j === i ? ' teraz' : ''))));
+    lista.forEach((x, j) => kreski.append(el('i', (jest(x.id) ? 'z' : '') + (j === i ? ' teraz' : ''))));
     const x = el('button', 'prx', '✕');
     x.setAttribute('aria-label', 'Zamknij tryb prowadzenia');
     x.onclick = zamknij;
@@ -3894,8 +4231,8 @@ function prowadzJoge(w) {
     tlo.append(gora);
 
     const tresc = el('div', 'prtresc');
-    const b = blokPozycji(it);
-    if (b) tresc.append(el('div', 'preye', b.name));
+    const b = blok && blok(it);
+    if (b) tresc.append(el('div', 'preye', b));
     tresc.append(el('h2', 'prname', it.name));
     tresc.append(el('div', 'prdawka', it.dose));
     const vid = filmPozycji(it);
@@ -3920,6 +4257,14 @@ function prowadzJoge(w) {
       tresc.append(min);
     }
 
+    // Panel pozycji (poziom i ocena w teście zakresów) odświeża tylko ✓ i przycisk —
+    // pełne `rysuj()` zatrzymałoby minutnik.
+    const dod = extra ? extra(it, () => {
+      const kr = kreski.children[i];
+      if (kr) kr.className = (jest(it.id) ? 'z' : '') + ' teraz';
+      if (ok) ok.textContent = jest(it.id) ? (lista[i + 1] ? 'Dalej →' : 'Zakończ') : (lista[i + 1] ? 'Zrobione → dalej' : 'Zrobione — koniec');
+    }) : null;
+    if (dod) tresc.append(dod);
     if (it.steps && it.steps.length) {
       const ol = el('ol', 'kroki');
       it.steps.forEach(k => ol.append(el('li', null, k)));
@@ -3940,7 +4285,7 @@ function prowadzJoge(w) {
     wst.setAttribute('aria-label', 'Poprzednia pozycja');
     wst.disabled = i === 0;
     wst.onclick = wstecz;
-    const ok = el('button', 'prok', mobJest(w, it.id) ? (nast ? 'Dalej →' : 'Zakończ') : (nast ? 'Zrobione → dalej' : 'Zrobione — koniec'));
+    ok = el('button', 'prok', jest(it.id) ? (nast ? 'Dalej →' : 'Zakończ') : (nast ? 'Zrobione → dalej' : 'Zrobione — koniec'));
     ok.onclick = dalej;
     przyc.append(wst, ok);
     dol.append(przyc);
@@ -3949,7 +4294,7 @@ function prowadzJoge(w) {
   };
   const dalej = () => {
     const it = lista[i];
-    if (!mobJest(w, it.id)) mobToggle(w, it.id);
+    if (!jest(it.id)) toggle(it.id);
     if (navigator.vibrate) navigator.vibrate(30);
     if (i < lista.length - 1) { i++; rysuj(); } else zamknij();
   };
@@ -4299,9 +4644,10 @@ function render() {
   const v = state.view;
   const onDay = v.startsWith('#/d/');
   const onMob = v === '#/mobilnosc' || v.startsWith('#/mobilnosc/');
-  const naGlownym = !onDay && !onMob && !['#/postep', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'].includes(v);
+  const onRozc = v === '#/rozciaganie' || v.startsWith('#/rozciaganie/');
+  const naGlownym = !onDay && !onMob && !onRozc && !['#/postep', '#/tabela', '#/raport', '#/zasady', '#/1rm', '#/ustawienia'].includes(v);
   if (naGlownym) app.append(weekBar());
-  document.body.classList.toggle('w-sesji', onDay || onMob);
+  document.body.classList.toggle('w-sesji', onDay || onMob || onRozc);
 
   // "#/d/A" albo "#/d/A/3" — druga forma zapisuje do wskazanego tygodnia,
   // nie ruszając tygodnia bieżącego.
@@ -4311,13 +4657,15 @@ function render() {
     if (prowadzPoRenderze && prowadzPoRenderze.day === k) { const p = prowadzPoRenderze; prowadzPoRenderze = null; setTimeout(() => prowadzSesje(p.day, p.w), 0); }
   }
   else if (onMob) app.append(mobilityView(tydzienZAdresu(v.split('/')[2])));
+  // "#/rozciaganie/wt" albo "#/rozciaganie/cz/3"
+  else if (onRozc) { const [, , k, t] = v.split('/'); app.append(rozcView(k, tydzienZAdresu(t))); }
   else if (v === '#/postep' || v === '#/tabela' || v === '#/raport') app.append(postepView());
   else if (v === '#/zasady') app.append(rulesView());
   else if (v === '#/1rm') app.append(calcView());
   else if (v === '#/ustawienia') app.append(settingsView());
   else app.append(homeView());
 
-  keepAwake(onDay || onMob);
+  keepAwake(onDay || onMob || onRozc);
   renderTimer();
   if (v !== ostatniWidok) odliczLiczby(app);
   ostatniWidok = v;
@@ -4331,7 +4679,7 @@ window.addEventListener('hashchange', () => { state.view = location.hash || '#/'
    prosto do pamięci, bez wysyłki — drugie urządzenie mogło już zacząć nowy cykl,
    a pusta paczka nadpisałaby jego stan. */
 const LS_CYKL = 'trening.cykl.v1', LS_ARCH = 'trening.archiwum.v1';
-const ZBIORY_CYKLU = { log: [LS_LOG, {}], kgw: [LS_KGW, {}], mob: [LS_MOB, {}], rekal: [LS_REK, {}], adjust: [LS_ADJ, {}],
+const ZBIORY_CYKLU = { log: [LS_LOG, {}], kgw: [LS_KGW, {}], mob: [LS_MOB, {}], rozc: [LS_ROZC, {}], rekal: [LS_REK, {}], adjust: [LS_ADJ, {}],
   treningi: [LS_TRN, {}], czasy: [LS_CZASY, {}], moves: [LS_MOV, []], queue: [LS_Q, []], pominiete: [LS_POM, {}] };
 function przejdzNaCykl(p) {
   const nowy = p.cykl || 1;
@@ -4350,11 +4698,47 @@ function przejdzNaCykl(p) {
     state[k] = Array.isArray(pusty) ? [] : {};
     localStorage.setItem(ls, JSON.stringify(state[k]));
   }
+  // Maksy: z planu albo — gdy plan tak mówi — te, z którymi kończy się poprzedni
+  // cykl. Samoregulacja i rekalibracje wiedzą o sztandze więcej niż liczba
+  // wpisana w plan tygodnie wcześniej.
+  const poprz = state.e1rm || {};
   state.week = 1;
   state.e1rm = { ...p.e1rm };
+  for (const L of p.e1rmZPoprzedniego || []) if (poprz[L] > 0) state.e1rm[L] = poprz[L];
+  // Cykl zaczęty w środku tygodnia: sesje tygodnia 1, których dzień już minął,
+  // są pominięte — nie wiszą jako „do wpisania" i nie psują serii tygodni.
+  // Pierwsza zapisana seria i tak odwołuje pominięcie. Bez wysyłki, jak wyżej.
+  const dzis = pozycjaDzis();
+  for (const k of ['A', 'B', 'C']) if (POZYCJA_DNIA[k] < dzis) state.pominiete[kluczPominiecia(k, 1)] = true;
+  localStorage.setItem(LS_POM, JSON.stringify(state.pominiete));
   zapiszLokalnie();
   localStorage.setItem(LS_CYKL, String(nowy));
-  return true;
+  return byl;                                    // numer zamkniętego cyklu — dla ciezaryZPoprzedniego
+}
+
+/* Ciężary ćwiczeń dodatkowych przechodzą z zamkniętego cyklu po nazwie: ostatni
+   ciężar zapisany w dzienniku staje się ustawieniem suwaka, o ile ten nie jest
+   już ustawiony. Dziennik zna tylko pozycje („tydzień|dzień|numer"), więc
+   potrzebny jest plan tamtego cyklu — doczytujemy plan-cyklN.json. Zapis bez
+   wysyłki, jak całe przejście; pójdzie z najbliższą paczką stanu. */
+async function ciezaryZPoprzedniego(n) {
+  const a = archiwum()[n];
+  if (!a || !a.log) return 0;
+  let stary;
+  try { stary = await (await fetch(`plan-cykl${n}.json?v=85`)).json(); } catch { return 0; }
+  let ile = 0;
+  for (const [day, d] of Object.entries((stary && stary.days) || {})) for (const it of d.items) {
+    if (it.load && it.load.ref) continue;        // boje mają swoje E1RM
+    let kg = null;
+    for (let w = 12; w >= 1 && kg == null; w--) {
+      const row = (a.log[`${w}|${day}|${it.n}`] || []).find(r => r && r.kg != null);
+      if (row) kg = row.kg;
+    }
+    const k = accKey(it);
+    if (kg != null && state.acc[k] == null) { state.acc[k] = kg; ile++; }
+  }
+  if (ile) localStorage.setItem(LS_ACC, JSON.stringify(state.acc));
+  return ile;
 }
 const archiwum = () => readJSON(LS_ARCH, {});
 
@@ -4376,7 +4760,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=83`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=85`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4429,13 +4813,13 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=83')
+fetch('plan.json?v=85')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
     loadState();
     loadStores();
-    przejdzNaCykl(p);
+    const zamkniety = przejdzNaCykl(p);
     if (!state.e1rm) state.e1rm = { ...p.e1rm };
     korektaMaksow(p);
     const ciag = pozycjaBoju('dl');
@@ -4455,6 +4839,7 @@ fetch('plan.json?v=83')
       history.replaceState(null, '', state.view);
     }
     render();
+    if (zamkniety) ciezaryZPoprzedniego(zamkniety).then(n => { if (n) render(); });
     pullStan().then(async () => {
       przeliczPlan();
       render();
