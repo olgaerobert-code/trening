@@ -134,14 +134,14 @@ się bezpiecznych marginesów.
   krótka wersja 9 pozycji. Każde ćwiczenie ma opis (filmy tylko w jodze); przy
   hantlach i maszynie jest suwak ciężaru z wartością startową (`kgStart`). Sufit RPE 7
   na dole, bez testu maksa — tydzień 12 to sprawdzian
-- **Cykl 3 — kolana i biodra** (plan.json, generator `tools/cykl3.py`): każdy dzień zaczyna
-  się jednym bojem ze sztangą, a resztę godziny wypełniają trzy superserie pod kolano
-  i biodro. Wt A **Kolana** (front squat; bułgarski + podciąganie; prostowanie + uginanie
-  na maszynach; piszczelowy + łydka siedząc), czw B **Biodra** (wyciskanie; hip thrust +
-  face pull; przysiad hiszpański + plank kopenhaski; odwodzenie w pochyleniu + marsz
-  biodrowy z gumą), sob C **Zawias** (martwy ciąg z podłogi z pełną drabinką; skrzynia
-  z wolnym zejściem + wiosłowanie; ciąg jednonóż + deska boczna z odwodzeniem; łydka
-  stojąc + spacer farmera). Joga bez zmian w pozycjach. Dni tygodnia siedzą w planie
+- **Cykl 3 — kolana i biodra** (plan.json, generator `tools/cykl3.py`): boje stoją tam,
+  gdzie w cyklu 2 — wt A **Góra** (wyciskanie; bułgarski + podciąganie; goblet z piętami
+  w górze + Nordic; piszczelowy przy ścianie + łydka siedząc z hantlami), czw B
+  **Jednonóż** bez sztangi (skrzynia z wolnym zejściem + wiosłowanie; hip thrust jednonóż
+  + face pull; ciąg jednonóż + deska boczna z odwodzeniem; przysiad hiszpański + plank
+  kopenhaski; marsz biodrowy z gumą), sob C **Dół** (front squat, martwy ciąg ze skróconą
+  drabinką; łydka stojąc + spacer farmera). Bez maszyn: sztanga ze stojakiem, ławka,
+  hantle, drążek, gumy i skrzynia; rozgrzewka bez roweru i bieżni. Joga bez zmian w pozycjach. Dni tygodnia siedzą w planie
   (`dzien` przy A/B/C i jodze, `ustawDniTygodnia`) — wt/czw/sob, bo tak wyglądał tydzień
   w dzienniku cyklu 2; plany bez tego pola zostają przy pn/śr/pt. Jednorazowa
   `migracjaDniCyklu3` zdejmuje pominięcia tygodnia 1 nadane jeszcze według starych dni

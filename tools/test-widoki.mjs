@@ -1294,8 +1294,8 @@ console.log('Ciezar po przeniesieniu');
   test('osobny, czysty klucz synchronizacji cyklu 3', B3.kluczSync() === S3.key + '-C3b');
   const bulg = S3.plan.days.A.items.find(i => i.name === 'Przysiad bułgarski z hantlami');
   test('ciezar dodatkowego przechodzi z dziennika cyklu 2 po nazwie', B3.plannedOf(bulg, 1, 'A').kg === 20, String(B3.plannedOf(bulg, 1, 'A').kg));
-  const prost = S3.plan.days.A.items.find(i => i.name === 'Prostowanie nóg na maszynie');
-  test('nowe cwiczenie startuje z wartosci z planu', B3.plannedOf(prost, 1, 'A').kg === prost.kgStart);
+  const gob = S3.plan.days.A.items.find(i => /^Goblet squat z piętami/.test(i.name));
+  test('nowe cwiczenie startuje z wartosci z planu', gob && B3.plannedOf(gob, 1, 'A').kg === gob.kgStart);
   test('dziennik cyklu 3 pusty', Object.keys(S3.log).length === 0 && Object.keys(S3.rozc).length === 0);
   const dzis = B3.pozycjaDzis();
   test('dni tygodnia 1 sprzed startu sa pominiete, reszta nie',
@@ -1303,9 +1303,11 @@ console.log('Ciezar po przeniesieniu');
   test('migracja poniedzialku nie dotyka cyklu 3', B3.migracjaPoniedzialku(true) === false && S3.moves.length === 0);
 
   // Plan: jeden boj na dzien, zawsze pierwszy.
-  test('pon front squat, sr wyciskanie, pt ciag',
-    B3.glownyBoj('A') === 'front' && B3.glownyBoj('B') === 'bench' && B3.glownyBoj('C') === 'dl'
-    && ['A', 'B', 'C'].every(d => B3.bojeDnia(d).length === 1 && S3.plan.days[d].items[0].load.ref));
+  test('boje jak w cyklu 2: wt wyciskanie, czw bez sztangi, sob przysiad i ciag',
+    B3.bojeDnia('A').join() === 'bench' && B3.bojeDnia('B').length === 0 && B3.bojeDnia('C').join() === 'front,dl'
+    && S3.plan.days.A.items[0].load.ref && S3.plan.days.C.items[0].load.ref && S3.plan.days.C.items[1].load.ref);
+  test('bez maszyn: zadne cwiczenie ani rozgrzewka ich nie wymaga', !/maszyn/i.test(JSON.stringify(S3.plan.days))
+    && !/maszyn|bieżni pod górę/i.test(JSON.stringify(S3.plan.warmup.days)));
   test('tydz. 1 = 67,5% maksow z cyklu 2', B3.kgOf('front', 1) === 75 && B3.kgOf('dl', 1) === 85 && B3.kgOf('bench', 1) === 92.5,
     [B3.kgOf('front', 1), B3.kgOf('dl', 1), B3.kgOf('bench', 1)].join('/'));
   for (let w = 1; w <= 12; w++) {
@@ -1317,9 +1319,9 @@ console.log('Ciezar po przeniesieniu');
   }
   test('c3: kazde cwiczenie ma serie we wszystkich tygodniach', true);
   const it3 = (d, n) => S3.plan.days[d].items.find(x => x.n === n);
-  test('przerwy: przysiad i ciag 3 min', B3.przerwaPo(it3('A', 1), 'A', 5) === 180 && B3.przerwaPo(it3('C', 1), 'C', 5) === 180);
-  test('przerwy: wyciskanie 2 min, od bloku 3 2,5 min', B3.przerwaPo(it3('B', 1), 'B', 5) === 120 && B3.przerwaPo(it3('B', 1), 'B', 9) === 150);
-  test('przerwy: bulgarski bez przerwy, po podciaganiu 90 s, po skrzyni z wioslowaniem 75 s', B3.przerwaPo(it3('A', 2), 'A', 5) === 0 && B3.przerwaPo(it3('A', 3), 'A', 5) === 90 && B3.przerwaPo(it3('C', 3), 'C', 5) === 75);
+  test('przerwy: przysiad i ciag 3 min', B3.przerwaPo(it3('C', 1), 'C', 5) === 180 && B3.przerwaPo(it3('C', 2), 'C', 5) === 180);
+  test('przerwy: wyciskanie 2 min, od bloku 3 2,5 min', B3.przerwaPo(it3('A', 1), 'A', 5) === 120 && B3.przerwaPo(it3('A', 1), 'A', 9) === 150);
+  test('przerwy: bulgarski bez przerwy, po podciaganiu 90 s, po skrzyni z wioslowaniem 75 s', B3.przerwaPo(it3('A', 2), 'A', 5) === 0 && B3.przerwaPo(it3('A', 3), 'A', 5) === 90 && B3.przerwaPo(it3('B', 2), 'B', 5) === 75);
   for (const d of ['A', 'B', 'C']) {
     const its = S3.plan.days[d].items;
     for (const it of its.filter(x => x.superset && x.superset.endsWith('2')))
@@ -1328,17 +1330,18 @@ console.log('Ciezar po przeniesieniu');
     test(`c3 ${d}: kazde cwiczenie ma opis i id, bez filmow`, its.every(x => x.note && /^c3[abc]\d+$/.test(x.id) && !x.film));
     // Budzet godziny: rozgrzewka + drabinka dojsciowa + praca + przerwy z opisu
     // + 15 s na przejscie. Powtorzenia 1,5 × szacunek aplikacji (tempo 3 s w dol),
-    // trzymanie na czas i dystans tyle, ile trwa.
+    // trzymanie na czas i dystans tyle, ile trwa. Drabinka: 4 serie przed pierwszym
+    // bojem dnia, 2 przed drugim; dzien bez sztangi jej nie ma.
     for (const w of [1, 6, 10]) {
-      const kroki = B3.kolejkaSesji(d, w);
-      let sek = 7 * 60 + 4 * 80;
+      const kroki = B3.kolejkaSesji(d, w), boje = B3.bojeDnia(d).length;
+      let sek = 7 * 60 + (boje ? 4 * 80 : 0) + Math.max(0, boje - 1) * 2 * 80;
       kroki.forEach((k, i) => { sek += B3.czasSerii(k.it, w, d) * (k.pl.unit ? 1 : 1.5) + 15 + (i < kroki.length - 1 ? B3.przerwaPo(k.it, d, w) : 0); });
       test(`c3 ${d} tydz. ${w} miesci sie w godzinie (~${Math.round(sek / 60)} min)`, sek <= 62 * 60);
     }
   }
   const nazwyC2 = new Set(['A', 'B', 'C'].flatMap(d => planCykl2.days[d].items.map(i => i.name)));
   test('cwiczenia z cyklu 2 maja te same nazwy (suwak pamieta ciezar)',
-    ['Przysiad bułgarski z hantlami', 'Wiosłowanie hantlem w podporze', 'Martwy ciąg rumuński jednonóż z hantlem', 'Zgięcie grzbietowe na maszynie (piszczelowy przedni)',
+    ['Przysiad bułgarski z hantlami', 'Wiosłowanie hantlem w podporze', 'Martwy ciąg rumuński jednonóż z hantlem', 'Hip thrust jednonóż z hantlem',
      'Przysiad hiszpański z hantlem (izometria)', 'Spacer farmera jednorącz', 'Face pull z gumą'].every(n => nazwyC2.has(n)
        && ['A', 'B', 'C'].some(d => S3.plan.days[d].items.some(i => i.name === n))));
   const SENS = /skolioz|cobb|przodopochyl|ból|bólu|boles|dolegliw|rehabilit|fizjoterapeu|ortoped|RTG|MRI|diagnoz|leczen|chorob|kontuzj|uraz|skręc|tendinop|patolog|obrzęk|wysięk|drętwi|mrowie|przeciwbólow|specjalist|zwyrodnien|nawrot/i;
@@ -1348,9 +1351,13 @@ console.log('Ciezar po przeniesieniu');
 
   // Rozgrzewka: pelna drabinka do boju dnia, bez skroconej tabeli „Przed ciągiem".
   S3.view = '#/d/C'; B3.render();
-  test('rozgrzewka C: pelna drabinka do ciagu', app.textContent.includes('Serie dojściowe') && app.textContent.includes('Martwy ciąg') && !app.textContent.includes('Przed ciągiem'));
+  // Atrapa nie parsuje innerHTML — sprawdzamy wygenerowany kod tabel.
+  const tabeleC = app.querySelectorAll('table').map(t => t.innerHTML).join('');
+  test('rozgrzewka C: pelna drabinka do przysiadu i skrocona do ciagu', /Serie dojściowe.*Front squat/.test(tabeleC) && /Przed ciągiem.*Martwy ciąg/.test(tabeleC));
   S3.view = '#/d/A'; B3.render();
-  test('rozgrzewka A: drabinka do front squata', app.textContent.includes('Serie dojściowe') && app.textContent.includes('Front squat'));
+  test('rozgrzewka A: drabinka do wyciskania', /Serie dojściowe.*Wyciskanie/.test(app.querySelectorAll('table').map(t => t.innerHTML).join('')));
+  S3.view = '#/d/B'; B3.render();
+  test('dzien B bez sztangi: bez tabeli serii dojsciowych', app.querySelectorAll('table').length === 0 && app.textContent.includes('Wejście na skrzynię'));
 
   // Rozciaganie we wtorek i czwartek.
   const R = S3.plan.rozciaganie;
@@ -1435,7 +1442,7 @@ console.log('Ciezar po przeniesieniu');
   test('cykl 3: sesje we wtorek, czwartek i sobote', JSON.stringify(B3.DZIEN_TYG) === JSON.stringify({ 0: 'D', 2: 'A', 4: 'B', 6: 'C' })
     && B3.POZYCJA_DNIA.A === 1 && B3.POZYCJA_DNIA.B === 3 && B3.POZYCJA_DNIA.C === 5 && B3.POZYCJA_DNIA.D === 6);
   S3.view = '#/'; B3.render();
-  test('panel tygodnia: Wt · Kolana, Cz · Biodra, So · Zawias', ['Wt · Kolana', 'Cz · Biodra', 'So · Zawias', 'Nd · Joga'].every(t => app.textContent.includes(t)));
+  test('panel tygodnia: Wt · Góra, Cz · Jednonóż, So · Dół', ['Wt · Góra', 'Cz · Jednonóż', 'So · Dół', 'Nd · Joga'].every(t => app.textContent.includes(t)));
   // Jednorazowa poprawka dla urządzenia, które zaczęło cykl 3 ze starym układem pn/śr/pt.
   localStorage.setItem('trening.migracja.v1', '{}');
   S3.week = 1;

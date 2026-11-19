@@ -2602,7 +2602,7 @@ function setRows(it, day, w, pl, onKg) {
     const kgBox = el('div', 'kgslider');
     const lab = el('div', 'kglab');
     const val = el('b', null, fmt(kgTeraz));
-    lab.append(el('span', null, pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar (hantel, maszyna)'), val, el('i', null, 'kg'));
+    lab.append(el('span', null, pl.planKg != null ? 'Ciężar na sztandze' : 'Ciężar (hantle)'), val, el('i', null, 'kg'));
     const sl = el('input', 'suwak');
     sl.type = 'range'; sl.min = min; sl.max = max; sl.step = 2.5; sl.value = kgTeraz;
     sl.setAttribute('aria-label', 'Ciężar w kilogramach');
@@ -4774,7 +4774,7 @@ async function ciezaryZPoprzedniego(n) {
   const a = archiwum()[n];
   if (!a || !a.log) return 0;
   let stary;
-  try { stary = await (await fetch(`plan-cykl${n}.json?v=86`)).json(); } catch { return 0; }
+  try { stary = await (await fetch(`plan-cykl${n}.json?v=87`)).json(); } catch { return 0; }
   let ile = 0;
   for (const [day, d] of Object.entries((stary && stary.days) || {})) for (const it of d.items) {
     if (it.load && it.load.ref) continue;        // boje mają swoje E1RM
@@ -4809,7 +4809,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=86`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=87`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -4862,7 +4862,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=86')
+fetch('plan.json?v=87')
   .then(r => r.json())
   .then(p => {
     state.plan = p;
