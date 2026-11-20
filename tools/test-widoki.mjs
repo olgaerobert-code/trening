@@ -1422,7 +1422,7 @@ console.log('Ciezar po przeniesieniu');
   test('komplet czwartku wymaga tez testu zakresow', B3.rozcKomplet(1, 'pt') && !B3.rozcKomplet(1, 'sr') && B3.rozcDone(1, 'pt') === N);
   S3.view = '#/'; B3.render();
   test('Dzis: rozciaganie i zakresy w tygodniu, piatek zrobiony', app.textContent.includes('Rozciąganie i zakresy')
-    && app.querySelectorAll('.plakat').some(r => r.textContent.includes('Piątek') && r.classList.contains('zrobione') && r.classList.contains('dom')));
+    && app.querySelectorAll('.plakat').some(r => /piątek/i.test(r.textContent) && r.classList.contains('zrobione') && r.classList.contains('dom')));
   test('raport cyklu liczy rozciaganie', B3.raportCyklu().includes(`Rozciąganie — Pt ${N}/${N}`));
   test('rozciaganie nie zmienia zawartosci tygodnia dla dni A–D', B3.zawartoscTygodnia(1).serie === 0 && B3.zawartoscTygodnia(1).mob === 0);
   B3.przeniesTydzien(1, 4);
@@ -1482,7 +1482,7 @@ console.log('Ciezar po przeniesieniu');
   for (const plik of ['progresja.js', 'figury.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb4, { filename: plik });
   vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, kgOf, raportCyklu, resolve, bojeDnia,
     sesjaPominieta, kolejkaSesji, czasSerii, rozcPozycje, bilansStawow, fazySerii, biegSerii, startTimer, stopTimer, stanPrzerwy, jednostka, naCzas,
-    pozycjaDzis, POZYCJA_DNIA, DZIEN_TYG, trening, scenaSesji, scena: () => scenaTeraz, STAWY, ukladTygodnia, mobItems };`, sb4);
+    pozycjaDzis, POZYCJA_DNIA, DZIEN_TYG, trening, scenaSesji, scena: () => scenaTeraz, STAWY, ukladTygodnia, mobItems, zakresGet, zakresSet, sesjaKompletna };`, sb4);
   const B4 = sb4.API;
   await new Promise(r => setTimeout(r, 60));
   const S4 = B4.state, D = S4.plan.days;
@@ -1509,7 +1509,7 @@ console.log('Ciezar po przeniesieniu');
   test('boje: wt wyciskanie, czw bez sztangi, sob przysiad i ciag',
     B4.bojeDnia('A').join() === 'bench' && B4.bojeDnia('B').length === 0 && B4.bojeDnia('C').join() === 'front,dl');
   test('bez maszyn', !/maszyn/i.test(JSON.stringify(D)) && !/bieżni|rower/i.test(JSON.stringify(S4.plan.warmup.days)));
-  const CELE = ['kolano', 'kostka', 'biodro', 'gora', 'tulow', 'kondycja'];
+  const CELE = ['kolano', 'kostka', 'biodro', 'gora', 'tulow', 'kondycja', 'rozciaganie'];
   test('kazde cwiczenie ma cel z dozwolonej listy, id i opis', ['A', 'B', 'C'].every(d => D[d].items.every(x =>
     Array.isArray(x.cel) && x.cel.length && x.cel.every(c => CELE.includes(c)) && /^c4[abc]\d+$/.test(x.id) && x.note)));
   let zle4 = '';
@@ -1569,8 +1569,17 @@ console.log('Ciezar po przeniesieniu');
 
   const SENS = /skolioz|cobb|przodopochyl|ból|bólu|boles|dolegliw|rehabilit|fizjoterapeu|ortoped|RTG|MRI|diagnoz|leczen|chorob|kontuzj|uraz|skręc|tendinop|patolog|obrzęk|wysięk|drętwi|mrowie|przeciwbólow|specjalist|zwyrodnien|nawrot/i;
   test('plan cyklu 4 bez tresci zdrowotnych', !SENS.test(JSON.stringify(S4.plan)));
-  test('rozciaganie: 7 pozycji + 4 testy zakresow, rownowaga przed oddechem',
-    B4.rozcPozycje().length === 11 && B4.rozcPozycje().slice(-2).map(i => i.id).join() === 'r7,r6');
+  // Trzy treningi + niedziela: rozciaganie konczy kazdy trening, test zakresow jest w niedziele z joga.
+  const rozcDnia = d => D[d].items.filter(x => x.rozc);
+  test('rozciaganie na koniec treningow: A 2, B 2, C 3 pozycje, zawsze po ostatnim cwiczeniu',
+    rozcDnia('A').length === 2 && rozcDnia('B').length === 2 && rozcDnia('C').length === 3
+    && ['A', 'B', 'C'].every(d => D[d].items.slice(-rozcDnia(d).length).every(x => x.rozc) && D[d].items.slice(0, -rozcDnia(d).length).every(x => !x.rozc)));
+  test('pozycje rozciagania: na czas, bez przerwy, z figurka, poza bilansem stawow',
+    ['A', 'B', 'C'].every(d => rozcDnia(d).every(x => B4.naCzas(B4.plannedOf(x, 1, d)) && B4.przerwaPo(x, d, 1) === 0 && x.fig && x.cel.join() === 'rozciaganie')));
+  test('dopisanie rozciagania nie rusza numerow wczesniejszych cwiczen', D.A.items.slice(0, 7).map(x => x.n).join() === '1,2,3,4,5,6,7'
+    && D.B.items.slice(0, 9).map(x => x.n).join() === '1,2,3,4,5,6,7,8,9' && D.C.items.slice(0, 4).map(x => x.n).join() === '1,2,3,4');
+  test('tydzien: trzy treningi i niedziela, bez osobnych dni rozciagania', B4.ukladTygodnia().length === 4 && B4.ukladTygodnia().every(x => x.k)
+    && S4.plan.rozciaganie.wJodze === true && S4.plan.rozciaganie.items.length === 0 && B4.rozcPozycje().length === 4);
   test('joga: te same pozycje co w cyklu 2', JSON.stringify(S4.plan.mobility.blocks) === JSON.stringify(planCykl2.mobility.blocks));
 
   // Ekrany.
@@ -1584,6 +1593,28 @@ console.log('Ciezar po przeniesieniu');
     app.querySelectorAll('.dzis-k').length === 1 && app.querySelectorAll('.st-w').length === 3 && app.querySelectorAll('.d7').length === 7);
   test('Dzis: plakaty w kolejnosci dni tygodnia, poniedzialek wolny', app.querySelectorAll('.plakat').map(x => x.dataset.poz).join('') === '0123456' && app.querySelectorAll('.plakat')[0].classList.contains('wolne')
     && app.querySelectorAll('.plakat').filter(x => x.classList.contains('sila')).length === 3);
+  test('Dzis: sroda i piatek wolne, niedziela z joga i testem zakresow', [0, 2, 4].every(i => app.querySelectorAll('.plakat')[i].classList.contains('wolne'))
+    && app.querySelectorAll('.plakat').filter(x => x.classList.contains('dom')).length === 0
+    && app.querySelectorAll('.plakat')[6].classList.contains('joga') && app.querySelectorAll('.plakat')[6].textContent.includes('test zakresów'));
+  // Niedziela: test zakresow na ekranie jogi, zapis pod kluczem niedzieli.
+  S4.view = '#/mobilnosc'; B4.render();
+  const paneleZ = app.querySelectorAll('.zakres');
+  test('joga ma blok testu zakresow z czterema pozycjami', paneleZ.length === 4 && app.textContent.includes('Test zakresów') && app.textContent.includes('0/4'));
+  paneleZ[0].querySelectorAll('.zoc')[1].click();
+  test('ocena w tescie zapisuje sie pod niedziela i liczy w bloku', !!B4.zakresGet(1, 'nd', 'q1') && B4.zakresGet(1, 'nd', 'q1').o === 1 && app.textContent.includes('1/4')
+    && !B4.sesjaKompletna('D', 1));
+  B4.zakresSet(1, 'nd', 'q1', null);
+  S4.view = '#/rozciaganie/sr'; B4.render();
+  test('stary adres rozciagania otwiera niedzielna joge z testem', app.textContent.includes('Joga') && app.querySelectorAll('.zakres').length === 4);
+  // Scena na pozycji rozciagania: etykieta, Start z czasem, figurka z planu.
+  for (const k of Object.keys(S4.log)) delete S4.log[k];
+  D.C.items.filter(x => !x.rozc).forEach(x => { const pl = B4.plannedOf(x, 1, 'C'); for (let i = 0; i < pl.sets; i++) B4.logSet(1, 'C', x.n, i, { r: pl.target, kg: pl.kg, pr: pl.target, pk: pl.planKg }); });
+  S4.view = '#/d/C'; B4.render();
+  const scR = app.querySelector('.scena');
+  test('scena po ostatnim cwiczeniu przechodzi do rozciagania', scR.querySelector('.sc-nazwa').textContent === rozcDnia('C')[0].name && scR.querySelector('.sc-seria').textContent.includes('rozciąganie na koniec')
+    && timer.querySelector('.ak-gl').textContent.includes('Start · 1 min') && scR.querySelector('.sc-fig').innerHTML.includes('<svg class="fig"'));
+  test('kolejka ma etykiete rozciagania przed pierwsza pozycja', app.querySelectorAll('.ss-et').some(x => x.textContent.includes('rozciąganie')));
+  for (const k of Object.keys(S4.log)) delete S4.log[k];
   S4.view = '#/d/A'; B4.render();
   const karty = app.querySelectorAll('.ex');
   test('sesja: kazda karta ma swiatla serii i znaczek celu', karty.length === D.A.items.length && karty.every(k => k.querySelectorAll('.swiatla').length === 1 && k.querySelectorAll('.cele').length === 1));
@@ -1591,7 +1622,7 @@ console.log('Ciezar po przeniesieniu');
   test('rundy maja przycisk minutnika przy kazdej serii', kartaWorka.querySelectorAll('.sstart').length === 3 && kartaWorka.textContent.includes('min'));
   test('sesja bez suwakow', app.querySelectorAll('.suwak').length === 0);
   S4.view = '#/plan'; B4.render();
-  test('Plan: fazy cyklu, szesc dni i zasady', app.querySelectorAll('.fz').length === 5 && app.querySelectorAll('.pl-dz').length === 6
+  test('Plan: fazy cyklu, cztery dni i zasady', app.querySelectorAll('.fz').length === 5 && app.querySelectorAll('.pl-dz').length === 4 && app.textContent.includes('Rozciąganie na koniec')
     && app.textContent.includes('Trzy stawy') && app.textContent.includes('Worek'));
   test('zakladka Plan jest aktywna', timer.querySelectorAll('.tab').find(t => t.classList.contains('on')).textContent.includes('Plan'));
   S4.view = '#/postep'; B4.render();
