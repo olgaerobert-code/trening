@@ -130,7 +130,7 @@ weeks = {
 warmup = {
   'ramp': {'steps': ['Gryf 2 × 8', '50% × 5', '70% × 3', '85% × 2', 'Ciężar roboczy'],
            'lifts': [{'lift': 'bench', 'name': 'Wyciskanie leżąc'}, {'lift': 'front', 'name': 'Front squat'}, {'lift': 'dl', 'name': 'Martwy ciąg'}]},
-  'skip': ['Rozciągania statycznego przed sztangą — zostaje na środę, piątek i niedzielę.',
+  'skip': ['Rozciągania statycznego przed sztangą — zostaje na koniec treningu i na niedzielę.',
            'Długiego rolowania — 1–2 minuty na miejsce, które naprawdę tego potrzebuje, wystarczą.',
            'Krążeń bioder, skrętów kolana i pracy w końcowych zakresach.',
            'Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć.'],
@@ -163,12 +163,11 @@ warmup = {
 
 rules = [
   {'heading': 'Układ tygodnia', 'lines': [
-    'Wtorek — Dzień A: GÓRA i kolana. Wyciskanie, przysiad bułgarski, goblet z piętami w górze, Nordic, na koniec worek.',
-    'Środa — rozciąganie i test zakresów w domu, ~17 min.',
-    'Czwartek — Dzień B: BIODRA i kostki, bez sztangi. Skrzynia, ciąg jednonóż, kopenhaski, przysiad hiszpański, łydka i strzałkowe, na koniec worek.',
-    'Piątek — rozciąganie i test zakresów, to samo co w środę.',
-    'Sobota — Dzień C: DÓŁ ze sztangą. Front squat, martwy ciąg, łydki, spacer farmera.',
-    'Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas.',
+    'Trzy treningi i niedziela. Poniedziałek, środa i piątek są wolne — rozciąganie nie ma osobnych dni, kończy każdy trening.',
+    'Wtorek — Dzień A: GÓRA i kolana. Wyciskanie, przysiad bułgarski, goblet z piętami w górze, Nordic, worek, na koniec rozciąganie.',
+    'Czwartek — Dzień B: BIODRA i kostki, bez sztangi. Skrzynia, ciąg jednonóż, kopenhaski, przysiad hiszpański, łydka i strzałkowe, worek, na koniec rozciąganie.',
+    'Sobota — Dzień C: DÓŁ ze sztangą. Front squat, martwy ciąg, łydki, spacer farmera, na koniec rozciąganie.',
+    'Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas, a po niej test zakresów (~8 min).',
     'Boje stoją tam, gdzie zawsze: wyciskanie we wtorek, przysiad i ciąg w sobotę. Czwartek jest bez sztangi.',
     'Sprzęt: sztanga ze stojakiem, ławka, hantle, drążek, gumy (długa i mini), skrzynia albo stopień, worek. Żadnych maszyn.']},
   {'heading': 'Trzy stawy', 'lines': [
@@ -184,8 +183,15 @@ rules = [
     'Skręt zawsze ze stopy i biodra — pięta tylnej nogi odrywa się i obraca. Stopa przyklejona do podłogi przy ciosie to skręt w kolanie.',
     'Rękawice albo owijki. Nadgarstek prosto, uderzasz dwiema pierwszymi kostkami.',
     'Aplikacja odlicza rundę i przerwę sama: gong na start i koniec, stuknięcie 10 s przed końcem.']},
+  {'heading': 'Rozciąganie na koniec', 'lines': [
+    'Każdy trening kończy się dwiema–trzema pozycjami statycznymi, razem 4–6 minut. Scena prowadzi je jak serie na czas: 5 s na ustawienie, trzymanie, zmiana strony — bez przerw między pozycjami.',
+    'Wtorek: zginacz biodra i łydka. Czwartek: pośladek i przywodziciele. Sobota: tył uda, zginacz biodra i łydka.',
+    'Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.',
+    'Bez sprężynowania. Wejdź do 6–7 na 10 i trzymaj; z każdym wydechem pozwól sobie zejść odrobinę dalej.',
+    'Nie przed sztangą — dlatego stoi na samym końcu sesji, po worku.',
+    'Dłuższa praca nad zakresem i test zakresów są w niedzielę, razem z jogą.']},
   {'heading': 'Czas trwania', 'lines': [
-    'Każdy dzień: ~50–55 min pracy plus 6–8 min rozgrzewki — mieści się w godzinie.',
+    'Każdy dzień: 6–8 min rozgrzewki, ~50 min pracy i 4–6 min rozciągania na koniec — razem około godziny.',
     'PRZERWY: przysiad i ciąg 3 min. Wyciskanie idzie w parze z piszczelowym: 90 s po parze (od bloku 3: 2 min). Superserie bez przerwy w środku; po parze 90 s przy bułgarskim, 75 s przy skrzyni i goblecie, 60 s przy lżejszych, 45 s przy kostkach.',
     'Timer przerwy rusza sam po odhaczeniu serii. Trzymaj się go — od tego zależy, czy worek zmieści się w godzinie.',
     'Jeśli brakuje czasu, tniesz w kolejności: jedna runda na worku → trzecia seria ostatniej superserii → trzecia seria środkowej superserii.',
@@ -223,7 +229,8 @@ rules = [
     'Jeśli nie — powtarzasz ten sam tydzień z tym samym ciężarem. To nie jest opóźnienie planu.']},
 ]
 
-# Środa i piątek (dni bez siłowni): rozciąganie i test zakresów w domu. Te same pozycje oba dni.
+# Test zakresów jest w niedzielę, na ekranie jogi. Rozciąganie nie ma osobnych dni —
+# jego pozycje kończą treningi A, B i C (niżej, ROZC_NA_KONIEC).
 def r(id_, name, dose, sec, steps, blad, note, film, **extra):
     return {'id': id_, 'name': name, 'dose': dose, 'sec': sec, 'steps': steps, 'blad': blad, 'note': note, 'film': film, **extra}
 
@@ -234,7 +241,7 @@ def z(id_, name, dose, sec, poziomy, steps, blad, note, film):
     return r(id_, name, dose, sec, steps, blad, note, film, poziomy=poziomy)
 
 ZAKRESY = {
-  'title': 'Test zakresów', 'minutes': 5,
+  'title': 'Test zakresów', 'minutes': 8,
   'why': 'Głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną po każdej pozycji. Ostatnie poziomy to już aktywna kontrola w zakresie, nie samo trzymanie.',
   'oceny': [
     {'v': 0, 'k': 'spokojnie', 'opis': 'lekkie rozciąganie albo nic'},
@@ -245,7 +252,7 @@ ZAKRESY = {
     'Tydzień 1 to test: w każdej pozycji zaczynasz od poziomu 1 i idziesz w górę tylko tak daleko, jak ocena zostaje 0 albo 1. Zapisujesz poziom, na którym kończysz.',
     'Ocena: 0 — spokojnie, 1 — ciągnie w mięśniu (tak ma być), 2 — coś w stawie, ucisk albo kłucie. Przy 2 wychodzisz z pozycji od razu.',
     'Zasada 24 godzin: jeśli dzień po kolano i biodro zachowują się normalnie — bez większej sztywności, bez puchnięcia — zostajesz na poziomie albo idziesz o jeden wyżej. Jeśli coś się odezwało, następnym razem poziom niżej, a nie rezygnacja.',
-    'Najwyżej jeden poziom w górę na tydzień w każdej pozycji. Aplikacja podpowiada poziom z ostatnich zapisów: po dwóch spokojnych razach — o jeden wyżej, po ocenie 2 — o jeden niżej.',
+    'Test robisz raz w tygodniu, w niedzielę po jodze. Aplikacja podpowiada poziom z ostatnich zapisów: po dwóch spokojnych niedzielach na tym samym poziomie — o jeden wyżej, po ocenie 2 — o jeden niżej.',
     'Końcowe zakresy są tylko tutaj. W jodze i przed sztangą dalej ich nie ma, a plan na siłowni zostaje bez zmian, dopóki test nie pokaże, jak kolana na to reagują.',
     'Lotos, pełny gołąb i siad między piętami nie wracają — łączą końcowy zakres ze skrętem w kolanie i do niczego nie są potrzebne.',
   ],
@@ -305,77 +312,39 @@ ZAKRESY = {
 }
 
 ROZCIAGANIE = {
-  'key': 'R', 'title': 'Rozciąganie', 'minutes': 17,
-  'dni': [{'k': 'sr', 'dzien': 3, 'nazwa': 'Środa', 'skrot': 'Śr'},
-          {'k': 'pt', 'dzien': 5, 'nazwa': 'Piątek', 'skrot': 'Pt'}],
-  'intro': 'Kwadrans w domu, najlepiej wieczorem po pracy. Najpierw pięć pozycji rozciągania statycznego: wchodzisz łagodnie, oddychasz i trzymasz. Przód bioder, tył i wewnętrzna strona uda, pośladek i łydki — to, co siedzenie skraca, a przysiad i ciąg potrzebują długie. Potem test zakresów: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną zapisywaną w aplikacji. Na koniec równowaga na jednej nodze i oddech. Gdy klęczysz, kolano leży na kocu. Potrzebne: mata, koc, poduszka, pasek albo ręcznik, ściana, framuga i krzesło.',
-  'rules': [
-    'Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.',
-    'Bez sprężynowania. Wejdź do 6–7 na 10 i trzymaj; z każdym wydechem pozwól sobie zejść odrobinę dalej.',
-    'Liczy się częstotliwość: dwa razy w tygodniu po kwadransie plus niedzielna joga dają więcej niż jedna długa sesja.',
-    'Nie przed sztangą. Rozciąganie statyczne zostaje na dni bez treningu siłowego.',
-    'Zginacz biodra możesz dorzucić w każdy dzień pracy — 2 minuty po wstaniu od biurka.',
-  ],
-  'items': [
-    r('r1', 'Zginacz biodra w półklęku', '2 × 45 s / stronę', 45,
-      ['Półklęk, tylne kolano na złożonym kocu, przednia stopa płasko, oba kolana zgięte pod kątem prostym.',
-       'Napnij pośladek tylnej nogi i podwiń miednicę, jakbyś chował kość ogonową pod siebie.',
-       'Dopiero teraz przesuń biodra 2–3 cm do przodu — rozciąganie pojawia się z przodu biodra tylnej nogi.',
-       'Tułów pionowo, żebra w dół. Trzymaj 45 s, zmień stronę, potem drugi raz na obie.'],
-      'Pchanie bioder daleko w przód z wygiętymi lędźwiami. Wtedy ciągnie w krzyżu, a przód biodra zostaje taki, jaki był.',
-      'Przód biodra skrócony po dniu siedzenia nie pozwala domknąć bioder w górze ciągu i hip thrustu — dłuższy daje pełny wyprost bez wyginania lędźwi.',
-      'half kneeling hip flexor stretch posterior pelvic tilt'),
-    r('r2', 'Tył uda z paskiem leżąc', '60 s / nogę', 60,
-      ['Połóż się na plecach, jedna noga prosta na podłodze.',
-       'Pasek albo ręcznik na śródstopie drugiej nogi, unieś ją w górę.',
-       'Przyciągaj nogę paskiem, aż poczujesz rozciąganie w środku tyłu uda. Kolano lekko ugięte, stopa luźno.',
-       'Lędźwie i noga na podłodze leżą płasko. Trzymaj 60 s, zmień nogę.'],
-      'Ciągnięcie z prostym, zablokowanym kolanem — wtedy ciągnie pod kolanem, a nie w udzie. Ugnij kolano o kilka stopni.',
-      'Dłuższy tył uda to głębszy zawias biodrowy w ciągu jednonóż i rumuńskim bez zaokrąglania pleców.',
-      'supine hamstring stretch with strap'),
-    r('r3', 'Przywodziciele: nogi na ścianie w rozkroku', '90 s', 90,
-      ['Połóż się na plecach pośladkami jak najbliżej ściany, proste nogi oparte o ścianę.',
-       'Pozwól nogom powoli rozjechać się na boki w kształt litery V.',
-       'Nie dociskaj — ciężar nóg robi wszystko. Kolana proste, ale miękkie.',
-       'Zostań 90 s. Wyjście: złącz nogi rękami, zegnij kolana, przetocz się na bok.'],
-      'Dociskanie ud dłońmi. To rozciąganie bierne — grawitacja wystarczy.',
-      'Przywodziciele puszczają bez żadnego obciążenia kolan. Dłuższe dają swobodniejszy przysiad z kolanami w linii stóp.',
-      'legs up the wall straddle adductor stretch'),
-    r('r4', 'Pośladek: kolano do przeciwnego barku', '45 s / stronę', 45,
-      ['Leżysz na plecach, obie nogi proste.',
-       'Zegnij prawą nogę i obejmij kolano obiema dłońmi.',
-       'Prowadź kolano w stronę lewego barku, aż poczujesz rozciąganie w prawym pośladku. Stopa luźno.',
-       'Lewa noga i miednica leżą na podłodze. Trzymaj 45 s, zmień stronę.'],
-      'Ciągnięcie za stopę zamiast za kolano. Trzymasz kolano — wtedy zostaje w jednej linii z udem.',
-      'Pośladek i tył biodra bez rotacji w kolanie — bezpieczny zamiennik gołębia, którego w tym planie nie ma.',
-      'supine knee to opposite shoulder glute stretch'),
-    r('r5', 'Łydka przy ścianie: prosta i ugięta noga', '30 s + 30 s / nogę', 30,
-      ['Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, palce prosto do ściany.',
-       'Tylne kolano proste — przenieś biodra do przodu, aż poczujesz łydkę. Trzymaj 30 s.',
-       'Teraz ugnij tylne kolano, pięta dalej na podłodze — rozciąganie schodzi niżej, nad piętę. Trzymaj 30 s.',
-       'Zmień nogę.'],
-      'Pięta odrywa się od podłogi albo palce uciekają na zewnątrz. Stopa prosto, pięta przyklejona.',
-      'Zgięcie grzbietowe stopy decyduje, jak nisko zejdziesz w front squacie z piętami na podłodze i kolanem w osi.',
-      'wall calf stretch straight and bent knee soleus'),
-    r('r7', 'Równowaga na jednej nodze', '30 s / nogę', 30,
-      ['Stań boso przy ścianie albo krześle, żeby było czego się złapać.',
-       'Unieś jedną stopę, kolano nogi podporowej lekko ugięte, miednica poziomo.',
-       'Stopa trzyma trzy punkty: piętę, podstawę dużego i małego palca. Trzymaj 30 s.',
-       'Gdy stoisz spokojnie: zamknij oczy. Potem stań na złożonym ręczniku. Zmień nogę.'],
-      'Zaciskanie palców i blokowanie kolana. Kostka ma drobno pracować — o to właśnie chodzi.',
-      'Równowaga to najlepiej zbadany sposób na stabilną kostkę: uczy ją łapać stopę, zanim zdążysz o tym pomyśleć. Ta sama robota co w ciągu jednonóż, tylko bez ciężaru.',
-      'single leg balance eyes closed ankle proprioception', naKoniec=True),
-    r('r6', 'Oddech z łydkami na krześle', '1 min', 60,
-      ['Połóż się na plecach, łydki na siedzisku krzesła albo kanapy — biodra i kolana zgięte pod kątem prostym.',
-       'Dłonie na dolnych żebrach.',
-       'Wdech nosem w boki żeber, długi wydech ustami — żebra schodzą w dół, lędźwie miękko opadają do podłogi.',
-       'Zostań minutę, 5–6 spokojnych oddechów.'],
-      'Oddychanie górą klatki z unoszeniem barków. Ruch ma być w dolnych żebrach i brzuchu.',
-      'Po rozciąganiu przód bioder i lędźwie puszczają, a miednica wraca do neutralnego ustawienia — tego samego, od którego zaczynasz przysiad.',
-      '90 90 breathing feet on chair', naKoniec=True),
-  ],
+  'key': 'R', 'title': 'Rozciąganie', 'minutes': 8,
+  # wJodze: nie jest osobnym dniem tygodnia — blok testu stoi na ekranie niedzielnej jogi.
+  'wJodze': True,
+  'dni': [{'k': 'nd', 'dzien': 0, 'nazwa': 'Niedziela', 'skrot': 'Nd'}],
+  'intro': 'Test zakresów po jodze: cztery pozycje, w każdej poziom i ocena.',
+  'rules': [],
+  'items': [],
   'zakresy': ZAKRESY,
 }
+
+# Rozciąganie na koniec treningu: pozycje statyczne jako serie na czas, bez przerw.
+# Dopisane NA KOŃCU list A, B, C — numery wcześniejszych ćwiczeń (a z nimi dziennik) zostają.
+def rozc(n, id_, name, scheme, fig, note):
+    d = it(n, id_, name, scheme, 'łagodnie, 6–7 na 10', '—', note, ['rozciaganie'])
+    d['rozc'] = True
+    d['fig'] = fig
+    return d
+
+ZGINACZ = ('Zginacz biodra w półklęku', '1 × 45 s / stronę', 'polklek',
+  'Półklęk, tylne kolano na złożonym kocu albo macie, przednia stopa płasko. Napnij pośladek tylnej nogi i podwiń miednicę, dopiero potem przesuń biodra 2–3 cm do przodu — ciągnie z przodu biodra tylnej nogi. Tułów pionowo, żebra w dół. Nie pchaj bioder daleko w przód z wygiętymi lędźwiami.')
+LYDKA = ('Łydka przy ścianie', '1 × 45 s / stronę', 'r5',
+  'Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, stopa prosto. Pierwszą połowę czasu tylne kolano proste, drugą lekko ugięte — rozciąganie schodzi niżej. Pięta nie odrywa się od podłogi.')
+POSLADEK = ('Pośladek: kolano do przeciwnego barku', '1 × 45 s / stronę', 'r4',
+  'Leżysz na plecach, jedna noga prosto. Kolano drugiej przyciągasz oburącz w stronę przeciwnego barku, aż poczujesz rozciąganie w pośladku. Miednica i oba barki zostają na podłodze.')
+PRZYWODZICIELE = ('Przywodziciele: nogi na ścianie w rozkroku', '1 × 60 s', 'r3',
+  'Leżysz na plecach z pośladkami blisko ściany, nogi oparte o ścianę. Pozwól im rozejść się na boki pod własnym ciężarem — ciągnie po wewnętrznej stronie ud. Kolana lekko ugięte, lędźwie na podłodze. Nie dociskaj nóg rękami.')
+TYL_UDA = ('Tył uda z paskiem leżąc', '1 × 60 s / stronę', 'r2',
+  'Leżysz na plecach, pasek albo ręcznik na stopie. Unieś nogę i przyciągaj ją paskiem, aż poczujesz rozciąganie w środku tyłu uda. Kolano lekko ugięte, stopa luźno, druga noga prosto na podłodze. Miednica nie odrywa się od podłogi.')
+ROZC_NA_KONIEC = {'A': [ZGINACZ, LYDKA], 'B': [POSLADEK, PRZYWODZICIELE], 'C': [TYL_UDA, ZGINACZ, LYDKA]}
+for klucz, lista in (('A', A), ('B', B), ('C', C)):
+    for poz in ROZC_NA_KONIEC[klucz]:
+        n = max(x['n'] for x in lista) + 1
+        lista.append(rozc(n, f'c4{klucz.lower()}{n}', *poz))
 
 # Joga bez zmian w pozycjach. Ciężki dzień wypada teraz w sobotę, tuż przed nią.
 import copy
@@ -387,7 +356,7 @@ assert any('Po ciężkiej sobocie' in l for l in JOGA_C3['rules'])
 plan = {
   'cykl': 4,
   'title': 'Cykl 4 · kolana, kostki, biodra',
-  'schedule': 'wt A · śr rozciąganie · czw B · pt rozciąganie · sob C · nd joga',
+  'schedule': 'wt A · czw B · sob C · nd joga i test zakresów',
   'bar': stary['bar'], 'plates': stary['plates'],
   # Wartości awaryjne — na urządzeniu z cyklem 2 maksy przechodzą z niego (niżej).
   'e1rm': dict(stary['e1rm']),
@@ -395,9 +364,9 @@ plan = {
   'weeks': weeks,
   'days': {
     # `dzien` = getDay (0 niedziela): aplikacja bierze z niego Dziś, pasek tygodnia i pominięcia.
-    'A': {'key': 'A', 'title': 'GÓRA · wyciskanie i kolana', 'day': 'Wtorek', 'dzien': 2, 'minutes': 55, 'items': A},
-    'B': {'key': 'B', 'title': 'BIODRA · kostki i jednonóż, bez sztangi', 'day': 'Czwartek', 'dzien': 4, 'minutes': 58, 'items': B},
-    'C': {'key': 'C', 'title': 'DÓŁ · front squat i martwy ciąg', 'day': 'Sobota', 'dzien': 6, 'minutes': 55, 'items': C},
+    'A': {'key': 'A', 'title': 'GÓRA · wyciskanie i kolana', 'day': 'Wtorek', 'dzien': 2, 'minutes': 58, 'items': A},
+    'B': {'key': 'B', 'title': 'BIODRA · kostki i jednonóż, bez sztangi', 'day': 'Czwartek', 'dzien': 4, 'minutes': 60, 'items': B},
+    'C': {'key': 'C', 'title': 'DÓŁ · front squat i martwy ciąg', 'day': 'Sobota', 'dzien': 6, 'minutes': 58, 'items': C},
   },
   'warmup': warmup,
   'rules': rules,
@@ -407,4 +376,4 @@ plan = {
   'tydzien12Tekst': 'Bez testu maksa. Front squat: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Stawy: porównaj z tygodniem 2 ciężary w bułgarskim, na skrzyni, w goblecie i przysiadzie hiszpańskim, czas w planku kopenhaskim i poziomy testu zakresów.',
 }
 json.dump(plan, open(os.path.join(ROOT, 'plan.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-print('plan.json: cykl', plan['cykl'], '·', sum(len(d['items']) for d in plan['days'].values()), 'ćwiczeń ·', len(ROZCIAGANIE['items']), 'pozycji rozciągania')
+print('plan.json: cykl', plan['cykl'], '·', sum(len(d['items']) for d in plan['days'].values()), 'pozycji w treningach, w tym', sum(1 for d in plan['days'].values() for x in d['items'] if x.get('rozc')), 'rozciągania')

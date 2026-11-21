@@ -1,7 +1,7 @@
 {
  "cykl": 4,
  "title": "Cykl 4 · kolana, kostki, biodra",
- "schedule": "wt A · śr rozciąganie · czw B · pt rozciąganie · sob C · nd joga",
+ "schedule": "wt A · czw B · sob C · nd joga i test zakresów",
  "bar": 20,
  "plates": [
   25,
@@ -250,7 +250,7 @@
    "title": "GÓRA · wyciskanie i kolana",
    "day": "Wtorek",
    "dzien": 2,
-   "minutes": 55,
+   "minutes": 58,
    "items": [
     {
      "n": 1,
@@ -452,6 +452,38 @@
       "biodro",
       "kondycja"
      ]
+    },
+    {
+     "n": 8,
+     "id": "c4a8",
+     "name": "Zginacz biodra w półklęku",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Półklęk, tylne kolano na złożonym kocu albo macie, przednia stopa płasko. Napnij pośladek tylnej nogi i podwiń miednicę, dopiero potem przesuń biodra 2–3 cm do przodu — ciągnie z przodu biodra tylnej nogi. Tułów pionowo, żebra w dół. Nie pchaj bioder daleko w przód z wygiętymi lędźwiami.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "polklek"
+    },
+    {
+     "n": 9,
+     "id": "c4a9",
+     "name": "Łydka przy ścianie",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, stopa prosto. Pierwszą połowę czasu tylne kolano proste, drugą lekko ugięte — rozciąganie schodzi niżej. Pięta nie odrywa się od podłogi.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r5"
     }
    ]
   },
@@ -460,7 +492,7 @@
    "title": "BIODRA · kostki i jednonóż, bez sztangi",
    "day": "Czwartek",
    "dzien": 4,
-   "minutes": 58,
+   "minutes": 60,
    "items": [
     {
      "n": 1,
@@ -732,6 +764,38 @@
       "biodro",
       "kondycja"
      ]
+    },
+    {
+     "n": 10,
+     "id": "c4b10",
+     "name": "Pośladek: kolano do przeciwnego barku",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Leżysz na plecach, jedna noga prosto. Kolano drugiej przyciągasz oburącz w stronę przeciwnego barku, aż poczujesz rozciąganie w pośladku. Miednica i oba barki zostają na podłodze.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r4"
+    },
+    {
+     "n": 11,
+     "id": "c4b11",
+     "name": "Przywodziciele: nogi na ścianie w rozkroku",
+     "superset": null,
+     "scheme": "1 × 60 s",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Leżysz na plecach z pośladkami blisko ściany, nogi oparte o ścianę. Pozwól im rozejść się na boki pod własnym ciężarem — ciągnie po wewnętrznej stronie ud. Kolana lekko ugięte, lędźwie na podłodze. Nie dociskaj nóg rękami.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r3"
     }
    ]
   },
@@ -740,7 +804,7 @@
    "title": "DÓŁ · front squat i martwy ciąg",
    "day": "Sobota",
    "dzien": 6,
-   "minutes": 55,
+   "minutes": 58,
    "items": [
     {
      "n": 1,
@@ -843,6 +907,54 @@
       "tulow"
      ],
      "kgStart": 24
+    },
+    {
+     "n": 5,
+     "id": "c4c5",
+     "name": "Tył uda z paskiem leżąc",
+     "superset": null,
+     "scheme": "1 × 60 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Leżysz na plecach, pasek albo ręcznik na stopie. Unieś nogę i przyciągaj ją paskiem, aż poczujesz rozciąganie w środku tyłu uda. Kolano lekko ugięte, stopa luźno, druga noga prosto na podłodze. Miednica nie odrywa się od podłogi.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r2"
+    },
+    {
+     "n": 6,
+     "id": "c4c6",
+     "name": "Zginacz biodra w półklęku",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Półklęk, tylne kolano na złożonym kocu albo macie, przednia stopa płasko. Napnij pośladek tylnej nogi i podwiń miednicę, dopiero potem przesuń biodra 2–3 cm do przodu — ciągnie z przodu biodra tylnej nogi. Tułów pionowo, żebra w dół. Nie pchaj bioder daleko w przód z wygiętymi lędźwiami.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "polklek"
+    },
+    {
+     "n": 7,
+     "id": "c4c7",
+     "name": "Łydka przy ścianie",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, stopa prosto. Pierwszą połowę czasu tylne kolano proste, drugą lekko ugięte — rozciąganie schodzi niżej. Pięta nie odrywa się od podłogi.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r5"
     }
    ]
   }
@@ -872,7 +984,7 @@
    ]
   },
   "skip": [
-   "Rozciągania statycznego przed sztangą — zostaje na środę, piątek i niedzielę.",
+   "Rozciągania statycznego przed sztangą — zostaje na koniec treningu i na niedzielę.",
    "Długiego rolowania — 1–2 minuty na miejsce, które naprawdę tego potrzebuje, wystarczą.",
    "Krążeń bioder, skrętów kolana i pracy w końcowych zakresach.",
    "Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć."
@@ -993,12 +1105,11 @@
   {
    "heading": "Układ tygodnia",
    "lines": [
-    "Wtorek — Dzień A: GÓRA i kolana. Wyciskanie, przysiad bułgarski, goblet z piętami w górze, Nordic, na koniec worek.",
-    "Środa — rozciąganie i test zakresów w domu, ~17 min.",
-    "Czwartek — Dzień B: BIODRA i kostki, bez sztangi. Skrzynia, ciąg jednonóż, kopenhaski, przysiad hiszpański, łydka i strzałkowe, na koniec worek.",
-    "Piątek — rozciąganie i test zakresów, to samo co w środę.",
-    "Sobota — Dzień C: DÓŁ ze sztangą. Front squat, martwy ciąg, łydki, spacer farmera.",
-    "Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas.",
+    "Trzy treningi i niedziela. Poniedziałek, środa i piątek są wolne — rozciąganie nie ma osobnych dni, kończy każdy trening.",
+    "Wtorek — Dzień A: GÓRA i kolana. Wyciskanie, przysiad bułgarski, goblet z piętami w górze, Nordic, worek, na koniec rozciąganie.",
+    "Czwartek — Dzień B: BIODRA i kostki, bez sztangi. Skrzynia, ciąg jednonóż, kopenhaski, przysiad hiszpański, łydka i strzałkowe, worek, na koniec rozciąganie.",
+    "Sobota — Dzień C: DÓŁ ze sztangą. Front squat, martwy ciąg, łydki, spacer farmera, na koniec rozciąganie.",
+    "Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas, a po niej test zakresów (~8 min).",
     "Boje stoją tam, gdzie zawsze: wyciskanie we wtorek, przysiad i ciąg w sobotę. Czwartek jest bez sztangi.",
     "Sprzęt: sztanga ze stojakiem, ławka, hantle, drążek, gumy (długa i mini), skrzynia albo stopień, worek. Żadnych maszyn."
    ]
@@ -1025,9 +1136,20 @@
    ]
   },
   {
+   "heading": "Rozciąganie na koniec",
+   "lines": [
+    "Każdy trening kończy się dwiema–trzema pozycjami statycznymi, razem 4–6 minut. Scena prowadzi je jak serie na czas: 5 s na ustawienie, trzymanie, zmiana strony — bez przerw między pozycjami.",
+    "Wtorek: zginacz biodra i łydka. Czwartek: pośladek i przywodziciele. Sobota: tył uda, zginacz biodra i łydka.",
+    "Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.",
+    "Bez sprężynowania. Wejdź do 6–7 na 10 i trzymaj; z każdym wydechem pozwól sobie zejść odrobinę dalej.",
+    "Nie przed sztangą — dlatego stoi na samym końcu sesji, po worku.",
+    "Dłuższa praca nad zakresem i test zakresów są w niedzielę, razem z jogą."
+   ]
+  },
+  {
    "heading": "Czas trwania",
    "lines": [
-    "Każdy dzień: ~50–55 min pracy plus 6–8 min rozgrzewki — mieści się w godzinie.",
+    "Każdy dzień: 6–8 min rozgrzewki, ~50 min pracy i 4–6 min rozciągania na koniec — razem około godziny.",
     "PRZERWY: przysiad i ciąg 3 min. Wyciskanie idzie w parze z piszczelowym: 90 s po parze (od bloku 3: 2 min). Superserie bez przerwy w środku; po parze 90 s przy bułgarskim, 75 s przy skrzyni i goblecie, 60 s przy lżejszych, 45 s przy kostkach.",
     "Timer przerwy rusza sam po odhaczeniu serii. Trzymaj się go — od tego zależy, czy worek zmieści się w godzinie.",
     "Jeśli brakuje czasu, tniesz w kolejności: jedna runda na worku → trzecia seria ostatniej superserii → trzecia seria środkowej superserii.",
@@ -1503,141 +1625,22 @@
  "rozciaganie": {
   "key": "R",
   "title": "Rozciąganie",
-  "minutes": 17,
+  "minutes": 8,
+  "wJodze": true,
   "dni": [
    {
-    "k": "sr",
-    "dzien": 3,
-    "nazwa": "Środa",
-    "skrot": "Śr"
-   },
-   {
-    "k": "pt",
-    "dzien": 5,
-    "nazwa": "Piątek",
-    "skrot": "Pt"
+    "k": "nd",
+    "dzien": 0,
+    "nazwa": "Niedziela",
+    "skrot": "Nd"
    }
   ],
-  "intro": "Kwadrans w domu, najlepiej wieczorem po pracy. Najpierw pięć pozycji rozciągania statycznego: wchodzisz łagodnie, oddychasz i trzymasz. Przód bioder, tył i wewnętrzna strona uda, pośladek i łydki — to, co siedzenie skraca, a przysiad i ciąg potrzebują długie. Potem test zakresów: głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną zapisywaną w aplikacji. Na koniec równowaga na jednej nodze i oddech. Gdy klęczysz, kolano leży na kocu. Potrzebne: mata, koc, poduszka, pasek albo ręcznik, ściana, framuga i krzesło.",
-  "rules": [
-   "Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.",
-   "Bez sprężynowania. Wejdź do 6–7 na 10 i trzymaj; z każdym wydechem pozwól sobie zejść odrobinę dalej.",
-   "Liczy się częstotliwość: dwa razy w tygodniu po kwadransie plus niedzielna joga dają więcej niż jedna długa sesja.",
-   "Nie przed sztangą. Rozciąganie statyczne zostaje na dni bez treningu siłowego.",
-   "Zginacz biodra możesz dorzucić w każdy dzień pracy — 2 minuty po wstaniu od biurka."
-  ],
-  "items": [
-   {
-    "id": "r1",
-    "name": "Zginacz biodra w półklęku",
-    "dose": "2 × 45 s / stronę",
-    "sec": 45,
-    "steps": [
-     "Półklęk, tylne kolano na złożonym kocu, przednia stopa płasko, oba kolana zgięte pod kątem prostym.",
-     "Napnij pośladek tylnej nogi i podwiń miednicę, jakbyś chował kość ogonową pod siebie.",
-     "Dopiero teraz przesuń biodra 2–3 cm do przodu — rozciąganie pojawia się z przodu biodra tylnej nogi.",
-     "Tułów pionowo, żebra w dół. Trzymaj 45 s, zmień stronę, potem drugi raz na obie."
-    ],
-    "blad": "Pchanie bioder daleko w przód z wygiętymi lędźwiami. Wtedy ciągnie w krzyżu, a przód biodra zostaje taki, jaki był.",
-    "note": "Przód biodra skrócony po dniu siedzenia nie pozwala domknąć bioder w górze ciągu i hip thrustu — dłuższy daje pełny wyprost bez wyginania lędźwi.",
-    "film": "half kneeling hip flexor stretch posterior pelvic tilt"
-   },
-   {
-    "id": "r2",
-    "name": "Tył uda z paskiem leżąc",
-    "dose": "60 s / nogę",
-    "sec": 60,
-    "steps": [
-     "Połóż się na plecach, jedna noga prosta na podłodze.",
-     "Pasek albo ręcznik na śródstopie drugiej nogi, unieś ją w górę.",
-     "Przyciągaj nogę paskiem, aż poczujesz rozciąganie w środku tyłu uda. Kolano lekko ugięte, stopa luźno.",
-     "Lędźwie i noga na podłodze leżą płasko. Trzymaj 60 s, zmień nogę."
-    ],
-    "blad": "Ciągnięcie z prostym, zablokowanym kolanem — wtedy ciągnie pod kolanem, a nie w udzie. Ugnij kolano o kilka stopni.",
-    "note": "Dłuższy tył uda to głębszy zawias biodrowy w ciągu jednonóż i rumuńskim bez zaokrąglania pleców.",
-    "film": "supine hamstring stretch with strap"
-   },
-   {
-    "id": "r3",
-    "name": "Przywodziciele: nogi na ścianie w rozkroku",
-    "dose": "90 s",
-    "sec": 90,
-    "steps": [
-     "Połóż się na plecach pośladkami jak najbliżej ściany, proste nogi oparte o ścianę.",
-     "Pozwól nogom powoli rozjechać się na boki w kształt litery V.",
-     "Nie dociskaj — ciężar nóg robi wszystko. Kolana proste, ale miękkie.",
-     "Zostań 90 s. Wyjście: złącz nogi rękami, zegnij kolana, przetocz się na bok."
-    ],
-    "blad": "Dociskanie ud dłońmi. To rozciąganie bierne — grawitacja wystarczy.",
-    "note": "Przywodziciele puszczają bez żadnego obciążenia kolan. Dłuższe dają swobodniejszy przysiad z kolanami w linii stóp.",
-    "film": "legs up the wall straddle adductor stretch"
-   },
-   {
-    "id": "r4",
-    "name": "Pośladek: kolano do przeciwnego barku",
-    "dose": "45 s / stronę",
-    "sec": 45,
-    "steps": [
-     "Leżysz na plecach, obie nogi proste.",
-     "Zegnij prawą nogę i obejmij kolano obiema dłońmi.",
-     "Prowadź kolano w stronę lewego barku, aż poczujesz rozciąganie w prawym pośladku. Stopa luźno.",
-     "Lewa noga i miednica leżą na podłodze. Trzymaj 45 s, zmień stronę."
-    ],
-    "blad": "Ciągnięcie za stopę zamiast za kolano. Trzymasz kolano — wtedy zostaje w jednej linii z udem.",
-    "note": "Pośladek i tył biodra bez rotacji w kolanie — bezpieczny zamiennik gołębia, którego w tym planie nie ma.",
-    "film": "supine knee to opposite shoulder glute stretch"
-   },
-   {
-    "id": "r5",
-    "name": "Łydka przy ścianie: prosta i ugięta noga",
-    "dose": "30 s + 30 s / nogę",
-    "sec": 30,
-    "steps": [
-     "Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, palce prosto do ściany.",
-     "Tylne kolano proste — przenieś biodra do przodu, aż poczujesz łydkę. Trzymaj 30 s.",
-     "Teraz ugnij tylne kolano, pięta dalej na podłodze — rozciąganie schodzi niżej, nad piętę. Trzymaj 30 s.",
-     "Zmień nogę."
-    ],
-    "blad": "Pięta odrywa się od podłogi albo palce uciekają na zewnątrz. Stopa prosto, pięta przyklejona.",
-    "note": "Zgięcie grzbietowe stopy decyduje, jak nisko zejdziesz w front squacie z piętami na podłodze i kolanem w osi.",
-    "film": "wall calf stretch straight and bent knee soleus"
-   },
-   {
-    "id": "r7",
-    "name": "Równowaga na jednej nodze",
-    "dose": "30 s / nogę",
-    "sec": 30,
-    "steps": [
-     "Stań boso przy ścianie albo krześle, żeby było czego się złapać.",
-     "Unieś jedną stopę, kolano nogi podporowej lekko ugięte, miednica poziomo.",
-     "Stopa trzyma trzy punkty: piętę, podstawę dużego i małego palca. Trzymaj 30 s.",
-     "Gdy stoisz spokojnie: zamknij oczy. Potem stań na złożonym ręczniku. Zmień nogę."
-    ],
-    "blad": "Zaciskanie palców i blokowanie kolana. Kostka ma drobno pracować — o to właśnie chodzi.",
-    "note": "Równowaga to najlepiej zbadany sposób na stabilną kostkę: uczy ją łapać stopę, zanim zdążysz o tym pomyśleć. Ta sama robota co w ciągu jednonóż, tylko bez ciężaru.",
-    "film": "single leg balance eyes closed ankle proprioception",
-    "naKoniec": true
-   },
-   {
-    "id": "r6",
-    "name": "Oddech z łydkami na krześle",
-    "dose": "1 min",
-    "sec": 60,
-    "steps": [
-     "Połóż się na plecach, łydki na siedzisku krzesła albo kanapy — biodra i kolana zgięte pod kątem prostym.",
-     "Dłonie na dolnych żebrach.",
-     "Wdech nosem w boki żeber, długi wydech ustami — żebra schodzą w dół, lędźwie miękko opadają do podłogi.",
-     "Zostań minutę, 5–6 spokojnych oddechów."
-    ],
-    "blad": "Oddychanie górą klatki z unoszeniem barków. Ruch ma być w dolnych żebrach i brzuchu.",
-    "note": "Po rozciąganiu przód bioder i lędźwie puszczają, a miednica wraca do neutralnego ustawienia — tego samego, od którego zaczynasz przysiad.",
-    "film": "90 90 breathing feet on chair",
-    "naKoniec": true
-   }
-  ],
+  "intro": "Test zakresów po jodze: cztery pozycje, w każdej poziom i ocena.",
+  "rules": [],
+  "items": [],
   "zakresy": {
    "title": "Test zakresów",
-   "minutes": 5,
+   "minutes": 8,
    "why": "Głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną po każdej pozycji. Ostatnie poziomy to już aktywna kontrola w zakresie, nie samo trzymanie.",
    "oceny": [
     {
@@ -1660,7 +1663,7 @@
     "Tydzień 1 to test: w każdej pozycji zaczynasz od poziomu 1 i idziesz w górę tylko tak daleko, jak ocena zostaje 0 albo 1. Zapisujesz poziom, na którym kończysz.",
     "Ocena: 0 — spokojnie, 1 — ciągnie w mięśniu (tak ma być), 2 — coś w stawie, ucisk albo kłucie. Przy 2 wychodzisz z pozycji od razu.",
     "Zasada 24 godzin: jeśli dzień po kolano i biodro zachowują się normalnie — bez większej sztywności, bez puchnięcia — zostajesz na poziomie albo idziesz o jeden wyżej. Jeśli coś się odezwało, następnym razem poziom niżej, a nie rezygnacja.",
-    "Najwyżej jeden poziom w górę na tydzień w każdej pozycji. Aplikacja podpowiada poziom z ostatnich zapisów: po dwóch spokojnych razach — o jeden wyżej, po ocenie 2 — o jeden niżej.",
+    "Test robisz raz w tygodniu, w niedzielę po jodze. Aplikacja podpowiada poziom z ostatnich zapisów: po dwóch spokojnych niedzielach na tym samym poziomie — o jeden wyżej, po ocenie 2 — o jeden niżej.",
     "Końcowe zakresy są tylko tutaj. W jodze i przed sztangą dalej ich nie ma, a plan na siłowni zostaje bez zmian, dopóki test nie pokaże, jak kolana na to reagują.",
     "Lotos, pełny gołąb i siad między piętami nie wracają — łączą końcowy zakres ze skrętem w kolanie i do niczego nie są potrzebne."
    ],

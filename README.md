@@ -15,13 +15,20 @@ i worek treningowy. Żadnych maszyn.
 
 | Dzień | Sesja |
 |---|---|
-| wt | **A · Góra** — wyciskanie (w parze z piszczelowym), bułgarski + podciąganie, goblet z piętami w górze + Nordic, rundy na worku |
-| śr | rozciąganie i test zakresów w domu, ~17 min |
-| czw | **B · Biodra**, bez sztangi — skrzynia + wiosłowanie, ciąg jednonóż + plank kopenhaski, przysiad hiszpański + deska boczna, łydka + strzałkowe, rundy na worku |
-| pt | rozciąganie i test zakresów |
-| sob | **C · Dół** — front squat, martwy ciąg, łydka stojąc + spacer farmera |
-| nd | joga (20 pozycji statycznych, wersja krótka ~20 min) |
+| wt | **A · Góra** — wyciskanie (w parze z piszczelowym), bułgarski + podciąganie, goblet z piętami w górze + Nordic, rundy na worku, na koniec rozciąganie: zginacz biodra, łydka |
+| czw | **B · Biodra**, bez sztangi — skrzynia + wiosłowanie, ciąg jednonóż + plank kopenhaski, przysiad hiszpański + deska boczna, łydka + strzałkowe, rundy na worku, na koniec rozciąganie: pośladek, przywodziciele |
+| sob | **C · Dół** — front squat, martwy ciąg, łydka stojąc + spacer farmera, na koniec rozciąganie: tył uda, zginacz biodra, łydka |
+| nd | joga (20 pozycji statycznych, wersja krótka ~20 min) i test zakresów (~8 min) |
 
+Trzy treningi po około godzinie i niedziela; poniedziałek, środa i piątek są wolne.
+
+- **Rozciąganie na koniec.** Pozycje statyczne są zwykłymi pozycjami dnia z polem
+  `rozc: true` — dopisane na końcu list A, B, C, więc numery wcześniejszych ćwiczeń
+  (i dziennik) zostają. Scena prowadzi je jak serie na czas, bez przerw; `fig`
+  wskazuje figurkę. Nie wchodzą do bilansu stawów.
+- **Test zakresów w niedzielę.** `rozciaganie.wJodze: true` znaczy, że rozciąganie
+  nie jest osobnym dniem tygodnia: blok testu stoi na ekranie jogi, a oceny
+  zapisują się pod kluczem dnia `nd`.
 - **Trzy stawy.** Każde ćwiczenie ma w planie pole `cel` (`kolano`, `kostka`,
   `biodro`, `gora`, `tulow`, `kondycja`). Z niego aplikacja rysuje znaczek stawu na
   karcie ćwiczenia i liczy bilans tygodnia (`bilansStawow`).
@@ -69,8 +76,9 @@ w `tools/test-widoki.mjs` pilnuje listy słów, które nie mają prawa się w ni
   oraz stuknięcie 10 s przed końcem.
 - **Dolny pasek** — cztery zakładki (Dziś, Plan, Postęp, Więcej); na ekranie sesji
   jego miejsce zajmuje przycisk sceny.
-- **Rozciąganie i test zakresów** (śr, pt) oraz **joga** (nd) — karty z krokami,
-  częstym błędem i minutnikiem, tryb „Prowadź mnie"; w jodze filmy w kartach.
+- **Joga i test zakresów** (nd) — karty z figurką, krokami, częstym błędem
+  i minutnikiem, tryb „Prowadź mnie", filmy w kartach; pod pozycjami jogi blok
+  testu zakresów z poziomem i oceną każdej pozycji.
 - **Plan** — fazy cyklu, tydzień dzień po dniu (po rozwinięciu ćwiczenia ze
   schematem na bieżący tydzień) i zasady prowadzenia cyklu.
 - **Postęp** — liczby cyklu, stawy tydzień po tygodniu, poziomy testu zakresów,
