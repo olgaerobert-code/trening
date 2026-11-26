@@ -267,6 +267,15 @@ function newPlanKey() {
 const lowerRow = w => state.plan.weeks.lower[w - 1];
 const upperRow = w => state.plan.weeks.upper[w - 1];
 
+// Serie FSL (5/3/1): ciężar pierwszej serii fali, na objętość. Procent od maksa
+// stoi w wierszu tygodnia jako pctFsl; ciąg dostaje tę samą poprawkę dlAdj.
+function kgFsl(lift, w) {
+  const r = lift === 'bench' ? upperRow(w) : lowerRow(w);
+  if (!r || r.pctFsl == null) return null;
+  return floor25(state.e1rm[lift] * (r.pctFsl + (lift === 'dl' ? r.dlAdj || 0 : 0)));
+}
+const podwyzkaBloku = () => Math.round(((state.plan && state.plan.rekalProc) || 0.1) * 100);
+
 function kgOf(lift, w) {
   const e = state.e1rm;
   if (lift === 'bench') { const r = upperRow(w); return r.pct == null ? null : floor25(e.bench * r.pct); }
@@ -298,6 +307,14 @@ function resolve(val, w) {
   if (r === 'bench.kg') return upperRow(w).benchText || kgOf('bench', w);
   if (r === 'front.kg') return kgOf('front', w);
   if (r === 'dl.kg') return kgOf('dl', w);
+  if (r === 'upper.fsl') return upperRow(w).fsl;
+  if (r === 'upper.rpeFsl') return upperRow(w).rpeFsl;
+  if (r === 'lower.fsl') return lowerRow(w).fsl;
+  if (r === 'lower.fslDl') return lowerRow(w).fslDl || lowerRow(w).fsl;
+  if (r === 'lower.rpeFsl') return lowerRow(w).rpeFsl;
+  if (r === 'bench.fsl') return kgFsl('bench', w);
+  if (r === 'front.fsl') return kgFsl('front', w);
+  if (r === 'dl.fsl') return kgFsl('dl', w);
   return null;
 }
 const isKg = v => typeof v === 'number';
@@ -899,7 +916,7 @@ function kartaDzis(k, w, etykieta, fokus = true) {
   // Figurka boju dnia (albo pierwszego ćwiczenia); rusza się tylko na plakacie w fokusie.
   const itFig = boje.length ? pozycjaBoju(boje[0]).it : d.items[0];
   return kartaHero({ k, eb, tytul: dane.krotki, pod: dane.reszta, liczba, jedn, opis, dodatek,
-    figura: itFig ? figuraHtml(itFig.id, itFig.cel, fokus && ile < 1) : '', rodzaj: 'sila', fokus,
+    figura: itFig ? figuraHtml(itFig.fig || itFig.id, itFig.cel, fokus && ile < 1) : '', rodzaj: 'sila', fokus,
     pg, pgEt: 'serii', pgDod, cta, klik, zrobione: ile >= 1 });
 }
 
@@ -1076,7 +1093,7 @@ function scenaSesji(day, w, { naZmiane } = {}) {
 
     const gl = el('div', 'sc-gl');
     gl.append(el('span', 'sc-kod', kod(it)),
-      el('span', 'sc-seria', (it.rozc ? 'rozciąganie na koniec' : `${pl.unit === 'min' ? 'runda' : 'seria'} ${k.i + 1} z ${pl.sets}`) + (k.para ? ' · superseria' : '') + (zapis ? ' · zapisana' : '')));
+      el('span', 'sc-seria', (it.rozc ? 'rozciąganie na koniec' : isMainItem(it) && pl.sets === 1 ? 'seria rekordowa' : `${pl.unit === 'min' ? 'runda' : 'seria'} ${k.i + 1} z ${pl.sets}`) + (k.para ? ' · superseria' : '') + (zapis ? ' · zapisana' : '')));
     const jak = el('button', 'sc-jak', 'Jak?');
     jak.setAttribute('aria-label', 'Jak wykonać ćwiczenie');
     gl.append(jak);
@@ -1155,7 +1172,8 @@ function scenaSesji(day, w, { naZmiane } = {}) {
     if (rpe != null && rpe !== '—') info.append(el('span', 'sc-chip', 'RPE ' + fmt(rpe)));
     if (pl.kg == null && it.load) info.append(el('span', 'sc-chip', String(resolve(it.load, w))));
     if (talerze) info.append(talerze);
-    if (k.i === pl.sets - 1 && !it.rozc) info.append(el('span', 'sc-chip ost', 'ostatnia seria'));
+    if (/\+\s*$/.test(String(resolve(it.scheme, w) || ''))) info.append(el('span', 'sc-chip plus', '+: ile wejdzie czysto, 1 w zapasie'));
+    if (k.i === pl.sets - 1 && pl.sets > 1 && !it.rozc) info.append(el('span', 'sc-chip ost', 'ostatnia seria'));
     box.append(info);
     const cele = celeEl(it);
     if (cele) box.append(cele);
@@ -2333,7 +2351,7 @@ function rekalDoWziecia(blok) {
   const zmiany = {};
   for (const key of REKAL_BOJE) {
     const ocena = ocenaBojuWBloku(key, blok);
-    const nowe = rekalibracja(state.e1rm[key], ocena);
+    const nowe = rekalibracja(state.e1rm[key], ocena, state.plan.rekalProc);
     if (nowe == null) return { blok, ocena: false };
     zmiany[key] = { before: state.e1rm[key], after: nowe };
   }
@@ -2407,7 +2425,7 @@ function rekalibracjaCard() {
 
 function kartaPodwyzki(blok, r) {
   const n = el('div', 'note rekal');
-  n.append(el('b', null, `Ciężary dołu w górę o 10% — po bloku ${blok.n}`));
+  n.append(el('b', null, `Ciężary dołu w górę o ${podwyzkaBloku()}% — po bloku ${blok.n}`));
   n.append(el('div', 'adjrow', 'Każda sesja dołu weszła w plan, więc podwyżka zastosowała się sama.'));
   for (const key of REKAL_BOJE) {
     if (!r[key]) continue;
@@ -2578,7 +2596,7 @@ function rekalibracjaHistoria(blok) {
     p.append(dot, el('span', null, `${L.short}: ${fmt(r[key].before)} → ${fmt(r[key].after)} kg`));
     box.append(p);
   }
-  box.append(el('p', null, r.auto ? 'Podwyżka +10% zastosowana automatycznie.' : 'Podwyżka +10%.'));
+  box.append(el('p', null, r.auto ? `Podwyżka +${podwyzkaBloku()}% zastosowana automatycznie.` : `Podwyżka +${podwyzkaBloku()}%.`));
   const cof = el('button', 'mini', 'Cofnij rekalibrację');
   cof.onclick = () => { cofnijRekalibracje(blok.rekal); render(); };
   box.append(cof);
@@ -2797,18 +2815,22 @@ const FAZY_CYKLU = [
 function fazyCyklu(w) {
   const box = el('section', 'fazy');
   const pas = el('div', 'fz-pas');
-  for (const f of FAZY_CYKLU) {
+  const nazwy = state.plan.fazy || [];
+  FAZY_CYKLU.forEach((f, i) => {
     const s = el('div', 'fz' + (w >= f.od && w <= f.do ? ' teraz' : w > f.do ? ' byla' : ''));
     s.style.flex = String(f.do - f.od + 1);
-    s.append(el('i'), el('b', null, f.nazwa), el('span', null, f.od === f.do ? String(f.od) : `${f.od}–${f.do}`));
+    s.append(el('i'), el('b', null, nazwy[i] || f.nazwa), el('span', null, f.od === f.do ? String(f.od) : `${f.od}–${f.do}`));
     pas.append(s);
-  }
+  });
   box.append(pas);
   const L = lowerRow(w), U = upperRow(w);
   const proc = x => fmt(Math.round(x * 1000) / 10) + '%';
   const opis = el('p', 'fz-opis');
-  opis.append(el('b', null, `Tydzień ${w}. `),
-    document.createTextNode(`Przysiad i ciąg ${L.scheme} przy ${proc(L.pct)} maksa, sufit RPE ${fmt(L.rpe)}. Wyciskanie ${U.scheme} przy ${proc(U.pct)}, sufit RPE ${fmt(U.rpe)}.`));
+  // 5/3/1: seria rekordowa i FSL, procenty od TM (tak liczy Wendler).
+  const tekst = U.fsl && U.tmPct != null
+    ? `Seria rekordowa ${U.scheme} przy ${proc(U.tmPct)} TM, sufit RPE ${fmt(U.rpe)}; potem FSL ${U.fsl} przy ${proc(U.tmPctFsl)} TM — przysiad tak samo, ciąg FSL ${L.fslDl || L.fsl}. TM to ${proc(state.plan.tm || 0.85)} maksa.`
+    : `Przysiad i ciąg ${L.scheme} przy ${proc(L.pct)} maksa, sufit RPE ${fmt(L.rpe)}. Wyciskanie ${U.scheme} przy ${proc(U.pct)}, sufit RPE ${fmt(U.rpe)}.`;
+  opis.append(el('b', null, `Tydzień ${w}. `), document.createTextNode(tekst));
   box.append(opis);
   return box;
 }
@@ -5443,7 +5465,7 @@ async function ciezaryZPoprzedniego(n) {
   const a = archiwum()[n];
   if (!a || !a.log) return 0;
   let stary;
-  try { stary = await (await fetch(`plan-cykl${n}.json?v=90`)).json(); } catch { return 0; }
+  try { stary = await (await fetch(`plan-cykl${n}.json?v=91`)).json(); } catch { return 0; }
   let ile = 0;
   for (const [day, d] of Object.entries((stary && stary.days) || {})) for (const it of d.items) {
     if (it.load && it.load.ref) continue;        // boje mają swoje E1RM
@@ -5506,7 +5528,7 @@ function korektaMaksow(p) {
 async function raportArchiwum(n) {
   const a = archiwum()[n];
   if (!a) return '';
-  const plan = await (await fetch(`plan-cykl${n}.json?v=90`)).json();
+  const plan = await (await fetch(`plan-cykl${n}.json?v=91`)).json();
   const pola = ['plan', 'week', 'e1rm', 'acc', ...Object.keys(ZBIORY_CYKLU)];
   const kopia = Object.fromEntries(pola.map(k => [k, state[k]]));
   const full = LIFTS[2].full;
@@ -5559,7 +5581,7 @@ async function sprawdzWersje() {
 }
 
 /* ---------- start ---------- */
-fetch('plan.json?v=90')
+fetch('plan.json?v=91')
   .then(r => r.json())
   .then(p => {
     state.plan = p;

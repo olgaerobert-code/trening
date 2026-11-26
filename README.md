@@ -8,17 +8,33 @@ każdy z trzech stawów.
 Bez kont, bez backendu poza opcjonalną synchronizacją dziennika. Po pierwszym
 otwarciu działa offline.
 
-## Plan (cykl 4)
+## Plan (cykl 5 · 5/3/1 i ATG)
+
+Plan składa metody uznanych trenerów: boje według **5/3/1 Forever Jima Wendlera**,
+kolana i kostki według **ATG Bena Patricka** i jednonóż **Mike'a Boyle'a**, izometria
+**Keitha Baara**, noszenie **Dana Johna**, rozgrzewka RAMP **Iana Jeffreysa** z Big 3
+**Stuarta McGilla**, kondycja na worku według **Joela Jamiesona**. Ekran Plan → Zasady
+→ „Skąd ten plan" mówi, co z czego pochodzi.
 
 Sprzęt: sztanga ze stojakiem, ławka, hantle, drążek, gumy, skrzynia albo stopień
 i worek treningowy. Żadnych maszyn.
 
 | Dzień | Sesja |
 |---|---|
-| wt | **A · Góra** — wyciskanie (w parze z piszczelowym), bułgarski + podciąganie, goblet z piętami w górze + Nordic, rundy na worku, na koniec rozciąganie: zginacz biodra, łydka |
-| czw | **B · Biodra**, bez sztangi — skrzynia + wiosłowanie, ciąg jednonóż + plank kopenhaski, przysiad hiszpański + deska boczna, łydka + strzałkowe, rundy na worku, na koniec rozciąganie: pośladek, przywodziciele |
-| sob | **C · Dół** — front squat, martwy ciąg, łydka stojąc + spacer farmera, na koniec rozciąganie: tył uda, zginacz biodra, łydka |
+| wt | **A · Wyciskanie** — seria rekordowa 5/3/1, FSL w parze z podciąganiem, ATG split squat + unoszenie palców, Nordic, interwały na worku, rozciąganie: zginacz biodra, łydka |
+| czw | **B · Jednonóż**, bez sztangi — izometria hiszpańska, skrzynia + wiosłowanie, ciąg jednonóż + plank kopenhaski, pompki + wspięcia z ugiętym kolanem, spacer jednorącz, rundy na worku, rozciąganie: pośladek, przywodziciele |
+| sob | **C · Dół** — front squat i martwy ciąg 5/3/1 z FSL, wspięcia + spacer farmera z dwoma hantlami, rozciąganie: tył uda, zginacz biodra, łydka |
 | nd | joga (20 pozycji statycznych, wersja krótka ~20 min) i test zakresów (~8 min) |
+
+**Boje (5/3/1).** TM = 85% maksa. Fala to trzy tygodnie: seria rekordowa na 85, 90
+i 95% TM, potem FSL (ciężar pierwszej serii fali) na objętość. Tydzień 1–6 to budowa
+(„Leader"): seria rekordowa równo na 5, FSL 5 × 5. Tydzień 7 lżej. Tydzień 8–11 to
+rekordy („Anchor"): 5+, 3+, 1+ z jednym powtórzeniem w zapasie, FSL 3 × 5. Tydzień 12
+to test TM: 3+ na 100% TM. W planie: seria rekordowa bierze ciężar z `pct` wiersza
+tygodnia, FSL — z `pctFsl` (odwołania `bench.fsl`, `front.fsl`, `dl.fsl`, schematy
+`upper.fsl`, `lower.fsl`, `lower.fslDl`). Ocenę tygodnia i korektę maksów liczy
+seria rekordowa; powtórzenia ponad plan w serii „+" są zapasem. Podwyżka dołu po
+bloku budowy wynosi tu 5% (`rekalProc`).
 
 Trzy treningi po około godzinie i niedziela; poniedziałek, środa i piątek są wolne.
 
@@ -33,16 +49,16 @@ Trzy treningi po około godzinie i niedziela; poniedziałek, środa i piątek s�
   `biodro`, `gora`, `tulow`, `kondycja`). Z niego aplikacja rysuje znaczek stawu na
   karcie ćwiczenia i liczy bilans tygodnia (`bilansStawow`).
 - **Bloki.** Schemat ćwiczeń dodatkowych jest zapisany na każdy tydzień
-  (`scheme.tyg`): blok 1 (tyg. 1–3), blok 2 (4–6), tydzień 7 lżej (2 serie),
-  blok 3 (8–11), tydzień 12 sprawdzian. Boje idą procentami E1RM jak dotąd.
-- **Worek.** Rundy to zwykłe ćwiczenie ze schematem `3 × 2 min`; aplikacja odlicza
+  (`scheme.tyg`): budowa 1 (tyg. 1–3), budowa 2 (4–6), tydzień 7 lżej (2 serie),
+  rekordy (8–11), tydzień 12 test (2 serie).
+- **Worek.** Rundy to zwykłe ćwiczenie ze schematem `3 × 3 min`; aplikacja odlicza
   rundę i przerwę sama.
 - **Test zakresów.** Głębokie zgięcie kolana i rotacja biodra wracają poziom po
   poziomie, z oceną 0–1–2 po każdej pozycji; aplikacja podpowiada poziom.
 
-Plan robi generator `tools/cykl4.py` → `plan.json`. Zamknięte cykle leżą
-w `plan-cykl1.json` … `plan-cykl3.json` (potrzebne do raportu z archiwum; generatory
-`tools/cykl2.py` i `tools/cykl3.py` piszą już tylko tam). Joga: `tools/joga2.py`.
+Plan robi generator `tools/cykl5.py` → `plan.json`. Zamknięte cykle leżą
+w `plan-cykl1.json` … `plan-cykl4.json` (potrzebne do raportu z archiwum; generatory
+`tools/cykl2.py`, `tools/cykl3.py` i `tools/cykl4.py` piszą już tylko tam). Joga: `tools/joga2.py`.
 
 Treść planu jest wyłącznie treningowa — repozytorium jest publiczne. Test
 w `tools/test-widoki.mjs` pilnuje listy słów, które nie mają prawa się w nim znaleźć.
@@ -200,11 +216,11 @@ app.css           tokeny, kroje, wszystkie style
 app.js            plan, dziennik, synchronizacja, zegar, widoki
 progresja.js      czyste funkcje oceny sesji i korekt (wspólne z testami)
 figury.js         figurki ćwiczeń: pozy z kątów → animowane SVG
-plan.json         bieżący plan (cykl 4)
+plan.json         bieżący plan (cykl 5)
 plan-cykl*.json   plany zamkniętych cykli
 sw.js             cache offline
 fonts/            kroje i ich licencje
-tools/cykl4.py    generator planu; cykl2.py, cykl3.py, joga2.py
+tools/cykl5.py    generator planu; cykl2.py, cykl3.py, cykl4.py, joga2.py
 tools/*.mjs       testy, ikony, konwerter arkusza cyklu 1
 tools/supabase.sql
 ```

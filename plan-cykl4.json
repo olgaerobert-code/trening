@@ -1,0 +1,1763 @@
+{
+ "cykl": 4,
+ "title": "Cykl 4 · kolana, kostki, biodra",
+ "schedule": "wt A · czw B · sob C · nd joga i test zakresów",
+ "bar": 20,
+ "plates": [
+  25,
+  20,
+  15,
+  10,
+  5,
+  2.5,
+  1.25
+ ],
+ "e1rm": {
+  "front": 107.5,
+  "dl": 120,
+  "bench": 135
+ },
+ "e1rmZPoprzedniego": [
+  "bench",
+  "front",
+  "dl"
+ ],
+ "weeks": {
+  "lower": [
+   {
+    "week": 1,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.675,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 2,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.7,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 3,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.725,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 4,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.725,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 5,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.75,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 6,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.775,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 7,
+    "block": "deload",
+    "scheme": "2 × 6",
+    "pct": 0.55,
+    "dlAdj": 0,
+    "rpe": 5,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 8,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.775,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 9,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.8,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 10,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.825,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 11,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.825,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   },
+   {
+    "week": 12,
+    "block": "3",
+    "scheme": "3 × 5 + kontrola",
+    "pct": 0.7,
+    "dlAdj": 0,
+    "rpe": 7,
+    "barHeight": "z podłogi"
+   }
+  ],
+  "upper": [
+   {
+    "week": 1,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.675,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 2,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.7,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 3,
+    "block": "1",
+    "scheme": "3 × 8",
+    "pct": 0.725,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 4,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.725,
+    "rpe": 7.5,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 5,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.75,
+    "rpe": 7.5,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 6,
+    "block": "2",
+    "scheme": "4 × 6",
+    "pct": 0.775,
+    "rpe": 7.5,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 7,
+    "block": "deload",
+    "scheme": "2 × 6",
+    "pct": 0.625,
+    "rpe": 5,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 8,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.775,
+    "rpe": 7.5,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 9,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.8,
+    "rpe": 7.5,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 10,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.825,
+    "rpe": 8,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 11,
+    "block": "3",
+    "scheme": "4 × 5",
+    "pct": 0.825,
+    "rpe": 8,
+    "benchText": null,
+    "pullup": null
+   },
+   {
+    "week": 12,
+    "block": "3",
+    "scheme": "3 × 5",
+    "pct": 0.8,
+    "rpe": 7,
+    "benchText": null,
+    "pullup": null
+   }
+  ]
+ },
+ "days": {
+  "A": {
+   "key": "A",
+   "title": "GÓRA · wyciskanie i kolana",
+   "day": "Wtorek",
+   "dzien": 2,
+   "minutes": 58,
+   "items": [
+    {
+     "n": 1,
+     "id": "c4a1",
+     "name": "Wyciskanie leżąc",
+     "superset": "A1",
+     "scheme": {
+      "ref": "upper.scheme"
+     },
+     "load": {
+      "ref": "bench.kg"
+     },
+     "rpe": {
+      "ref": "upper.rpe"
+     },
+     "note": "Bój główny. SUPERSERIA z unoszeniem palców — 90 s po parze (od bloku 3: 120 s). Łopatki ściągnięte i wbite w ławkę, stopy płasko, umiarkowany mostek. Sztanga schodzi na dolną część mostka, łokcie ok. 45° od tułowia. W tym cyklu góra jest na utrzymanie — sufit RPE pilnuje zapasu. Między seriami idziesz pod ścianę: nogi i tak czekają.",
+     "noCut": true,
+     "cel": [
+      "gora"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "c4a2",
+     "name": "Unoszenie palców przy ścianie (piszczelowy przedni)",
+     "superset": "A2",
+     "scheme": {
+      "tyg": [
+       "3 × 15",
+       "3 × 15",
+       "3 × 15",
+       "3 × 20",
+       "3 × 20",
+       "3 × 20",
+       "2 × 20",
+       "3 × 20",
+       "3 × 20",
+       "3 × 20",
+       "3 × 20",
+       "2 × 20"
+      ]
+     },
+     "load": "masa ciała",
+     "rpe": 7,
+     "note": "Plecy i pośladki o ścianę, pięty 30–40 cm od niej, nogi proste. Unieś palce stóp jak najwyżej, 1 s na górze, opuść bez klapania. Trudniej: stopy dalej od ściany, potem na jednej nodze. Piszczelowy przedni hamuje stopę i kolano przy każdym kroku w dół — to on amortyzuje schody.",
+     "noCut": false,
+     "cel": [
+      "kostka"
+     ],
+     "sPowt": 1.5
+    },
+    {
+     "n": 3,
+     "id": "c4a3",
+     "name": "Przysiad bułgarski z hantlami",
+     "superset": "B1",
+     "scheme": {
+      "tyg": [
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "2 × 6"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA z podciąganiem — 90 s po parze. Tylna stopa na ławce, przednia tak daleko, żeby w dole kolano było nad stopą albo lekko przed nią. 3 s w dół, kolano w linii drugiego palca, miednica pozioma. Tułów lekko pochylony obciąża pośladek, pionowy — udo. Zaczynasz słabszą nogą. W bloku 3 mniej powtórzeń, cięższe hantle.",
+     "noCut": true,
+     "cel": [
+      "kolano",
+      "biodro"
+     ],
+     "kgStart": 12
+    },
+    {
+     "n": 4,
+     "id": "c4a4",
+     "name": "Podciąganie",
+     "superset": "B2",
+     "scheme": {
+      "tyg": [
+       "3 × 5",
+       "3 × 5",
+       "3 × 5",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "2 × 6",
+       "4 × 5",
+       "4 × 5",
+       "4 × 5",
+       "4 × 5",
+       "2 × 5"
+      ]
+     },
+     "load": "pełne albo negatywy 4 s",
+     "rpe": 8,
+     "note": "Łopatki najpierw w dół, potem ciągniesz łokcie do żeber, broda nad drążek. Jeśli pełne nie wchodzą czysto, zacznij serię od tylu pełnych, ile masz, a resztę dobij negatywami: wejście z ławki, 4 s w dół do pełnego zwisu.",
+     "noCut": false,
+     "cel": [
+      "gora"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "c4a5",
+     "name": "Goblet squat z piętami na podwyższeniu (do skrzyni)",
+     "superset": "C1",
+     "scheme": {
+      "tyg": [
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "2 × 12",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "2 × 10"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA z Nordikiem — 75 s po parze. Pięty na talerzach 5 kg albo klinie, stopy wąsko, hantel pionowo przy mostku. 3 s w dół do skrzyni na wysokości kolan — dotknij jej bez siadania całym ciężarem — i w górę. Tułów pionowo, kolana wychodzą do przodu nad palce. Z całego planu to ćwiczenie najmocniej skupia pracę na przodzie uda.",
+     "noCut": false,
+     "cel": [
+      "kolano"
+     ],
+     "kgStart": 16
+    },
+    {
+     "n": 6,
+     "id": "c4a6",
+     "name": "Nordic z asekuracją rękami",
+     "superset": "C2",
+     "scheme": {
+      "tyg": [
+       "3 × 4",
+       "3 × 4",
+       "3 × 4",
+       "3 × 5",
+       "3 × 5",
+       "3 × 5",
+       "2 × 5",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "2 × 6"
+      ]
+     },
+     "load": "masa ciała",
+     "rpe": 8,
+     "note": "Kolana na kocu, pięty zaczepione pod obciążoną sztangą w stojaku albo pod innym stałym punktem. Ciało w jednej linii od kolan do głowy, biodra wyprostowane. Opuszczaj się tak wolno, jak dasz radę (cel 3–5 s), na końcu złap się dłońmi jak przy pompce i odepchnij do góry. Blok 1: połowa zakresu. Tył uda trzyma kolano od tyłu — przeciwwaga dla całej pracy czworogłowego.",
+     "noCut": false,
+     "cel": [
+      "kolano"
+     ],
+     "sPowt": 5
+    },
+    {
+     "n": 7,
+     "id": "c4a7",
+     "name": "Worek: rundy",
+     "superset": null,
+     "scheme": {
+      "tyg": [
+       "3 × 2 min",
+       "3 × 2 min",
+       "3 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "2 × 2 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "2 × 3 min"
+      ]
+     },
+     "load": "tempo rozmowy",
+     "rpe": 7,
+     "note": "Przerwa 60 s. Runda 1: lewy prosty i praca nóg dookoła worka. Runda 2: lewy–prawy, po każdej kombinacji krok w bok. Od rundy 3: dowolne kombinacje, ostatnie 20 s szybciej. Cały czas na przedniej części stóp, kolana miękkie. Przy prawym prostym i sierpie pięta tylnej nogi obraca się razem z biodrem — skręt idzie ze stopy i biodra, kolano tylko za nimi podąża. Tempo takie, żeby dało się mówić pełnymi zdaniami.",
+     "noCut": false,
+     "cel": [
+      "kostka",
+      "biodro",
+      "kondycja"
+     ]
+    },
+    {
+     "n": 8,
+     "id": "c4a8",
+     "name": "Zginacz biodra w półklęku",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Półklęk, tylne kolano na złożonym kocu albo macie, przednia stopa płasko. Napnij pośladek tylnej nogi i podwiń miednicę, dopiero potem przesuń biodra 2–3 cm do przodu — ciągnie z przodu biodra tylnej nogi. Tułów pionowo, żebra w dół. Nie pchaj bioder daleko w przód z wygiętymi lędźwiami.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "polklek"
+    },
+    {
+     "n": 9,
+     "id": "c4a9",
+     "name": "Łydka przy ścianie",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, stopa prosto. Pierwszą połowę czasu tylne kolano proste, drugą lekko ugięte — rozciąganie schodzi niżej. Pięta nie odrywa się od podłogi.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r5"
+    }
+   ]
+  },
+  "B": {
+   "key": "B",
+   "title": "BIODRA · kostki i jednonóż, bez sztangi",
+   "day": "Czwartek",
+   "dzien": 4,
+   "minutes": 60,
+   "items": [
+    {
+     "n": 1,
+     "id": "c4b1",
+     "name": "Wejście na skrzynię z wolnym zejściem",
+     "superset": "A1",
+     "scheme": {
+      "tyg": [
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "2 × 6"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA z wiosłowaniem — 75 s po parze (wiosłowanie daje nogom chwilę). Skrzynia tak wysoka, żeby udo nogi na skrzyni było najwyżej poziomo. Hantle w dłoniach, cała stopa na skrzyni. Wchodzisz siłą nogi na górze — dolna tylko się odrywa, bez odbijania. Schodzisz tą samą nogą przez 3 s, kolano w linii drugiego palca, miednica pozioma. Najpierw cała seria na jedną nogę, potem druga.",
+     "noCut": true,
+     "cel": [
+      "kolano",
+      "biodro"
+     ],
+     "kgStart": 10
+    },
+    {
+     "n": 2,
+     "id": "c4b2",
+     "name": "Wiosłowanie hantlem w podporze",
+     "superset": "A2",
+     "scheme": {
+      "tyg": [
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "2 × 6"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Kolano i dłoń na ławce, plecy płasko. Ciągnij hantel do biodra, nie do barku — łokieć blisko tułowia, łopatka zjeżdża w dół i do kręgosłupa. 1 s pauzy na górze, bez skrętu tułowia.",
+     "noCut": false,
+     "cel": [
+      "gora"
+     ],
+     "kgStart": 20
+    },
+    {
+     "n": 3,
+     "id": "c4b3",
+     "name": "Martwy ciąg rumuński jednonóż z hantlem",
+     "superset": "B1",
+     "scheme": {
+      "tyg": [
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA z plankiem kopenhaskim — 60 s po parze. Hantel w ręce po stronie nogi wolnej. Biodro cofa się, tułów i wolna noga tworzą jedną linię jak dźwignia, kolano nogi podporowej lekko ugięte. Miednica równo — biodro wolnej nogi nie otwiera się w bok. Stopa podporowa trzyma trzy punkty: piętę, podstawę dużego i małego palca. Biodro, kolano i kostka uczą się tu trzymać oś naraz.",
+     "noCut": false,
+     "cel": [
+      "biodro",
+      "kostka"
+     ],
+     "kgStart": 12
+    },
+    {
+     "n": 4,
+     "id": "c4b4",
+     "name": "Plank kopenhaski",
+     "superset": "B2",
+     "scheme": {
+      "tyg": [
+       "3 × 25 s / stronę",
+       "3 × 25 s / stronę",
+       "3 × 25 s / stronę",
+       "3 × 30 s / stronę",
+       "3 × 30 s / stronę",
+       "3 × 30 s / stronę",
+       "2 × 30 s / stronę",
+       "3 × 30 s / stronę",
+       "3 × 30 s / stronę",
+       "3 × 30 s / stronę",
+       "3 × 30 s / stronę",
+       "2 × 30 s / stronę"
+      ]
+     },
+     "load": "kolano na ławce",
+     "rpe": "—",
+     "note": "Bokiem na przedramieniu, kolano górnej nogi na ławce, dolna noga swobodnie. Unieś biodra do linii prostej i trzymaj. Progresja: najpierw czas, potem co 2–3 s unosisz dolną nogę do ławki. Stopa zamiast kolana na ławce dopiero wtedy, gdy wewnętrzna strona kolana nic nie zgłasza. Przywodziciele trzymają kolano w osi razem z pośladkiem średnim.",
+     "noCut": false,
+     "cel": [
+      "biodro"
+     ]
+    },
+    {
+     "n": 5,
+     "id": "c4b5",
+     "name": "Przysiad hiszpański z hantlem (izometria)",
+     "superset": "C1",
+     "scheme": {
+      "tyg": [
+       "3 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "2 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "3 × 45 s",
+       "2 × 45 s"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 6,
+     "note": "SUPERSERIA z deską boczną — 45 s po parze. Guma za kolanami przyczepiona do stojaka, hantel trzymany przy klatce. Zejdź do ok. 60–70° zgięcia w kolanie, piszczele pionowo, tułów pionowo, i trzymaj, mocno napinając uda. Trudniej = cięższy hantel, nie głębiej. Kolana bardzo dobrze znoszą izometrię — mocny bodziec dla czworogłowego i więzadła rzepki bez ruchu w stawie.",
+     "noCut": true,
+     "cel": [
+      "kolano"
+     ],
+     "kgStart": 8
+    },
+    {
+     "n": 6,
+     "id": "c4b6",
+     "name": "Deska boczna z odwodzeniem nogi",
+     "superset": "C2",
+     "scheme": {
+      "tyg": [
+       "3 × 6 / stronę",
+       "3 × 6 / stronę",
+       "3 × 6 / stronę",
+       "3 × 8 / stronę",
+       "3 × 8 / stronę",
+       "3 × 8 / stronę",
+       "2 × 8 / stronę",
+       "3 × 8 / stronę",
+       "3 × 8 / stronę",
+       "3 × 8 / stronę",
+       "3 × 8 / stronę",
+       "2 × 8 / stronę"
+      ]
+     },
+     "load": "masa ciała",
+     "rpe": "—",
+     "note": "Deska boczna na przedramieniu: łatwiej z dolnym kolanem na macie, trudniej na prostych nogach. Biodra w górze, w jednej linii z barkami. Górną, prostą nogę unosisz na 30–40 cm, 1 s pauzy, 2 s w dół. Pracuje pośladek średni obu nóg naraz — górnej w ruchu, dolnej w podporze — ten, który nie pozwala kolanu zapadać się do środka.",
+     "noCut": false,
+     "cel": [
+      "biodro",
+      "tulow"
+     ]
+    },
+    {
+     "n": 7,
+     "id": "c4b7",
+     "name": "Wspięcia na palce jednonóż, kolano ugięte",
+     "superset": "D1",
+     "scheme": {
+      "tyg": [
+       "3 × 10 / nogę",
+       "3 × 10 / nogę",
+       "3 × 10 / nogę",
+       "3 × 12 / nogę",
+       "3 × 12 / nogę",
+       "3 × 12 / nogę",
+       "2 × 12 / nogę",
+       "3 × 12 / nogę",
+       "3 × 12 / nogę",
+       "3 × 12 / nogę",
+       "3 × 12 / nogę",
+       "2 × 12 / nogę"
+      ]
+     },
+     "load": "masa ciała → hantel",
+     "rpe": 7,
+     "note": "SUPERSERIA z ewersją — 45 s po parze. Przednia część stopy na stopniu, kolano ugięte ok. 20–30° przez cały ruch — tak pracuje płaszczkowaty, główny amortyzator kostki i kolana przy schodzeniu. Pięta nisko w dół, 1 s na górze, 3 s w dół. Gdy komplet idzie lekko, hantel w ręce po stronie nogi pracującej.",
+     "noCut": false,
+     "cel": [
+      "kostka"
+     ]
+    },
+    {
+     "n": 8,
+     "id": "c4b8",
+     "name": "Ewersja stopy z gumą (siedząc)",
+     "superset": "D2",
+     "scheme": {
+      "tyg": [
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę",
+       "2 × 15 / nogę"
+      ]
+     },
+     "load": "coraz grubsza guma",
+     "rpe": 6,
+     "note": "Siedzisz, guma wokół przedniej części stopy, zaczepiona po wewnętrznej stronie. Odwiedź stopę na zewnątrz, 1 s pauzy, powrót wolno. Ruch tylko w kostce — kolano i udo nieruchomo. Mięśnie strzałkowe trzymają kostkę z boku: to one łapią stopę, gdy ląduje krzywo.",
+     "noCut": false,
+     "cel": [
+      "kostka"
+     ],
+     "sPowt": 1.5
+    },
+    {
+     "n": 9,
+     "id": "c4b9",
+     "name": "Worek: rundy",
+     "superset": null,
+     "scheme": {
+      "tyg": [
+       "3 × 2 min",
+       "3 × 2 min",
+       "3 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "2 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "2 × 2 min"
+      ]
+     },
+     "load": "tempo rozmowy",
+     "rpe": 7,
+     "note": "Przerwa 60 s. Dziś nacisk na nogi: runda 1 — krążysz wokół worka w obie strony na lewym prostym. Runda 2 — po każdej kombinacji dwa kroki w bok albo w tył. Runda 3 — kombinacje z ciosem na dół: uginasz kolana, nie plecy. Cały czas na przedniej części stóp. Pięta tylnej nogi obraca się razem z biodrem — skręt idzie ze stopy i biodra, kolano tylko za nimi podąża.",
+     "noCut": false,
+     "cel": [
+      "kostka",
+      "biodro",
+      "kondycja"
+     ]
+    },
+    {
+     "n": 10,
+     "id": "c4b10",
+     "name": "Pośladek: kolano do przeciwnego barku",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Leżysz na plecach, jedna noga prosto. Kolano drugiej przyciągasz oburącz w stronę przeciwnego barku, aż poczujesz rozciąganie w pośladku. Miednica i oba barki zostają na podłodze.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r4"
+    },
+    {
+     "n": 11,
+     "id": "c4b11",
+     "name": "Przywodziciele: nogi na ścianie w rozkroku",
+     "superset": null,
+     "scheme": "1 × 60 s",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Leżysz na plecach z pośladkami blisko ściany, nogi oparte o ścianę. Pozwól im rozejść się na boki pod własnym ciężarem — ciągnie po wewnętrznej stronie ud. Kolana lekko ugięte, lędźwie na podłodze. Nie dociskaj nóg rękami.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r3"
+    }
+   ]
+  },
+  "C": {
+   "key": "C",
+   "title": "DÓŁ · front squat i martwy ciąg",
+   "day": "Sobota",
+   "dzien": 6,
+   "minutes": 58,
+   "items": [
+    {
+     "n": 1,
+     "id": "c4c1",
+     "name": "Front squat",
+     "superset": null,
+     "scheme": {
+      "ref": "lower.scheme"
+     },
+     "load": {
+      "ref": "front.kg"
+     },
+     "rpe": {
+      "ref": "lower.rpe"
+     },
+     "note": "Bój główny. Przerwy 3 min. Sztanga na przednich naramiennych, łokcie wysoko, tułów pionowo. Kolana mogą wyjść przed palce — ważne, żeby szły w linii drugiego palca stopy i nie zapadały się do środka. Głębokość: tak nisko, jak plecy zostają neutralne, a pięty na podłodze. 2 s w dół, w górę zdecydowanie.",
+     "noCut": true,
+     "cel": [
+      "kolano",
+      "biodro"
+     ]
+    },
+    {
+     "n": 2,
+     "id": "c4c2",
+     "name": "Martwy ciąg",
+     "superset": null,
+     "scheme": {
+      "ref": "lower.scheme"
+     },
+     "load": {
+      "ref": "dl.kg"
+     },
+     "rpe": {
+      "ref": "lower.rpe"
+     },
+     "note": "Bój główny. Przerwy 3 min. Z podłogi; po przysiadzie wystarczą dwie serie dojściowe (50% × 5, 75% × 3). Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.",
+     "noCut": true,
+     "cel": [
+      "biodro"
+     ]
+    },
+    {
+     "n": 3,
+     "id": "c4c3",
+     "name": "Wspięcia na palce stojąc na stopniu z hantlem",
+     "superset": "A1",
+     "scheme": {
+      "tyg": [
+       "3 × 15",
+       "3 × 15",
+       "3 × 15",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "2 × 12",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "2 × 10"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA ze spacerem farmera — 60 s po parze. Obunóż, przednia część stóp na stopniu albo talerzu, hantel w jednej ręce, druga dłoń o stojak. Kolana proste, ale nie zablokowane. Pięta nisko, 1 s na górze, 3 s w dół. Z bloku na blok mniej powtórzeń i cięższy hantel; gdy brakuje hantli — na jednej nodze. Przy prostym kolanie pracuje brzuchaty łydki, druga połowa łydki obok płaszczkowatego z czwartku.",
+     "noCut": false,
+     "cel": [
+      "kostka"
+     ],
+     "kgStart": 16
+    },
+    {
+     "n": 4,
+     "id": "c4c4",
+     "name": "Spacer farmera jednorącz",
+     "superset": "A2",
+     "scheme": {
+      "tyg": [
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "3 × 30 m / stronę",
+       "2 × 30 m / stronę"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Ciężki hantel w jednej ręce, druga ręka swobodnie. Barki na jednym poziomie, tułów pionowo — nie przechylaj się w żadną stronę. Krótkie, spokojne kroki, kolana w linii stóp. Pośladek średni po przeciwnej stronie trzyma miednicę poziomo przy każdym kroku. Mało miejsca: chodź tam i z powrotem, licząc kroki zamiast metrów.",
+     "noCut": false,
+     "cel": [
+      "biodro",
+      "tulow"
+     ],
+     "kgStart": 24
+    },
+    {
+     "n": 5,
+     "id": "c4c5",
+     "name": "Tył uda z paskiem leżąc",
+     "superset": null,
+     "scheme": "1 × 60 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Leżysz na plecach, pasek albo ręcznik na stopie. Unieś nogę i przyciągaj ją paskiem, aż poczujesz rozciąganie w środku tyłu uda. Kolano lekko ugięte, stopa luźno, druga noga prosto na podłodze. Miednica nie odrywa się od podłogi.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r2"
+    },
+    {
+     "n": 6,
+     "id": "c4c6",
+     "name": "Zginacz biodra w półklęku",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Półklęk, tylne kolano na złożonym kocu albo macie, przednia stopa płasko. Napnij pośladek tylnej nogi i podwiń miednicę, dopiero potem przesuń biodra 2–3 cm do przodu — ciągnie z przodu biodra tylnej nogi. Tułów pionowo, żebra w dół. Nie pchaj bioder daleko w przód z wygiętymi lędźwiami.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "polklek"
+    },
+    {
+     "n": 7,
+     "id": "c4c7",
+     "name": "Łydka przy ścianie",
+     "superset": null,
+     "scheme": "1 × 45 s / stronę",
+     "load": "łagodnie, 6–7 na 10",
+     "rpe": "—",
+     "note": "Dłonie na ścianie, jedna noga z tyłu, pięta na podłodze, stopa prosto. Pierwszą połowę czasu tylne kolano proste, drugą lekko ugięte — rozciąganie schodzi niżej. Pięta nie odrywa się od podłogi.",
+     "noCut": false,
+     "cel": [
+      "rozciaganie"
+     ],
+     "rozc": true,
+     "fig": "r5"
+    }
+   ]
+  }
+ },
+ "warmup": {
+  "ramp": {
+   "steps": [
+    "Gryf 2 × 8",
+    "50% × 5",
+    "70% × 3",
+    "85% × 2",
+    "Ciężar roboczy"
+   ],
+   "lifts": [
+    {
+     "lift": "bench",
+     "name": "Wyciskanie leżąc"
+    },
+    {
+     "lift": "front",
+     "name": "Front squat"
+    },
+    {
+     "lift": "dl",
+     "name": "Martwy ciąg"
+    }
+   ]
+  },
+  "skip": [
+   "Rozciągania statycznego przed sztangą — zostaje na koniec treningu i na niedzielę.",
+   "Długiego rolowania — 1–2 minuty na miejsce, które naprawdę tego potrzebuje, wystarczą.",
+   "Krążeń bioder, skrętów kolana i pracy w końcowych zakresach.",
+   "Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć."
+  ],
+  "notes": [
+   "Przerwy między seriami dojściowymi: 60 s. Mają rozgrzewać, nie męczyć.",
+   "W sobotę przed ciągiem wystarczą DWIE serie (50% × 5, 75% × 3) — po przysiadzie jesteś rozgrzany."
+  ],
+  "days": {
+   "A": {
+    "label": "DZIEŃ A — wyciskanie i kolana  ·  ~7 min",
+    "steps": [
+     {
+      "what": "Worek albo walka z cieniem, lekko",
+      "dose": "2 min",
+      "note": "Same proste i praca nóg, bez siły. Ma rozgrzać barki, biodra i kostki, nie zmęczyć."
+     },
+     {
+      "what": "Podskoki na palcach (pogo)",
+      "dose": "2 × 15",
+      "note": "Obunóż, niskie i ciche, kolana prawie proste, pięty nie dotykają podłogi. Sprężyna ma być w kostce."
+     },
+     {
+      "what": "Band pull-apart",
+      "dose": "2 × 15",
+      "note": "Ręce na wysokości barków, łopatki ściągnięte."
+     },
+     {
+      "what": "Rotacja zewnętrzna barku z gumą",
+      "dose": "1 × 15 / rękę",
+      "note": "Łokieć przy tułowiu."
+     },
+     {
+      "what": "Serie dojściowe do wyciskania",
+      "dose": "wg tabeli",
+      "note": ""
+     },
+     {
+      "what": "Przed bułgarskim: goblet squat do skrzyni",
+      "dose": "1 × 8",
+      "note": "Po wyciskaniu, zanim zaczniesz superserię — kolana mają być ciepłe. 3 s w dół."
+     }
+    ]
+   },
+   "B": {
+    "label": "DZIEŃ B — biodra i kostki, bez sztangi  ·  ~6 min",
+    "steps": [
+     {
+      "what": "Worek albo walka z cieniem, lekko",
+      "dose": "2 min",
+      "note": "Praca nóg dookoła worka, luźne proste."
+     },
+     {
+      "what": "Knee-to-wall",
+      "dose": "1 × 10 / nogę",
+      "note": "Pięta na podłodze, kolano do ściany w linii drugiego palca, 2 s przy ścianie."
+     },
+     {
+      "what": "Chód boczny z mini gumą",
+      "dose": "1 × 10 / stronę",
+      "note": "Półprzysiad, kolana nie zapadają się do środka. Budzi pośladek średni."
+     },
+     {
+      "what": "Marsz biodrowy z mini gumą (leżąc)",
+      "dose": "1 × 8 / stronę",
+      "note": "Lędźwie przyklejone do podłogi, 2 s pauzy. Budzi zginacze biodra po dniu siedzenia."
+     },
+     {
+      "what": "Band pull-apart",
+      "dose": "1 × 15",
+      "note": "Przed wiosłowaniem."
+     }
+    ]
+   },
+   "C": {
+    "label": "DZIEŃ C — dół ze sztangą  ·  ~8 min",
+    "steps": [
+     {
+      "what": "Worek albo walka z cieniem, lekko",
+      "dose": "2 min",
+      "note": "Najcięższy dzień tygodnia — nie skracaj rozgrzewki."
+     },
+     {
+      "what": "Oddech 90/90 ze stopami na ścianie",
+      "dose": "1 × 5 oddechów",
+      "note": "Wydech ustami, żebra w dół, lędźwie miękko do podłogi. Ustawia miednicę przed sztangą."
+     },
+     {
+      "what": "Knee-to-wall",
+      "dose": "1 × 10 / nogę",
+      "note": "Pięta na podłodze, kolano do ściany w linii drugiego palca."
+     },
+     {
+      "what": "Podskoki na palcach (pogo)",
+      "dose": "2 × 15",
+      "note": "Niskie i ciche. Budzi łydki i ścięgna przed przysiadem."
+     },
+     {
+      "what": "Goblet squat do skrzyni",
+      "dose": "1 × 8",
+      "note": "Lekki hantel, 3 s w dół. Ustawia tor kolan przed sztangą."
+     },
+     {
+      "what": "Serie dojściowe do front squata",
+      "dose": "wg tabeli",
+      "note": ""
+     },
+     {
+      "what": "Serie dojściowe do ciągu",
+      "dose": "50% × 5, 75% × 3",
+      "note": "Krótsza wersja — po przysiadzie jesteś rozgrzany."
+     }
+    ]
+   }
+  }
+ },
+ "rules": [
+  {
+   "heading": "Układ tygodnia",
+   "lines": [
+    "Trzy treningi i niedziela. Poniedziałek, środa i piątek są wolne — rozciąganie nie ma osobnych dni, kończy każdy trening.",
+    "Wtorek — Dzień A: GÓRA i kolana. Wyciskanie, przysiad bułgarski, goblet z piętami w górze, Nordic, worek, na koniec rozciąganie.",
+    "Czwartek — Dzień B: BIODRA i kostki, bez sztangi. Skrzynia, ciąg jednonóż, kopenhaski, przysiad hiszpański, łydka i strzałkowe, worek, na koniec rozciąganie.",
+    "Sobota — Dzień C: DÓŁ ze sztangą. Front squat, martwy ciąg, łydki, spacer farmera, na koniec rozciąganie.",
+    "Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas, a po niej test zakresów (~8 min).",
+    "Boje stoją tam, gdzie zawsze: wyciskanie we wtorek, przysiad i ciąg w sobotę. Czwartek jest bez sztangi.",
+    "Sprzęt: sztanga ze stojakiem, ławka, hantle, drążek, gumy (długa i mini), skrzynia albo stopień, worek. Żadnych maszyn."
+   ]
+  },
+  {
+   "heading": "Trzy stawy",
+   "lines": [
+    "Kolana: silny czworogłowy w całym zakresie — front squat i bułgarski w zgięciu, przysiad hiszpański w środku, goblet z piętami w górze na sam przód uda — i tył uda jako przeciwwaga (Nordic, ciąg jednonóż).",
+    "Kostki: cztery rzeczy, których potrzebuje każda kostka. Siła łydki przy prostym i ugiętym kolanie, przód goleni (piszczelowy), bok (strzałkowe z gumą) i sprężystość — podskoki w rozgrzewce i praca nóg na worku.",
+    "Biodra: pośladek wielki (ciąg, bułgarski, skrzynia), pośladek średni (deska boczna z odwodzeniem, spacer farmera), przywodziciele (kopenhaski) i rotacja pod prędkością na worku.",
+    "Każde ćwiczenie w aplikacji ma znaczek stawu, a ekran Dziś pokazuje, ile serii dostał w tym tygodniu każdy z trzech.",
+    "Góra jest na utrzymanie: wyciskanie raz w tygodniu, ciągnięcie dwa razy (podciąganie, wiosłowanie)."
+   ]
+  },
+  {
+   "heading": "Worek",
+   "lines": [
+    "Dwa razy w tygodniu na koniec sesji, 3–4 rundy, plus dwie lekkie minuty w każdej rozgrzewce.",
+    "To nie jest trening boksu, tylko praca dla stawów: sprężysta kostka, biodro, które obraca się szybko, i kondycja bez biegania.",
+    "Tempo rozmowy: dasz radę mówić pełnymi zdaniami. Ostatnie 20 s rundy można przyspieszyć.",
+    "Skręt zawsze ze stopy i biodra — pięta tylnej nogi odrywa się i obraca. Stopa przyklejona do podłogi przy ciosie to skręt w kolanie.",
+    "Rękawice albo owijki. Nadgarstek prosto, uderzasz dwiema pierwszymi kostkami.",
+    "Aplikacja odlicza rundę i przerwę sama: gong na start i koniec, stuknięcie 10 s przed końcem."
+   ]
+  },
+  {
+   "heading": "Rozciąganie na koniec",
+   "lines": [
+    "Każdy trening kończy się dwiema–trzema pozycjami statycznymi, razem 4–6 minut. Scena prowadzi je jak serie na czas: 5 s na ustawienie, trzymanie, zmiana strony — bez przerw między pozycjami.",
+    "Wtorek: zginacz biodra i łydka. Czwartek: pośladek i przywodziciele. Sobota: tył uda, zginacz biodra i łydka.",
+    "Rozciąganie ma ciągnąć w mięśniu, nie w stawie. Gdy czujesz coś w kolanie albo w pachwinie, zmniejsz zakres.",
+    "Bez sprężynowania. Wejdź do 6–7 na 10 i trzymaj; z każdym wydechem pozwól sobie zejść odrobinę dalej.",
+    "Nie przed sztangą — dlatego stoi na samym końcu sesji, po worku.",
+    "Dłuższa praca nad zakresem i test zakresów są w niedzielę, razem z jogą."
+   ]
+  },
+  {
+   "heading": "Czas trwania",
+   "lines": [
+    "Każdy dzień: 6–8 min rozgrzewki, ~50 min pracy i 4–6 min rozciągania na koniec — razem około godziny.",
+    "PRZERWY: przysiad i ciąg 3 min. Wyciskanie idzie w parze z piszczelowym: 90 s po parze (od bloku 3: 2 min). Superserie bez przerwy w środku; po parze 90 s przy bułgarskim, 75 s przy skrzyni i goblecie, 60 s przy lżejszych, 45 s przy kostkach.",
+    "Timer przerwy rusza sam po odhaczeniu serii. Trzymaj się go — od tego zależy, czy worek zmieści się w godzinie.",
+    "Jeśli brakuje czasu, tniesz w kolejności: jedna runda na worku → trzecia seria ostatniej superserii → trzecia seria środkowej superserii.",
+    "Nie tniesz: boju głównego, przysiadu bułgarskiego, wejścia na skrzynię ani przysiadu hiszpańskiego."
+   ]
+  },
+  {
+   "heading": "Ciężary",
+   "lines": [
+    "Maksy przechodzą z poprzedniego cyklu tak, jak zostawiła je samoregulacja — nic nie wpisujesz ręcznie. Tydzień 1 to 67,5% tych maksów.",
+    "Ćwiczenia, które zostały pod tą samą nazwą (bułgarski, wiosłowanie, ciąg jednonóż, skrzynia, goblet, przysiad hiszpański, spacer farmera), startują z ostatnim ciężarem zapisanym w dzienniku.",
+    "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.",
+    "Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak dotąd. Każdą da się cofnąć."
+   ]
+  },
+  {
+   "heading": "Progresja ćwiczeń dodatkowych",
+   "lines": [
+    "Plan sam zmienia serie i powtórzenia między blokami — w bloku 3 jest mniej powtórzeń i cięższe hantle. Aplikacja pokazuje schemat na bieżący tydzień.",
+    "Przy hantlach ustaw raz ciężar, którego używasz — aplikacja go zapamięta i podpowie podwyżkę, gdy dwa tygodnie z rzędu robisz komplet.",
+    "Tempo jest częścią ćwiczenia: 3 s w dół przy bułgarskim, skrzyni, goblecie i wspięciach. Szybsze powtórzenie z większym ciężarem to nie progres.",
+    "Nordic: blok 1 połowa zakresu, potem coraz niżej bez łapania się rękami, dopiero na końcu wolniej.",
+    "Izometria: trudniej = cięższy hantel, nie głębiej.",
+    "Plank kopenhaski: najpierw czas, potem unoszenie dolnej nogi, dopiero na końcu stopa zamiast kolana na ławce.",
+    "Piszczelowy przy ścianie: trudniej = stopy dalej od ściany, potem jedna noga.",
+    "Podskoki w rozgrzewce: gdy 2 × 15 jest ciche i lekkie, przejdź na skakankę (2 × 30 s), potem na jedną nogę."
+   ]
+  },
+  {
+   "heading": "Zasada złego dnia",
+   "lines": [
+    "Rozgrzewka idzie wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.",
+    "Kostka albo kolano odzywa się przy podskokach lub na worku: tego dnia podskoki zamień na wspięcia, a na worku stój szerzej i bij z miejsca.",
+    "Plecy sztywne rano w sobotę: ciąg lżej o 10% albo zamień sobotę z czwartkiem. Kolejność da się przestawić w obrębie tygodnia.",
+    "Ćwiczenie, w którym coś nie gra w stawie (nie zmęczenie mięśnia) — najpierw mniejszy zakres, potem mniejszy ciężar, a jeśli dalej nie gra, pomiń je w tej sesji i zanotuj."
+   ]
+  },
+  {
+   "heading": "Tydzień 7 — lżejszy (nie jest opcjonalny)",
+   "lines": [
+    "Boje: 2 × 6 przy 55% (dół) i 62,5% (góra), RPE 5.",
+    "Ćwiczenia dodatkowe: 2 serie zamiast 3, ten sam ciężar — aplikacja pokazuje już skrócony schemat. Worek: 2 rundy. Rozciąganie i joga bez zmian."
+   ]
+  },
+  {
+   "heading": "Tydzień 12 — sprawdzian",
+   "lines": [
+    "Bez testu maksa. Boje lżej (3 × 5).",
+    "Przysiad: po seriach roboczych weź ciężar front squata z tygodnia 3 i zrób jedną serię na maks. powtórzeń — stop przy 15 albo RPE 8. Porównaj z tygodniem 3.",
+    "Kolana, kostki i biodra — porównaj z tygodniem 2 w Raporcie cyklu: ciężar w bułgarskim, na skrzyni, w goblecie i przysiadzie hiszpańskim przy tym samym tempie, zakres w Nordicu, powtórzenia we wspięciach jednonóż i sekundy w planku kopenhaskim.",
+    "Zakresy: porównaj poziomy testu zakresów z pierwszym tygodniem.",
+    "To jest miara celu tego cyklu — nie ciężar na sztandze."
+   ]
+  },
+  {
+   "heading": "Kiedy powtórzyć tydzień",
+   "lines": [
+    "Tydzień podbijasz, gdy każda sesja zmieściła się w suficie RPE.",
+    "Jeśli nie — powtarzasz ten sam tydzień z tym samym ciężarem. To nie jest opóźnienie planu."
+   ]
+  }
+ ],
+ "mobility": {
+  "key": "D",
+  "title": "JOGA",
+  "day": "Niedziela",
+  "minutes": 44,
+  "shortMinutes": 20,
+  "domyslnieKrotka": true,
+  "intro": "Praktyka oparta na pozycjach statycznych: wchodzisz, ustawiasz się i trzymasz, oddychając. Równowaga uczy kostki i biodra trzymać kolano w osi, wojownicy budują siłę bioder w szerokim rozkroku, pozycje na brzuchu budzą plecy i łopatki po siedzeniu, a na końcu biodra i tył uda puszczają z podparciem. Kolano zawsze nad stopą, bez rotacji w kolanie i bez końcowych zakresów. Przydadzą się dwa klocki, pasek, złożony koc, krzesło i kawałek ściany.",
+  "rules": [
+   "Trzymasz pozycję, nie wytrzymujesz jej. Jeśli oddech się rwie, wyjdź wcześniej — 20 równych sekund jest warte więcej niż 45 z zaciśniętymi zębami.",
+   "Żadnych końcowych zakresów. Zatrzymujesz się tam, gdzie oddech zostaje równy.",
+   "Kolano zawsze prowadzone nad stopą, a gdy na nim klęczysz — zawsze na kocu. Pozycje z rotacją w kolanie (lotos, pełny gołąb, siad między piętami) zostały z tej praktyki usunięte.",
+   "Jeśli coś w pozycji kłuje albo promieniuje w nogę, wyjdź z niej i przejdź do następnej. Rozciąganie ma ciągnąć, nie kłuć.",
+   "Równowagi rób przy ścianie albo krześle, dopóki nie trzymasz ich spokojnie. Podpórka to nie oszustwo, tylko ustawienie.",
+   "Krótka wersja (~20 min) to pozycje oznaczone kropką: po jednej albo dwie z każdego bloku.",
+   "Po ciężkiej sobocie zrób bloki 1, 5 i 6. Reszta poczeka do następnej niedzieli."
+  ],
+  "blocks": [
+   {
+    "n": 1,
+    "name": "Ustawienie",
+    "minutes": 4,
+    "why": "Zanim cokolwiek przytrzymasz, sprawdzasz, gdzie stoisz. Ściana pokazuje postawę lepiej niż lustro.",
+    "items": [
+     {
+      "id": "z1",
+      "name": "Góra przy ścianie (Tadasana)",
+      "dose": "1 min",
+      "sec": 60,
+      "core": true,
+      "steps": [
+       "Stań plecami do ściany, pięty 5 cm od niej, stopy na szerokość bioder.",
+       "Pośladki, łopatki i tył głowy dotykają ściany. Broda lekko cofnięta, jakby ktoś ciągnął cię za czubek głowy w górę.",
+       "Między lędźwiami a ścianą mieści się płasko dłoń — nie pięść. Jeśli pięść, delikatnie podwiń miednicę.",
+       "Rozłóż ciężar na piętę, podstawę dużego i małego palca. Kolana miękkie, nie zablokowane.",
+       "Oddychaj spokojnie w boki żeber przez minutę, nie tracąc żadnego punktu kontaktu."
+      ],
+      "blad": "Unoszenie brody, żeby dotknąć głową ściany. Głowa ma się cofnąć, nie zadrzeć.",
+      "note": "Ustawienie z tej pozycji to to samo ustawienie, które chcesz mieć pod sztangą: żebra nad miednicą, głowa nad barkami.",
+      "film": "tadasana against wall posture",
+      "yt": "Tda7u6mQ68Y"
+     },
+     {
+      "id": "z2",
+      "name": "Wznos rąk przy ścianie (Urdhva Hastasana)",
+      "dose": "5 oddechów",
+      "sec": null,
+      "core": false,
+      "steps": [
+       "Zostań w ustawieniu z poprzedniej pozycji, plecami przy ścianie.",
+       "Z wdechem unieś proste ręce przodem w górę, kciuki prowadzą.",
+       "Zatrzymaj ręce tam, gdzie lędźwie wciąż dotykają ściany tak samo jak na początku — to twój zakres.",
+       "Wytrzymaj 5 spokojnych oddechów, z każdym wydechem lekko wydłużając się w górę."
+      ],
+      "blad": "Sięganie rękami do ściany kosztem wygięcia lędźwi. Ręce zatrzymujesz wcześniej, plecy się nie zmieniają.",
+      "note": "Pokazuje, ile zakresu nad głową masz naprawdę z barków, a ile pożyczasz z lędźwi.",
+      "film": "urdhva hastasana wall shoulder flexion",
+      "yt": "0kYwPUUHMWs"
+     }
+    ]
+   },
+   {
+    "n": 2,
+    "name": "Równowaga",
+    "minutes": 7,
+    "why": "Stanie na jednej nodze uczy kostkę i biodro trzymać kolano w osi — po cichu, bez ciężaru.",
+    "items": [
+     {
+      "id": "z3",
+      "name": "Drzewo (Vrksasana)",
+      "dose": "30 s / stronę",
+      "sec": 30,
+      "core": true,
+      "steps": [
+       "Stań na lewej nodze, wzrok w jeden punkt przed sobą.",
+       "Prawą stopę oprzyj o wewnętrzną stronę lewej łydki albo uda — nigdy o kolano.",
+       "Dociśnij stopę do nogi, a nogę do stopy. Miednica zostaje pozioma, prawe kolano otwiera się w bok bez przekręcania bioder.",
+       "Dłonie złożone przed mostkiem albo uniesione nad głowę. Trzymaj 30 s, zmień stronę."
+      ],
+      "blad": "Stopa oparta o bok kolana. Kolano nie ma pracować na boki — stopa idzie nad albo pod nie.",
+      "note": "Stopa podporowa, kostka i pośladek średni trzymają kolano w osi. Ta sama robota co w przysiadzie bułgarskim.",
+      "film": "tree pose tutorial beginners",
+      "yt": "cw-3W992h0s"
+     },
+     {
+      "id": "z4",
+      "name": "Wojownik III z dłońmi na krześle (Virabhadrasana III)",
+      "dose": "20 s / stronę",
+      "sec": 20,
+      "core": true,
+      "steps": [
+       "Stań przodem do krzesła albo ściany, dłonie na oparciu na wysokości bioder.",
+       "Przenieś ciężar na lewą nogę, kolano lekko ugięte.",
+       "Odsuwaj prawą nogę w tył i w górę, aż tułów i noga utworzą jedną linię równoległą do podłogi.",
+       "Palce tylnej stopy patrzą w podłogę — biodro nie otwiera się w bok. Trzymaj 20 s, zmień stronę."
+      ],
+      "blad": "Otwieranie biodra tylnej nogi i obracanie miednicy w bok. Obie kości biodrowe patrzą w podłogę.",
+      "note": "To martwy ciąg jednonóż bez ciężaru, zatrzymany w połowie — stabilizacja biodra i kostki w czystej postaci.",
+      "film": "warrior 3 with chair support",
+      "yt": "kKwofcX9vJA"
+     },
+     {
+      "id": "z5",
+      "name": "Krzesło przy ścianie (Utkatasana)",
+      "dose": "2 × 30 s",
+      "sec": 30,
+      "core": false,
+      "steps": [
+       "Stań plecami przy ścianie, stopy ok. 30 cm od niej, na szerokość bioder.",
+       "Zsuń się po ścianie, aż kolana będą zgięte pod kątem ok. 60–70°, nie głębiej.",
+       "Kolana nad drugim palcem stopy, ciężar na piętach. Ręce przodem przed siebie albo w górę.",
+       "Trzymaj 30 s, wyjdź po ścianie w górę, odpocznij chwilę i powtórz."
+      ],
+      "blad": "Kolana uciekające do środka. Dociśnij zewnętrzne krawędzie stóp i rozepchnij kolana lekko na zewnątrz.",
+      "note": "Izometria czworogłowego w płytkim zakresie — kuzyn przysiadu hiszpańskiego, tylko w jodze.",
+      "film": "wall sit chair pose",
+      "yt": "VoiwtLrL12Q"
+     }
+    ]
+   },
+   {
+    "n": 3,
+    "name": "Wojownicy i stanie",
+    "minutes": 10,
+    "why": "Długie trzymanie w szerokim rozkroku buduje siłę bioder i ud w zakresie, którego na siłowni prawie nie ma.",
+    "items": [
+     {
+      "id": "z6",
+      "name": "Wojownik II (Virabhadrasana II)",
+      "dose": "30 s / stronę",
+      "sec": 30,
+      "core": true,
+      "steps": [
+       "Rozstaw stopy szeroko, ok. 1,2 m. Prawa stopa w bok, lewa lekko do środka.",
+       "Ugnij prawe kolano, aż będzie nad kostką — nie dalej. Kolano celuje w drugi palec stopy.",
+       "Ręce rozłożone na wysokości barków, wzrok nad prawą dłonią. Tułów pionowo nad miednicą.",
+       "Wciśnij zewnętrzną krawędź tylnej stopy w matę. Trzymaj 30 s, zmień stronę."
+      ],
+      "blad": "Kolano wysuwa się przed stopę albo zapada do środka. Lepiej płycej, ale w osi.",
+      "note": "Pośladek średni i rotatory biodra trzymają kolano w linii przez pół minuty — dokładnie to, czego kolano potrzebuje.",
+      "film": "warrior 2 alignment tutorial",
+      "yt": "B4JWwXTvi7M"
+     },
+     {
+      "id": "z7",
+      "name": "Rozszerzony kąt boczny (Utthita Parsvakonasana)",
+      "dose": "30 s / stronę",
+      "sec": 30,
+      "core": false,
+      "steps": [
+       "Wejdź do wojownika II na prawą stronę.",
+       "Połóż prawe przedramię na prawym udzie, lewą rękę wyciągnij nad uchem w przedłużeniu boku.",
+       "Od zewnętrznej krawędzi lewej stopy do palców lewej dłoni ma być jedna długa linia.",
+       "Klatka otwiera się do sufitu, prawe kolano zostaje nad kostką. Trzymaj 30 s, zmień stronę."
+      ],
+      "blad": "Opadanie całym ciężarem na przedramię. Udo to podpórka, nie leżak — bok tułowia pracuje.",
+      "note": "Wydłuża boczną taśmę od kostki do dłoni, którą przy biurku trzymasz skróconą przez cały dzień.",
+      "film": "extended side angle pose forearm",
+      "yt": "CPbp3o6jD7s"
+     },
+     {
+      "id": "z8",
+      "name": "Trójkąt z klockiem (Trikonasana)",
+      "dose": "30 s / stronę",
+      "sec": 30,
+      "core": false,
+      "steps": [
+       "Stopy jak w wojowniku II, ale obie nogi proste z miękkimi kolanami — bez przeprostu.",
+       "Przesuń biodra w lewo, a tułów wydłuż w prawo, nad prawą nogę.",
+       "Prawa dłoń na klocku przy goleni, lewa ręka w górę nad barkiem.",
+       "Obie strony tułowia długie — prawy bok nie zapada się. Trzymaj 30 s, zmień stronę."
+      ],
+      "blad": "Sięganie dłonią do podłogi kosztem zaokrąglenia pleców. Klocek jest po to, żeby tego nie robić.",
+      "note": "Tył uda i przywodziciele pracują w rozciągnięciu, a tułów uczy się zostać długi przy pochyleniu.",
+      "film": "triangle pose with block",
+      "yt": "pd0ahRFnVNU"
+     },
+     {
+      "id": "z9",
+      "name": "Bogini (Utkata Konasana)",
+      "dose": "2 × 30 s",
+      "sec": 30,
+      "core": false,
+      "steps": [
+       "Stopy szeroko, palce skierowane lekko na zewnątrz.",
+       "Zejdź w dół, aż kolana będą nad kostkami, kierując je w tę samą stronę co palce stóp.",
+       "Tułów pionowo, kość ogonowa w dół, łokcie zgięte pod kątem prostym na wysokości barków.",
+       "Trzymaj 30 s, wyprostuj nogi, odpocznij chwilę i powtórz."
+      ],
+      "blad": "Kolana uciekające do środka, w stronę dużych palców. Prowadź je nad małymi palcami.",
+      "note": "Pośladki i przywodziciele pracują razem w szerokiej pozycji — biodro dostaje siłę w zakresie odwiedzenia.",
+      "film": "goddess pose alignment",
+      "yt": "0FKV52GP-2c"
+     },
+     {
+      "id": "z10",
+      "name": "Półksiężyc przy ścianie (Ardha Chandrasana)",
+      "dose": "20 s / stronę",
+      "sec": 20,
+      "core": false,
+      "steps": [
+       "Stań bokiem do ściany, plecami blisko niej, klocek przed prawą stopą.",
+       "Przenieś ciężar na prawą nogę, prawa dłoń schodzi na klocek ok. 30 cm przed stopą.",
+       "Lewą nogę unieś do poziomu, plecami opierając się lekko o ścianę.",
+       "Lewa ręka w górę, biodra ułożone jedno nad drugim. Trzymaj 20 s, zmień stronę."
+      ],
+      "blad": "Blokowanie kolana nogi podporowej w przeproście. Kolano proste, ale miękkie.",
+      "note": "Najtrudniejsza równowaga dnia: pośladek średni nogi podporowej trzyma całe ciało bokiem do ziemi.",
+      "film": "half moon pose wall support",
+      "yt": "MB90z9KuBhw"
+     }
+    ]
+   },
+   {
+    "n": 4,
+    "name": "Plecy i postawa",
+    "minutes": 8,
+    "why": "Pozycje na brzuchu i w podporze budzą mięśnie, które przy biurku śpią: prostowniki grzbietu, łopatki, mięśnie głębokie.",
+    "items": [
+     {
+      "id": "z11",
+      "name": "Szarańcza, wersja pierwsza (Salabhasana)",
+      "dose": "3 × 5 oddechów",
+      "sec": null,
+      "core": true,
+      "steps": [
+       "Połóż się na brzuchu, czoło na macie, ręce wzdłuż ciała dłońmi do podłogi.",
+       "Nogi zostają na macie, napnij lekko pośladki.",
+       "Z wdechem unieś klatkę, głowę i ręce kilka centymetrów nad matę. Łopatki ściągnij do siebie i w dół.",
+       "Wzrok w podłogę przed matą, kark długi. Trzymaj 5 oddechów, opuść się, powtórz 3 razy."
+      ],
+      "blad": "Zadzieranie głowy i wysokie unoszenie. Tu liczy się praca między łopatkami, nie wysokość.",
+      "note": "Prostowniki grzbietu i dolny czworoboczny w tej samej robocie co w Y-T-W — trzymają plecy wyprostowane przy siedzeniu.",
+      "film": "locust pose salabhasana beginner",
+      "yt": "0kxczNm1xF4"
+     },
+     {
+      "id": "z12",
+      "name": "Sfinks (Salamba Bhujangasana)",
+      "dose": "6 oddechów",
+      "sec": 45,
+      "core": false,
+      "steps": [
+       "Leżąc na brzuchu, oprzyj przedramiona o matę, łokcie pod barkami albo trochę przed nimi.",
+       "Wciśnij przedramiona w matę i odsuń barki od uszu.",
+       "Nogi i miednica leżą luźno, pośladki nie są zaciśnięte.",
+       "Oddychaj spokojnie 6 razy. Jeśli ciągnie w lędźwiach, przesuń łokcie dalej przed siebie."
+      ],
+      "blad": "Wiszenie na barkach z uszami przy ramionach. Barki w dół, mostek do przodu.",
+      "note": "Łagodny wyprost, który oddaje plecom to, co zabiera im wielogodzinne siedzenie w zgięciu.",
+      "film": "sphinx pose tutorial",
+      "yt": "Q5r-Ook-2BA"
+     },
+     {
+      "id": "z13",
+      "name": "Deska na przedramionach (Phalakasana)",
+      "dose": "3 × 20 s",
+      "sec": 20,
+      "core": true,
+      "steps": [
+       "Przedramiona na macie, łokcie pod barkami, stopy na szerokość bioder.",
+       "Unieś biodra do jednej linii z barkami i piętami.",
+       "Podwiń lekko miednicę, żebra w dół, pośladki napięte. Wypchnij podłogę przedramionami.",
+       "Trzymaj 20 s, opuść kolana, odpocznij chwilę i powtórz 3 razy."
+      ],
+      "blad": "Zapadające się biodra albo wypięty w górę tyłek. Gdy linia się psuje, kończysz serię.",
+      "note": "Mięśnie głębokie brzucha w czystej izometrii — trzymają tułów sztywny tak, jak przy front squacie.",
+      "film": "forearm plank proper form",
+      "yt": "VRMDN9WqATc"
+     },
+     {
+      "id": "z14",
+      "name": "Stół odwrócony na ugiętych kolanach (Ardha Purvottanasana)",
+      "dose": "3 × 5 oddechów",
+      "sec": null,
+      "core": false,
+      "steps": [
+       "Usiądź, stopy płasko na macie, kolana zgięte. Dłonie za biodrami, palce w stronę stóp.",
+       "Z wdechem wypchnij biodra w górę, aż tułów i uda utworzą stół.",
+       "Kolana nad kostkami, głowa w przedłużeniu tułowia albo lekko odchylona, jeśli kark pozwala.",
+       "Trzymaj 5 oddechów, usiądź, powtórz 3 razy."
+      ],
+      "blad": "Kolana uciekające na boki i opadające biodra. Ściśnij lekko klocek między kolanami.",
+      "note": "Otwiera przód barków i klatkę — odwrotność zgarbionej pozycji przy klawiaturze — a pośladki trzymają biodra w górze.",
+      "film": "reverse tabletop pose",
+      "yt": "rekWo0mrXFM"
+     }
+    ]
+   },
+   {
+    "n": 5,
+    "name": "Biodra",
+    "minutes": 8,
+    "why": "Biodra otwierane z podparciem: zakres przychodzi z czasu w pozycji, nie z dociskania.",
+    "items": [
+     {
+      "id": "z15",
+      "name": "Jaszczurka z kolanem na kocu (Utthan Pristhasana)",
+      "dose": "45 s / stronę",
+      "sec": 45,
+      "core": true,
+      "steps": [
+       "Z niskiego wykroku postaw prawą stopę szerzej, na zewnątrz prawej dłoni. Lewe kolano na złożonym kocu.",
+       "Dłonie na podłodze albo na klockach po wewnętrznej stronie prawej stopy.",
+       "Prawe kolano nad kostką, celuje w palce — nie pozwól mu opaść do środka ani wyjść za stopę.",
+       "Biodra opadają w dół i lekko w przód. Trzymaj 45 s, oddychając w biodro, zmień stronę."
+      ],
+      "blad": "Kolano przedniej nogi wychodzi daleko za palce. Przesuń stopę do przodu, aż kolano wróci nad kostkę.",
+      "note": "Przód biodra tylnej nogi i przywodziciele przedniej — dwa miejsca, które siedzenie skraca jednocześnie.",
+      "film": "lizard pose with blocks",
+      "yt": "fG9mvQUglr0"
+     },
+     {
+      "id": "z16",
+      "name": "Leżący motyl z podpartymi kolanami (Supta Baddha Konasana)",
+      "dose": "2 min",
+      "sec": 120,
+      "core": false,
+      "steps": [
+       "Połóż się na plecach, złącz stopy, kolana opadają na boki.",
+       "Pod każde kolano wsuń klocek albo zwinięty koc — kolana mają leżeć podparte, nie wisieć.",
+       "Dłonie na brzuchu, oddychaj spokojnie.",
+       "Zostań 2 minuty. Jeśli ciągnie w pachwinach, podnieś podpórki wyżej."
+      ],
+      "blad": "Pozycja bez podpórek, z kolanami wiszącymi w powietrzu. Wtedy ciągną więzadła, a nie mięśnie.",
+      "note": "Przywodziciele puszczają biernie, bez żadnego obciążenia kolan — zakres przychodzi sam z oddechem.",
+      "film": "supported reclined bound angle",
+      "yt": "eJ7A6s4hqxk"
+     },
+     {
+      "id": "z17",
+      "name": "Most podparty na klocku (Setu Bandha z podparciem)",
+      "dose": "1 min",
+      "sec": 60,
+      "core": false,
+      "steps": [
+       "Leżąc na plecach ze stopami płasko, unieś biodra.",
+       "Wsuń klocek pod kość krzyżową (płaski fragment nad pośladkami), na najniższej albo średniej wysokości.",
+       "Opuść się na klocek i rozluźnij pośladki. Ręce wzdłuż ciała.",
+       "Zostań minutę. Żeby wyjść: unieś biodra, wyjmij klocek, zejdź kręg po kręgu."
+      ],
+      "blad": "Klocek pod lędźwiami zamiast pod kością krzyżową. Przesuń go niżej, aż lędźwie odpoczną.",
+      "note": "Przód bioder otwiera się biernie, a lędźwie wiszą rozluźnione — ulga po dniu przy biurku.",
+      "film": "supported bridge pose block",
+      "yt": "y5YY9BaE0bE"
+     }
+    ]
+   },
+   {
+    "n": 6,
+    "name": "Wyciszenie",
+    "minutes": 7,
+    "why": "Ostatnie pozycje bez wysiłku: tył uda, barki i oddech w plecy.",
+    "items": [
+     {
+      "id": "z18",
+      "name": "Tył uda przy framudze drzwi",
+      "dose": "60 s / nogę",
+      "sec": 60,
+      "core": true,
+      "steps": [
+       "Połóż się na plecach w drzwiach: jedna noga leży przez próg na podłodze, druga oparta o framugę.",
+       "Przysuwaj się bliżej framugi, aż poczujesz łagodne rozciąganie z tyłu uda uniesionej nogi.",
+       "Kolano uniesionej nogi lekko ugięte, lędźwie leżą na podłodze, noga na podłodze prosta.",
+       "Zostań minutę, oddychając spokojnie, potem zmień nogę."
+      ],
+      "blad": "Przysuwanie się tak blisko, że miednica odrywa się od podłogi. Ma ciągnąć tył uda, nie lędźwie.",
+      "note": "Rozciąganie tyłu uda z plecami podpartymi przez podłogę — bez żadnego zgięcia w lędźwiach.",
+      "film": "doorway hamstring stretch",
+      "yt": "P9-nPFSFyzk"
+     },
+     {
+      "id": "z19",
+      "name": "Szczenię z czołem na klocku (Uttana Shishosana)",
+      "dose": "6 oddechów",
+      "sec": 45,
+      "core": false,
+      "steps": [
+       "Klęk podparty, kolana na kocu pod biodrami.",
+       "Wędruj dłońmi do przodu, biodra zostają nad kolanami.",
+       "Opuść czoło na klocek, ręce wyciągnięte, łokcie nad matą.",
+       "Oddychaj w górną część pleców przez 6 oddechów."
+      ],
+      "blad": "Biodra uciekające na pięty. Wtedy to już pozycja dziecka — biodra nad kolanami.",
+      "note": "Otwiera barki i klatkę w wyproście nad głową — przeciwieństwo pochylenia nad biurkiem.",
+      "film": "puppy pose uttana shishosana",
+      "yt": "hRJvY9Ht2vw"
+     },
+     {
+      "id": "z20",
+      "name": "Krokodyl — odpoczynek na brzuchu (Makarasana)",
+      "dose": "2 min",
+      "sec": 120,
+      "core": true,
+      "steps": [
+       "Połóż się na brzuchu, stopy rozstawione, pięty opadają na boki.",
+       "Złóż przedramiona jedno na drugim i oprzyj na nich czoło.",
+       "Oddychaj brzuchem w podłogę — poczujesz, jak lędźwie lekko unoszą się z wdechem i opadają z wydechem.",
+       "Zostań 2 minuty. Wstań powoli przez klęk."
+      ],
+      "blad": "Wstrzymywanie oddechu albo oddychanie górą klatki. Oddech ma wędrować w dół pleców.",
+      "note": "Oddech w tył tułowia rozluźnia lędźwie od środka i kończy praktykę spokojniej niż leżenie na plecach.",
+      "film": "makarasana crocodile pose",
+      "yt": "nXkfTKEDsN8"
+     }
+    ]
+   }
+  ],
+  "dzien": 0
+ },
+ "rozciaganie": {
+  "key": "R",
+  "title": "Rozciąganie",
+  "minutes": 8,
+  "wJodze": true,
+  "dni": [
+   {
+    "k": "nd",
+    "dzien": 0,
+    "nazwa": "Niedziela",
+    "skrot": "Nd"
+   }
+  ],
+  "intro": "Test zakresów po jodze: cztery pozycje, w każdej poziom i ocena.",
+  "rules": [],
+  "items": [],
+  "zakresy": {
+   "title": "Test zakresów",
+   "minutes": 8,
+   "why": "Głębokie zgięcie kolana i rotacja biodra, poziom po poziomie, z oceną po każdej pozycji. Ostatnie poziomy to już aktywna kontrola w zakresie, nie samo trzymanie.",
+   "oceny": [
+    {
+     "v": 0,
+     "k": "spokojnie",
+     "opis": "lekkie rozciąganie albo nic"
+    },
+    {
+     "v": 1,
+     "k": "ciągnie w mięśniu",
+     "opis": "tak ma być"
+    },
+    {
+     "v": 2,
+     "k": "coś w stawie",
+     "opis": "ucisk albo kłucie — wyjdź z pozycji"
+    }
+   ],
+   "rules": [
+    "Tydzień 1 to test: w każdej pozycji zaczynasz od poziomu 1 i idziesz w górę tylko tak daleko, jak ocena zostaje 0 albo 1. Zapisujesz poziom, na którym kończysz.",
+    "Ocena: 0 — spokojnie, 1 — ciągnie w mięśniu (tak ma być), 2 — coś w stawie, ucisk albo kłucie. Przy 2 wychodzisz z pozycji od razu.",
+    "Zasada 24 godzin: jeśli dzień po kolano i biodro zachowują się normalnie — bez większej sztywności, bez puchnięcia — zostajesz na poziomie albo idziesz o jeden wyżej. Jeśli coś się odezwało, następnym razem poziom niżej, a nie rezygnacja.",
+    "Test robisz raz w tygodniu, w niedzielę po jodze. Aplikacja podpowiada poziom z ostatnich zapisów: po dwóch spokojnych niedzielach na tym samym poziomie — o jeden wyżej, po ocenie 2 — o jeden niżej.",
+    "Końcowe zakresy są tylko tutaj. W jodze i przed sztangą dalej ich nie ma, a plan na siłowni zostaje bez zmian, dopóki test nie pokaże, jak kolana na to reagują.",
+    "Lotos, pełny gołąb i siad między piętami nie wracają — łączą końcowy zakres ze skrętem w kolanie i do niczego nie są potrzebne."
+   ],
+   "items": [
+    {
+     "id": "q1",
+     "name": "Siad na piętach z podkładką",
+     "dose": "30 s",
+     "sec": 30,
+     "steps": [
+      "Klęknij na kocu, kolana na szerokość bioder, stopy prosto do tyłu — pięty pod pośladkami, nie po bokach.",
+      "Wsuń podkładkę z twojego poziomu między uda a łydki, tuż za kolanami.",
+      "Powoli opuść pośladki na podkładkę, dłonie asekurują.",
+      "Trzymaj 30 s, oddychając spokojnie. Wychodzisz przez klęk podparty, bez gwałtownego wstawania."
+     ],
+     "blad": "Stopy rozjeżdżające się na boki i pośladki między piętami. Taki siad daje skręt w kolanie — stopy zostają prosto pod pośladkami.",
+     "note": "Głębokie zgięcie kolana bez skrętu: zakres, w którym kolano bywa przy klęknięciu i w dole przysiadu. Oswojony przestaje być niewiadomą.",
+     "film": "kneeling heel sit cushion knee flexion progression",
+     "poziomy": [
+      "Gruba podkładka (zwinięty koc) między udami a łydkami, dłonie na podłodze",
+      "Cienka poduszka, dłonie na udach",
+      "Złożony ręcznik",
+      "Bez podkładki, część ciężaru na dłoniach",
+      "Bez podkładki, pełny siad, 60 s"
+     ]
+    },
+    {
+     "id": "q2",
+     "name": "Głęboki przysiad z trzymaniem framugi",
+     "dose": "30 s",
+     "sec": 30,
+     "steps": [
+      "Stań przodem do otwartych drzwi, stopy na szerokość bioder albo trochę szerzej, palce lekko na zewnątrz.",
+      "Złap framugę obiema rękami na wysokości klatki.",
+      "Zjedź w dół do swojego poziomu, kolana nad stopami, ręce przejmują tyle ciężaru, ile trzeba.",
+      "Trzymaj 30 s w dole, oddychając. Wychodzisz siłą nóg, ręce pomagają."
+     ],
+     "blad": "Kolana uciekające do środka w dole. Rozepchnij je nad małe palce stóp, a jeśli się nie da — poziom niżej.",
+     "note": "Pełny przysiad to zwykła codzienność: kucanie, podnoszenie czegoś z podłogi. Z rękami na framudze uczysz kolana i biodra dołu bez ciężaru na plecach.",
+     "film": "assisted deep squat hold doorframe",
+     "poziomy": [
+      "Siad na niskim stołku (~30 cm), chwila w dole i powrót",
+      "Stołek ~15 cm albo stos książek",
+      "Pełny przysiad, pięty na podkładce 2–3 cm",
+      "Pełny przysiad, pięty na podłodze",
+      "Pełny przysiad, dłonie tylko asekurują; 3 razy wejście i wyjście z dołu"
+     ]
+    },
+    {
+     "id": "q3",
+     "name": "Siad 90/90 (rotacja biodra)",
+     "dose": "30 s / stronę",
+     "sec": 30,
+     "steps": [
+      "Usiądź na macie. Przednia noga zgięta 90° przed tobą, goleń w poprzek; tylna noga zgięta 90° z boku, stopa do tyłu.",
+      "Przednie kolano i stopa leżą na podłodze, tylne kolano — tak nisko, jak pozwala biodro.",
+      "Ustaw się według poziomu, ciężar możliwie równo na obu pośladkach.",
+      "Trzymaj 30 s. Zmiana strony: dłonie za plecami, oba kolana przechodzą na drugą stronę."
+     ],
+     "blad": "Ciągnięcie po wewnętrznej stronie tylnego kolana. Odsuń tylną stopę dalej od pośladka albo podłóż poduszkę pod to kolano — rotacja ma być w biodrze.",
+     "note": "Przednia noga to rotacja zewnętrzna biodra, tylna — wewnętrzna. Biodro, które ma obie, nie oddaje ruchu kolanu przy zmianie kierunku i na schodach.",
+     "film": "90 90 hip stretch beginner hands behind",
+     "poziomy": [
+      "Pośladki na poduszce, dłonie za plecami, poduszka pod tylnym kolanem",
+      "Bez poduszki pod pośladkami, dłonie za plecami",
+      "Tułów pionowo, dłonie lekko na podłodze",
+      "Tułów pochylony nad przednią goleń, plecy długie",
+      "Tułów pionowo, 5 razy uniesienie tylnego kolana na 2 s"
+     ]
+    },
+    {
+     "id": "q4",
+     "name": "Czwórka leżąc (rotacja zewnętrzna biodra)",
+     "dose": "30 s / stronę",
+     "sec": 30,
+     "steps": [
+      "Leżysz na plecach, oba kolana zgięte.",
+      "Połóż kostkę prawej nogi na lewym udzie tuż nad kolanem, prawa stopa zgięta — palce do siebie.",
+      "Ustaw się według poziomu, aż poczujesz rozciąganie w prawym pośladku i z boku biodra.",
+      "Trzymaj 30 s, zmień stronę."
+     ],
+     "blad": "Luźna, opadająca stopa górnej nogi. Stopa zgięta (palce do siebie) trzyma kolano stabilnie — wtedy ruch zostaje w biodrze.",
+     "note": "Łagodniejszy krewny gołębia: ta sama rotacja zewnętrzna biodra, ale z plecami na podłodze i bez ciężaru na kolanie.",
+     "film": "supine figure four stretch",
+     "poziomy": [
+      "Stopa dolnej nogi na ścianie, pośladki daleko od ściany",
+      "Stopa na ścianie, pośladki bliżej ściany",
+      "Bez ściany, dłonie przyciągają udo dolnej nogi do klatki",
+      "Bez ściany, dłonie przyciągają udo, 60 s"
+     ]
+    }
+   ]
+  }
+ },
+ "deloadTekst": "Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar, worek 2 rundy. Rozciąganie i joga bez zmian.",
+ "tydzien12Tekst": "Bez testu maksa. Front squat: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Stawy: porównaj z tygodniem 2 ciężary w bułgarskim, na skrzyni, w goblecie i przysiadzie hiszpańskim, czas w planku kopenhaskim i poziomy testu zakresów."
+}

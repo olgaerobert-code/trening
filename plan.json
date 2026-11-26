@@ -1,6 +1,6 @@
 {
- "cykl": 4,
- "title": "Cykl 4 · kolana, kostki, biodra",
+ "cykl": 5,
+ "title": "Cykl 5 · 5/3/1 i ATG",
  "schedule": "wt A · czw B · sob C · nd joga i test zakresów",
  "bar": 20,
  "plates": [
@@ -22,223 +22,364 @@
   "front",
   "dl"
  ],
+ "tm": 0.85,
+ "rekalProc": 0.05,
+ "fazy": [
+  "Budowa 1",
+  "Budowa 2",
+  "Lżej",
+  "Rekordy",
+  "Test TM"
+ ],
  "weeks": {
   "lower": [
    {
     "week": 1,
     "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.675,
+    "scheme": "1 × 5",
+    "pct": 0.7225,
+    "rpe": 8,
+    "fsl": "5 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 7,
+    "tmPct": 0.85,
+    "tmPctFsl": 0.65,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "3 × 5"
    },
    {
     "week": 2,
     "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.7,
+    "scheme": "1 × 5",
+    "pct": 0.765,
+    "rpe": 8.5,
+    "fsl": "5 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "3 × 5"
    },
    {
     "week": 3,
     "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.725,
+    "scheme": "1 × 5",
+    "pct": 0.8075,
+    "rpe": 9,
+    "fsl": "5 × 5",
+    "pctFsl": 0.6375,
+    "rpeFsl": 7,
+    "tmPct": 0.95,
+    "tmPctFsl": 0.75,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "3 × 5"
    },
    {
     "week": 4,
     "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.725,
+    "scheme": "1 × 5",
+    "pct": 0.7225,
+    "rpe": 8,
+    "fsl": "5 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 7,
+    "tmPct": 0.85,
+    "tmPctFsl": 0.65,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "3 × 5"
    },
    {
     "week": 5,
     "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.75,
+    "scheme": "1 × 5",
+    "pct": 0.765,
+    "rpe": 8.5,
+    "fsl": "5 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "3 × 5"
    },
    {
     "week": 6,
     "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.775,
+    "scheme": "1 × 5",
+    "pct": 0.8075,
+    "rpe": 9,
+    "fsl": "5 × 5",
+    "pctFsl": 0.6375,
+    "rpeFsl": 7,
+    "tmPct": 0.95,
+    "tmPctFsl": 0.75,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "3 × 5"
    },
    {
     "week": 7,
     "block": "deload",
-    "scheme": "2 × 6",
-    "pct": 0.55,
-    "dlAdj": 0,
+    "scheme": "1 × 5",
+    "pct": 0.595,
     "rpe": 5,
-    "barHeight": "z podłogi"
+    "fsl": "2 × 5",
+    "pctFsl": 0.51,
+    "rpeFsl": 5,
+    "tmPct": 0.7,
+    "tmPctFsl": 0.6,
+    "dlAdj": 0,
+    "barHeight": "z podłogi",
+    "fslDl": "2 × 5"
    },
    {
     "week": 8,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.775,
+    "scheme": "1 × 5+",
+    "pct": 0.7225,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 7,
+    "tmPct": 0.85,
+    "tmPctFsl": 0.65,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "2 × 5"
    },
    {
     "week": 9,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.8,
+    "scheme": "1 × 3+",
+    "pct": 0.765,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "2 × 5"
    },
    {
     "week": 10,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.825,
+    "scheme": "1 × 1+",
+    "pct": 0.8075,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.6375,
+    "rpeFsl": 7,
+    "tmPct": 0.95,
+    "tmPctFsl": 0.75,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "2 × 5"
    },
    {
     "week": 11,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.825,
+    "scheme": "1 × 5+",
+    "pct": 0.765,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "2 × 5"
    },
    {
     "week": 12,
     "block": "3",
-    "scheme": "3 × 5 + kontrola",
-    "pct": 0.7,
+    "scheme": "1 × 3+",
+    "pct": 0.85,
+    "rpe": 9,
+    "fsl": "2 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 6,
+    "tmPct": 1.0,
+    "tmPctFsl": 0.65,
     "dlAdj": 0,
-    "rpe": 7,
-    "barHeight": "z podłogi"
+    "barHeight": "z podłogi",
+    "fslDl": "1 × 5"
    }
   ],
   "upper": [
    {
     "week": 1,
     "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.675,
-    "rpe": 7,
+    "scheme": "1 × 5",
+    "pct": 0.7225,
+    "rpe": 8,
+    "fsl": "5 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 7,
+    "tmPct": 0.85,
+    "tmPctFsl": 0.65,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 2,
     "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.7,
-    "rpe": 7,
+    "scheme": "1 × 5",
+    "pct": 0.765,
+    "rpe": 8.5,
+    "fsl": "5 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 3,
     "block": "1",
-    "scheme": "3 × 8",
-    "pct": 0.725,
-    "rpe": 7,
+    "scheme": "1 × 5",
+    "pct": 0.8075,
+    "rpe": 9,
+    "fsl": "5 × 5",
+    "pctFsl": 0.6375,
+    "rpeFsl": 7,
+    "tmPct": 0.95,
+    "tmPctFsl": 0.75,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 4,
     "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.725,
-    "rpe": 7.5,
+    "scheme": "1 × 5",
+    "pct": 0.7225,
+    "rpe": 8,
+    "fsl": "5 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 7,
+    "tmPct": 0.85,
+    "tmPctFsl": 0.65,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 5,
     "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.75,
-    "rpe": 7.5,
+    "scheme": "1 × 5",
+    "pct": 0.765,
+    "rpe": 8.5,
+    "fsl": "5 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 6,
     "block": "2",
-    "scheme": "4 × 6",
-    "pct": 0.775,
-    "rpe": 7.5,
+    "scheme": "1 × 5",
+    "pct": 0.8075,
+    "rpe": 9,
+    "fsl": "5 × 5",
+    "pctFsl": 0.6375,
+    "rpeFsl": 7,
+    "tmPct": 0.95,
+    "tmPctFsl": 0.75,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 7,
     "block": "deload",
-    "scheme": "2 × 6",
-    "pct": 0.625,
+    "scheme": "1 × 5",
+    "pct": 0.595,
     "rpe": 5,
+    "fsl": "2 × 5",
+    "pctFsl": 0.51,
+    "rpeFsl": 5,
+    "tmPct": 0.7,
+    "tmPctFsl": 0.6,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 8,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.775,
-    "rpe": 7.5,
+    "scheme": "1 × 5+",
+    "pct": 0.7225,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 7,
+    "tmPct": 0.85,
+    "tmPctFsl": 0.65,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 9,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.8,
-    "rpe": 7.5,
+    "scheme": "1 × 3+",
+    "pct": 0.765,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 10,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.825,
-    "rpe": 8,
+    "scheme": "1 × 1+",
+    "pct": 0.8075,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.6375,
+    "rpeFsl": 7,
+    "tmPct": 0.95,
+    "tmPctFsl": 0.75,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 11,
     "block": "3",
-    "scheme": "4 × 5",
-    "pct": 0.825,
-    "rpe": 8,
+    "scheme": "1 × 5+",
+    "pct": 0.765,
+    "rpe": 9,
+    "fsl": "3 × 5",
+    "pctFsl": 0.595,
+    "rpeFsl": 7,
+    "tmPct": 0.9,
+    "tmPctFsl": 0.7,
     "benchText": null,
     "pullup": null
    },
    {
     "week": 12,
     "block": "3",
-    "scheme": "3 × 5",
-    "pct": 0.8,
-    "rpe": 7,
+    "scheme": "1 × 3+",
+    "pct": 0.85,
+    "rpe": 9,
+    "fsl": "2 × 5",
+    "pctFsl": 0.5525,
+    "rpeFsl": 6,
+    "tmPct": 1.0,
+    "tmPctFsl": 0.65,
     "benchText": null,
     "pullup": null
    }
@@ -247,16 +388,16 @@
  "days": {
   "A": {
    "key": "A",
-   "title": "GÓRA · wyciskanie i kolana",
+   "title": "WYCISKANIE · 5/3/1 i kolana ATG",
    "day": "Wtorek",
    "dzien": 2,
    "minutes": 58,
    "items": [
     {
      "n": 1,
-     "id": "c4a1",
+     "id": "c5a1",
      "name": "Wyciskanie leżąc",
-     "superset": "A1",
+     "superset": null,
      "scheme": {
       "ref": "upper.scheme"
      },
@@ -266,17 +407,102 @@
      "rpe": {
       "ref": "upper.rpe"
      },
-     "note": "Bój główny. SUPERSERIA z unoszeniem palców — 90 s po parze (od bloku 3: 120 s). Łopatki ściągnięte i wbite w ławkę, stopy płasko, umiarkowany mostek. Sztanga schodzi na dolną część mostka, łokcie ok. 45° od tułowia. W tym cyklu góra jest na utrzymanie — sufit RPE pilnuje zapasu. Między seriami idziesz pod ścianę: nogi i tak czekają.",
+     "note": "Bój główny. Przerwa 3 min. 5/3/1: to jest seria rekordowa — dwie pierwsze serie fali (ok. 65% i 75% TM) masz w tabeli rozgrzewki. W budowie (tydz. 1–6) równo 5 powtórzeń, bez dokładania. W rekordach (8–12) „+\": tyle, ile wejdzie czysto, z jednym powtórzeniem w zapasie. Łopatki ściągnięte i wbite w ławkę, stopy płasko, sztanga na dolną część mostka, łokcie ok. 45° od tułowia.",
      "noCut": true,
      "cel": [
       "gora"
-     ]
+     ],
+     "fig": "wyciskanie"
     },
     {
      "n": 2,
-     "id": "c4a2",
-     "name": "Unoszenie palców przy ścianie (piszczelowy przedni)",
+     "id": "c5a2",
+     "name": "Wyciskanie leżąc · FSL",
+     "superset": "A1",
+     "scheme": {
+      "ref": "upper.fsl"
+     },
+     "load": {
+      "ref": "bench.fsl"
+     },
+     "rpe": {
+      "ref": "upper.rpeFsl"
+     },
+     "note": "SUPERSERIA z podciąganiem — 75 s po parze. FSL (First Set Last): ciężar pierwszej serii 5/3/1 jeszcze raz, na objętość — 5 × 5 w budowie, 3 × 5 w rekordach. Każde powtórzenie takie samo jak w serii rekordowej: to praca, nie walka.",
+     "noCut": false,
+     "cel": [
+      "gora"
+     ],
+     "fig": "wyciskanie"
+    },
+    {
+     "n": 3,
+     "id": "c5a3",
+     "name": "Podciąganie",
      "superset": "A2",
+     "scheme": {
+      "tyg": [
+       "5 × 4",
+       "5 × 4",
+       "5 × 4",
+       "5 × 5",
+       "5 × 5",
+       "5 × 5",
+       "2 × 5",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "3 × 6",
+       "2 × 6"
+      ]
+     },
+     "load": "pełne albo negatywy 4 s",
+     "rpe": 8,
+     "note": "Na każdą serię pchania seria ciągnięcia — zasada Wendlera dla ćwiczeń dodatkowych. Łopatki najpierw w dół, potem łokcie do żeber, broda nad drążek. Gdy pełne się kończą, dobijasz serię negatywami: wejście z ławki, 4 s w dół do pełnego zwisu.",
+     "noCut": false,
+     "cel": [
+      "gora"
+     ],
+     "fig": "podciaganie"
+    },
+    {
+     "n": 4,
+     "id": "c5a4",
+     "name": "ATG split squat z hantlami",
+     "superset": "B1",
+     "scheme": {
+      "tyg": [
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "2 × 10",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "SUPERSERIA z unoszeniem palców — 75 s po parze. Ben Patrick (ATG): długi wykrok, przednia stopa płasko, przednie kolano jedzie daleko za palce, aż tył uda dotknie łydki, tylne kolano tuż nad podłogą. 3 s w dół, 1 s pauzy, w górę. Na start przednia stopa na talerzu 5–10 kg — gdy pełny zakres jest lekki, schodzisz na podłogę, potem dokładasz hantle. Zaczynasz słabszą nogą.",
+     "noCut": true,
+     "cel": [
+      "kolano",
+      "biodro"
+     ],
+     "fig": "atg-split",
+     "kgStart": 8,
+     "sPowt": 4
+    },
+    {
+     "n": 5,
+     "id": "c5a5",
+     "name": "Unoszenie palców przy ścianie (piszczelowy przedni)",
+     "superset": "B2",
      "scheme": {
       "tyg": [
        "3 × 15",
@@ -295,108 +521,19 @@
      },
      "load": "masa ciała",
      "rpe": 7,
-     "note": "Plecy i pośladki o ścianę, pięty 30–40 cm od niej, nogi proste. Unieś palce stóp jak najwyżej, 1 s na górze, opuść bez klapania. Trudniej: stopy dalej od ściany, potem na jednej nodze. Piszczelowy przedni hamuje stopę i kolano przy każdym kroku w dół — to on amortyzuje schody.",
+     "note": "Tibialis raise z programu ATG. Plecy i pośladki o ścianę, pięty 30–40 cm od niej, nogi proste. Palce stóp jak najwyżej, 1 s na górze, opuść bez klapania. Trudniej: stopy dalej od ściany, potem jedna noga. Przód goleni hamuje stopę i kolano przy każdym kroku w dół — schody, zbieganie, praca nóg na worku.",
      "noCut": false,
      "cel": [
       "kostka"
      ],
+     "fig": "piszczelowy",
      "sPowt": 1.5
     },
     {
-     "n": 3,
-     "id": "c4a3",
-     "name": "Przysiad bułgarski z hantlami",
-     "superset": "B1",
-     "scheme": {
-      "tyg": [
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "2 × 8",
-       "3 × 6",
-       "3 × 6",
-       "3 × 6",
-       "3 × 6",
-       "2 × 6"
-      ]
-     },
-     "load": "podwójna progresja",
-     "rpe": 7,
-     "note": "SUPERSERIA z podciąganiem — 90 s po parze. Tylna stopa na ławce, przednia tak daleko, żeby w dole kolano było nad stopą albo lekko przed nią. 3 s w dół, kolano w linii drugiego palca, miednica pozioma. Tułów lekko pochylony obciąża pośladek, pionowy — udo. Zaczynasz słabszą nogą. W bloku 3 mniej powtórzeń, cięższe hantle.",
-     "noCut": true,
-     "cel": [
-      "kolano",
-      "biodro"
-     ],
-     "kgStart": 12
-    },
-    {
-     "n": 4,
-     "id": "c4a4",
-     "name": "Podciąganie",
-     "superset": "B2",
-     "scheme": {
-      "tyg": [
-       "3 × 5",
-       "3 × 5",
-       "3 × 5",
-       "3 × 6",
-       "3 × 6",
-       "3 × 6",
-       "2 × 6",
-       "4 × 5",
-       "4 × 5",
-       "4 × 5",
-       "4 × 5",
-       "2 × 5"
-      ]
-     },
-     "load": "pełne albo negatywy 4 s",
-     "rpe": 8,
-     "note": "Łopatki najpierw w dół, potem ciągniesz łokcie do żeber, broda nad drążek. Jeśli pełne nie wchodzą czysto, zacznij serię od tylu pełnych, ile masz, a resztę dobij negatywami: wejście z ławki, 4 s w dół do pełnego zwisu.",
-     "noCut": false,
-     "cel": [
-      "gora"
-     ]
-    },
-    {
-     "n": 5,
-     "id": "c4a5",
-     "name": "Goblet squat z piętami na podwyższeniu (do skrzyni)",
-     "superset": "C1",
-     "scheme": {
-      "tyg": [
-       "3 × 12",
-       "3 × 12",
-       "3 × 12",
-       "3 × 12",
-       "3 × 12",
-       "3 × 12",
-       "2 × 12",
-       "3 × 10",
-       "3 × 10",
-       "3 × 10",
-       "3 × 10",
-       "2 × 10"
-      ]
-     },
-     "load": "podwójna progresja",
-     "rpe": 7,
-     "note": "SUPERSERIA z Nordikiem — 75 s po parze. Pięty na talerzach 5 kg albo klinie, stopy wąsko, hantel pionowo przy mostku. 3 s w dół do skrzyni na wysokości kolan — dotknij jej bez siadania całym ciężarem — i w górę. Tułów pionowo, kolana wychodzą do przodu nad palce. Z całego planu to ćwiczenie najmocniej skupia pracę na przodzie uda.",
-     "noCut": false,
-     "cel": [
-      "kolano"
-     ],
-     "kgStart": 16
-    },
-    {
      "n": 6,
-     "id": "c4a6",
+     "id": "c5a6",
      "name": "Nordic z asekuracją rękami",
-     "superset": "C2",
+     "superset": null,
      "scheme": {
       "tyg": [
        "3 × 4",
@@ -415,47 +552,49 @@
      },
      "load": "masa ciała",
      "rpe": 8,
-     "note": "Kolana na kocu, pięty zaczepione pod obciążoną sztangą w stojaku albo pod innym stałym punktem. Ciało w jednej linii od kolan do głowy, biodra wyprostowane. Opuszczaj się tak wolno, jak dasz radę (cel 3–5 s), na końcu złap się dłońmi jak przy pompce i odepchnij do góry. Blok 1: połowa zakresu. Tył uda trzyma kolano od tyłu — przeciwwaga dla całej pracy czworogłowego.",
+     "note": "Przerwa 60 s. Kolana na kocu, pięty zaczepione pod obciążoną sztangą w stojaku albo pod innym stałym punktem. Ciało w jednej linii od kolan do głowy, biodra wyprostowane. Opuszczaj się tak wolno, jak dasz radę (cel 3–5 s), na końcu złap się dłońmi jak przy pompce i odepchnij do góry. Tył uda trzyma kolano od tyłu — przeciwwaga dla całej pracy przodu uda.",
      "noCut": false,
      "cel": [
       "kolano"
      ],
+     "fig": "nordic",
      "sPowt": 5
     },
     {
      "n": 7,
-     "id": "c4a7",
-     "name": "Worek: rundy",
+     "id": "c5a7",
+     "name": "Worek: interwały",
      "superset": null,
      "scheme": {
       "tyg": [
-       "3 × 2 min",
-       "3 × 2 min",
-       "3 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
+       "4 × 2 min",
        "4 × 2 min",
        "4 × 2 min",
        "4 × 2 min",
        "2 × 2 min",
-       "3 × 3 min",
-       "3 × 3 min",
-       "3 × 3 min",
-       "3 × 3 min",
-       "2 × 3 min"
+       "6 × 1 min",
+       "6 × 1 min",
+       "6 × 1 min",
+       "6 × 1 min",
+       "2 × 1 min"
       ]
      },
-     "load": "tempo rozmowy",
-     "rpe": 7,
-     "note": "Przerwa 60 s. Runda 1: lewy prosty i praca nóg dookoła worka. Runda 2: lewy–prawy, po każdej kombinacji krok w bok. Od rundy 3: dowolne kombinacje, ostatnie 20 s szybciej. Cały czas na przedniej części stóp, kolana miękkie. Przy prawym prostym i sierpie pięta tylnej nogi obraca się razem z biodrem — skręt idzie ze stopy i biodra, kolano tylko za nimi podąża. Tempo takie, żeby dało się mówić pełnymi zdaniami.",
+     "load": "mocno, technicznie",
+     "rpe": 8,
+     "note": "Przerwa 60 s, w marszu. Joel Jamieson: krótkie odcinki mocno, żeby podnieść sufit kondycji — baza w tempie rozmowy jest w czwartek. Kombinacje 2–3 ciosów, po każdej krok w bok albo w tył, cały czas na przedniej części stóp. W drugiej fali ostatnie 30 s każdego odcinka na pełnym tempie, w bloku rekordów odcinki krótsze i mocniejsze od początku. Skręt zawsze ze stopy i biodra — pięta tylnej nogi obraca się razem z biodrem.",
      "noCut": false,
      "cel": [
       "kostka",
       "biodro",
       "kondycja"
-     ]
+     ],
+     "fig": "worek"
     },
     {
      "n": 8,
-     "id": "c4a8",
+     "id": "c5a8",
      "name": "Zginacz biodra w półklęku",
      "superset": null,
      "scheme": "1 × 45 s / stronę",
@@ -471,7 +610,7 @@
     },
     {
      "n": 9,
-     "id": "c4a9",
+     "id": "c5a9",
      "name": "Łydka przy ścianie",
      "superset": null,
      "scheme": "1 × 45 s / stronę",
@@ -489,14 +628,45 @@
   },
   "B": {
    "key": "B",
-   "title": "BIODRA · kostki i jednonóż, bez sztangi",
+   "title": "JEDNONÓŻ · biodra i kostki, bez sztangi",
    "day": "Czwartek",
    "dzien": 4,
    "minutes": 60,
    "items": [
     {
      "n": 1,
-     "id": "c4b1",
+     "id": "c5b1",
+     "name": "Przysiad hiszpański z hantlem (izometria)",
+     "superset": null,
+     "scheme": {
+      "tyg": [
+       "4 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "2 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "4 × 45 s",
+       "2 × 45 s"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Przerwa 45 s. Keith Baar: długa izometria daje ścięgnu rzepki obciążenie bez ruchu w stawie — dlatego na początek dnia, zanim nogi się zmęczą. Gruba guma za kolanami, przyczepiona do słupka stojaka. Stopy do przodu, siadasz w tył do kąta 60–90° w kolanie, piszczele pionowo, tułów prosto, hantel przy mostku. 45 s bez ruchu. Trudniej = cięższy hantel, nie głębiej.",
+     "noCut": false,
+     "cel": [
+      "kolano"
+     ],
+     "fig": "hiszpanski",
+     "kgStart": 8
+    },
+    {
+     "n": 2,
+     "id": "c5b2",
      "name": "Wejście na skrzynię z wolnym zejściem",
      "superset": "A1",
      "scheme": {
@@ -517,19 +687,52 @@
      },
      "load": "podwójna progresja",
      "rpe": 7,
-     "note": "SUPERSERIA z wiosłowaniem — 75 s po parze (wiosłowanie daje nogom chwilę). Skrzynia tak wysoka, żeby udo nogi na skrzyni było najwyżej poziomo. Hantle w dłoniach, cała stopa na skrzyni. Wchodzisz siłą nogi na górze — dolna tylko się odrywa, bez odbijania. Schodzisz tą samą nogą przez 3 s, kolano w linii drugiego palca, miednica pozioma. Najpierw cała seria na jedną nogę, potem druga.",
+     "note": "SUPERSERIA z wiosłowaniem — 60 s po parze. Mike Boyle: jednonóż to podstawa treningu nóg poza sztangą. Skrzynia na wysokość kolana, cała stopa na skrzyni, wchodzisz siłą nogi na górze — tylna tylko odbija się palcami. Zejście 3 s, kolano w linii drugiego palca. Hantle w dłoniach. W bloku rekordów mniej powtórzeń, cięższe hantle.",
      "noCut": true,
      "cel": [
       "kolano",
       "biodro"
      ],
-     "kgStart": 10
+     "fig": "skrzynia",
+     "kgStart": 10,
+     "sPowt": 4
     },
     {
-     "n": 2,
-     "id": "c4b2",
+     "n": 3,
+     "id": "c5b3",
      "name": "Wiosłowanie hantlem w podporze",
      "superset": "A2",
+     "scheme": {
+      "tyg": [
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "3 × 10",
+       "2 × 10",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "3 × 8",
+       "2 × 8"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 8,
+     "note": "Kolano i dłoń na ławce, plecy płasko. Ciągniesz łokieć do biodra, 1 s na górze, 2 s w dół. Tułów nie obraca się za hantlem.",
+     "noCut": false,
+     "cel": [
+      "gora"
+     ],
+     "fig": "wioslowanie",
+     "kgStart": 20
+    },
+    {
+     "n": 4,
+     "id": "c5b4",
+     "name": "Martwy ciąg rumuński jednonóż z hantlem",
+     "superset": "B1",
      "scheme": {
       "tyg": [
        "3 × 8",
@@ -548,58 +751,30 @@
      },
      "load": "podwójna progresja",
      "rpe": 7,
-     "note": "Kolano i dłoń na ławce, plecy płasko. Ciągnij hantel do biodra, nie do barku — łokieć blisko tułowia, łopatka zjeżdża w dół i do kręgosłupa. 1 s pauzy na górze, bez skrętu tułowia.",
-     "noCut": false,
-     "cel": [
-      "gora"
-     ],
-     "kgStart": 20
-    },
-    {
-     "n": 3,
-     "id": "c4b3",
-     "name": "Martwy ciąg rumuński jednonóż z hantlem",
-     "superset": "B1",
-     "scheme": {
-      "tyg": [
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "2 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "3 × 8",
-       "2 × 8"
-      ]
-     },
-     "load": "podwójna progresja",
-     "rpe": 7,
-     "note": "SUPERSERIA z plankiem kopenhaskim — 60 s po parze. Hantel w ręce po stronie nogi wolnej. Biodro cofa się, tułów i wolna noga tworzą jedną linię jak dźwignia, kolano nogi podporowej lekko ugięte. Miednica równo — biodro wolnej nogi nie otwiera się w bok. Stopa podporowa trzyma trzy punkty: piętę, podstawę dużego i małego palca. Biodro, kolano i kostka uczą się tu trzymać oś naraz.",
+     "note": "SUPERSERIA z plankiem kopenhaskim — 45 s po parze. Mike Boyle: ciąg na jednej nodze uczy biodro trzymać miednicę. Hantel w ręce po stronie nogi wolnej, biodro w tył, tułów i wolna noga jak dźwignia, kolano stojącej nogi lekko ugięte. Miednica równo — biodro wolnej nogi nie otwiera się w bok. Stopa podporowa trzyma trzy punkty: pięta, duży i mały palec.",
      "noCut": false,
      "cel": [
       "biodro",
       "kostka"
      ],
-     "kgStart": 12
+     "fig": "rdl-jednonoz",
+     "kgStart": 12,
+     "sPowt": 4
     },
     {
-     "n": 4,
-     "id": "c4b4",
+     "n": 5,
+     "id": "c5b5",
      "name": "Plank kopenhaski",
      "superset": "B2",
      "scheme": {
       "tyg": [
+       "3 × 20 s / stronę",
+       "3 × 20 s / stronę",
+       "3 × 20 s / stronę",
        "3 × 25 s / stronę",
        "3 × 25 s / stronę",
        "3 × 25 s / stronę",
-       "3 × 30 s / stronę",
-       "3 × 30 s / stronę",
-       "3 × 30 s / stronę",
-       "2 × 30 s / stronę",
+       "2 × 25 s / stronę",
        "3 × 30 s / stronę",
        "3 × 30 s / stronę",
        "3 × 30 s / stronę",
@@ -607,167 +782,143 @@
        "2 × 30 s / stronę"
       ]
      },
-     "load": "kolano na ławce",
-     "rpe": "—",
-     "note": "Bokiem na przedramieniu, kolano górnej nogi na ławce, dolna noga swobodnie. Unieś biodra do linii prostej i trzymaj. Progresja: najpierw czas, potem co 2–3 s unosisz dolną nogę do ławki. Stopa zamiast kolana na ławce dopiero wtedy, gdy wewnętrzna strona kolana nic nie zgłasza. Przywodziciele trzymają kolano w osi razem z pośladkiem średnim.",
+     "load": "masa ciała",
+     "rpe": 7,
+     "note": "Podpór bokiem na przedramieniu, kolano górnej nogi na ławce (krótka dźwignia), dolna noga wolno pod ławką. Biodra w górze, ciało w jednej linii. Trudniej: unieś dolną nogę do ławki, potem stopa zamiast kolana. Przywodziciele trzymają biodro i kolano od środka.",
      "noCut": false,
      "cel": [
       "biodro"
-     ]
-    },
-    {
-     "n": 5,
-     "id": "c4b5",
-     "name": "Przysiad hiszpański z hantlem (izometria)",
-     "superset": "C1",
-     "scheme": {
-      "tyg": [
-       "3 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "2 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "3 × 45 s",
-       "2 × 45 s"
-      ]
-     },
-     "load": "podwójna progresja",
-     "rpe": 6,
-     "note": "SUPERSERIA z deską boczną — 45 s po parze. Guma za kolanami przyczepiona do stojaka, hantel trzymany przy klatce. Zejdź do ok. 60–70° zgięcia w kolanie, piszczele pionowo, tułów pionowo, i trzymaj, mocno napinając uda. Trudniej = cięższy hantel, nie głębiej. Kolana bardzo dobrze znoszą izometrię — mocny bodziec dla czworogłowego i więzadła rzepki bez ruchu w stawie.",
-     "noCut": true,
-     "cel": [
-      "kolano"
      ],
-     "kgStart": 8
+     "fig": "kopenhaski"
     },
     {
      "n": 6,
-     "id": "c4b6",
-     "name": "Deska boczna z odwodzeniem nogi",
-     "superset": "C2",
+     "id": "c5b6",
+     "name": "Pompki",
+     "superset": "C1",
      "scheme": {
       "tyg": [
-       "3 × 6 / stronę",
-       "3 × 6 / stronę",
-       "3 × 6 / stronę",
-       "3 × 8 / stronę",
-       "3 × 8 / stronę",
-       "3 × 8 / stronę",
-       "2 × 8 / stronę",
-       "3 × 8 / stronę",
-       "3 × 8 / stronę",
-       "3 × 8 / stronę",
-       "3 × 8 / stronę",
-       "2 × 8 / stronę"
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 15",
+       "3 × 15",
+       "3 × 15",
+       "2 × 15",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "2 × 12"
       ]
      },
      "load": "masa ciała",
-     "rpe": "—",
-     "note": "Deska boczna na przedramieniu: łatwiej z dolnym kolanem na macie, trudniej na prostych nogach. Biodra w górze, w jednej linii z barkami. Górną, prostą nogę unosisz na 30–40 cm, 1 s pauzy, 2 s w dół. Pracuje pośladek średni obu nóg naraz — górnej w ruchu, dolnej w podporze — ten, który nie pozwala kolanu zapadać się do środka.",
+     "rpe": 8,
+     "note": "SUPERSERIA ze wspięciami — 45 s po parze. Pchanie jako ćwiczenie dodatkowe raz w tygodniu poza wyciskaniem — u Wendlera to stały punkt planu. Ciało w jednej linii, dłonie pod barkami, łokcie ok. 45° od tułowia, klatka do podłogi. W bloku rekordów nogi na ławce.",
+     "noCut": false,
+     "cel": [
+      "gora"
+     ],
+     "fig": "pompki",
+     "sPowt": 2.5
+    },
+    {
+     "n": 7,
+     "id": "c5b7",
+     "name": "Wspięcia na palce jednonóż, kolano ugięte",
+     "superset": "C2",
+     "scheme": {
+      "tyg": [
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 15",
+       "3 × 15",
+       "3 × 15",
+       "2 × 15",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "3 × 12",
+       "2 × 12"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 8,
+     "note": "Przednia część stopy na stopniu, kolano ugięte ok. 30° i takie zostaje przez całą serię. Pięta wolno w dół poniżej stopnia, pauza, w górę na palce, 1 s na górze. Ugięte kolano przenosi pracę na płaszczkowatą — mięsień, który trzyma kostkę przy każdym kroku i lądowaniu. Hantel w ręce po stronie pracującej nogi, gdy 15 jest lekkie.",
+     "noCut": false,
+     "cel": [
+      "kostka"
+     ],
+     "fig": "wspiecia-ugiete"
+    },
+    {
+     "n": 8,
+     "id": "c5b8",
+     "name": "Spacer farmera jednorącz",
+     "superset": null,
+     "scheme": {
+      "tyg": [
+       "2 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "2 × 30 m / stronę",
+       "2 × 40 m / stronę",
+       "2 × 40 m / stronę",
+       "2 × 40 m / stronę",
+       "2 × 40 m / stronę",
+       "2 × 40 m / stronę"
+      ]
+     },
+     "load": "podwójna progresja",
+     "rpe": 7,
+     "note": "Przerwa 45 s. Dan John: noszenie ciężaru buduje biodra i tułów jak mało co. Ciężki hantel w jednej ręce, druga swobodnie, barki na jednym poziomie, tułów pionowo — nie przechylasz się w żadną stronę. Krótkie, spokojne kroki. Po 30 m zmiana ręki.",
      "noCut": false,
      "cel": [
       "biodro",
       "tulow"
-     ]
-    },
-    {
-     "n": 7,
-     "id": "c4b7",
-     "name": "Wspięcia na palce jednonóż, kolano ugięte",
-     "superset": "D1",
-     "scheme": {
-      "tyg": [
-       "3 × 10 / nogę",
-       "3 × 10 / nogę",
-       "3 × 10 / nogę",
-       "3 × 12 / nogę",
-       "3 × 12 / nogę",
-       "3 × 12 / nogę",
-       "2 × 12 / nogę",
-       "3 × 12 / nogę",
-       "3 × 12 / nogę",
-       "3 × 12 / nogę",
-       "3 × 12 / nogę",
-       "2 × 12 / nogę"
-      ]
-     },
-     "load": "masa ciała → hantel",
-     "rpe": 7,
-     "note": "SUPERSERIA z ewersją — 45 s po parze. Przednia część stopy na stopniu, kolano ugięte ok. 20–30° przez cały ruch — tak pracuje płaszczkowaty, główny amortyzator kostki i kolana przy schodzeniu. Pięta nisko w dół, 1 s na górze, 3 s w dół. Gdy komplet idzie lekko, hantel w ręce po stronie nogi pracującej.",
-     "noCut": false,
-     "cel": [
-      "kostka"
-     ]
-    },
-    {
-     "n": 8,
-     "id": "c4b8",
-     "name": "Ewersja stopy z gumą (siedząc)",
-     "superset": "D2",
-     "scheme": {
-      "tyg": [
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę",
-       "2 × 15 / nogę"
-      ]
-     },
-     "load": "coraz grubsza guma",
-     "rpe": 6,
-     "note": "Siedzisz, guma wokół przedniej części stopy, zaczepiona po wewnętrznej stronie. Odwiedź stopę na zewnątrz, 1 s pauzy, powrót wolno. Ruch tylko w kostce — kolano i udo nieruchomo. Mięśnie strzałkowe trzymają kostkę z boku: to one łapią stopę, gdy ląduje krzywo.",
-     "noCut": false,
-     "cel": [
-      "kostka"
      ],
-     "sPowt": 1.5
+     "fig": "farmer",
+     "kgStart": 24
     },
     {
      "n": 9,
-     "id": "c4b9",
+     "id": "c5b9",
      "name": "Worek: rundy",
      "superset": null,
      "scheme": {
       "tyg": [
-       "3 × 2 min",
-       "3 × 2 min",
-       "3 × 2 min",
-       "4 × 2 min",
-       "4 × 2 min",
-       "4 × 2 min",
-       "2 × 2 min",
-       "4 × 2 min",
-       "4 × 2 min",
-       "4 × 2 min",
-       "4 × 2 min",
-       "2 × 2 min"
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "2 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "3 × 3 min",
+       "2 × 3 min"
       ]
      },
      "load": "tempo rozmowy",
-     "rpe": 7,
-     "note": "Przerwa 60 s. Dziś nacisk na nogi: runda 1 — krążysz wokół worka w obie strony na lewym prostym. Runda 2 — po każdej kombinacji dwa kroki w bok albo w tył. Runda 3 — kombinacje z ciosem na dół: uginasz kolana, nie plecy. Cały czas na przedniej części stóp. Pięta tylnej nogi obraca się razem z biodrem — skręt idzie ze stopy i biodra, kolano tylko za nimi podąża.",
+     "rpe": 6,
+     "note": "Przerwa 60 s. Joel Jamieson: baza tlenowa — tempo, przy którym da się mówić pełnymi zdaniami. Runda 1: lewy prosty i praca nóg dookoła worka w obie strony. Runda 2: lewy–prawy, po każdej kombinacji dwa kroki w bok. Runda 3: dowolne kombinacje, ostatnie 20 s szybciej. Na przedniej części stóp, kolana miękkie, skręt ze stopy i biodra.",
      "noCut": false,
      "cel": [
       "kostka",
       "biodro",
       "kondycja"
-     ]
+     ],
+     "fig": "worek"
     },
     {
      "n": 10,
-     "id": "c4b10",
+     "id": "c5b10",
      "name": "Pośladek: kolano do przeciwnego barku",
      "superset": null,
      "scheme": "1 × 45 s / stronę",
@@ -783,7 +934,7 @@
     },
     {
      "n": 11,
-     "id": "c4b11",
+     "id": "c5b11",
      "name": "Przywodziciele: nogi na ścianie w rozkroku",
      "superset": null,
      "scheme": "1 × 60 s",
@@ -801,14 +952,14 @@
   },
   "C": {
    "key": "C",
-   "title": "DÓŁ · front squat i martwy ciąg",
+   "title": "DÓŁ · front squat i martwy ciąg 5/3/1",
    "day": "Sobota",
    "dzien": 6,
    "minutes": 58,
    "items": [
     {
      "n": 1,
-     "id": "c4c1",
+     "id": "c5c1",
      "name": "Front squat",
      "superset": null,
      "scheme": {
@@ -820,16 +971,39 @@
      "rpe": {
       "ref": "lower.rpe"
      },
-     "note": "Bój główny. Przerwy 3 min. Sztanga na przednich naramiennych, łokcie wysoko, tułów pionowo. Kolana mogą wyjść przed palce — ważne, żeby szły w linii drugiego palca stopy i nie zapadały się do środka. Głębokość: tak nisko, jak plecy zostają neutralne, a pięty na podłodze. 2 s w dół, w górę zdecydowanie.",
+     "note": "Bój główny. Przerwa 3 min. 5/3/1: seria rekordowa — dwie pierwsze serie fali masz w tabeli rozgrzewki. W budowie równo 5, w rekordach „+\" z jednym powtórzeniem w zapasie. Sztanga na przednich naramiennych, łokcie wysoko, tułów pionowo. Kolana mogą wyjść przed palce — ważne, żeby szły w linii drugiego palca stopy. Głębokość: tak nisko, jak trzymasz plecy neutralnie.",
      "noCut": true,
      "cel": [
       "kolano",
       "biodro"
-     ]
+     ],
+     "fig": "front-squat"
     },
     {
      "n": 2,
-     "id": "c4c2",
+     "id": "c5c2",
+     "name": "Front squat · FSL",
+     "superset": null,
+     "scheme": {
+      "ref": "lower.fsl"
+     },
+     "load": {
+      "ref": "front.fsl"
+     },
+     "rpe": {
+      "ref": "lower.rpeFsl"
+     },
+     "note": "Przerwy 2 min. FSL (First Set Last): ciężar pierwszej serii 5/3/1 na objętość — 5 × 5 w budowie, 3 × 5 w rekordach. Każde powtórzenie na tej samej głębokości i w tym samym torze kolan co seria rekordowa.",
+     "noCut": true,
+     "cel": [
+      "kolano",
+      "biodro"
+     ],
+     "fig": "front-squat"
+    },
+    {
+     "n": 3,
+     "id": "c5c3",
      "name": "Martwy ciąg",
      "superset": null,
      "scheme": {
@@ -841,15 +1015,37 @@
      "rpe": {
       "ref": "lower.rpe"
      },
-     "note": "Bój główny. Przerwy 3 min. Z podłogi; po przysiadzie wystarczą dwie serie dojściowe (50% × 5, 75% × 3). Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napięcie (zabierz luz ze sztangi), potem pchasz podłogę nogami. Każde powtórzenie od zera — bez odbijania.",
+     "note": "Bój główny. Przerwa 3 min. 5/3/1, tak jak przysiad. Z podłogi; po przysiadzie wystarczą dwie serie dojściowe (50% × 5, 75% × 3). Sztanga nad środkiem stopy, łopatki nad sztangą, plecy neutralne. Najpierw napnij plecy i „wyciągnij luz\" ze sztangi, potem pchaj podłogę nogami.",
      "noCut": true,
      "cel": [
       "biodro"
-     ]
+     ],
+     "fig": "martwy-ciag"
     },
     {
-     "n": 3,
-     "id": "c4c3",
+     "n": 4,
+     "id": "c5c4",
+     "name": "Martwy ciąg · FSL",
+     "superset": null,
+     "scheme": {
+      "ref": "lower.fslDl"
+     },
+     "load": {
+      "ref": "dl.fsl"
+     },
+     "rpe": {
+      "ref": "lower.rpeFsl"
+     },
+     "note": "Przerwy 2 min. FSL ciągu jest krótszy niż przysiadu — 3 × 5 w budowie, 2 × 5 w rekordach — bo plecy pracowały już przy front squacie. Każde powtórzenie od zera, bez odbijania od podłogi.",
+     "noCut": false,
+     "cel": [
+      "biodro"
+     ],
+     "fig": "martwy-ciag"
+    },
+    {
+     "n": 5,
+     "id": "c5c5",
      "name": "Wspięcia na palce stojąc na stopniu z hantlem",
      "superset": "A1",
      "scheme": {
@@ -870,47 +1066,50 @@
      },
      "load": "podwójna progresja",
      "rpe": 7,
-     "note": "SUPERSERIA ze spacerem farmera — 60 s po parze. Obunóż, przednia część stóp na stopniu albo talerzu, hantel w jednej ręce, druga dłoń o stojak. Kolana proste, ale nie zablokowane. Pięta nisko, 1 s na górze, 3 s w dół. Z bloku na blok mniej powtórzeń i cięższy hantel; gdy brakuje hantli — na jednej nodze. Przy prostym kolanie pracuje brzuchaty łydki, druga połowa łydki obok płaszczkowatego z czwartku.",
+     "note": "SUPERSERIA ze spacerem farmera — 60 s po parze. Obunóż, przednia część stóp na stopniu albo talerzu, hantel w jednej ręce, druga dłoń na ścianie. Kolana proste. Pięty wolno w dół poniżej stopnia, 1 s pauzy w rozciągnięciu, w górę na palce, 1 s na górze. Prosta noga to łydka — ta, która odbija na worku.",
      "noCut": false,
      "cel": [
       "kostka"
      ],
+     "fig": "wspiecia",
      "kgStart": 16
     },
     {
-     "n": 4,
-     "id": "c4c4",
-     "name": "Spacer farmera jednorącz",
+     "n": 6,
+     "id": "c5c6",
+     "name": "Spacer farmera z dwoma hantlami",
      "superset": "A2",
      "scheme": {
       "tyg": [
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "2 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "3 × 30 m / stronę",
-       "2 × 30 m / stronę"
+       "3 × 30 m",
+       "3 × 30 m",
+       "3 × 30 m",
+       "3 × 30 m",
+       "3 × 30 m",
+       "3 × 30 m",
+       "2 × 30 m",
+       "3 × 40 m",
+       "3 × 40 m",
+       "3 × 40 m",
+       "3 × 40 m",
+       "2 × 40 m"
       ]
      },
-     "load": "podwójna progresja",
+     "load": "podwójna progresja (kg na rękę)",
      "rpe": 7,
-     "note": "Ciężki hantel w jednej ręce, druga ręka swobodnie. Barki na jednym poziomie, tułów pionowo — nie przechylaj się w żadną stronę. Krótkie, spokojne kroki, kolana w linii stóp. Pośladek średni po przeciwnej stronie trzyma miednicę poziomo przy każdym kroku. Mało miejsca: chodź tam i z powrotem, licząc kroki zamiast metrów.",
+     "note": "Dan John: najprostsze ćwiczenie siłowe na świecie — podnieś coś ciężkiego i idź. Dwa ciężkie hantle, barki w dół i w tył, tułów pionowo, krótkie szybkie kroki. Stopy stawiasz prosto, kolana nie uciekają do środka. Ciężar podajesz na jedną rękę.",
      "noCut": false,
      "cel": [
       "biodro",
-      "tulow"
+      "tulow",
+      "kostka"
      ],
+     "fig": "farmer2",
      "kgStart": 24
     },
     {
-     "n": 5,
-     "id": "c4c5",
+     "n": 7,
+     "id": "c5c7",
      "name": "Tył uda z paskiem leżąc",
      "superset": null,
      "scheme": "1 × 60 s / stronę",
@@ -925,8 +1124,8 @@
      "fig": "r2"
     },
     {
-     "n": 6,
-     "id": "c4c6",
+     "n": 8,
+     "id": "c5c8",
      "name": "Zginacz biodra w półklęku",
      "superset": null,
      "scheme": "1 × 45 s / stronę",
@@ -941,8 +1140,8 @@
      "fig": "polklek"
     },
     {
-     "n": 7,
-     "id": "c4c7",
+     "n": 9,
+     "id": "c5c9",
      "name": "Łydka przy ścianie",
      "superset": null,
      "scheme": "1 × 45 s / stronę",
@@ -964,9 +1163,9 @@
    "steps": [
     "Gryf 2 × 8",
     "50% × 5",
-    "70% × 3",
-    "85% × 2",
-    "Ciężar roboczy"
+    "70% × 5",
+    "85% × 3",
+    "Seria rekordowa"
    ],
    "lifts": [
     {
@@ -990,7 +1189,8 @@
    "Ćwiczeń do upadku mięśniowego — rozgrzewka ma przygotować, nie zmęczyć."
   ],
   "notes": [
-   "Przerwy między seriami dojściowymi: 60 s. Mają rozgrzewać, nie męczyć.",
+   "Rozgrzewka idzie według RAMP Iana Jeffreysa: rozgrzać, uruchomić, rozruszać, przygotować do ciężaru.",
+   "Serie dojściowe do serii rekordowej to zarazem dwie pierwsze serie 5/3/1 — przerwy 60–90 s.",
    "W sobotę przed ciągiem wystarczą DWIE serie (50% × 5, 75% × 3) — po przysiadzie jesteś rozgrzany."
   ],
   "days": {
@@ -998,24 +1198,19 @@
     "label": "DZIEŃ A — wyciskanie i kolana  ·  ~7 min",
     "steps": [
      {
-      "what": "Worek albo walka z cieniem, lekko",
+      "what": "Walka z cieniem albo lekko worek",
       "dose": "2 min",
       "note": "Same proste i praca nóg, bez siły. Ma rozgrzać barki, biodra i kostki, nie zmęczyć."
      },
      {
-      "what": "Podskoki na palcach (pogo)",
-      "dose": "2 × 15",
-      "note": "Obunóż, niskie i ciche, kolana prawie proste, pięty nie dotykają podłogi. Sprężyna ma być w kostce."
+      "what": "McGill Big 3: brzuszek McGilla, deska boczna, bird dog",
+      "dose": "5 × 10 s · 2 × 10 s / stronę · 4 × 10 s / stronę",
+      "note": "Stuart McGill: trzy ćwiczenia, które usztywniają tułów bez zginania kręgosłupa. Każde powtórzenie to 10 s napięcia i spokojnego oddechu — bez zmęczenia."
      },
      {
       "what": "Band pull-apart",
       "dose": "2 × 15",
-      "note": "Ręce na wysokości barków, łopatki ściągnięte."
-     },
-     {
-      "what": "Rotacja zewnętrzna barku z gumą",
-      "dose": "1 × 15 / rękę",
-      "note": "Łokieć przy tułowiu."
+      "note": "Wendler robi je codziennie. Ręce na wysokości barków, łopatki ściągnięte."
      },
      {
       "what": "Serie dojściowe do wyciskania",
@@ -1023,19 +1218,24 @@
       "note": ""
      },
      {
-      "what": "Przed bułgarskim: goblet squat do skrzyni",
-      "dose": "1 × 8",
-      "note": "Po wyciskaniu, zanim zaczniesz superserię — kolana mają być ciepłe. 3 s w dół."
+      "what": "Przed ATG split squatem: wykrok bez ciężaru",
+      "dose": "1 × 6 / nogę",
+      "note": "Po wyciskaniu, zanim zaczniesz superserię. Kolano wolno za palce, tylko tyle, ile jest lekko."
      }
     ]
    },
    "B": {
-    "label": "DZIEŃ B — biodra i kostki, bez sztangi  ·  ~6 min",
+    "label": "DZIEŃ B — jednonóż, bez sztangi  ·  ~6 min",
     "steps": [
      {
-      "what": "Worek albo walka z cieniem, lekko",
+      "what": "Walka z cieniem albo lekko worek",
       "dose": "2 min",
       "note": "Praca nóg dookoła worka, luźne proste."
+     },
+     {
+      "what": "Patrick step",
+      "dose": "1 × 15 / nogę",
+      "note": "Ben Patrick (ATG). Stoisz jedną nogą na niskim stopniu, drugą opuszczasz piętą do podłogi, uginając kolano stojącej nogi do przodu za palce. Wolno, bez odbicia. Budzi przód uda przed izometrią."
      },
      {
       "what": "Knee-to-wall",
@@ -1048,14 +1248,9 @@
       "note": "Półprzysiad, kolana nie zapadają się do środka. Budzi pośladek średni."
      },
      {
-      "what": "Marsz biodrowy z mini gumą (leżąc)",
-      "dose": "1 × 8 / stronę",
-      "note": "Lędźwie przyklejone do podłogi, 2 s pauzy. Budzi zginacze biodra po dniu siedzenia."
-     },
-     {
-      "what": "Band pull-apart",
-      "dose": "1 × 15",
-      "note": "Przed wiosłowaniem."
+      "what": "Podskoki na palcach (pogo)",
+      "dose": "2 × 15",
+      "note": "Obunóż, niskie i ciche, kolana prawie proste, pięty nie dotykają podłogi. Sprężyna ma być w kostce."
      }
     ]
    },
@@ -1063,24 +1258,19 @@
     "label": "DZIEŃ C — dół ze sztangą  ·  ~8 min",
     "steps": [
      {
-      "what": "Worek albo walka z cieniem, lekko",
+      "what": "Walka z cieniem albo lekko worek",
       "dose": "2 min",
       "note": "Najcięższy dzień tygodnia — nie skracaj rozgrzewki."
      },
      {
-      "what": "Oddech 90/90 ze stopami na ścianie",
-      "dose": "1 × 5 oddechów",
-      "note": "Wydech ustami, żebra w dół, lędźwie miękko do podłogi. Ustawia miednicę przed sztangą."
+      "what": "McGill Big 3: brzuszek McGilla, deska boczna, bird dog",
+      "dose": "5 × 10 s · 2 × 10 s / stronę · 4 × 10 s / stronę",
+      "note": "Stuart McGill: trzy ćwiczenia, które usztywniają tułów bez zginania kręgosłupa. Każde powtórzenie to 10 s napięcia i spokojnego oddechu — bez zmęczenia."
      },
      {
       "what": "Knee-to-wall",
       "dose": "1 × 10 / nogę",
       "note": "Pięta na podłodze, kolano do ściany w linii drugiego palca."
-     },
-     {
-      "what": "Podskoki na palcach (pogo)",
-      "dose": "2 × 15",
-      "note": "Niskie i ciche. Budzi łydki i ścięgna przed przysiadem."
      },
      {
       "what": "Goblet squat do skrzyni",
@@ -1103,33 +1293,66 @@
  },
  "rules": [
   {
+   "heading": "Skąd ten plan",
+   "lines": [
+    "Jim Wendler — 5/3/1 Forever: boje w trzytygodniowych falach (5, 3, 5/3/1), jedna seria rekordowa i serie FSL, dwie fale budowy, siódmy tydzień lżej, potem fala rekordów. Małe kroki, zapas w każdej serii, rekordy dopiero wtedy, gdy przychodzą same.",
+    "Ben Patrick (ATG, „Knees Over Toes Guy\") — kolana i kostki: ATG split squat z kolanem daleko za palcami, unoszenie palców przy ścianie, Nordic, Patrick step w rozgrzewce. Pełny zakres zdobywany stopniowo, pod ciężarem, który da się kontrolować.",
+    "Mike Boyle — jednonóż jako podstawa treningu nóg poza sztangą (skrzynia, ciąg jednonóż) i podejście „staw po stawie\": kostka i biodro potrzebują ruchu, kolano — stabilności.",
+    "Keith Baar — długa izometria na początek czwartku: przysiad hiszpański 4 × 45 s.",
+    "Dan John — noszenie ciężarów: spacer farmera z dwoma hantlami w sobotę, jednorącz w czwartek.",
+    "Stuart McGill — Big 3 w rozgrzewce przed sztangą: brzuszek McGilla, deska boczna, bird dog.",
+    "Joel Jamieson — kondycja na worku: w czwartek baza w tempie rozmowy, we wtorek krótkie interwały mocniej.",
+    "Ian Jeffreys — rozgrzewka RAMP: rozgrzać, uruchomić, rozruszać, przygotować do ciężaru."
+   ]
+  },
+  {
    "heading": "Układ tygodnia",
    "lines": [
-    "Trzy treningi i niedziela. Poniedziałek, środa i piątek są wolne — rozciąganie nie ma osobnych dni, kończy każdy trening.",
-    "Wtorek — Dzień A: GÓRA i kolana. Wyciskanie, przysiad bułgarski, goblet z piętami w górze, Nordic, worek, na koniec rozciąganie.",
-    "Czwartek — Dzień B: BIODRA i kostki, bez sztangi. Skrzynia, ciąg jednonóż, kopenhaski, przysiad hiszpański, łydka i strzałkowe, worek, na koniec rozciąganie.",
-    "Sobota — Dzień C: DÓŁ ze sztangą. Front squat, martwy ciąg, łydki, spacer farmera, na koniec rozciąganie.",
-    "Niedziela — joga, domyślnie krótka (~20 min), pełna, gdy jest czas, a po niej test zakresów (~8 min).",
+    "Trzy treningi i niedziela. Poniedziałek, środa i piątek są wolne.",
+    "Wtorek — Dzień A: wyciskanie 5/3/1 z FSL w parze z podciąganiem, ATG split squat z unoszeniem palców, Nordic, interwały na worku, rozciąganie.",
+    "Czwartek — Dzień B, bez sztangi: izometria hiszpańska, skrzynia z wiosłowaniem, ciąg jednonóż z kopenhaskim, pompki ze wspięciami, spacer jednorącz, rundy na worku, rozciąganie.",
+    "Sobota — Dzień C: front squat i martwy ciąg 5/3/1 z FSL, łydki ze spacerem farmera, rozciąganie.",
+    "Niedziela — joga (domyślnie krótka, ~20 min), a po niej test zakresów (~8 min).",
     "Boje stoją tam, gdzie zawsze: wyciskanie we wtorek, przysiad i ciąg w sobotę. Czwartek jest bez sztangi.",
     "Sprzęt: sztanga ze stojakiem, ławka, hantle, drążek, gumy (długa i mini), skrzynia albo stopień, worek. Żadnych maszyn."
    ]
   },
   {
+   "heading": "5/3/1 — jak czytać boje",
+   "lines": [
+    "TM (Training Max) = 85% maksa z aplikacji. Procenty 5/3/1 liczą się od TM, dlatego ciężary są niższe, niż sugerowałby maks — tak ma być.",
+    "Fala to trzy tygodnie: seria rekordowa na 85%, 90% i 95% TM. Dwie pierwsze serie każdego dnia (ok. 65% i 75% TM) masz w tabeli rozgrzewki.",
+    "Budowa (tydz. 1–6, u Wendlera „Leader\"): seria rekordowa zawsze na 5 powtórzeń — bez dokładania, nawet gdy czujesz zapas. FSL 5 × 5.",
+    "Rekordy (tydz. 8–11, „Anchor\"): 5+, 3+, 1+ — tyle powtórzeń, ile wejdzie czysto, z jednym w zapasie. FSL 3 × 5. Tydzień 11 zaczyna nową falę z wyższym TM.",
+    "FSL (First Set Last): ciężar pierwszej serii fali jeszcze raz, na objętość. Każde powtórzenie jak w serii rekordowej.",
+    "Tydzień 7 to siódmy tydzień Wendlera: lżej, żeby ciało nadrobiło. Tydzień 12 to test TM."
+   ]
+  },
+  {
+   "heading": "Jak rośnie ciężar",
+   "lines": [
+    "U Wendlera TM rośnie po każdej fali o 2,5 kg na górze i 5 kg na dole. Tutaj robi to samoregulacja: korekta z dwóch tygodni (+2,5% za dwa czyste tygodnie, +5% za dwa z zapasem) i podwyżka dołu o 5% po każdym bloku budowy. Każdą zmianę da się cofnąć.",
+    "Powtórzenia ponad plan w serii „+\" aplikacja liczy jako zapas — dwa takie tygodnie podnoszą TM.",
+    "Sufit RPE jest nadrzędny: jeśli seria rekordowa idzie ciężej niż sufit, kończysz na zaplanowanych powtórzeniach. Dwa tygodnie poniżej planu obniżają TM o 5%.",
+    "Hantle: podwójna progresja — najpierw powtórzenia do górnej granicy w każdej serii, potem cięższy hantel. Aplikacja zapamiętuje ciężar i podpowiada podwyżkę.",
+    "Tempo jest częścią ćwiczenia: 3 s w dół przy ATG split squacie, skrzyni i wspięciach. Szybsze powtórzenie z większym ciężarem to nie progres."
+   ]
+  },
+  {
    "heading": "Trzy stawy",
    "lines": [
-    "Kolana: silny czworogłowy w całym zakresie — front squat i bułgarski w zgięciu, przysiad hiszpański w środku, goblet z piętami w górze na sam przód uda — i tył uda jako przeciwwaga (Nordic, ciąg jednonóż).",
-    "Kostki: cztery rzeczy, których potrzebuje każda kostka. Siła łydki przy prostym i ugiętym kolanie, przód goleni (piszczelowy), bok (strzałkowe z gumą) i sprężystość — podskoki w rozgrzewce i praca nóg na worku.",
-    "Biodra: pośladek wielki (ciąg, bułgarski, skrzynia), pośladek średni (deska boczna z odwodzeniem, spacer farmera), przywodziciele (kopenhaski) i rotacja pod prędkością na worku.",
-    "Każde ćwiczenie w aplikacji ma znaczek stawu, a ekran Dziś pokazuje, ile serii dostał w tym tygodniu każdy z trzech.",
-    "Góra jest na utrzymanie: wyciskanie raz w tygodniu, ciągnięcie dwa razy (podciąganie, wiosłowanie)."
+    "Kolana: front squat i ATG split squat w pełnym zgięciu, skrzynia i izometria hiszpańska w środku zakresu, Nordic jako przeciwwaga z tyłu uda.",
+    "Kostki: przód goleni (unoszenie palców), łydka przy prostym i ugiętym kolanie, sprężystość na worku i w podskokach w rozgrzewce.",
+    "Biodra: martwy ciąg, ciąg jednonóż, plank kopenhaski, noszenie ciężarów i rotacja pod prędkością na worku.",
+    "Każde ćwiczenie ma znaczek stawu, a ekran Dziś pokazuje, ile serii dostał w tym tygodniu każdy z trzech.",
+    "Góra: wyciskanie z FSL raz w tygodniu, pompki w czwartek, ciągnięcie dwa razy (podciąganie, wiosłowanie)."
    ]
   },
   {
    "heading": "Worek",
    "lines": [
-    "Dwa razy w tygodniu na koniec sesji, 3–4 rundy, plus dwie lekkie minuty w każdej rozgrzewce.",
-    "To nie jest trening boksu, tylko praca dla stawów: sprężysta kostka, biodro, które obraca się szybko, i kondycja bez biegania.",
-    "Tempo rozmowy: dasz radę mówić pełnymi zdaniami. Ostatnie 20 s rundy można przyspieszyć.",
+    "Dwa razy w tygodniu na koniec sesji plus dwie lekkie minuty w każdej rozgrzewce.",
+    "Czwartek — baza: 3 rundy po 3 min w tempie rozmowy. Wtorek — interwały: krótsze odcinki mocniej, przerwa w marszu.",
     "Skręt zawsze ze stopy i biodra — pięta tylnej nogi odrywa się i obraca. Stopa przyklejona do podłogi przy ciosie to skręt w kolanie.",
     "Rękawice albo owijki. Nadgarstek prosto, uderzasz dwiema pierwszymi kostkami.",
     "Aplikacja odlicza rundę i przerwę sama: gong na start i koniec, stuknięcie 10 s przed końcem."
@@ -1149,59 +1372,36 @@
   {
    "heading": "Czas trwania",
    "lines": [
-    "Każdy dzień: 6–8 min rozgrzewki, ~50 min pracy i 4–6 min rozciągania na koniec — razem około godziny.",
-    "PRZERWY: przysiad i ciąg 3 min. Wyciskanie idzie w parze z piszczelowym: 90 s po parze (od bloku 3: 2 min). Superserie bez przerwy w środku; po parze 90 s przy bułgarskim, 75 s przy skrzyni i goblecie, 60 s przy lżejszych, 45 s przy kostkach.",
+    "Każdy dzień: 6–8 min rozgrzewki, ~45–50 min pracy i 3–5 min rozciągania — razem około godziny.",
+    "PRZERWY: seria rekordowa 3 min, FSL przysiadu i ciągu 2 min, FSL wyciskania w parze z podciąganiem 75 s po parze. Superserie bez przerwy w środku; po parze 75 s przy ATG split squacie, 60 s przy skrzyni i łydkach ze spacerem, 45 s przy ciągu jednonóż i pompkach. Izometria i spacer jednorącz: 45 s.",
     "Timer przerwy rusza sam po odhaczeniu serii. Trzymaj się go — od tego zależy, czy worek zmieści się w godzinie.",
-    "Jeśli brakuje czasu, tniesz w kolejności: jedna runda na worku → trzecia seria ostatniej superserii → trzecia seria środkowej superserii.",
-    "Nie tniesz: boju głównego, przysiadu bułgarskiego, wejścia na skrzynię ani przysiadu hiszpańskiego."
-   ]
-  },
-  {
-   "heading": "Ciężary",
-   "lines": [
-    "Maksy przechodzą z poprzedniego cyklu tak, jak zostawiła je samoregulacja — nic nie wpisujesz ręcznie. Tydzień 1 to 67,5% tych maksów.",
-    "Ćwiczenia, które zostały pod tą samą nazwą (bułgarski, wiosłowanie, ciąg jednonóż, skrzynia, goblet, przysiad hiszpański, spacer farmera), startują z ostatnim ciężarem zapisanym w dzienniku.",
-    "Sufit RPE jest nadrzędny wobec procentów: jeśli ciężar wychodzi ciężej niż sufit, zdejmujesz z gryfu.",
-    "Korekta z dwóch tygodni i podwyżka dołu po blokach działają jak dotąd. Każdą da się cofnąć."
-   ]
-  },
-  {
-   "heading": "Progresja ćwiczeń dodatkowych",
-   "lines": [
-    "Plan sam zmienia serie i powtórzenia między blokami — w bloku 3 jest mniej powtórzeń i cięższe hantle. Aplikacja pokazuje schemat na bieżący tydzień.",
-    "Przy hantlach ustaw raz ciężar, którego używasz — aplikacja go zapamięta i podpowie podwyżkę, gdy dwa tygodnie z rzędu robisz komplet.",
-    "Tempo jest częścią ćwiczenia: 3 s w dół przy bułgarskim, skrzyni, goblecie i wspięciach. Szybsze powtórzenie z większym ciężarem to nie progres.",
-    "Nordic: blok 1 połowa zakresu, potem coraz niżej bez łapania się rękami, dopiero na końcu wolniej.",
-    "Izometria: trudniej = cięższy hantel, nie głębiej.",
-    "Plank kopenhaski: najpierw czas, potem unoszenie dolnej nogi, dopiero na końcu stopa zamiast kolana na ławce.",
-    "Piszczelowy przy ścianie: trudniej = stopy dalej od ściany, potem jedna noga.",
-    "Podskoki w rozgrzewce: gdy 2 × 15 jest ciche i lekkie, przejdź na skakankę (2 × 30 s), potem na jedną nogę."
+    "Jeśli brakuje czasu, tniesz w kolejności: ostatni odcinek na worku → trzecia seria ostatniej superserii → FSL ciągu.",
+    "Nie tniesz: serii rekordowych, FSL przysiadu, ATG split squata ani skrzyni."
    ]
   },
   {
    "heading": "Zasada złego dnia",
    "lines": [
-    "Rozgrzewka idzie wyraźnie ciężej niż zwykle: zdejmujesz 10% i robisz zaplanowaną objętość lżej.",
+    "Rozgrzewka idzie wyraźnie ciężej niż zwykle: seria rekordowa bez „+\" — tylko zaplanowane powtórzenia — a FSL o jedną serię krócej.",
     "Kostka albo kolano odzywa się przy podskokach lub na worku: tego dnia podskoki zamień na wspięcia, a na worku stój szerzej i bij z miejsca.",
     "Plecy sztywne rano w sobotę: ciąg lżej o 10% albo zamień sobotę z czwartkiem. Kolejność da się przestawić w obrębie tygodnia.",
     "Ćwiczenie, w którym coś nie gra w stawie (nie zmęczenie mięśnia) — najpierw mniejszy zakres, potem mniejszy ciężar, a jeśli dalej nie gra, pomiń je w tej sesji i zanotuj."
    ]
   },
   {
-   "heading": "Tydzień 7 — lżejszy (nie jest opcjonalny)",
+   "heading": "Tydzień 7 — siódmy tydzień (nie jest opcjonalny)",
    "lines": [
-    "Boje: 2 × 6 przy 55% (dół) i 62,5% (góra), RPE 5.",
-    "Ćwiczenia dodatkowe: 2 serie zamiast 3, ten sam ciężar — aplikacja pokazuje już skrócony schemat. Worek: 2 rundy. Rozciąganie i joga bez zmian."
+    "Boje: seria 1 × 5 przy 70% TM i 2 × 5 przy 60% TM, RPE 5.",
+    "Ćwiczenia dodatkowe: 2 serie zamiast 3, ten sam ciężar — aplikacja pokazuje już skrócony schemat. Worek: 2 rundy. Joga i test zakresów bez zmian."
    ]
   },
   {
-   "heading": "Tydzień 12 — sprawdzian",
+   "heading": "Tydzień 12 — test TM",
    "lines": [
-    "Bez testu maksa. Boje lżej (3 × 5).",
-    "Przysiad: po seriach roboczych weź ciężar front squata z tygodnia 3 i zrób jedną serię na maks. powtórzeń — stop przy 15 albo RPE 8. Porównaj z tygodniem 3.",
-    "Kolana, kostki i biodra — porównaj z tygodniem 2 w Raporcie cyklu: ciężar w bułgarskim, na skrzyni, w goblecie i przysiadzie hiszpańskim przy tym samym tempie, zakres w Nordicu, powtórzenia we wspięciach jednonóż i sekundy w planku kopenhaskim.",
-    "Zakresy: porównaj poziomy testu zakresów z pierwszym tygodniem.",
-    "To jest miara celu tego cyklu — nie ciężar na sztandze."
+    "Boje: 3+ na 100% TM — tak Wendler sprawdza, czy TM jest dobre. 3 czyste powtórzenia albo więcej: TM w porządku, następny cykl rusza od niego.",
+    "Mniej niż 3: TM jest za wysokie — przed kolejnym cyklem obniż maks o 10% w Postęp → Maksy.",
+    "Kolana, kostki i biodra: porównaj z tygodniem 2 w Raporcie cyklu ciężar w ATG split squacie, na skrzyni i w przysiadzie hiszpańskim, zakres w Nordicu, powtórzenia we wspięciach jednonóż i sekundy w planku kopenhaskim.",
+    "Zakresy: porównaj poziomy testu zakresów z pierwszą niedzielą."
    ]
   },
   {
@@ -1758,6 +1958,6 @@
    ]
   }
  },
- "deloadTekst": "Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar, worek 2 rundy. Rozciąganie i joga bez zmian.",
- "tydzien12Tekst": "Bez testu maksa. Front squat: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Stawy: porównaj z tygodniem 2 ciężary w bułgarskim, na skrzyni, w goblecie i przysiadzie hiszpańskim, czas w planku kopenhaskim i poziomy testu zakresów."
+ "deloadTekst": "Siódmy tydzień Wendlera: boje 1 × 5 przy 70% TM i 2 × 5 przy 60% TM, ćwiczenia dodatkowe po 2 serie, worek 2 rundy. Joga i test zakresów bez zmian.",
+ "tydzien12Tekst": "Test TM: na 100% TM robisz 3+ czystych powtórzeń. 3 albo więcej — TM jest dobre. Mniej — przed kolejnym cyklem obniż maks o 10% w Postęp → Maksy."
 }
