@@ -93,6 +93,8 @@ test('zaokraglenie w dol, nie do najblizszego', P.rekalibracja(100, komplet), 11
 test('niedowoz blokuje rekalibracje', P.rekalibracja(80, zNiedowozem), null);
 test('brak oceny blokuje rekalibracje', P.rekalibracja(80, null), null);
 test('bez E1RM nie ma czego podnosic', P.rekalibracja(null, komplet), null);
+test('plan moze podac mniejsza podwyzke: 135 +5% → 140', P.rekalibracja(135, komplet, 0.05), 140);
+test('+5% zawsze o co najmniej 2,5 kg', P.rekalibracja(40, komplet, 0.05), 42.5);
 test('maly ciezar dostaje minimum jeden krok', P.rekalibracja(20, komplet), 22.5);
 
 console.log('');

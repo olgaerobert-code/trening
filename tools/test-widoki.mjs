@@ -110,6 +110,7 @@ const planJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl1.json'), 
 const planBiezacy = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan.json'), 'utf8'));
 const planCykl2 = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl2.json'), 'utf8'));
 const planCykl3 = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl3.json'), 'utf8'));
+const planCykl4 = JSON.parse(fs.readFileSync(path.join(ROOT, 'plan-cykl4.json'), 'utf8'));
 const sandbox = {
   document, localStorage, console,
   location: { hash: '', search: '', href: 'http://localhost/' },
@@ -1476,7 +1477,7 @@ console.log('Ciezar po przeniesieniu');
   // B zakończony (czas przechodzi), A z niedomkniętym stoperem (nie przechodzi).
   localStorage.setItem('trening.treningi.v1', JSON.stringify({ '1|B': { start: ts, end: ts }, '1|A': { start: ts, end: null } }));
   app.children = []; timer.children = [];
-  const sb4 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl3') ? planCykl3 : planBiezacy) }) };
+  const sb4 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl3') ? planCykl3 : planCykl4) }) };
   delete sb4.API;
   vm.createContext(sb4);
   for (const plik of ['progresja.js', 'figury.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb4, { filename: plik });
@@ -1641,6 +1642,114 @@ console.log('Ciezar po przeniesieniu');
   S4.view = '#/plan'; B4.render();
   test('wyjscie z sesji zatrzymuje minutnik serii i nic nie zapisuje', !B4.stanPrzerwy().leci && !B4.logGet(1, 'A', worek.n)[0]);
   for (const k of Object.keys(S4.log)) delete S4.log[k];
+}
+
+{
+  console.log('\nCykl 5: 5/3/1 i ATG — przejscie, plan, serie FSL');
+  // Urządzenie w cyklu 4, tydzień 1: wtorek (dzień A) zrobiony w tym tygodniu.
+  const ts = new Date().toISOString();
+  const serie = (n, r, kg, pk) => Array.from({ length: n }, () => ({ r, kg, ts, pr: r, pk }));
+  const M = { bench: 150, front: 135, dl: 135 };
+  for (const k of ['trening.kgw.v1', 'trening.mob.v1', 'trening.rozc.v1', 'trening.rekal.v1', 'trening.adjust.v1', 'trening.czasy.v1', 'trening.pominiete.v1', 'trening.queue.v1', 'trening.moves.v1', 'trening.archiwum.v1']) localStorage.removeItem(k);
+  localStorage.setItem('trening.cykl.v1', '4');
+  localStorage.setItem('trening.v1', JSON.stringify({ week: 1, e1rm: M, korekta: 3 }));
+  localStorage.setItem('trening.acc.v1', '{}');
+  // stary plan A: 1 wyciskanie 3 × 8, 2 piszczelowy, 4 podciąganie, 3 bułgarski (w cyklu 5 go nie ma)
+  localStorage.setItem('trening.log.v1', JSON.stringify({ '1|A|1': serie(3, 8, 100, 100), '1|A|2': serie(3, 15, null, null), '1|A|3': serie(3, 8, 14, null), '1|A|4': serie(3, 5, null, null) }));
+  localStorage.setItem('trening.treningi.v1', JSON.stringify({ '1|A': { start: ts, end: ts } }));
+  app.children = []; timer.children = [];
+  const sb5 = { ...sandbox, fetch: url => Promise.resolve({ ok: true, json: () => Promise.resolve(String(url).includes('plan-cykl4') ? planCykl4 : planBiezacy) }) };
+  delete sb5.API;
+  vm.createContext(sb5);
+  for (const plik of ['progresja.js', 'figury.js', 'app.js']) vm.runInContext(fs.readFileSync(path.join(ROOT, plik), 'utf8'), sb5, { filename: plik });
+  vm.runInContext(`globalThis.API = { state, render, plannedOf, logSet, logGet, kluczSync, archiwum, przerwaPo, kgOf, kgFsl, resolve, bojeDnia, judgeWeek,
+    kolejkaSesji, czasSerii, bilansStawow, naCzas, pozycjaBoju, ukladTygodnia, DZIEN_TYG, isMainItem, rekalDoWziecia, BLOKI, scena: () => scenaTeraz,
+    rekalibracja, Figury };`, sb5);
+  const B5 = sb5.API;
+  await new Promise(r => setTimeout(r, 60));
+  const S5 = B5.state, D = S5.plan.days;
+  const it5 = (d, wzor) => D[d].items.find(x => wzor.test(x.name));
+  test('plan cyklu 5 wczytany', S5.plan.cykl === 5 && /5\/3\/1/.test(S5.plan.title));
+  test('cykl 5 startuje od tygodnia 1 z maksami z cyklu 4', S5.week === 1 && S5.e1rm.bench === 150 && S5.e1rm.front === 135 && S5.e1rm.dl === 135);
+  test('cykl 4 w archiwum, czysty klucz synchronizacji cyklu 5', B5.archiwum()[4] && Object.keys(B5.archiwum()[4].log).length === 4 && B5.kluczSync() === S5.key + '-C5');
+  test('dni bez zmian: wtorek A, czwartek B, sobota C, niedziela joga', JSON.stringify(B5.DZIEN_TYG) === JSON.stringify({ 0: 'D', 2: 'A', 4: 'B', 6: 'C' })
+    && B5.ukladTygodnia().length === 4);
+  test('boje w tych samych dniach: wt wyciskanie, czw bez sztangi, sob przysiad i ciag',
+    B5.bojeDnia('A').join() === 'bench' && B5.bojeDnia('B').length === 0 && B5.bojeDnia('C').join() === 'front,dl'
+    && !D.B.items.some(x => x.load && x.load.ref));
+
+  // Przejście: wtorkowe serie po nazwie, seria rekordowa bierze pierwszą serię.
+  const top = D.A.items[0], fsl = it5('A', /FSL/), pisz = it5('A', /^Unoszenie palców/), podc = it5('A', /^Podciąganie/);
+  test('wtorek z tego tygodnia przechodzi po nazwach: seria rekordowa 1 seria, piszczelowy i podciaganie w calosci',
+    B5.logGet(1, 'A', top.n).filter(Boolean).length === 1 && B5.logGet(1, 'A', top.n)[0].kg === 100
+    && B5.logGet(1, 'A', pisz.n).filter(Boolean).length === 3 && B5.logGet(1, 'A', podc.n).filter(Boolean).length === 3
+    && !B5.logGet(1, 'A', fsl.n).some(Boolean));
+  test('przeniesiona seria liczy sie wobec planu z chwili zapisu (czysto, nie niedowoz)', B5.judgeWeek('bench', 1) === 'czysto');
+
+  // 5/3/1: seria rekordowa i FSL z procentów TM.
+  const kg = (lift, pct) => Math.floor(S5.e1rm[lift] * pct / 2.5) * 2.5;
+  test('TM 85%: tydzien 1 seria rekordowa 85% TM, FSL 65% TM', S5.plan.tm === 0.85
+    && B5.kgOf('bench', 1) === kg('bench', 0.85 * 0.85) && B5.kgFsl('bench', 1) === kg('bench', 0.85 * 0.65)
+    && B5.kgOf('front', 1) === kg('front', 0.85 * 0.85) && B5.kgFsl('dl', 1) === kg('dl', 0.85 * 0.65));
+  test('wyciskanie tydz. 1: 107,5 × 5 i FSL 82,5 kg 5 × 5', B5.plannedOf(top, 1, 'A').planKg === 107.5 && B5.plannedOf(top, 1, 'A').sets === 1
+    && B5.plannedOf(fsl, 1, 'A').kg === 82.5 && B5.plannedOf(fsl, 1, 'A').sets === 5 && B5.plannedOf(fsl, 1, 'A').target === 5);
+  const fale = w => B5.resolve(top.scheme, w) + '|' + B5.resolve(fsl.scheme, w);
+  test('budowa: 1 × 5 i FSL 5 × 5; rekordy: 5+, 3+, 1+ i FSL 3 × 5; tydz. 12: 3+ na 100% TM',
+    [1, 2, 3, 4, 5, 6].every(w => fale(w) === '1 × 5|5 × 5') && fale(8) === '1 × 5+|3 × 5' && fale(9) === '1 × 3+|3 × 5' && fale(10) === '1 × 1+|3 × 5'
+    && fale(12) === '1 × 3+|2 × 5' && S5.plan.weeks.upper[11].tmPct === 1);
+  test('fale rosna w obrebie trzech tygodni (85 → 90 → 95% TM)', B5.kgOf('bench', 1) < B5.kgOf('bench', 2) && B5.kgOf('bench', 2) < B5.kgOf('bench', 3) && B5.kgOf('bench', 4) === B5.kgOf('bench', 1));
+  test('tydzien 7 lzej', S5.plan.weeks.lower[6].block === 'deload' && B5.kgOf('front', 7) < B5.kgOf('front', 1));
+  const fslDl = it5('C', /^Martwy ciąg · FSL/), fslFs = it5('C', /^Front squat · FSL/);
+  test('FSL ciagu krotszy niz przysiadu', B5.plannedOf(fslFs, 1, 'C').sets === 5 && B5.plannedOf(fslDl, 1, 'C').sets === 3 && B5.plannedOf(fslDl, 8, 'C').sets === 2);
+  test('FSL to nie bój glowny: ocena idzie z serii rekordowej', !B5.isMainItem(fsl) && B5.isMainItem(top) && B5.pozycjaBoju('bench').it === top
+    && B5.pozycjaBoju('front').it.name === 'Front squat');
+  // Seria „+": więcej powtórzeń niż plan to zapas.
+  B5.logSet(8, 'A', top.n, 0, { r: 8, kg: B5.kgOf('bench', 8), pr: 5, pk: B5.kgOf('bench', 8) });
+  test('seria 5+ zrobiona na 8 powtorzen = zapas', B5.judgeWeek('bench', 8) === 'zapas');
+  B5.logSet(8, 'A', top.n, 0, null);
+  test('podwyzka dolu po bloku budowy: +5% z planu, nie +10%', S5.plan.rekalProc === 0.05 && B5.rekalibracja(135, { komplet: true }, 0.05) === 140
+    && B5.rekalibracja(135, { komplet: true }) === 147.5);
+
+  // Plan: cele, figurki, id, bez maszyn i treści zdrowotnych.
+  const CELE = ['kolano', 'kostka', 'biodro', 'gora', 'tulow', 'kondycja', 'rozciaganie'];
+  test('kazde cwiczenie ma cel, id c5, opis i figurke', ['A', 'B', 'C'].every(d => D[d].items.every(x =>
+    Array.isArray(x.cel) && x.cel.length && x.cel.every(c => CELE.includes(c)) && /^c5[abc]\d+$/.test(x.id) && x.note && B5.Figury.ma(x.fig || x.id))));
+  test('bez maszyn', !/maszyn/i.test(JSON.stringify(D)));
+  const SENS = /skolioz|cobb|przodopochyl|ból|bólu|boles|dolegliw|rehabilit|fizjoterapeu|ortoped|RTG|MRI|diagnoz|leczen|chorob|kontuzj|uraz|skręc|tendinop|patolog|obrzęk|wysięk|drętwi|mrowie|przeciwbólow|specjalist|zwyrodnien|nawrot/i;
+  test('plan cyklu 5 bez tresci zdrowotnych', !SENS.test(JSON.stringify(S5.plan)));
+  test('zasady wymieniaja zrodla planu', ['Wendler', 'Patrick', 'Boyle', 'Baar', 'Dan John', 'McGill', 'Jamieson'].every(n => JSON.stringify(S5.plan.rules).includes(n)));
+  test('rozciaganie na koniec kazdego treningu, test zakresow w niedziele', ['A', 'B', 'C'].every(d => D[d].items[D[d].items.length - 1].rozc)
+    && S5.plan.rozciaganie.wJodze === true && S5.plan.rozciaganie.zakresy.items.length === 4);
+  test('joga bez zmian wzgledem cyklu 4', JSON.stringify(S5.plan.mobility) === JSON.stringify(planCykl4.mobility));
+  test('numery cwiczen po kolei od 1', ['A', 'B', 'C'].every(d => D[d].items.every((x, i) => x.n === i + 1)));
+
+  // Godzina: rozgrzewka, serie z czasem pracy, przerwy z opisu.
+  for (const d of ['A', 'B', 'C']) for (const w of [1, 6, 8, 10]) {
+    const kroki = B5.kolejkaSesji(d, w), boje = B5.bojeDnia(d).length;
+    let sek = 7 * 60 + (boje ? 4 * 80 : 0) + Math.max(0, boje - 1) * 2 * 80;
+    kroki.forEach((k, i) => { sek += B5.czasSerii(k.it, w, d) * (k.pl.unit ? 1 : 1.5) + 15 + (i < kroki.length - 1 ? B5.przerwaPo(k.it, d, w) : 0); });
+    test(`c5 ${d} tydz. ${w} miesci sie w godzinie (~${Math.round(sek / 60)} min)`, sek <= 62 * 60);
+  }
+  test('przerwy: seria rekordowa 3 min, FSL przysiadu 2 min, FSL wyciskania 75 s po parze z podciaganiem',
+    B5.przerwaPo(top, 'A', 1) === 180 && B5.przerwaPo(fslFs, 'C', 1) === 120 && B5.przerwaPo(fsl, 'A', 1) === 0 && B5.przerwaPo(podc, 'A', 1) === 75);
+
+  // Ekrany.
+  for (const v of ['#/', '#/d/A', '#/d/B', '#/d/C', '#/d/C/8', '#/mobilnosc', '#/postep', '#/plan', '#/1rm', '#/ustawienia']) {
+    S5.view = v; let blad = null;
+    try { B5.render(); } catch (e) { blad = e; }
+    test('cykl 5 renderuje ' + v, !blad, blad && blad.message);
+  }
+  S5.view = '#/plan'; B5.render();
+  test('Plan: nazwy odcinkow cyklu i opis fali 5/3/1', ['Budowa 1', 'Budowa 2', 'Lżej', 'Rekordy', 'Test TM'].every(n => app.textContent.includes(n))
+    && app.textContent.includes('Seria rekordowa 1 × 5 przy 85% TM') && app.textContent.includes('FSL 5 × 5 przy 65% TM') && app.textContent.includes('Skąd ten plan'));
+  // Scena: seria rekordowa w tygodniu rekordów ma podpowiedź „+".
+  S5.week = 8; S5.view = '#/d/A/8'; B5.render();
+  const sc = app.querySelector('.scena');
+  test('scena: seria rekordowa 5+ z podpowiedzia, ciezar z planu', sc.querySelector('.sc-nazwa').textContent === 'Wyciskanie leżąc' && !!sc.querySelector('.plus')
+    && sc.querySelector('.sc-kg').textContent.includes(fmtPl(B5.kgOf('bench', 8))));
+  test('kolejka: FSL zaraz po serii rekordowej, z talerzami', app.querySelectorAll('.ex')[1].textContent.includes('FSL') && app.querySelectorAll('.ex')[1].querySelectorAll('.plates').length === 1);
+  S5.week = 1;
+  for (const k of Object.keys(S5.log)) delete S5.log[k];
 }
 
 console.log('\n' + (zle ? `${zle} BLEDOW, ${ok} ok` : `Wszystkie ${ok} testow przeszlo`));

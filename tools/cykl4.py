@@ -1,4 +1,4 @@
-# Generator planu cyklu 4 (plan.json). Zamknięte cykle: plan-cykl1.json … plan-cykl3.json.
+# Generator planu cyklu 4 — dziś archiwum plan-cykl4.json (bieżący plan: tools/cykl5.py).
 # Uruchom: python3 tools/cykl4.py
 # Tresc wylacznie treningowa — repozytorium jest publiczne.
 #
@@ -375,5 +375,5 @@ plan = {
   'deloadTekst': 'Boje 2 × 6 lekko, ćwiczenia dodatkowe po 2 serie, ten sam ciężar, worek 2 rundy. Rozciąganie i joga bez zmian.',
   'tydzien12Tekst': 'Bez testu maksa. Front squat: po seriach roboczych jedna seria na maks. powtórzeń z ciężarem z tygodnia 3 (stop przy 15 albo RPE 8). Stawy: porównaj z tygodniem 2 ciężary w bułgarskim, na skrzyni, w goblecie i przysiadzie hiszpańskim, czas w planku kopenhaskim i poziomy testu zakresów.',
 }
-json.dump(plan, open(os.path.join(ROOT, 'plan.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-print('plan.json: cykl', plan['cykl'], '·', sum(len(d['items']) for d in plan['days'].values()), 'pozycji w treningach, w tym', sum(1 for d in plan['days'].values() for x in d['items'] if x.get('rozc')), 'rozciągania')
+json.dump(plan, open(os.path.join(ROOT, 'plan-cykl4.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+print('plan-cykl4.json: cykl', plan['cykl'], '·', sum(len(d['items']) for d in plan['days'].values()), 'pozycji w treningach, w tym', sum(1 for d in plan['days'].values() for x in d['items'] if x.get('rozc')), 'rozciągania')

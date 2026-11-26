@@ -108,9 +108,11 @@ function ocenaBloku(oceny) {
  * Zaokraglenie w dol do 2,5 kg, jak wszedzie indziej w planie, z gwarancja
  * jednego kroku — inaczej przy lekkich ciezarach korekta znikalaby w podlodze.
  */
-function rekalibracja(e1rm, ocena) {
+function rekalibracja(e1rm, ocena, proc = 0.1) {
   if (e1rm == null || !ocena || !ocena.komplet) return null;
-  const out = Math.floor(e1rm * 1.1 / KROK) * KROK;
+  // proc: ile w górę po czystym bloku. Domyślnie 10% (arkusz), plan może dać mniej —
+  // 5/3/1 podnosi TM dołu o ~5 kg na falę, a nie o jedną dziesiątą.
+  const out = Math.floor(e1rm * (1 + proc) / KROK) * KROK;
   return out > e1rm ? out : e1rm + KROK;
 }
 

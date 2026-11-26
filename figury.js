@@ -140,6 +140,16 @@
       B: { a: ['p', 90, 92], n: [90, 90, 48], t: -90, r: [90, 90], r2: [-6, -6] },
       rek: [['skrzynia', 66, 100, 95], ['sciana', 122], ['hantel', 'nad']],
     },
+    // Ben Patrick: przednie kolano daleko za palce, tylne tuż nad podłogą.
+    'atg-split': {
+      A: { a: ['s', 98, 101], n: [80, 100, 0], n2: [115, 135, 70], t: -88, r: [92, 88] },
+      B: { a: ['s', 98, 101], n: [15, 125, 0], n2: [100, 175, 20], t: -84, r: [90, 86] },
+      rek: [['hantel', 'nad']],
+    },
+    'pompki': {
+      A: { a: ['s', 30, 96], n: [157, 157, 60], t: -23, r: [90, 90], g: -23 },
+      B: { a: ['s', 30, 96], n: [177, 177, 80], t: -3, r: [160, 20], g: -3 },
+    },
     'farmer': {
       A: { a: ['h', 80, 55], n: [68, 82, -8], n2: [108, 122, 40], t: -90, r: [90, 90], r2: [104, 96] },
       B: { a: ['h', 80, 55], n: [108, 122, 40], n2: [68, 82, -8], t: -90, r: [90, 90], r2: [84, 80] },
@@ -187,6 +197,8 @@
   };
 
   // Ćwiczenie → figurka. Klucz to id pozycji z planu.
+  F['farmer2'] = { ...F.farmer, rek: [['odwaznik', 'nad'], ['odwaznik', 'nad2']] };
+
   const MAPA = {
     c4a1: 'wyciskanie', c4a2: 'piszczelowy', c4a3: 'bulgarski', c4a4: 'podciaganie', c4a5: 'goblet', c4a6: 'nordic', c4a7: 'worek',
     c4b1: 'skrzynia', c4b2: 'wioslowanie', c4b3: 'rdl-jednonoz', c4b4: 'kopenhaski', c4b5: 'hiszpanski', c4b6: 'deska-boczna',

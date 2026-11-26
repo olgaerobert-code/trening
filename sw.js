@@ -1,10 +1,10 @@
 /* Cache-first: po pierwszym wejściu aplikacja działa bez zasięgu.
    Zmiana CACHE unieważnia stary komplet plików. */
-const CACHE = 'trening-v91';
+const CACHE = 'trening-v92';
 const ASSETS = [
-  './', './index.html', './app.css?v=90', './app.js?v=90', './progresja.js?v=90', './figury.js?v=90', './plan.json?v=90',
-  './plan-cykl1.json?v=90', './plan-cykl2.json?v=90', './plan-cykl3.json?v=90',
-  './fonts/Grotesk.woff2?v=90', './fonts/Grotesk-pl.woff2?v=90', './fonts/Mono.woff2?v=90', './fonts/Mono-pl.woff2?v=90',
+  './', './index.html', './app.css?v=91', './app.js?v=91', './progresja.js?v=91', './figury.js?v=91', './plan.json?v=91',
+  './plan-cykl1.json?v=91', './plan-cykl2.json?v=91', './plan-cykl3.json?v=91', './plan-cykl4.json?v=91',
+  './fonts/Grotesk.woff2?v=91', './fonts/Grotesk-pl.woff2?v=91', './fonts/Mono.woff2?v=91', './fonts/Mono-pl.woff2?v=91',
   './manifest.webmanifest', './icon-192.png', './icon-512.png',
 ];
 
